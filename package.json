@@ -1,0 +1,10 @@
+{
+  "name":  "TOTO",
+  "version": "0.1.0",
+  "description": "OpenCascade OCE Wrapper for Node js",
+  "dependencies": {
+
+  },
+  "main": "lib/index",
+  "engines": { "node": ">= 0.6.13 " }
+}

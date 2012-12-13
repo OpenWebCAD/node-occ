@@ -11,3 +11,10 @@
 *.lai
 *.la
 *.a
+
+# log files
+*.log
+
+node_modules
+build
+
