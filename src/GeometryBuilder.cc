@@ -1,81 +1,243 @@
 #pragma once
-
-#include <v8.h>
-#include <map>
-#include <vector>
-
-#include "OCC.h"
-#include "json_spirit/json_spirit.h"
-
-using namespace std;
-using namespace json_spirit;
-
-class Builder {
-public:
-    Builder() {};
-    virtual ~Builder() {};
-    
-protected:
-    TopoDS_Shape shape_;
-    
-    void ApplyOrigin(map< string, mValue > json);
-    void ApplyTransform(map< string, mValue > json);
-    void ApplyTransforms(map< string, mValue > json);
-    void ApplyWorkplane(map< string, mValue > json);
-    void ApplyReverseWorkplane(map< string, mValue > json);
-    virtual void PostProcess(map< string, mValue > json) = 0;
-   
-public:
-    TopoDS_Shape shape();
-    
-};
-
-class Builder3D : public Builder {
-protected:
-    void Mesh();
-    void PostProcess(map< string, mValue > json);
-    virtual ~Builder3D() {};
-public:
-    Builder3D() {};
-    
-};
-
-class CuboidBuilder : public Builder3D {
-
-public:
-    CuboidBuilder(map< string, mValue > json);
-    virtual ~CuboidBuilder() {};
-};
-
-
-
+#include "GeometryBuilder.h"
 #include "Util.h"
 #include "Transform.h"
 
+#include <map>
+#include <vector>
 
-void Builder::ApplyOrigin(map< string, mValue > json) 
+using namespace std;
+
+
+
+ v8::Handle<v8::Value> GetPointCoord(v8::Local<v8::String> property,const v8::AccessorInfo &info)
+ {
+   
+ 
+    Solid* obj = node::ObjectWrap::Unwrap<Solid>(info.This());
+
+    double value = rand();
+    if (property->Equals(v8::String::New("x"))) {
+       value = rand();
+    }
+    if (property->Equals(v8::String::New("y"))) {
+       value = rand();
+    }
+    if (property->Equals(v8::String::New("z"))) {
+       value = rand();
+    }
+    return v8::Number::New(value);
+  }
+  
+  void noset(v8::Local<v8::String> property, v8::Local<v8::Value> value,const v8::AccessorInfo& info) 
+  {
+   //C Local<Object> self = info.Holder();
+   //C Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    //C void* ptr = wrap->Value();
+    //C static_cast<Point*>(ptr)->x_ = value->Int32Value();
+   Solid* obj = node::ObjectWrap::Unwrap<Solid>(info.This());
+
+
+  }
+
+
+bool Shape::isNull() 
 {
-    if (!json["origin"].is_null()) {
-        map< string, mValue > origin = json["origin"].get_obj();
-        double x = Util::to_d(origin["x"]);
-        double y = Util::to_d(origin["y"]);
-        double z = Util::to_d(origin["z"]);
-        gp_Trsf transformation = gp_Trsf();
-        transformation.SetTranslation(gp_Vec(x,y,z));
-        
-        shape_ = BRepBuilderAPI_Transform(shape_, transformation).Shape();
+    return shape_.IsNull() ? true : false;
+}
+
+bool Shape::isValid()
+{
+    if (shape_.IsNull())
+        return false;
+    BRepCheck_Analyzer aChecker(shape_);
+    return aChecker.IsValid() ? true : false;
+}
+
+
+
+ v8::Persistent<v8::Function> Solid::constructor;
+
+
+ template<class T,typename T1,typename T2,typename T2 (T::*func)() >
+ v8::Handle<v8::Value> ee(v8::Local<v8::String> property,const v8::AccessorInfo &info)
+ {
+    T* obj = node::ObjectWrap::Unwrap<T>(info.This());
+    return T1::New((obj->*func)());
+
+ }
+   
+ 
+ /*static*/void Solid::Init(v8::Handle<v8::Object> target)
+ {
+  srand ( time(NULL) );
+
+
+  // Prepare constructor template
+  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Solid::New);
+  tpl->SetClassName(v8::String::NewSymbol("Solid"));
+
+  // object has one internal filed ( the C++ object)
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+
+  // Prototype
+  v8::Local<v8::ObjectTemplate> objTemplate = tpl->PrototypeTemplate();
+
+
+  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("translate"),v8::FunctionTemplate::New(translate)->GetFunction());
+  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("rotate"),   v8::FunctionTemplate::New(rotate)->GetFunction());  
+  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makeBox"),  v8::FunctionTemplate::New(makeBox)->GetFunction());
+
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("isNull"), 
+    ee<Shape,v8::Boolean,bool,&Shape::isNull>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("isValid"), 
+    ee<Shape,v8::Boolean,bool,&Shape::isValid>, 0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+ 
+  //XxCtpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("location"), 
+  //XxC  ee<Shape,v8::Object,v8::Object,&Shape::location>, 0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("x"), GetPointCoord, noset);
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("y"), GetPointCoord, noset);
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("z"), GetPointCoord, noset);
+
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("width"),  GetPointCoord, noset);
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("depth"),  GetPointCoord, noset);
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("height"), GetPointCoord, noset);
+
+
+  Solid::constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
+  target->Set(v8::String::NewSymbol("Solid"), constructor);
+
+}
+
+v8::Handle<v8::Value> Solid::New(const v8::Arguments& args)
+{
+  v8::HandleScope scope;
+  
+  Solid* obj = new Solid();
+  obj->Wrap(args.This());
+  // return scope.Close(args.This());
+  return args.This();
+}
+
+v8::Handle<v8::Value> Solid::NewInstance(const v8::Arguments& args) 
+{
+  v8::HandleScope scope;
+
+  const unsigned argc = 1;
+  v8::Handle<v8::Value> argv[argc] = { args[0] };
+  v8::Local<v8::Object> instance = constructor->NewInstance(argc, argv);
+
+  return scope.Close(instance);
+}
+
+
+
+void ReadPoint(v8::Local<v8::Value>& value,gp_Pnt* pt)
+{
+  double x=0,y=0,z=0;
+  ReadPoint(value,&x,&y,&z);
+  pt->SetCoord(x,y,z);
+}
+
+v8::Handle<v8::Value> Solid::makeBox(const v8::Arguments& args) 
+{
+
+   // could be :
+   //    3 numbers dx,dy,dz
+   //    2 points  p1,p2
+   //TODO   1 point + 3 numbers dx,dy,dz 
+   //TODO    1 object with { x: 1,y: 2,z: 3, dw:
+   Solid* pThis = ObjectWrap::Unwrap<Solid>(args.This());
+   
+   double dx = 10;
+   double dy = 10;
+   double dz = 10;
+      
+   try {
+     if (args.Length() == 3 && args[0]->IsNumber() && args[1]->IsNumber()  && args[2]->IsNumber() ) {
+        dx  = args[0]->ToNumber()->Value();
+        dy  = args[1]->ToNumber()->Value();
+        dz  = args[2]->ToNumber()->Value();
+        pThis->shape_ = BRepPrimAPI_MakeBox(dx, dy, dz).Shape();
+     } else if (args.Length() == 2) {
+
+       gp_Pnt p1;
+       ReadPoint(args[0],&p1);
+
+       gp_Pnt p2;
+       ReadPoint(args[1],&p2);
+
+       pThis->shape_ = BRepPrimAPI_MakeBox(p1,p2).Shape();
+
+     } else if (args.Length() == 3) {
+
+       gp_Pnt p1;
+       ReadPoint(args[0],&p1);
+
+       dx  = args[2]->ToNumber()->Value();
+       dy  = args[3]->ToNumber()->Value();
+       dz  = args[4]->ToNumber()->Value();
+     
+       pThis->shape_ = BRepPrimAPI_MakeBox(p1,dx, dy, dz).Shape();
+
+
+     } 
+   }
+   catch(Standard_Failure &err) {
+      pThis->shape_.Nullify();
+   }
+   // xx pThis->PostProcess(json);
+   return args.This();
+
+}
+
+
+v8::Handle<v8::Value> Shape::translate(const v8::Arguments& args) 
+{
+  v8::HandleScope scope;
+  Shape* obj = ObjectWrap::Unwrap<Shape>(args.This());
+  return scope.Close(args.This());
+}
+
+v8::Handle<v8::Value> Shape::rotate(const v8::Arguments& args) 
+{
+  v8::HandleScope scope;
+  Shape* obj = ObjectWrap::Unwrap<Shape>(args.This());
+  return scope.Close(args.This());
+}
+
+void Shape::ApplyOrigin(v8::Handle<v8::Object> json) 
+{
+
+    v8::Local<v8::Object> origin = json->Get(v8::String::New("origin"))->ToObject();
+
+    if (!origin->IsUndefined()) {  
+      double x=0,y=0,z=0;
+      ReadXYZ(origin,&x,&y,&z);
+      gp_Trsf transformation = gp_Trsf();
+      transformation.SetTranslation(gp_Vec(x,y,z));        
+      shape_ = BRepBuilderAPI_Transform(shape_, transformation).Shape();
     }
 }
 
-void Builder::ApplyTransform(map< string, mValue > transformJson)
+bool operator == (v8::Local<v8::String> str,const char* value)
+{
+  return str->Equals(v8::String::New(value));
+}
+
+void Shape::ApplyTransform(v8::Handle<v8::Object> transformJson)
  {
 	
-    string transformType = transformJson["type"].get_str();
-    map< string, mValue > origin = transformJson["origin"].get_obj();
-    map< string, mValue > parameters = transformJson["parameters"].get_obj();
+    v8::Local<v8::String> transformType = transformJson->Get(v8::String::New("type"))->ToString(); 
+
+    v8::Local<v8::Object> origin = transformJson->Get(v8::String::New("origin"))->ToObject();
+    v8::Local<v8::Object> parameters = transformJson->Get(v8::String::New("parameters"))->ToObject();
+
     
-    if (transformType == "rotate") {
-        auto_ptr< Transformer<Rotate> > transformer(new Transformer<Rotate>(shape_, origin, parameters));
+    if (transformType->Equals(v8::String::New("rotate"))) {
+        auto_ptr< Transformer<RotateTransform> > transformer(new Transformer<RotateTransform>(shape_, origin, parameters));
         shape_ = transformer->transformed_shape();
         return;
     } else if (transformType == "scale") {
@@ -83,7 +245,7 @@ void Builder::ApplyTransform(map< string, mValue > transformJson)
         shape_ = transformer->transformed_shape();
         return;
     } else if (transformType == "translate") {
-        auto_ptr< Transformer<Translate> > transformer(new Transformer<Translate>(shape_, origin, parameters));
+        auto_ptr< Transformer<TranslateTransform> > transformer(new Transformer<TranslateTransform>(shape_, origin, parameters));
         shape_ = transformer->transformed_shape();
         return;
     } else if ((transformType == "mirror") || (transformType == "axis_mirror")) {
@@ -98,31 +260,50 @@ void Builder::ApplyTransform(map< string, mValue > transformJson)
     throw "transform type not found";
 }
 
-void Builder::ApplyTransforms(map< string, mValue > json) {
+
+void Shape::ApplyTransforms(v8::Handle<v8::Object> json) {
 	
-    if (!json["transforms"].is_null()) {
-        mArray transforms = json["transforms"].get_array();
-        for (unsigned int k = 0; k < transforms.size(); ++k) {
-            mValue transformJson = transforms[k];
-            this->ApplyTransform(transformJson.get_obj());
+    v8::Local<v8::Value> transforms = json->Get(v8::String::New("transforms"));
+
+    if (transforms->IsArray()) {
+
+          v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(transforms);
+          int length = array->Length();
+
+      
+      
+        for ( int k = 0; k < length; ++k) {
+
+            v8::Local<v8::Value> transformJson = array->Get(k);
+
+            if (transformJson->IsObject()) {
+              this->ApplyTransform(transformJson->ToObject());
+            }
         }
     } 
 }
 
-void Builder::ApplyWorkplane(map< string, mValue> json) {
+
+void Shape::ApplyWorkplane(v8::Handle<v8::Object> json) {
 	
-    if (!json["workplane"].is_null()) {
-        map< string, mValue > workplane_origin = json["workplane"].get_obj()["origin"].get_obj();
-        double x = Util::to_d(workplane_origin["x"]);
-        double y = Util::to_d(workplane_origin["y"]);
-        double z = Util::to_d(workplane_origin["z"]);
+   v8::Local<v8::Object> workplane = json->Get(v8::String::New("workplane"))->ToObject();
 
-        map< string, mValue > workplane_axis = json["workplane"].get_obj()["axis"].get_obj();
-        double u = Util::to_d(workplane_axis["x"]);
-        double v = Util::to_d(workplane_axis["y"]);
-        double w = Util::to_d(workplane_axis["z"]);
+   if (!workplane->IsNull()) {
+        
+  
+        v8::Local<v8::Object> workplane_origin = workplane->Get(v8::String::New("origin"))->ToObject();
+        
+        double x = ReadDouble(workplane_origin,"x");
+        double y = ReadDouble(workplane_origin,"y");
+        double z = ReadDouble(workplane_origin,"z");
 
-        double angle = Util::to_d(json["workplane"].get_obj()["angle"]);
+        v8::Local<v8::Object> workplane_axis = workplane->Get(v8::String::New("axis"))->ToObject();  
+        
+        double u = ReadDouble(workplane_axis,"x");
+        double v = ReadDouble(workplane_axis,"y");
+        double w = ReadDouble(workplane_axis,"z");
+
+        double angle = ReadDouble(workplane,"angle");
 
         gp_Trsf transformation1 = gp_Trsf();
         transformation1.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0), gp_Dir(u,v,w)), angle/180*M_PI);
@@ -134,20 +315,24 @@ void Builder::ApplyWorkplane(map< string, mValue> json) {
     }
 }
 
-void Builder::ApplyReverseWorkplane(map< string, mValue> json) {
+void Shape::ApplyReverseWorkplane(v8::Handle<v8::Object> json) {
 	
-    if (!json["workplane"].is_null()) {
-        map< string, mValue > workplane_origin = json["workplane"].get_obj()["origin"].get_obj();
-        double x = -Util::to_d(workplane_origin["x"]);
-        double y = -Util::to_d(workplane_origin["y"]);
-        double z = -Util::to_d(workplane_origin["z"]);
+   v8::Local<v8::Object> workplane = json->Get(v8::String::New("workplane"))->ToObject();;
+   if (!workplane->IsNull()) {
+
+        v8::Local<v8::Object> workplane_origin = workplane->Get(v8::String::New("origin"))->ToObject();;
         
-        map< string, mValue > workplane_axis = json["workplane"].get_obj()["axis"].get_obj();
-        double u = Util::to_d(workplane_axis["x"]);
-        double v = Util::to_d(workplane_axis["y"]);
-        double w = Util::to_d(workplane_axis["z"]);
+        double x = ReadDouble(workplane_origin,"x");
+        double y = ReadDouble(workplane_origin,"y");
+        double z = ReadDouble(workplane_origin,"z");
+
+        v8::Local<v8::Object> workplane_axis = workplane->Get(v8::String::New("axis"))->ToObject();;       
         
-        double angle = -Util::to_d(json["workplane"].get_obj()["angle"]);
+        double u = ReadDouble(workplane_axis,"x");
+        double v = ReadDouble(workplane_axis,"y");
+        double w = ReadDouble(workplane_axis,"z");
+
+        double angle = ReadDouble(workplane,"angle");
         
         gp_Trsf transformation1 = gp_Trsf();
         transformation1.SetTranslation(gp_Vec(x,y,z));
@@ -163,12 +348,14 @@ void Builder::ApplyReverseWorkplane(map< string, mValue> json) {
 
 
 
-TopoDS_Shape Builder::shape() {
+TopoDS_Shape Shape::shape() 
+{
     return shape_;
 }
 
 
-void Builder3D::Mesh() {
+void Solid::Mesh() 
+{
     TopExp_Explorer Ex; 
     int numFaces = 0;
     for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 
@@ -180,38 +367,10 @@ void Builder3D::Mesh() {
     }
 }
 
-void Builder3D::PostProcess(map< string, mValue > json) {
+void Solid::PostProcess(v8::Handle<v8::Object> json)
+{
     this->ApplyOrigin(json);
     this->ApplyTransforms(json);
     this->ApplyWorkplane(json);
     this->Mesh();
-}
-
-
-CuboidBuilder::CuboidBuilder(map< string, mValue > json) {
-    map< string, mValue > parameters = json["parameters"].get_obj();
-    double width = Util::to_d(parameters["u"]);
-    double depth = Util::to_d(parameters["v"]);
-    double height = Util::to_d(parameters["w"]);
-         
-    map< string, mValue > origin = json["origin"].get_obj();
-         
-    if (width < 0) {
-        origin["x"] = Util::to_d(origin["x"]) + width;
-        width = -width;
-    }
-
-    if (depth < 0) {
-        origin["y"] = Util::to_d(origin["y"]) + depth;
-        depth = -depth;
-    }
-         
-    if (height < 0) {
-        origin["z"] = Util::to_d(origin["z"]) + height;
-        height = -height;
-    }
-    json["origin"] = origin;
-         
-    shape_ = BRepPrimAPI_MakeBox(width, depth, height).Shape();
-    PostProcess(json);
 }

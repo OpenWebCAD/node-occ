@@ -2,89 +2,60 @@
 #include <node.h>
 #include <v8.h>
 
-using namespace v8;
+#include "Util.h"
+#include "GeometryBuilder.h"
 
-void ReadPropertyPointFromArray( Local<Value>& value,double* x,double* y, double*z ) 
+
+
+v8::Handle<v8::Value> createBox(const v8::Arguments& args)
 {
-    Local<Object> obj = value->ToObject();
-
-    Handle<Array> array = Handle<Array>::Cast(obj);
-    int length = array->Length();
-    // int length = obj->Get(String::New("length"))->ToObject()->Uint32Value();
-
-     if (length>=1) {  *x = obj->Get(0)->NumberValue();  }
-     if (length>=2) {  *y = obj->Get(1)->NumberValue();  }
-     if (length>=3) {  *z = obj->Get(2)->NumberValue();  }
-  
-}
-
-void ReadPropertyPoint( Local<Value>& value,const char* name,double* x,double* y, double*z ) 
-{
-  if (value->IsObject()) {
-     Local<Object> obj = value->ToObject();
-    // for exemple a THREE.Vector3 
-    // ( we try to read the "x","y","z" property )
-    return ReadPropertyPointFromArray(obj->Get(String::New(name)),x,y,z);
-  }
-
-
-  if (value->IsArray()) {
-    ReadPropertyPointFromArray(value,x,y,z);
-  }
-}
-
-inline Handle<Value> Cuboid(const Arguments& args)
-{
-
-  HandleScope scope;
+  v8::HandleScope scope;
   
   if (args.Length() < 1) {
-    ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-    return scope.Close(Undefined());
+    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong number of arguments")));
+    return scope.Close(v8::Undefined());
   }
   
-  double x=0;double y=0;double z=0;
-  ReadPropertyPoint(args[0],"position",&x,&y,&z);
-
   // resulting object
-  Local<Object> obj = Object::New();
-  obj->Set(String::NewSymbol("x"), Number::New(x));
-  obj->Set(String::NewSymbol("y"), Number::New(y));
-  obj->Set(String::NewSymbol("z"), Number::New(z));
+  v8::Handle<v8::Value> obj = Solid::NewInstance(args);  
 
-  return scope.Close(obj);
+
+  return scope.Close(Solid::makeBox(args));
 }
 
-Handle<Value> Hello(const Arguments& args) {
-  HandleScope scope;
-  return scope.Close(String::New("world"));
+v8::Handle<v8::Value> Hello(const v8::Arguments& args)
+{
+  v8::HandleScope scope;
+  return scope.Close(v8::String::New("world"));
 }
 
 
 
-Handle<Value> Add(const Arguments& args) {
-  HandleScope scope;
+v8::Handle<v8::Value> Add(const v8::Arguments& args)
+{
+  v8::HandleScope scope;
 
   if (args.Length() < 2) {
-    ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-    return scope.Close(Undefined());
+    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong number of arguments")));
+    return scope.Close(v8::Undefined());
   }
 
   if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
-    ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-    return scope.Close(Undefined());
+    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
+    return scope.Close(v8::Undefined());
   }
 
-  Local<Number> num = Number::New(args[0]->NumberValue() +
+  v8::Local<v8::Number> num = v8::Number::New(args[0]->NumberValue() +
       args[1]->NumberValue());
   return scope.Close(num);
 }
 
 
-void Initialize(Handle<Object> target) {
+void Initialize(v8::Handle<v8::Object> target) 
+{
   
-  NODE_SET_METHOD(target, "Cuboid", Cuboid);
-  
+  Solid::Init(target);
+  NODE_SET_METHOD(target, "createBox", createBox);
 }
 NODE_MODULE(binding, Initialize)
 

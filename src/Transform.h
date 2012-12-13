@@ -1,23 +1,25 @@
-#ifndef SS_TRANSFORM
-#define SS_TRANSFORM
+#pragma once
+#include <node.h>
+#include <v8.h>
 
-#include "json_spirit/json_spirit.h"
 #include "OCC.h"
 
 using namespace std;
-using namespace json_spirit;
+
 
 template <class T>
 class Transformer {
     
 public:
     Transformer(TopoDS_Shape shape, 
-                map< string, mValue > origin,
-                map< string, mValue > parameters) {
+                v8::Handle<v8::Object> origin,
+                v8::Handle<v8::Object> parameters) 
+    {
         transformed_shape_ = apply<T>(shape, origin, parameters);
     }
     
-    TopoDS_Shape transformed_shape() { 
+    TopoDS_Shape transformed_shape() 
+    { 
         return transformed_shape_;
     }
 
@@ -26,11 +28,14 @@ private:
     TopoDS_Shape transformed_shape_;
     
     template<typename U>
+    
     static TopoDS_Shape apply(TopoDS_Shape shape, 
-                              map< string, mValue > origin,
-                              map< string, mValue > parameters) {
-        int n = parameters["n"].is_null() ? 0 : parameters["n"].get_int();
+                              v8::Handle<v8::Object>  origin,
+                              v8::Handle<v8::Object>  parameters) 
+    {
+        int n = ReadInt(parameters,"n",0);
         
+        // the number of time we want to apply the transform
         if(n == 0) {
             auto_ptr<U> transform(new T(shape));
             return transform->apply(1.0, origin, parameters);
@@ -79,19 +84,19 @@ public:
     virtual ~Transform() {};
 
     virtual TopoDS_Shape apply(double multiplier, 
-                                 map< string, mValue > origin, 
-                                 map< string, mValue > parameters) = 0;
+                                 v8::Handle<v8::Object>  origin, 
+                                 v8::Handle<v8::Object>  parameters) = 0;
 };
 
-class Rotate : public Transform {
+class RotateTransform : public Transform {
     
 public:
-    Rotate(TopoDS_Shape shape) : Transform(shape) {}
-    virtual ~Rotate() {};
+    RotateTransform(TopoDS_Shape shape) : Transform(shape) {}
+    virtual ~RotateTransform() {};
     
     virtual TopoDS_Shape apply(double multiplier, 
-                                 map< string, mValue > origin, 
-                                 map< string, mValue > parameters);
+                                 v8::Handle<v8::Object>  origin, 
+                                 v8::Handle<v8::Object>  parameters);
 };
 
 
@@ -102,8 +107,8 @@ public:
     virtual ~Scale() {};
     
     virtual TopoDS_Shape apply(double multiplier, 
-                                 map< string, mValue > origin, 
-                                 map< string, mValue > parameters);
+                                v8::Handle<v8::Object>  origin, 
+                               v8::Handle<v8::Object>  parameters);
 };
 
 class AxisMirror : public Transform {
@@ -113,8 +118,8 @@ public:
     virtual ~AxisMirror() {};
     
     virtual TopoDS_Shape apply(double multiplier, 
-                                 map< string, mValue > origin, 
-                                 map< string, mValue > parameters);
+                                 v8::Handle<v8::Object>  origin, 
+                                v8::Handle<v8::Object> parameters);
 };
 
 class PlaneMirror : public Transform {
@@ -124,20 +129,18 @@ public:
     virtual ~PlaneMirror() {};
     
     virtual TopoDS_Shape apply(double multiplier, 
-                               map< string, mValue > origin, 
-                               map< string, mValue > parameters);
+                               v8::Handle<v8::Object> origin, 
+                              v8::Handle<v8::Object>  parameters);
 };
 
-class Translate : public Transform {
+class TranslateTransform : public Transform {
     
 public:
-    Translate(TopoDS_Shape shape) : Transform(shape) {}
-    virtual ~Translate() {};
+    TranslateTransform(TopoDS_Shape shape) : Transform(shape) {}
+    virtual ~TranslateTransform() {};
     
     virtual TopoDS_Shape apply(double multiplier, 
-                                 map< string, mValue > origin, 
-                                 map< string, mValue > parameters);
+                                 v8::Handle<v8::Object>  origin, 
+                                 v8::Handle<v8::Object>  parameters);
 };
-
-#endif
 
