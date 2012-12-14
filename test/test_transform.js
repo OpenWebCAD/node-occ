@@ -1,0 +1,40 @@
+var assert = require("assert");
+var should = require("should");
+var occ = require("../build/Release/occ");
+
+
+describe("testing transformation object",function(){
+	
+	var trsf;
+	before(function() {
+	   trsf=new occ.Transformation();
+	})
+	describe("a empty transformation", function() {
+		it("should have a scale factor of 1.0", function() { 
+			trsf.scaleFactor.should.equal(1.0);
+		});	
+		it("should have a rotation axis of 0,0,1", function() { 
+			trsf.scaleFactor.should.equal(1.0);
+		});	
+	});
+	describe("testing translation [10,20,30]", function() {
+		before(function() {
+		   trsf.makeTranslation([10,20,30]);
+		})
+		it("should have a scale factor of 1.0", function() { 
+			trsf.scaleFactor.should.equal(1.0);
+		});	
+/*		it("should have a rotation axis of 0,0,1", function() { 
+			trsf.rotationAxis.i.should.equal(0.0);
+			trsf.rotationAxis.j.should.equal(0.0);
+			trsf.rotationAxis.k.should.equal(1.0);
+		});	
+		it("should have a translationPart at [10,20,30]", function() { 
+			trsf.translationPart.x.should.equal(10.0);
+			trsf.translationPart.y.should.equal(20.0);
+			trsf.translationPart.z.should.equal(30.0);
+		});	
+*/
+	});
+
+});

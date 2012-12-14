@@ -69,9 +69,10 @@
 #include <Storage_HSeqOfRoot.hxx>
 #include <Storage_Root.hxx>
 #include <BRepCheck_Analyzer.hxx>
+
+#include <TopExp.hxx>
 /*
 #include <PTColStd_PersistentTransientMap.hxx>
 #include <PTColStd_TransientPersistentMap.hxx>
 */
 #undef Handle
-#undef Persistent

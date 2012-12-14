@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "binding",
+      "target_name": "occ",
 	  "msvs_settings": {
 
 				'VCLinkerTool': {					
@@ -18,15 +18,20 @@
 			"src/Transform.cc",
 			"src/Util.cc",
 			"src/V8Wrapper.cc",
+			"src/Util.h",
+			"src/Transform.h",
+			"src/GeometryBuilder.h",
+			"src/NodeV8.h",
+			"src/Transformation.h",
+			"src/Transformation.cc",
+			"src/Solid.h",
+			"src/Solid.cc",
+			"src/OCC.h"
 			],
 			
 	  "defines": [],
 	
-	  "include_dirs": [ 
-			"/projet/oce/inc",			
-	
-	],				
-	# "libraries_dir": [ "/projet/oce-build/bin/Debug/" ],
+	  "include_dirs": [  "/projet/oce/inc",			    ],				
 
 	"libraries": [ 
 		'TKAdvToolsd.lib',

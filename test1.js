@@ -1,5 +1,5 @@
 var assert = require('assert');
-var occ = require('./build/Release/binding');
+var occ = require('./build/Release/occ');
 
 console.log("hello");
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <v8.h>
+#include "NodeV8.h"
  
 int ReadInt(v8::Handle<v8::Object>& obj,const char* name,int defaultValue);
 double ReadDouble(v8::Handle<v8::Object>& obj,const char* name,double defaultValue=0.0);
