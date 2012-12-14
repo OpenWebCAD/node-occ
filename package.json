@@ -1,5 +1,5 @@
 {
-  "name":  "TOTO",
+  "name":  "nodeocc",
   "version": "0.1.0",
   "description": "OpenCascade OCE Wrapper for Node js",
   "dependencies": {

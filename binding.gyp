@@ -6,8 +6,7 @@
 
 				'VCLinkerTool': {					
 					'AdditionalLibraryDirectories': [
-							#"c:/Program Files (x86)/boost/boost_1_46_1/lib",
-							"/projet/oce-build/bin/Debug/",
+							"/projects/oce-0.11/Win64/lib/",
 					],
 					# 'AdditionalOptions': ["/FORCE",],						
 				},	  
@@ -33,7 +32,9 @@
 			
 	  "defines": [],
 	
-	  "include_dirs": [  "/projet/oce/inc",			    ],				
+	  "include_dirs": [  
+    	"/projects/oce-0.11/include/oce",
+	    "/projet/oce/inc",			    ],				
 
 	"libraries": [ 
 		'TKAdvToolsd.lib',
