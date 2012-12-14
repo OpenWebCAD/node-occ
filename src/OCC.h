@@ -71,6 +71,8 @@
 #include <BRepCheck_Analyzer.hxx>
 
 #include <TopExp.hxx>
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
 /*
 #include <PTColStd_PersistentTransientMap.hxx>
 #include <PTColStd_TransientPersistentMap.hxx>

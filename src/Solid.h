@@ -13,6 +13,9 @@ protected:
    int numSolids();
    int numFaces();
 
+   double volume();
+   double area();
+
    typedef enum BoolOpType {
       BOOL_FUSE,
       BOOL_CUT,
@@ -21,6 +24,7 @@ protected:
    int boolean(Solid *tool, BoolOpType op);
 
     // boolean operation
+    static v8::Handle<v8::Value> _boolean(const v8::Arguments& args,BoolOpType op);
     static v8::Handle<v8::Value> fuse(const v8::Arguments& args);
     static v8::Handle<v8::Value> cut(const v8::Arguments& args);
     static v8::Handle<v8::Value> common(const v8::Arguments& args);

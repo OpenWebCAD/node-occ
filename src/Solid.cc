@@ -61,6 +61,8 @@
   tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makeBox"),  v8::FunctionTemplate::New(makeBox)->GetFunction());
 
   tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("fuse"),  v8::FunctionTemplate::New(fuse)->GetFunction());
+  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("cut"),  v8::FunctionTemplate::New(cut)->GetFunction());
+  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("common"),  v8::FunctionTemplate::New(common)->GetFunction());
 
   tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("isNull"), 
     ee<Shape,v8::Boolean,bool,&Shape::isNull>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
@@ -72,6 +74,11 @@
   
   tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("numSolids"), 
     ee<Solid,v8::Integer,int,&Solid::numSolids>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("volume"), 
+    ee<Solid,v8::Number,double,&Solid::volume>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("area"), 
+    ee<Solid,v8::Number,double,&Solid::area>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
 
   //XxCtpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("location"), 
   //XxC  ee<Shape,v8::Object,v8::Object,&Shape::location>, 0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
@@ -211,23 +218,26 @@ int Solid::numFaces()
     TopExp::MapShapes(this->shape(), TopAbs_FACE, anIndices);
     return anIndices.Extent();
 }
-//
-//double Solid::area() {
-//    GProp_GProps prop;
-//    BRepGProp::SurfaceProperties(this->getSolid(), prop);
-//    return prop.Mass();
-//}
-//
-//double Solid::volume() {
-//    GProp_GProps prop;
-//    BRepGProp::VolumeProperties(this->getSolid(), prop);
-//    return prop.Mass();
-//}
+
+
+double Solid::area() 
+{
+    GProp_GProps prop;
+    BRepGProp::SurfaceProperties(this->shape(), prop);
+    return prop.Mass();
+}
+
+double Solid::volume() 
+{
+    GProp_GProps prop;
+    BRepGProp::VolumeProperties(this->shape(), prop);
+    return prop.Mass();
+}
 
 //DVec Solid::inertia() {
 //    DVec ret;
 //    GProp_GProps prop;
-//    BRepGProp::VolumeProperties(this->getSolid(), prop);
+//    BRepGProp::VolumeProperties(this->shape(), prop);
 //    gp_Mat mat = prop.MatrixOfInertia();
 //    ret.push_back(mat(1,1)); // Ixx
 //    ret.push_back(mat(2,2)); // Iyy
@@ -253,6 +263,7 @@ typedef enum BoolOpType {
   BOOL_CUT,
   BOOL_COMMON,
 } BoolOpType;
+
 int Solid::boolean(Solid *tool, BoolOpType op)
 {
     try {
@@ -314,7 +325,9 @@ int Solid::boolean(Solid *tool, BoolOpType op)
     }
     return 1;
 }
-v8::Handle<v8::Value> Solid::fuse(const v8::Arguments& args) 
+
+
+v8::Handle<v8::Value> Solid::_boolean(const v8::Arguments& args,BoolOpType op) 
 {
   v8::HandleScope scope;
   
@@ -326,8 +339,20 @@ v8::Handle<v8::Value> Solid::fuse(const v8::Arguments& args)
   Solid* pThis = ObjectWrap::Unwrap<Solid>(args.This());
   Solid* pTool = ObjectWrap::Unwrap<Solid>(v->ToObject());
 
-  int ret =  pThis->boolean(pTool, Solid::BOOL_FUSE);
+  int ret =  pThis->boolean(pTool, op);
 
   return scope.Close(args.This());
 
+}
+v8::Handle<v8::Value> Solid::fuse(const v8::Arguments& args) 
+{
+  return _boolean(args,BOOL_FUSE);
+}
+v8::Handle<v8::Value> Solid::cut(const v8::Arguments& args) 
+{
+  return _boolean(args,BOOL_CUT);
+}
+v8::Handle<v8::Value> Solid::common(const v8::Arguments& args) 
+{
+  return _boolean(args,BOOL_COMMON);
 }
