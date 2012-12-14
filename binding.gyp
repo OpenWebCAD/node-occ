@@ -26,6 +26,8 @@
 			"src/Transformation.cc",
 			"src/Solid.h",
 			"src/Solid.cc",
+			"src/Mesh.h",
+			"src/Mesh.cc",
 			"src/OCC.h"
 			],
 			

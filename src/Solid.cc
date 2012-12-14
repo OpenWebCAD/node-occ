@@ -80,6 +80,9 @@
   tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("area"), 
     ee<Solid,v8::Number,double,&Solid::area>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
 
+  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("mesh"),_mesh, 
+     0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+
   //XxCtpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("location"), 
   //XxC  ee<Shape,v8::Object,v8::Object,&Shape::location>, 0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
 
@@ -179,18 +182,7 @@ v8::Handle<v8::Value> Solid::makeBox(const v8::Arguments& args)
 
 }
 
-void Solid::Mesh() 
-{
-    TopExp_Explorer Ex; 
-    int numFaces = 0;
-    for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 
-        ++numFaces;
-    }
-    
-    if (numFaces > 0) {
-        BRepMesh().Mesh(shape_, 1.0);
-    }
-}
+
 int Solid::numSolids()
 {
     const TopoDS_Shape& shp = this->shape();
@@ -355,4 +347,89 @@ v8::Handle<v8::Value> Solid::cut(const v8::Arguments& args)
 v8::Handle<v8::Value> Solid::common(const v8::Arguments& args) 
 {
   return _boolean(args,BOOL_COMMON);
+}
+
+
+
+v8::Handle<v8::Value> Solid::_mesh(v8::Local<v8::String> property,const v8::AccessorInfo &info)
+{
+ 
+   Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
+   if (pThis->m_cacheMesh.IsEmpty()) {
+      pThis->m_cacheMesh = v8::Persistent<v8::Object>::New(pThis->createMesh(1.0,15.0,true));
+   }
+   return pThis->m_cacheMesh;
+}
+
+//void Solid::Mesh() 
+//{
+//    TopExp_Explorer Ex; 
+//    int numFaces = 0;
+//    for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 
+//        ++numFaces;
+//    }
+//    
+//    if (numFaces > 0) {
+//        BRepMesh().Mesh(shape_, 1.0);
+//    }
+//}
+v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qualityNormals)
+{
+ 
+    const unsigned argc = 0;
+    v8::Handle<v8::Value> argv[1] = {  };
+    v8::Local<v8::Object> theMesh = Mesh::constructor->NewInstance(argc, argv);
+
+
+    Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
+
+    const TopoDS_Shape& shape = this->shape();
+    
+    try {
+        Bnd_Box aBox;
+        BRepBndLib::Add(shape, aBox);
+        
+        Standard_Real aXmin, aYmin, aZmin;
+        Standard_Real aXmax, aYmax, aZmax;
+        aBox.Get(aXmin, aYmin, aZmin, aXmax, aYmax, aZmax);
+        
+        Standard_Real maxd = fabs(aXmax - aXmin);
+        maxd = std::max(maxd, fabs(aYmax - aYmin));
+        maxd = std::max(maxd, fabs(aZmax - aZmin));
+        
+        BRepMesh_FastDiscret MSH(factor*maxd, angle, aBox, Standard_True, Standard_True, 
+                                 Standard_True, Standard_True);
+        
+        MSH.Perform(shape);
+        
+        if (shape.ShapeType() == TopAbs_COMPSOLID || shape.ShapeType() == TopAbs_COMPOUND) {
+            TopExp_Explorer exSolid, exFace;
+            for (exSolid.Init(shape, TopAbs_SOLID); exSolid.More(); exSolid.Next()) {
+                const TopoDS_Solid& solid = static_cast<const TopoDS_Solid &>(exSolid.Current());
+                for (exFace.Init(solid, TopAbs_FACE); exFace.More(); exFace.Next()) {
+                    const TopoDS_Face& face = static_cast<const TopoDS_Face &>(exFace.Current());
+                    if (face.IsNull()) continue;
+                    mesh->extractFaceMesh(face, qualityNormals);
+                }
+            }
+        }  else {
+            TopExp_Explorer exFace;
+            for (exFace.Init(shape, TopAbs_FACE); exFace.More(); exFace.Next()) {
+                const TopoDS_Face& face = static_cast<const TopoDS_Face &>(exFace.Current());
+                if (face.IsNull()) continue;
+                mesh->extractFaceMesh(face, qualityNormals);
+            }
+        }
+    } catch(Standard_Failure &err) {
+        Handle_Standard_Failure e = Standard_Failure::Caught();
+        const Standard_CString msg = e->GetMessageString();
+        if (msg != NULL && strlen(msg) > 1) {
+            setErrorMessage(msg);
+        } else {
+            setErrorMessage("Failed to mesh object");
+        }
+        return v8::Object::New();
+    }
+    mesh->optimize();
+    return theMesh;
 }

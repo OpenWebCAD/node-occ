@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "GeometryBuilder.h"
 #include "Solid.h"
+#include "Mesh.h"
 #include "Transformation.h"
 
 
@@ -53,6 +54,7 @@ void Initialize(v8::Handle<v8::Object> target)
   
   Solid::Init(target);
   Transformation::Init(target);
+  Mesh::Init(target);
 
   NODE_SET_METHOD(target, "createBox", createBox);
 }

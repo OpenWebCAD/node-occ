@@ -62,7 +62,7 @@ describe("testing solid construction",function(){
 			solid1.numSolids.should.equal(1);
 		});
 	});
-	describe("cut a corner of a boxe", function() {
+	describe("cut a corner of a box", function() {
 	    var solid1;
 	    var solid2;
 		before(function() {
@@ -81,4 +81,24 @@ describe("testing solid construction",function(){
 			solid1.numSolids.should.equal(1);
 		});
 	});
+    describe("Meshing a simple solid", function() {
+        describe("Meshing a box", function() {
+            var solid;
+            before(function(){
+                solid = new occ.Solid();
+                solid.makeBox([10,20,30],[20,30,40]);
+
+            });
+            it("should have a mesh with 4*6 vertices", function() {
+                solid.mesh.numVertices.should.equal(24);
+            });
+            it("should have a mesh with (2*3)*4 edges", function() {
+                solid.mesh.numEdges.should.equal(24);
+            });
+            it("should have a mesh with 2*6 triangles", function() {
+                solid.mesh.numTriangles.should.equal(12);
+            });
+        });
+
+    });
 });

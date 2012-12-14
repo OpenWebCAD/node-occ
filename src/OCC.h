@@ -73,6 +73,14 @@
 #include <TopExp.hxx>
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
+#include <BRepBndLib.hxx>
+#include <Bnd_Box.hxx>
+#include <BRepMesh_FastDiscret.hxx>
+#include <Poly_Triangulation.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <GeomLProp_SLProps.hxx>
+#include <Poly_PolygonOnTriangulation.hxx>
 /*
 #include <PTColStd_PersistentTransientMap.hxx>
 #include <PTColStd_TransientPersistentMap.hxx>

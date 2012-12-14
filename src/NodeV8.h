@@ -9,7 +9,7 @@
 #include <v8.h>
 
 
-template<class T,typename T1,typename T2,typename T2 (T::*func)() >
+template<class T,typename T1,typename T2,typename T2 (T::*func)() > inline 
 v8::Handle<v8::Value> ee(v8::Local<v8::String> property,const v8::AccessorInfo &info)
 {
   T* obj = node::ObjectWrap::Unwrap<T>(info.This());
