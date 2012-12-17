@@ -22,16 +22,15 @@
   // Prototype
   Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-  EXPOSE_METHOD(Solid,translate);
-  EXPOSE_METHOD(Solid,rotate);
+  Base::InitProto(proto);
+
   EXPOSE_METHOD(Solid,makeBox);
   EXPOSE_METHOD(Solid,fuse);
   EXPOSE_METHOD(Solid,cut);
   EXPOSE_METHOD(Solid,common);
 
-  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Shape,isNull);
-  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Shape,isValid);
-  EXPOSE_READ_ONLY_PROPERTY_CONST_STRING (Shape,shapeType);
+
+
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,volume);
@@ -70,12 +69,7 @@ Handle<v8::Value> Solid::NewInstance(const v8::Arguments& args)
 
 
 
-void ReadPoint(Local<v8::Value>& value,gp_Pnt* pt)
-{
-  double x=0,y=0,z=0;
-  ReadPoint(value,&x,&y,&z);
-  pt->SetCoord(x,y,z);
-}
+
 
 Handle<v8::Value> Solid::makeBox(const v8::Arguments& args) 
 {

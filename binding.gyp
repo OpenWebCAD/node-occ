@@ -14,11 +14,8 @@
 		
       "sources": [
 			"src/GeometryBuilder.cc",
-			"src/Transform.cc",
-			"src/Util.cc",
-			"src/V8Wrapper.cc",
-			"src/Util.h",
-			"src/Transform.h",
+			"src/Base.h",
+			"src/Base.cc",
 			"src/GeometryBuilder.h",
 			"src/NodeV8.h",
 			"src/Transformation.h",
@@ -27,10 +24,17 @@
 			"src/Solid.cc",
 			"src/Shape.h",
 			"src/Shape.cc",
+			"src/Vertex.h",
+			"src/Vertex.cc",
+			"src/Edge.h",
+			"src/Edge.cc",
 			"src/Mesh.h",
 			"src/Mesh.cc",
 			"src/Tools.cc",
 			"src/OCC.h"
+			"src/Util.h",
+			"src/Util.cc",
+			"src/V8Wrapper.cc",
 			],
 			
 	  "defines": [],

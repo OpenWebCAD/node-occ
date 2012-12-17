@@ -20,7 +20,7 @@ void extractShapes(Local<Value>& value,std::vector<Shape*>& shapes)
 	} else if (value->IsArray())  {
 
 		Array* arr = Array::Cast(*value);
-		for (int i=0;i<arr->Length();i++) {
+		for (uint32_t i=0;i<arr->Length();i++) {
 			extractShapes(arr->Get(i),shapes);
 		}
 	}

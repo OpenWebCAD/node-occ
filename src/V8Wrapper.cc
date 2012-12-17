@@ -3,6 +3,8 @@
 #include "GeometryBuilder.h"
 #include "Solid.h"
 #include "Mesh.h"
+#include "Edge.h"
+#include "Vertex.h"
 #include "Transformation.h"
 #include "Tools.h"
 
@@ -28,6 +30,8 @@ void Initialize(Handle<Object> target)
   Solid::Init(target);
   Transformation::Init(target);
   Mesh::Init(target);
+  Edge::Init(target);
+  Vertex::Init(target);
 
   target->Set(String::NewSymbol("createBox"),FunctionTemplate::New(createBox)->GetFunction());
   target->Set(String::NewSymbol("writeSTEP"),FunctionTemplate::New(writeSTEP)->GetFunction());

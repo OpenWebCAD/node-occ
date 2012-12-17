@@ -69,9 +69,17 @@ void ReadUVW(Handle<Object>& obj,double* x,double* y,double* z)
     * y = ReadDouble(obj,"v",0.0);
     * z = ReadDouble(obj,"w",0.0);
 }
-/*
-void __cdecl boost::throw_exception(class std::exception const &)
-{
 
+
+void ReadPoint(Local<v8::Value>& value,gp_Pnt* pt)
+{
+  double x=0,y=0,z=0;
+  ReadPoint(value,&x,&y,&z);
+  pt->SetCoord(x,y,z);
 }
-*/
+void ReadDir(Local<v8::Value>& value,gp_Dir* pt)
+{
+  double x=0,y=0,z=0;
+  ReadPoint(value,&x,&y,&z);
+  pt->SetCoord(x,y,z);
+}
