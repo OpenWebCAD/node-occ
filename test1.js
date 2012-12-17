@@ -3,12 +3,14 @@ var assert = require('assert');
 var occ = require('./');
 
 
+var v = new occ.Vertex();
+var e = new occ.Edge();
+console.log(e.length)
 
-function testBufferArray()
-{
+edge = new occ.Edge();
+edge.createCircle([10,10,10],[0,0,1],20);
 
-   var b = new Buffered
-}
+
 console.log("hello");
 
 var box1 = new occ.Solid();

@@ -6,7 +6,7 @@
 #include <map>
 #include <assert.h>
 
-#define   Handle(ClassName)      Handle_##ClassName
+
 
 Mesh::Mesh()
 {
@@ -73,7 +73,7 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
         }
     
         TopLoc_Location loc;
-        Handle(Poly_Triangulation) triangulation = BRep_Tool::Triangulation(face, loc);
+        occHandle(Poly_Triangulation) triangulation = BRep_Tool::Triangulation(face, loc);
         
         if(triangulation.IsNull()) {
             StdFail_NotDone::Raise("No triangulation created");
@@ -225,7 +225,7 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
                     
                 int hash = edge.HashCode(std::numeric_limits<int>::max());
                 if (seen.count(hash) == 0) {
-                    Handle(Poly_PolygonOnTriangulation) edgepoly = BRep_Tool::PolygonOnTriangulation(edge, triangulation, loc);
+                    occHandle(Poly_PolygonOnTriangulation) edgepoly = BRep_Tool::PolygonOnTriangulation(edge, triangulation, loc);
                     if (edgepoly.IsNull()) {
                         continue;
                     }

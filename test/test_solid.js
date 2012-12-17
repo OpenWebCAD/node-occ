@@ -1,7 +1,7 @@
 var assert = require("assert");
 var should = require("should");
 
-var occ = require("../build/Release/occ");
+var occ = require("../lib/occ");
 
 // see https://npmjs.org/package/should
 
@@ -137,7 +137,7 @@ describe("testing solid construction",function(){
             solid1.makeBox([20,30,50],[110,40,00]);
         });
         it("should export a single solid to STEP", function() {
-            occ.writeSTEP("toto1.step",solid);
+            occ.writeSTEP("toto1.step",solid1);
         });
         it("should export many solids to STEP", function() {
             occ.writeSTEP("toto2.step",solid1,solid2);

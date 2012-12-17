@@ -6,14 +6,20 @@
 #pragma warning(disable:4355) // warning C4355: 'this' : used in base member initializer list
 
 #endif
+
+#ifdef Handle
+#define Handle_was_defined
+#undef Handle
+#endif
+
 #include <v8.h>
 #include <node.h>
 
+#ifdef Handle_was_defined
+#define   Handle(ClassName)      Handle_##ClassName
+#endif
+#define   occHandle(ClassName)      Handle_##ClassName
 using namespace v8;
-
-
-
-
 
 template<class T,typename T1,typename T2,typename T2 (T::*func)() >  
 Handle<Value> ee(Local<String> property,const AccessorInfo &info)

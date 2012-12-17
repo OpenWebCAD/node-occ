@@ -25,6 +25,8 @@
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
+
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 
@@ -35,12 +37,18 @@
 #include <StlAPI_Writer.hxx>
 #include <StlAPI_Reader.hxx>
 
+
+#include <gce_MakeCirc.hxx>
+#include <gce_MakePln.hxx>
+#include <ElCLib.hxx>
+
 #include <gp.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Elips.hxx>
 #include <gp_Sphere.hxx>
 #include <Geom_BezierCurve.hxx>
-
+#include <Geom_Circle.hxx>
+#include <Geom_TrimmedCurve.hxx>
 #include <GCPnts_UniformDeflection.hxx>
 
 #include <TopExp_Explorer.hxx>
@@ -59,6 +67,11 @@
 #include <FSD_BinaryFile.hxx>
 
 #include <GC_MakeSegment.hxx>
+#include <GC_MakeArcOfCircle.hxx>
+#include <GC_MakeArcOfEllipse.hxx>
+#include <GC_MakeLine.hxx>
+#include <GC_MakePlane.hxx>
+#include <GC_MakeTrimmedCone.hxx>
 
 #include <Storage_Data.hxx>
 #include <ShapeSchema.hxx>
