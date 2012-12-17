@@ -81,6 +81,9 @@
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomLProp_SLProps.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
+
+#include "STEPControl_Writer.hxx"
+#include "Interface_Static.hxx"
 /*
 #include <PTColStd_PersistentTransientMap.hxx>
 #include <PTColStd_TransientPersistentMap.hxx>

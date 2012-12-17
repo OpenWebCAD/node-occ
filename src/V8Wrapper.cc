@@ -4,60 +4,34 @@
 #include "Solid.h"
 #include "Mesh.h"
 #include "Transformation.h"
+#include "Tools.h"
 
-
-v8::Handle<v8::Value> createBox(const v8::Arguments& args)
+Handle<Value> createBox(const Arguments& args)
 {
-  v8::HandleScope scope;
+  HandleScope scope;
   
   if (args.Length() < 1) {
-    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong number of arguments")));
-    return scope.Close(v8::Undefined());
+    ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+    return scope.Close(Undefined());
   }
   
   // resulting object
-  v8::Handle<v8::Value> obj = Solid::NewInstance(args);  
+  Handle<Value> obj = Solid::NewInstance(args);  
 
   return scope.Close(Solid::makeBox(args));
 }
 
-//v8::Handle<v8::Value> Hello(const v8::Arguments& args)
-//{
-//  v8::HandleScope scope;
-//  return scope.Close(v8::String::New("world"));
-//}
-//
-//
-//
-//v8::Handle<v8::Value> Add(const v8::Arguments& args)
-//{
-//  v8::HandleScope scope;
-//
-//  if (args.Length() < 2) {
-//    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong number of arguments")));
-//    return scope.Close(v8::Undefined());
-//  }
-//
-//  if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
-//    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
-//    return scope.Close(v8::Undefined());
-//  }
-//
-//  v8::Local<v8::Number> num = v8::Number::New(args[0]->NumberValue() +
-//      args[1]->NumberValue());
-//  return scope.Close(num);
-//}
 
-
-void Initialize(v8::Handle<v8::Object> target) 
+void Initialize(Handle<Object> target) 
 {
   
   Solid::Init(target);
   Transformation::Init(target);
   Mesh::Init(target);
 
-  NODE_SET_METHOD(target, "createBox", createBox);
+  target->Set(String::NewSymbol("createBox"),FunctionTemplate::New(createBox)->GetFunction());
+  target->Set(String::NewSymbol("writeSTEP"),FunctionTemplate::New(writeSTEP)->GetFunction());
+  target->Set(String::NewSymbol("oceVersion"), String::New("0.11"));
+
 }
 NODE_MODULE(occ, Initialize)
-
-

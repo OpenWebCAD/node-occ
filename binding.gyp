@@ -25,8 +25,11 @@
 			"src/Transformation.cc",
 			"src/Solid.h",
 			"src/Solid.cc",
+			"src/Shape.h",
+			"src/Shape.cc",
 			"src/Mesh.h",
 			"src/Mesh.cc",
+			"src/Tools.cc",
 			"src/OCC.h"
 			],
 			
@@ -56,6 +59,8 @@
 		'TKShHealingd.lib',
 		'TKTopAlgod.lib',
 		'TKXMeshd.lib',
+		'TKStepd.lib',
+		'TKIGESd.lib',
 		],
     }
   ]

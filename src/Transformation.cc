@@ -1,13 +1,32 @@
 #include "Transformation.h"
 #include "Util.h"
 
-v8::Handle<v8::Value> Transformation::makeTranslation(const v8::Arguments& args)
+
+// Methods exposed to JavaScripts
+void Point3Wrap::Init(Handle<Object> target)
 {
-    v8::HandleScope scope;
+   // Prepare constructor template
+  Local<FunctionTemplate> tpl = FunctionTemplate::New(Transformation::New);
+  tpl->SetClassName(String::NewSymbol("Point3"));
+
+  // object has one internal filed ( the C++ object)
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+  // Prototype
+  Local<ObjectTemplate> objTemplate = tpl->PrototypeTemplate();
+
+
+}
+
+
+
+Handle<Value> Transformation::makeTranslation(const Arguments& args)
+{
+    HandleScope scope;
     Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
     if( args.Length()!=1) {
-      v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
-      return scope.Close(v8::Undefined());
+      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
     }
     double x=0,y=0,z=0;
     ReadPoint(args[0],&x,&y,&z);
@@ -16,13 +35,13 @@ v8::Handle<v8::Value> Transformation::makeTranslation(const v8::Arguments& args)
     return scope.Close(args.This());
 }
 
-v8::Handle<v8::Value> Transformation::makePlaneMirror(const v8::Arguments& args)
+Handle<Value> Transformation::makePlaneMirror(const Arguments& args)
 {
-    v8::HandleScope scope;
+    HandleScope scope;
     Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
     if( args.Length()!=2) {
-      v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
-      return scope.Close(v8::Undefined());
+      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
     }
 
     double x=0,y=0,z=0;
@@ -37,13 +56,13 @@ v8::Handle<v8::Value> Transformation::makePlaneMirror(const v8::Arguments& args)
 }
   
   
-v8::Handle<v8::Value> Transformation::makeAxisMirror(const v8::Arguments& args)
+Handle<Value> Transformation::makeAxisMirror(const Arguments& args)
 {
-    v8::HandleScope scope;
+    HandleScope scope;
     Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
     if( args.Length()!=2) {
-      v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
-      return scope.Close(v8::Undefined());
+      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
     }
 
     double x=0,y=0,z=0;
@@ -57,14 +76,14 @@ v8::Handle<v8::Value> Transformation::makeAxisMirror(const v8::Arguments& args)
     return scope.Close(args.This());
 }
   
-v8::Handle<v8::Value> Transformation::makeScale(const v8::Arguments& args)
+Handle<Value> Transformation::makeScale(const Arguments& args)
 {
-    v8::HandleScope scope;
+    HandleScope scope;
     Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
 
     if( args.Length()!=2) {
-      v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
-      return scope.Close(v8::Undefined());
+      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
     }
 
     double factor=args[0]->NumberValue();
@@ -77,13 +96,13 @@ v8::Handle<v8::Value> Transformation::makeScale(const v8::Arguments& args)
     return scope.Close(args.This());
 }
 
-v8::Handle<v8::Value> Transformation::makeRotation(const v8::Arguments& args)
+Handle<Value> Transformation::makeRotation(const Arguments& args)
 {
-    v8::HandleScope scope;
+    HandleScope scope;
     Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
     if( args.Length()!=3) {
-      v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
-      return scope.Close(v8::Undefined());
+      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
     }
       
     double x=0,y=0,z=0;
@@ -100,51 +119,47 @@ v8::Handle<v8::Value> Transformation::makeRotation(const v8::Arguments& args)
 }
 
 // Methods exposed to JavaScripts
-v8::Persistent<v8::Function> Transformation::constructor;
+Persistent<FunctionTemplate> Transformation::constructor;
 
-void Transformation::Init(v8::Handle<v8::Object> target)
+void Transformation::Init(Handle<Object> target)
 {
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Transformation::New);
-  tpl->SetClassName(v8::String::NewSymbol("Transformation"));
+  constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Transformation::New));
+  constructor->SetClassName(String::NewSymbol("Transformation"));
 
   // object has one internal filed ( the C++ object)
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
+  constructor->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype
-  v8::Local<v8::ObjectTemplate> objTemplate = tpl->PrototypeTemplate();
+  Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
+  EXPOSE_METHOD(Transformation,makeRotation);
+  EXPOSE_METHOD(Transformation,makeTranslation);
+  EXPOSE_METHOD(Transformation,makePlaneMirror);
+  EXPOSE_METHOD(Transformation,makeAxisMirror);
+  EXPOSE_METHOD(Transformation,makeScale);
+  EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Transformation,scaleFactor);
 
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makeRotation"),      v8::FunctionTemplate::New(makeRotation)->GetFunction());
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makeTranslation"),   v8::FunctionTemplate::New(makeTranslation)->GetFunction());  
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makePlaneMirror"),   v8::FunctionTemplate::New(makePlaneMirror)->GetFunction());
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makeAxisMirror"),    v8::FunctionTemplate::New(makeAxisMirror)->GetFunction());
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makeScale"),         v8::FunctionTemplate::New(makeScale)->GetFunction());
-
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("scaleFactor"), 
-    ee<Transformation,v8::Number,double,&Transformation::scaleFactor>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-
-  constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-  target->Set(v8::String::NewSymbol("Transformation"), constructor);
+  target->Set(String::NewSymbol("Transformation"), constructor->GetFunction());
 }
 
-v8::Handle<v8::Value> Transformation::New(const v8::Arguments& args)
+Handle<Value> Transformation::New(const Arguments& args)
 {
-  v8::HandleScope scope;
+  HandleScope scope;
   
   Transformation* obj = new Transformation();
   obj->Wrap(args.This());
   // return scope.Close(args.This());
   return args.This();
 }
-v8::Handle<v8::Value> Transformation::NewInstance(const v8::Arguments& args)
+
+Handle<Value> Transformation::NewInstance(const Arguments& args)
 {
-  v8::HandleScope scope;
+  HandleScope scope;
 
   const unsigned argc = 1;
-  v8::Handle<v8::Value> argv[argc] = { args[0] };
-  v8::Local<v8::Object> instance = constructor->NewInstance(argc, argv);
+  Handle<Value> argv[argc] = { args[0] };
+  Local<Object> instance = constructor->GetFunction()->NewInstance(argc, argv);
 
   return scope.Close(instance);
 }

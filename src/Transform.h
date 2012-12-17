@@ -11,8 +11,8 @@
 //    
 //public:
 //    Transformer(TopoDS_Shape shape, 
-//                v8::Handle<v8::Object> origin,
-//                v8::Handle<v8::Object> parameters) 
+//                Handle<Object> origin,
+//                Handle<Object> parameters) 
 //    {
 //        transformed_shape_ = apply<T>(shape, origin, parameters);
 //    }
@@ -29,8 +29,8 @@
 //    template<typename U>
 //    
 //    static TopoDS_Shape apply(TopoDS_Shape shape, 
-//                              v8::Handle<v8::Object>  origin,
-//                              v8::Handle<v8::Object>  parameters) 
+//                              Handle<Object>  origin,
+//                              Handle<Object>  parameters) 
 //    {
 //        int n = ReadInt(parameters,"n",0);
 //        
@@ -83,8 +83,8 @@
 //    virtual ~Transform() {};
 //
 //    virtual TopoDS_Shape apply(double multiplier, 
-//                                 v8::Handle<v8::Object>  origin, 
-//                                 v8::Handle<v8::Object>  parameters) = 0;
+//                                 Handle<Object>  origin, 
+//                                 Handle<Object>  parameters) = 0;
 //};
 //
 //class RotateTransform : public Transform {
@@ -94,8 +94,8 @@
 //    virtual ~RotateTransform() {};
 //    
 //    virtual TopoDS_Shape apply(double multiplier, 
-//                                 v8::Handle<v8::Object>  origin, 
-//                                 v8::Handle<v8::Object>  parameters);
+//                                 Handle<Object>  origin, 
+//                                 Handle<Object>  parameters);
 //};
 //
 //
@@ -106,8 +106,8 @@
 //    virtual ~Scale() {};
 //    
 //    virtual TopoDS_Shape apply(double multiplier, 
-//                                v8::Handle<v8::Object>  origin, 
-//                               v8::Handle<v8::Object>  parameters);
+//                                Handle<Object>  origin, 
+//                               Handle<Object>  parameters);
 //};
 //
 //class AxisMirror : public Transform {
@@ -117,8 +117,8 @@
 //    virtual ~AxisMirror() {};
 //    
 //    virtual TopoDS_Shape apply(double multiplier, 
-//                                 v8::Handle<v8::Object>  origin, 
-//                                v8::Handle<v8::Object> parameters);
+//                                 Handle<Object>  origin, 
+//                                Handle<Object> parameters);
 //};
 //
 //class PlaneMirror : public Transform {
@@ -128,8 +128,8 @@
 //    virtual ~PlaneMirror() {};
 //    
 //    virtual TopoDS_Shape apply(double multiplier, 
-//                               v8::Handle<v8::Object> origin, 
-//                              v8::Handle<v8::Object>  parameters);
+//                               Handle<Object> origin, 
+//                              Handle<Object>  parameters);
 //};
 //
 //class TranslateTransform : public Transform {
@@ -139,7 +139,7 @@
 //    virtual ~TranslateTransform() {};
 //    
 //    virtual TopoDS_Shape apply(double multiplier, 
-//                                 v8::Handle<v8::Object>  origin, 
-//                                 v8::Handle<v8::Object>  parameters);
+//                                 Handle<Object>  origin, 
+//                                 Handle<Object>  parameters);
 //};
 //

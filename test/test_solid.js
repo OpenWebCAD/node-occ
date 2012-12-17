@@ -32,6 +32,9 @@ describe("testing solid construction",function(){
 		it("should have 1 solid", function() { 
 			solid.numSolids.should.equal(1);
 		});
+		it("should have a shapeType beeing 'SOLID' ", function() { 
+			solid.shapeType.should.equal("SOLID");
+		});
 		it("should have (20-10)*(40-20)*(60-30) as a volume", function() { 
 			solid.volume.should.equal( (20-10)*(40-20)*(60-30));
 		});
@@ -53,7 +56,8 @@ describe("testing solid construction",function(){
 			solid2.makeBox([15,25,35],[-20,-40,-60]);
 			
 			solid1.fuse(solid2);
-
+			//xx var solid3= solid1.fuse(solid2,true);
+			//xx var solid3= occ.fuse(solid1,solid2);
 		});
 		it("should have 12 faces", function() { 
 			solid1.numFaces.should.equal(12);
@@ -101,4 +105,43 @@ describe("testing solid construction",function(){
         });
 
     });
+	describe("Testing  Shape __prototype", function() {
+		 var solid;
+            before(function(){
+                solid = new occ.Solid();
+                solid.makeBox([10,20,30],[20,30,40]);
+            });
+			it("should expose the expected properties ", function() {
+			   var expected = ["shapeType","numFaces","isNull","isValid","rotate","fuse"];
+			   var actual = []
+               for ( var j in occ.Solid.prototype) {
+			      actual.push(j.toString())	
+			   }
+			   // console.log(actual);
+			   var missing = []
+               for ( var j in expected) {			   
+			       if (actual.indexOf(expected[j]) == -1) {
+				    missing.push(expected[j]);
+				   }
+			   }
+			   missing.should.be.empty;
+
+            });
+	});
+    describe("exporting a solid to STEP ", function() {
+        var solid1,solid2;
+        before(function(){
+            solid1 = new occ.Solid();
+            solid1.makeBox([10,20,30],[20,30,40]);
+            solid1 = new occ.Solid();
+            solid1.makeBox([20,30,50],[110,40,00]);
+        });
+        it("should export a single solid to STEP", function() {
+            occ.writeSTEP("toto1.step",solid);
+        });
+        it("should export many solids to STEP", function() {
+            occ.writeSTEP("toto2.step",solid1,solid2);
+        });
+    });
+
 });

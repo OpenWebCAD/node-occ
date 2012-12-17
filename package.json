@@ -6,6 +6,6 @@
       "should": "latest",
 	  "assert": "latest"	  
   },
-  "main": "lib/index",
+  "main": "lib/occ",
   "engines": { "node": ">= 0.6.13 " }
 }

@@ -4,5 +4,20 @@
  */
 
 exports.list = function(req, res){
-  res.send("respond with a resource");
+
+    res.format({
+        text: function(){
+            res.send( 'hey');
+        },
+
+        html: function(){
+            res.send('<p>hey</p>');
+        },
+
+        json: function(){
+            res.send({ message: 'hey' });
+        }
+    });
+
+
 };

@@ -13,14 +13,16 @@ struct Triangle3i {
     int j;
     int k;
 };
-class Mesh : public Shape {
+class Mesh : public  node::ObjectWrap  {
 public:
   Mesh();
   int extractFaceMesh(const TopoDS_Face& face, bool qualityNormals);
   void optimize();
 
-  static v8::Handle<v8::Value> New(const v8::Arguments& args);
-  static void Init(v8::Handle<v8::Object> target);
+  static Handle<Value> New(const Arguments& args);
+  static void Init(Handle<Object> target);
+
+
 private:
   std::vector<Coord3f> normals;
   std::vector<Coord3f> vertices;
@@ -29,9 +31,15 @@ private:
   std::vector<int> edgeranges;
   std::vector<int> edgehash;
   friend class MeshOptimizer;
+
+  void updateJavaScriptArray();
 public:
- static v8::Persistent<v8::Function> constructor;
-  size_t numTriangles()  { return triangles.size(); }
-  size_t numVertices()  { return vertices.size(); }
-  size_t numEdges()  { return edgeindices.size(); }
+ static Persistent<FunctionTemplate> constructor;
+ int32_t numTriangles()  { return  (int32_t) triangles.size(); }
+ int32_t numVertices()  { return (int32_t)vertices.size(); }
+ int32_t numNormals()  { return (int32_t)normals.size(); }
+ int32_t numEdges()  { return (int32_t)edgeindices.size(); }
+
+   void setErrorMessage(const char* message){};
+
 };

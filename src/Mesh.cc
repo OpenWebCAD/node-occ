@@ -4,53 +4,58 @@
 #include <list>
 #include <algorithm>
 #include <map>
+#include <assert.h>
 
-# define   Handle(ClassName)      Handle_##ClassName
+#define   Handle(ClassName)      Handle_##ClassName
+
 Mesh::Mesh()
 {
 }
-v8::Handle<v8::Value> Mesh::New(const v8::Arguments& args)
+   
+Handle<Value> Mesh::New(const Arguments& args)
 {
-  v8::HandleScope scope;
-  
+  HandleScope scope;
+
+
   Mesh* obj = new Mesh();
+
+  args.This()->Set(String::NewSymbol("vertices"),   Object::New());
+  args.This()->Set(String::NewSymbol("normals"),    Object::New());
+  args.This()->Set(String::NewSymbol("edgeindices"),Object::New());
+  args.This()->Set(String::NewSymbol("triangles"),  Object::New());
   obj->Wrap(args.This());
-  // return scope.Close(args.This());
   return args.This();
 }
 
-v8::Persistent<v8::Function> Mesh::constructor;
+Persistent<FunctionTemplate> Mesh::constructor;
 
-/*static*/void Mesh::Init(v8::Handle<v8::Object> target)
- {
+
+/*static*/void Mesh::Init(Handle<Object> target)
+{
+
+ //xx constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Mesh::New));
 
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Mesh::New);
-  tpl->SetClassName(v8::String::NewSymbol("Mesh"));
+  constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Mesh::New));
+  constructor->SetClassName(String::NewSymbol("Mesh"));
 
   // object has one internal filed ( the C++ object)
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
+  constructor->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype
-  v8::Local<v8::ObjectTemplate> objTemplate = tpl->PrototypeTemplate();
+  Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Mesh,numTriangles);
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Mesh,numEdges);
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Mesh,numVertices);
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Mesh,numNormals);
 
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("numTriangles"), 
-    ee<Mesh,v8::Uint32,size_t,&Mesh::numTriangles>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-  
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("numEdges"), 
-    ee<Mesh,v8::Uint32,size_t,&Mesh::numEdges>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+  // other Mesh prototype members are defined in the mesh.js script
 
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("numVertices"), 
-    ee<Mesh,v8::Uint32,size_t,&Mesh::numVertices>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-
-  constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-  //xx Mesh cannot be created by the client app at this time
-  // target->Set(v8::String::NewSymbol("Mesh"), constructor);
+  target->Set(String::NewSymbol("Mesh"), constructor->GetFunction());
 
 }
+
 int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
 {
 
@@ -231,16 +236,16 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
                     const TColStd_Array1OfInteger& edgeind = edgepoly->Nodes();
                     for (int i=edgeind.Lower();i <= edgeind.Upper();i++) {
                         const unsigned int idx = (unsigned int)edgeind(i);
-                        this->edgeindices.push_back(vsize + idx - 1);
+                        this->edgeindices.push_back((int)(vsize + idx - 1));
                     }
                     
-                    this->edgeranges.push_back((int)this->edgeindices.size() - lastSize);
+                    this->edgeranges.push_back((int)(this->edgeindices.size() - lastSize));
                     lastSize = this->edgeindices.size();
                 }
             }
         }
         
-    } catch(Standard_Failure &err) {
+    } catch(Standard_Failure&) {
         Handle_Standard_Failure e = Standard_Failure::Caught();
         const Standard_CString msg = e->GetMessageString();
         if (msg != NULL && strlen(msg) > 1) {
@@ -250,11 +255,85 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
         }
         return 0;
     }
-    
+    optimize();
+	updateJavaScriptArray();
     return 1;
 }
 
-void Mesh::optimize() {
+template <class T> struct _typeMatcher{	 static ExternalArrayType get() ;};
 
+template <> struct _typeMatcher<float>       {	static ExternalArrayType get() { return kExternalFloatArray ; } };
+template <> struct _typeMatcher<int>         {	static ExternalArrayType get() { return kExternalShortArray ; } };
+template <> struct _typeMatcher<unsigned int>{	static ExternalArrayType get() { return kExternalUnsignedShortArray ; } };
+
+template<class T>
+void UpdateExternalArray(Handle<Object>& pThis,const char* name,const T* data,size_t _length)
+{
+	int length = (int)_length;
+	
+	Handle<Object> extArray(pThis->Get(String::NewSymbol(name))->ToObject());
+	if (extArray.IsEmpty()) {
+			ThrowException(Exception::Error(String::New(" error in UpdateExternalArray")));
+
+	}
+	extArray->SetIndexedPropertiesToExternalArrayData(const_cast<T*>(data), _typeMatcher<T>::get(), length);
+
+	extArray->Set(String::NewSymbol("length"), Int32::New(length), DontDelete);
+	assert(	 extArray->GetIndexedPropertiesExternalArrayDataLength() ==   length);
+	assert(	 extArray->Get(String::NewSymbol("length"))->ToInt32()->Uint32Value() ==   length);
 }
 
+void Mesh::updateJavaScriptArray()
+{						
+    assert(sizeof(triangles[0])==sizeof(int)*3);
+	HandleScope scope;		   
+	Handle<Object> pThis = this->handle_;
+	UpdateExternalArray(pThis, "vertices"    ,&vertices.data()[0].x  ,vertices.size()*3);
+	UpdateExternalArray(pThis, "normals"     ,&normals.data()[0].x   ,normals.size()*3);
+	UpdateExternalArray(pThis, "triangles"   ,&triangles.data()[0].i ,triangles.size()*3);
+	UpdateExternalArray(pThis, "edgeindices" ,&edgeindices.data()[0] ,edgeindices.size());
+}
+
+
+float square(float b) { return b*b;}
+
+float distance2( const Coord3f& a,const Coord3f& b) 
+{
+	return square(a.x -b.x) + square(a.y -b.y)	+ square(a.y -b.y);
+}
+int findPt(const std::vector<Coord3f>& arrayPts, const Coord3f pt,double tolerance)
+{							   
+	
+	double tolerance2 =tolerance*tolerance;
+	int i=0;
+	for (std::vector<Coord3f>::const_iterator it=arrayPts.begin();it!=arrayPts.end();it++) {
+		const Coord3f& point = (*it);
+		if ( distance2(point,pt) < tolerance2)  {
+			return i;
+		}
+		i++;
+	}
+	return -1;
+}					
+void Mesh::optimize()
+{
+#if 0
+	double tolerance =1E-6;
+
+ 	std::map<int,int> indexOldNewMap;
+	std::vector<Coord3f> newPoints;
+	newPoints.reserve(vertices.size());
+	int i=0;
+	for (std::vector<Coord3f>::const_iterator it=vertices.begin();it!=vertices.end();it++) 
+	{
+		int pos = findPt(newPoints,*it,tolerance);
+		if (pos == -1) {
+			newPoints.push_back(*it);
+			indexOldNewMap[i] =   newPoints.size()-1;
+		}
+		i++;
+	}
+#endif
+
+
+}

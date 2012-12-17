@@ -15,8 +15,8 @@
 //
 //TopoDS_Shape RotateTransform::apply(
 //    double multiplier, 
-//    v8::Handle<v8::Object> origin, 
-//    v8::Handle<v8::Object> parameters) 
+//    Handle<Object> origin, 
+//    Handle<Object> parameters) 
 //{
 //    double x=0,y=0,z=0;
 //    ReadXYZ(origin,&x,&y,&z);
@@ -42,8 +42,8 @@
 //}
 
 //TopoDS_Shape Scale::apply(double multiplier, 
-//                          v8::Handle<v8::Object> origin, 
-//                          v8::Handle<v8::Object> parameters) {
+//                          Handle<Object> origin, 
+//                          Handle<Object> parameters) {
 //    
 //    double x=0,y=0,z=0;
 //    ReadXYZ(origin,&x,&y,&z);
@@ -58,8 +58,8 @@
 //}
 
 //TopoDS_Shape AxisMirror::apply(double multiplier, 
-//                               v8::Handle<v8::Object> origin, 
-//                               v8::Handle<v8::Object> parameters) {
+//                               Handle<Object> origin, 
+//                               Handle<Object> parameters) {
 //    
 //    double x=0,y=0,z=0;
 //    ReadXYZ(origin,&x,&y,&z);
@@ -74,8 +74,8 @@
 //    
 //}
 //TopoDS_Shape PlaneMirror::apply(double multiplier, 
-//                                v8::Handle<v8::Object> origin, 
-//                                v8::Handle<v8::Object> parameters) {
+//                                Handle<Object> origin, 
+//                                Handle<Object> parameters) {
 //    
 //    double x=0,y=0,z=0;
 //    ReadXYZ(origin,&x,&y,&z);
@@ -91,8 +91,8 @@
 //}
 
 //TopoDS_Shape TranslateTransform::apply(double multiplier, 
-//                              v8::Handle<v8::Object> origin, 
-//                              v8::Handle<v8::Object> parameters) {
+//                              Handle<Object> origin, 
+//                              Handle<Object> parameters) {
 //    
 //    double u=0,v=0,w=0;
 //    ReadUVW(parameters,&u,&v,&w);

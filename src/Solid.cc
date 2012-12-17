@@ -3,106 +3,53 @@
 #include "Util.h"
 
 
- //v8::Handle<v8::Value> GetPointCoord(v8::Local<v8::String> property,const v8::AccessorInfo &info)
- //{
- //  
- //
- //   Solid* obj = node::ObjectWrap::Unwrap<Solid>(info.This());
-
- //   double value = rand();
- //   if (property->Equals(v8::String::New("x"))) {
- //      value = rand();
- //   }
- //   if (property->Equals(v8::String::New("y"))) {
- //      value = rand();
- //   }
- //   if (property->Equals(v8::String::New("z"))) {
- //      value = rand();
- //   }
- //   return v8::Number::New(value);
- // }
- // 
- // void noset(v8::Local<v8::String> property, v8::Local<v8::Value> value,const v8::AccessorInfo& info) 
- // {
- //  //C Local<Object> self = info.Holder();
- //  //C Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
- //   //C void* ptr = wrap->Value();
- //   //C static_cast<Point*>(ptr)->x_ = value->Int32Value();
- //  Solid* obj = node::ObjectWrap::Unwrap<Solid>(info.This());
-
-
- // }
-
- v8::Persistent<v8::Function> Solid::constructor;
+ Persistent<FunctionTemplate> Solid::constructor;
 
 
 
-   
- 
- /*static*/void Solid::Init(v8::Handle<v8::Object> target)
- {
-  srand ( time(NULL) );
-
+    
+/*static*/void Solid::Init(Handle<Object> target)
+{
 
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Solid::New);
-  tpl->SetClassName(v8::String::NewSymbol("Solid"));
+  constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Solid::New));
+  constructor->SetClassName(String::NewSymbol("Solid"));
 
   // object has one internal filed ( the C++ object)
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  constructor->InstanceTemplate()->SetInternalFieldCount(1);
 
 
   // Prototype
-  v8::Local<v8::ObjectTemplate> objTemplate = tpl->PrototypeTemplate();
+  Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
+  EXPOSE_METHOD(Solid,translate);
+  EXPOSE_METHOD(Solid,rotate);
+  EXPOSE_METHOD(Solid,makeBox);
+  EXPOSE_METHOD(Solid,fuse);
+  EXPOSE_METHOD(Solid,cut);
+  EXPOSE_METHOD(Solid,common);
 
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("translate"),v8::FunctionTemplate::New(translate)->GetFunction());
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("rotate"),   v8::FunctionTemplate::New(rotate)->GetFunction());  
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("makeBox"),  v8::FunctionTemplate::New(makeBox)->GetFunction());
-
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("fuse"),  v8::FunctionTemplate::New(fuse)->GetFunction());
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("cut"),  v8::FunctionTemplate::New(cut)->GetFunction());
-  tpl->PrototypeTemplate()->Set(v8::String::NewSymbol("common"),  v8::FunctionTemplate::New(common)->GetFunction());
-
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("isNull"), 
-    ee<Shape,v8::Boolean,bool,&Shape::isNull>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("isValid"), 
-    ee<Shape,v8::Boolean,bool,&Shape::isValid>, 0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("numFaces"), 
-    ee<Solid,v8::Integer,int,&Solid::numFaces>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
+  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Shape,isNull);
+  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Shape,isValid);
+  EXPOSE_READ_ONLY_PROPERTY_CONST_STRING (Shape,shapeType);
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
+  EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,volume);
+  EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,area);
+  EXPOSE_READ_ONLY_PROPERTY(Solid,_mesh,mesh);
   
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("numSolids"), 
-    ee<Solid,v8::Integer,int,&Solid::numSolids>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("volume"), 
-    ee<Solid,v8::Number,double,&Solid::volume>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("area"), 
-    ee<Solid,v8::Number,double,&Solid::area>,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-
-  tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("mesh"),_mesh, 
-     0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-
-  //XxCtpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("location"), 
-  //XxC  ee<Shape,v8::Object,v8::Object,&Shape::location>, 0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly);
-
-  //tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("x"), GetPointCoord, noset);
-  //tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("y"), GetPointCoord, noset);
-  //tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("z"), GetPointCoord, noset);
-
-  //tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("width"),  GetPointCoord, noset);
-  //tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("depth"),  GetPointCoord, noset);
-  //tpl->PrototypeTemplate()->SetAccessor(v8::String::NewSymbol("height"), GetPointCoord, noset);
-
-
-  constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-  target->Set(v8::String::NewSymbol("Solid"), constructor);
+  target->Set(String::NewSymbol("Solid"), constructor->GetFunction());
 
 }
 
-v8::Handle<v8::Value> Solid::New(const v8::Arguments& args)
+Handle<v8::Value> Solid::New(const v8::Arguments& args)
 {
-  v8::HandleScope scope;
+  HandleScope scope;
+  if (!args.IsConstructCall()) {
+	ThrowException(Exception::TypeError(String::New(" use new occ.Solid() to construct a solid")));
+	return scope.Close(Undefined());
+    // return FromConstructorTemplate(constructor, args);
+  }
   
   Solid* obj = new Solid();
   obj->Wrap(args.This());
@@ -110,27 +57,27 @@ v8::Handle<v8::Value> Solid::New(const v8::Arguments& args)
   return args.This();
 }
 
-v8::Handle<v8::Value> Solid::NewInstance(const v8::Arguments& args) 
+Handle<v8::Value> Solid::NewInstance(const v8::Arguments& args) 
 {
-  v8::HandleScope scope;
+  HandleScope scope;
 
   const unsigned argc = 1;
-  v8::Handle<v8::Value> argv[argc] = { args[0] };
-  v8::Local<v8::Object> instance = constructor->NewInstance(argc, argv);
+  Handle<v8::Value> argv[argc] = { args[0] };
+  Local<Object> instance = constructor->GetFunction()->NewInstance(argc, argv);
 
   return scope.Close(instance);
 }
 
 
 
-void ReadPoint(v8::Local<v8::Value>& value,gp_Pnt* pt)
+void ReadPoint(Local<v8::Value>& value,gp_Pnt* pt)
 {
   double x=0,y=0,z=0;
   ReadPoint(value,&x,&y,&z);
   pt->SetCoord(x,y,z);
 }
 
-v8::Handle<v8::Value> Solid::makeBox(const v8::Arguments& args) 
+Handle<v8::Value> Solid::makeBox(const v8::Arguments& args) 
 {
 
    // could be :
@@ -250,6 +197,8 @@ double Solid::volume()
 //    ret.z = cg.Z();
 //    return ret;
 //}
+
+
 typedef enum BoolOpType {
   BOOL_FUSE,
   BOOL_CUT,
@@ -305,7 +254,7 @@ int Solid::boolean(Solid *tool, BoolOpType op)
         if (!this->fixShape())
             StdFail_NotDone::Raise("Shapes not valid");
         
-    } catch(Standard_Failure &err) {
+    } catch(Standard_Failure &) {
         Handle_Standard_Failure e = Standard_Failure::Caught();
         const Standard_CString msg = e->GetMessageString();
         if (msg != NULL && strlen(msg) > 1) {
@@ -319,14 +268,14 @@ int Solid::boolean(Solid *tool, BoolOpType op)
 }
 
 
-v8::Handle<v8::Value> Solid::_boolean(const v8::Arguments& args,BoolOpType op) 
+Handle<v8::Value> Solid::_boolean(const v8::Arguments& args,BoolOpType op) 
 {
-  v8::HandleScope scope;
+  HandleScope scope;
   
-  v8::Local<v8::Value> v = args[0];
+  Local<v8::Value> v = args[0];
   if (v.IsEmpty() || !v->IsObject()) {
-      v8::ThrowException(v8::Exception::TypeError(v8::String::New("Wrong arguments")));
-      return scope.Close(v8::Undefined());
+      ThrowException(Exception::TypeError(String::New("Wrong v8::Arguments")));
+      return scope.Close(Undefined());
   }
   Solid* pThis = ObjectWrap::Unwrap<Solid>(args.This());
   Solid* pTool = ObjectWrap::Unwrap<Solid>(v->ToObject());
@@ -336,29 +285,35 @@ v8::Handle<v8::Value> Solid::_boolean(const v8::Arguments& args,BoolOpType op)
   return scope.Close(args.This());
 
 }
-v8::Handle<v8::Value> Solid::fuse(const v8::Arguments& args) 
+Handle<v8::Value> Solid::fuse(const v8::Arguments& args) 
 {
   return _boolean(args,BOOL_FUSE);
 }
-v8::Handle<v8::Value> Solid::cut(const v8::Arguments& args) 
+Handle<v8::Value> Solid::cut(const v8::Arguments& args) 
 {
   return _boolean(args,BOOL_CUT);
 }
-v8::Handle<v8::Value> Solid::common(const v8::Arguments& args) 
+Handle<v8::Value> Solid::common(const v8::Arguments& args) 
 {
   return _boolean(args,BOOL_COMMON);
 }
 
 
 
-v8::Handle<v8::Value> Solid::_mesh(v8::Local<v8::String> property,const v8::AccessorInfo &info)
+Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
 {
- 
+	HandleScope scope;
+	if (info.This().IsEmpty()) {
+		return scope.Close(Undefined());
+	}
+   if (info.This()->InternalFieldCount() == 0 ) {
+	  return scope.Close(Undefined());
+  }
    Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
    if (pThis->m_cacheMesh.IsEmpty()) {
-      pThis->m_cacheMesh = v8::Persistent<v8::Object>::New(pThis->createMesh(1.0,15.0,true));
+      pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(1.0,15.0,true));
    }
-   return pThis->m_cacheMesh;
+   return scope.Close(pThis->m_cacheMesh);
 }
 
 //void Solid::Mesh() 
@@ -373,12 +328,13 @@ v8::Handle<v8::Value> Solid::_mesh(v8::Local<v8::String> property,const v8::Acce
 //        BRepMesh().Mesh(shape_, 1.0);
 //    }
 //}
-v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qualityNormals)
+Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNormals)
 {
- 
+ 	HandleScope scope;
+
     const unsigned argc = 0;
-    v8::Handle<v8::Value> argv[1] = {  };
-    v8::Local<v8::Object> theMesh = Mesh::constructor->NewInstance(argc, argv);
+    Handle<v8::Value> argv[1] = {  };
+	Local<Object> theMesh = Mesh::constructor->GetFunction()->NewInstance(argc, argv);
 
 
     Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
@@ -420,7 +376,7 @@ v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qual
                 mesh->extractFaceMesh(face, qualityNormals);
             }
         }
-    } catch(Standard_Failure &err) {
+    } catch(Standard_Failure&) {
         Handle_Standard_Failure e = Standard_Failure::Caught();
         const Standard_CString msg = e->GetMessageString();
         if (msg != NULL && strlen(msg) > 1) {
@@ -428,8 +384,8 @@ v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qual
         } else {
             setErrorMessage("Failed to mesh object");
         }
-        return v8::Object::New();
+        return  scope.Close(Object::New());
     }
     mesh->optimize();
-    return theMesh;
+    return scope.Close(theMesh);
 }
