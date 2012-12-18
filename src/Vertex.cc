@@ -48,6 +48,17 @@ Handle<Value> Vertex::New(const Arguments& args)
 
   return args.This();
 }
+
+
+Local<Object>  Vertex::Clone()
+{
+  HandleScope scope;
+  Vertex* obj = new Vertex();
+  Local<Object> instance = constructor->GetFunction()->NewInstance();
+  obj->Wrap(instance);
+  obj->setShape(this->shape());
+  return scope.Close(instance);
+}	
 void Vertex::Init(Handle<Object> target)
 {
   // Prepare constructor template

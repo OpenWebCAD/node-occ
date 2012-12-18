@@ -22,7 +22,8 @@ public:
    virtual const TopoDS_Shape& shape() const;
    virtual void setShape( const TopoDS_Shape&);
 
-   bool fixShape() { return true;}
+
+
    void setErrorMessage(const char* message){};
 
 };

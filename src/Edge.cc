@@ -44,15 +44,6 @@ double Edge::length()
     return prop.Mass();
 }
 
-#define CATCH_AND_RETHROW(message)									\
-   catch(Standard_Failure& ) {										\
-        Handle_Standard_Failure e = Standard_Failure::Caught();		\
-        Standard_CString msg = e->GetMessageString();				\
-        if (msg == NULL || strlen(msg) < 1) {						\
-            msg = message;											\
-        }															\
-		ThrowException(Exception::TypeError(String::New(msg)));		\
-    }																\
 
 
 int Edge::createLine(Vertex *start, Vertex *end) 
@@ -189,11 +180,13 @@ Handle<v8::Value> Edge::createCircle(const v8::Arguments& args)
 	ReadDir(arg2,&normal);
 
 	if (!arg3->IsNumber())  {
-		ThrowException(Exception::TypeError(String::New("expecting a number (radius) as third arguments")));  
+		ThrowException(Exception::TypeError(String::New("expecting a number (radius) as third arguments")));
+		return scope.Close(Undefined());
 	}
 	double radius = arg3->ToNumber()->Value();
 	if (radius<1E-9)  {
 		ThrowException(Exception::TypeError(String::New("radius cannot be zero ( or close to zero)")));  
+		return scope.Close(Undefined());
 	}
 	
 	Edge* pThis = ObjectWrap::Unwrap<Edge>(args.This());	
@@ -251,6 +244,15 @@ Handle<Value> Edge::New(const Arguments& args)
   return args.This();
 }
 
+Local<Object>  Edge::Clone()
+{
+  HandleScope scope;
+  Edge* obj = new Edge();
+  Local<Object> instance = constructor->GetFunction()->NewInstance();
+  obj->Wrap(instance);
+  obj->setShape(this->shape());
+  return scope.Close(instance);
+}			  
 void Edge::Init(Handle<Object> target)
 {
   // Prepare constructor template

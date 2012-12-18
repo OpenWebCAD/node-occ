@@ -18,7 +18,7 @@
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
-
+			   
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
@@ -29,6 +29,7 @@
 
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
+#include <BRepFilletAPI_MakeChamfer.hxx>
 
 #include <BRepClass3d_SolidExplorer.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
@@ -94,7 +95,9 @@
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomLProp_SLProps.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
-
+#include "BRepCheck_Analyzer.hxx"
+#include "ShapeFix_ShapeTolerance.hxx"
+#include "ShapeFix_Shape.hxx"
 #include "STEPControl_Writer.hxx"
 #include "Interface_Static.hxx"
 /*

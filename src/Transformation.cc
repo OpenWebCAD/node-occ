@@ -31,8 +31,8 @@ Handle<Value> Transformation::makeTranslation(const Arguments& args)
     double x=0,y=0,z=0;
     ReadPoint(args[0],&x,&y,&z);
 
-    pThis->m_transformation.SetTranslation(gp_Vec(x,y,z));
-    return scope.Close(args.This());
+    pThis->m_trsf.SetTranslation(gp_Vec(x,y,z));
+    return args.This();
 }
 
 Handle<Value> Transformation::makePlaneMirror(const Arguments& args)
@@ -49,10 +49,16 @@ Handle<Value> Transformation::makePlaneMirror(const Arguments& args)
 
     double u=0,v=0,w=0;
     ReadPoint(args[1],&u,&v,&w);
+	
+	Standard_Real D = sqrt (u * u + v * v + w * w);
+	if (D <= gp::Resolution()) {
+       ThrowException(Exception::TypeError(String::New("Plane Axis direction is null")));
+       return scope.Close(Undefined());
+	}    
     
-    pThis->m_transformation.SetMirror(gp_Ax2(gp_Pnt(x, y, z), gp_Dir(u, v, w))); 
+	pThis->m_trsf.SetMirror(gp_Ax2(gp_Pnt(x, y, z), gp_Dir(u, v, w))); 
       
-    return scope.Close(args.This());
+    return args.This();
 }
   
   
@@ -71,9 +77,15 @@ Handle<Value> Transformation::makeAxisMirror(const Arguments& args)
     double u=0,v=0,w=0;
     ReadPoint(args[1],&u,&v,&w);
     
-    pThis->m_transformation.SetMirror(gp_Ax1(gp_Pnt(x, y, z), gp_Dir(u, v, w))); 
+	Standard_Real D = sqrt (u * u + v * v + w * w);
+	if (D <= gp::Resolution()) {
+       ThrowException(Exception::TypeError(String::New("Lirror Axis direction is null")));
+       return scope.Close(Undefined());
+	}
+
+    pThis->m_trsf.SetMirror(gp_Ax1(gp_Pnt(x, y, z), gp_Dir(u, v, w))); 
       
-    return scope.Close(args.This());
+    return args.This();
 }
   
 Handle<Value> Transformation::makeScale(const Arguments& args)
@@ -91,9 +103,9 @@ Handle<Value> Transformation::makeScale(const Arguments& args)
     double x=0,y=0,z=0;
     ReadPoint(args[1],&x,&y,&z);
     
-    pThis->m_transformation.SetScale(gp_Pnt(x, y, z), factor);
+    pThis->m_trsf.SetScale(gp_Pnt(x, y, z), factor);
       
-    return scope.Close(args.This());
+    return args.This();
 }
 
 Handle<Value> Transformation::makeRotation(const Arguments& args)
@@ -113,9 +125,9 @@ Handle<Value> Transformation::makeRotation(const Arguments& args)
 
     double angle=args[2]->NumberValue();
     
-    pThis->m_transformation.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),angle/180.0*M_PI);
+    pThis->m_trsf.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),angle/180.0*M_PI);
       
-    return scope.Close(args.This());
+    return args.This();
 }
 
 // Methods exposed to JavaScripts
@@ -146,6 +158,12 @@ void Transformation::Init(Handle<Object> target)
 Handle<Value> Transformation::New(const Arguments& args)
 {
   HandleScope scope;
+
+  if (!args.IsConstructCall()) {
+	ThrowException(Exception::TypeError(String::New(" use new occ.Transformation() to construct a transformation")));
+	return scope.Close(Undefined());
+    // return FromConstructorTemplate(constructor, args);
+  }
   
   Transformation* obj = new Transformation();
   obj->Wrap(args.This());
@@ -157,9 +175,8 @@ Handle<Value> Transformation::NewInstance(const Arguments& args)
 {
   HandleScope scope;
 
-  const unsigned argc = 1;
-  Handle<Value> argv[argc] = { args[0] };
-  Local<Object> instance = constructor->GetFunction()->NewInstance(argc, argv);
-
+  // const unsigned argc = 1;
+  // Handle<Value> argv[argc] = { args[0] };
+  Local<Object> instance = constructor->GetFunction()->NewInstance(0,0);
   return scope.Close(instance);
 }

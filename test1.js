@@ -2,6 +2,59 @@ var util   = require('util');
 var assert = require('assert');
 var occ = require('./');
 
+var shapeFactory = require('./lib/shapeFactory.js');
+
+var bottle = shapeFactory.makeBottle();
+
+function test3()
+{
+    solid = new occ.Solid();
+    solid.makeBox([10,20,30],[20,40,60]);
+    solid.fillet(solid.getEdges(),5);
+
+}
+function test2(){
+    var trsf ;
+    trsf=new occ.Transformation();
+    trsf.makePlaneMirror([10,20,30],occ.ZDir);
+
+    console.log(" Scale Factor=",trsf.scaleFactor);
+
+}
+test2();
+
+function test1() {
+var solid;
+var shapeIt;
+
+solid = new occ.Solid();
+solid.makeBox([10,20,30],[20,40,60]);
+shapeIt = new occ.ShapeIterator(solid,"FACE");
+    shapeIt.more.should.be.true;
+    assert(shapeIt.current === undefined);
+    for (var i=0;i<12;i++) {
+        shapeIt.more.should.be.true;
+        shapeIt.next();
+        shapeIt.current.should.not.be.undefined;
+    }
+    shapeIt.more.should.be.false;
+    shapeIt.current.should.not.be.undefined;
+
+}
+test1();
+
+
+
+var wire = new occ.Wire();
+console.log(wire.numEdges);
+console.log(wire.numVertices);
+
+var trsf;
+trsf = new occ.Transformation();
+trsf.makePlaneMirror([10,20,30],occ.ZDir);
+
+
+
 
 var v = new occ.Vertex();
 var e = new occ.Edge().createLine([10,20,30],[10,14,15]);

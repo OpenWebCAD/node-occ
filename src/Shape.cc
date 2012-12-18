@@ -29,3 +29,6 @@ void Shape::setShape( const TopoDS_Shape& shape)
 {
    shape_ = shape;
 }
+
+
+

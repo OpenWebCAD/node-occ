@@ -20,28 +20,30 @@ class Point3Wrap	 : public node::ObjectWrap
 class Transformation : public node::ObjectWrap 
 {
 public:
-  Transformation():m_translationPart_Acc(*this){};
+  Transformation()
+//xx	  :m_translationPart_Acc(*this)
+  {}
   static Handle<Value> makeTranslation(const Arguments& args);
   static Handle<Value> makePlaneMirror(const Arguments& args);
   static Handle<Value> makeAxisMirror(const Arguments& args);
   static Handle<Value> makeScale(const Arguments& args);
   static Handle<Value> makeRotation(const Arguments& args);
 
-  double scaleFactor() { return m_transformation.ScaleFactor(); }
+  double scaleFactor() { return m_trsf.ScaleFactor(); }
 
 
-  Point3Wrap& translationPart() { return m_translationPart_Acc; } 
   
-  gp_Trsf m_transformation;
+  gp_Trsf m_trsf;
 
-  class MyXYZMember : public Point3Wrap
-  {
-     Transformation& m_parent;
-  public:
-     MyXYZMember(Transformation& parent):m_parent(parent){};
-     virtual const gp_XYZ& get() const{ return m_parent.m_transformation.TranslationPart();}
-  } m_translationPart_Acc;
-  friend class MyXYZMember;
+  //class MyXYZMember : public Point3Wrap
+  //{
+  //   Transformation& m_parent;
+  //public:
+  //   MyXYZMember(Transformation& parent):m_parent(parent){};
+  //   virtual const gp_XYZ& get() const{ return m_parent.m_transformation.TranslationPart();}
+  //} m_translationPart_Acc;
+  //friend class MyXYZMember;
+  // Point3Wrap& translationPart() { return m_translationPart_Acc; } 
 
 
   // Methods exposed to JavaScripts

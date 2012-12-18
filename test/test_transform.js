@@ -1,6 +1,6 @@
 var assert = require("assert");
 var should = require("should");
-var occ = require("../build/Release/occ");
+var occ = require("../lib/occ");
 
 
 describe("testing transformation object",function(){
@@ -20,7 +20,7 @@ describe("testing transformation object",function(){
 	describe("testing translation [10,20,30]", function() {
 		before(function() {
 		   trsf.makeTranslation([10,20,30]);
-		})
+		});
 		it("should have a scale factor of 1.0", function() { 
 			trsf.scaleFactor.should.equal(1.0);
 		});	
@@ -36,5 +36,13 @@ describe("testing transformation object",function(){
 		});	
 */
 	});
+    describe("testing planeMirror [10,20,30]", function() {
 
+        before(function(){
+            trsf.makePlaneMirror([10,20,30],occ.ZDir);
+        });
+        it("should have a scale factor of -1.0", function() {
+            trsf.scaleFactor.should.equal(-1.0);
+        });
+    });
 });

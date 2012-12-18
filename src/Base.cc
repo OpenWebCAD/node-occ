@@ -75,6 +75,34 @@ Handle<Value>  Base::applyTransform(const Arguments& args)
   return scope.Close(args.This());
 }
 
+#include "Transformation.h"
+
+
+ Handle<Value> Base::transformed(const Arguments& args)
+ {
+   HandleScope scope;
+   if (args.Length()!=1 && !Transformation::constructor->HasInstance(args[0])) {
+      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
+   }
+   
+   Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());		  
+
+   Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());	
+   const gp_Trsf& trsf =  pTrans->m_trsf;
+   gp_Trsf transformation = 	trsf;
+
+   Local<Object> copy	= pThis->Clone();
+					
+   if (!pThis->shape().IsNull()){
+		pThis->Unwrap(copy)->setShape(
+		   BRepBuilderAPI_Transform(pThis->shape(),
+				transformation,Standard_True).Shape());
+   }
+
+   return scope.Close(copy);			
+																							   
+ }			    
 
 
 //void Shape::ApplyWorkplane(Handle<Object> json) {
@@ -137,13 +165,55 @@ Handle<Value>  Base::applyTransform(const Arguments& args)
 //        
 //    }
 //}
+bool Base::fixShape()
+{
+    if (this->shape().IsNull()) {
+		return false;  
+	}
+	BRepCheck_Analyzer aChecker(this->shape()); 
+	if (!aChecker.IsValid()) {       
+		ShapeFix_ShapeTolerance aSFT; 
+		aSFT.LimitTolerance(this->shape(),Precision::Confusion(),Precision::Confusion());
+		
+		occHandle(ShapeFix_Shape) aSfs = new ShapeFix_Shape(this->shape()); 
+		aSfs->SetPrecision(Precision::Confusion());
+		aSfs->Perform(); 
+		const TopoDS_Shape aShape = aSfs->Shape();  
+		aChecker.Init(aShape, Standard_False);
+
+		if (aChecker.IsValid() /* && this->canSetShape(aShape) */) { 
+			this->setShape(aShape);       
+		}  
+	}    
+	return aChecker.IsValid() ? true : false;
+
+}
+
+Handle<Value> Base::fixShape(const Arguments& args)
+{
+    HandleScope scope;
+   if (args.Length()!=0) {
+      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
+   }
+   Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());	 
+
+   pThis->fixShape();
+
+   return scope.Close(args.This());
+}
 
 void  Base::InitProto(Handle<ObjectTemplate> proto)
 {
   EXPOSE_METHOD(Base,translate);
   EXPOSE_METHOD(Base,rotate);
+  EXPOSE_METHOD(Base,mirror);
+
+  EXPOSE_METHOD(Base,transformed);
+
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isValid);
   EXPOSE_READ_ONLY_PROPERTY_CONST_STRING (Base,shapeType);
 
 }
+

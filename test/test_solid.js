@@ -38,14 +38,26 @@ describe("testing solid construction",function(){
 		it("should have (20-10)*(40-20)*(60-30) as a volume", function() { 
 			solid.volume.should.equal( (20-10)*(40-20)*(60-30));
 		});
-		it("should have ~ 2*((20-10)*(40-20)+(20-10)*(60-30)+(40-20)*(60-30)) as a area", function() { 
-			
+
+		it("should have ~ 2*((20-10)*(40-20)+(20-10)*(60-30)+(40-20)*(60-30)) as a area", function() {
 			var expectedArea = 2*((20-10)*(40-20)+(20-10)*(60-30)+(40-20)*(60-30));
 			var eps = 0.001;
 			solid.area.should.be.within( expectedArea - eps, expectedArea+eps );
 		});
-	});
 
+        it("should have the sum(face area) ===  area of solid ",function() {
+
+            var epsilon = 1E-3;
+
+            var shapeIt = new occ.ShapeIterator(solid,"FACE");
+            var cumulated_face_area = 0;
+            while(shapeIt.more) {
+                cumulated_face_area += shapeIt.next().area
+            }
+            var expectedArea = solid.area;
+            cumulated_face_area.should.be.within(expectedArea -epsilon,expectedArea+epsilon )
+        })
+	});
 	describe("fuse 2 overlapping boxes", function() {
 	    var solid1;
 	    var solid2;
@@ -143,5 +155,59 @@ describe("testing solid construction",function(){
             occ.writeSTEP("toto2.step",solid1,solid2);
         });
     });
+    describe("testing ShapeIterator on solid", function() {
+        var solid;
+        var shapeIt;
+        before(function() {
+            solid = new occ.Solid();
+            solid.makeBox([10,20,30],[20,40,60]);
+        });
+        it("should iterate on 6 faces", function() {
 
+            shapeIt = new occ.ShapeIterator(solid,"FACE");
+            shapeIt.more.should.be.true;
+            assert(shapeIt.current === undefined);
+            var counter =0;
+            while (shapeIt.more) {
+                shapeIt.more.should.be.true;
+                shapeIt.next();
+                shapeIt.current.should.not.be.undefined;
+                counter+=1;
+            }
+            counter.should.equal(6);
+            shapeIt.more.should.be.false;
+            shapeIt.current.should.not.be.undefined;
+
+        });
+        it("should iterate on 24 edges ( 4 on each of the 6 faces", function() {
+            shapeIt = new occ.ShapeIterator(solid,"EDGE");
+            shapeIt.more.should.be.true;
+            assert(shapeIt.current === undefined);
+            var counter =0;
+            while (shapeIt.more) {
+                shapeIt.more.should.be.true;
+                shapeIt.next();
+                shapeIt.current.should.not.be.undefined;
+                counter+=1;
+            }
+            counter.should.equal(24);
+            shapeIt.more.should.be.false;
+            shapeIt.current.should.not.be.undefined;
+
+        });
+
+    });
+    describe("testing fillet on a box..",function(){
+        var solid;
+        before(function(){
+            solid = new occ.Solid().makeBox([10,20,30],[30,40,50]);
+
+        });
+        it("should be possible to round the corner...",function(){
+            solid.numFaces.should.equal(6);
+            solid.fillet(solid.getEdges(),3);
+            solid.numFaces.should.be.greaterThan(24);
+
+        });
+    });
 });

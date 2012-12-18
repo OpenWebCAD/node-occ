@@ -34,6 +34,8 @@ v8::Handle<Value> writeSTEP(const v8::Arguments& args)
 	// first argument is filename
 	if (!args[0]->IsString()) {
 		ThrowException(Exception::TypeError(String::New("expecting a file name")));
+		return scope.Close(Undefined());
+
 	}
     v8::String::Utf8Value str(args[0]);
     const char* filename = ToCString(str);

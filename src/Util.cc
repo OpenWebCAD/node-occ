@@ -1,5 +1,12 @@
 #include "Util.h"
 
+#include "vector"
+
+using namespace std;
+
+																				  
+
+
 
 void ReadPropertyPointFromArray( Handle<Array>& arr,double* x,double* y, double*z ) 
 {
@@ -78,6 +85,12 @@ void ReadPoint(Local<v8::Value>& value,gp_Pnt* pt)
   pt->SetCoord(x,y,z);
 }
 void ReadDir(Local<v8::Value>& value,gp_Dir* pt)
+{
+  double x=0,y=0,z=0;
+  ReadPoint(value,&x,&y,&z);
+  pt->SetCoord(x,y,z);
+}
+void ReadVector(Local<v8::Value>& value,gp_Vec* pt)
 {
   double x=0,y=0,z=0;
   ReadPoint(value,&x,&y,&z);

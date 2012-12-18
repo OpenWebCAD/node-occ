@@ -17,8 +17,6 @@ public:
 	int numVertices();
 	double length();
 
-	Edge *copy(bool deepCopy);
-
 
 	// OCCTesselation *tesselate(double factor, double angle);
 
@@ -40,7 +38,8 @@ public:
 	virtual const TopoDS_Shape& shape() const { return m_edge; }
 	virtual const TopoDS_Edge&  edge() const { return m_edge; }
 	virtual void setShape(const TopoDS_Shape& shape) { m_edge = TopoDS::Edge(shape); }
-
+    virtual Local<Object>  Clone() ;
+	virtual Base* Unwrap(v8::Local<v8::Object> obj)  { return node::ObjectWrap::Unwrap<Edge>(obj); }
 	
 	static Handle<v8::Value> createLine(const v8::Arguments& args); 
 	static Handle<v8::Value> createCircle(const v8::Arguments& args);

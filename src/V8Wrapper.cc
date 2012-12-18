@@ -5,8 +5,10 @@
 #include "Mesh.h"
 #include "Edge.h"
 #include "Vertex.h"
-#include "Wire.h"
+#include "Wire.h"				
+#include "Face.h"
 #include "Transformation.h"
+#include "ShapeIterator.h"
 #include "Tools.h"
 
 Handle<Value> createBox(const Arguments& args)
@@ -34,8 +36,11 @@ void Initialize(Handle<Object> target)
   Edge::Init(target);
   Vertex::Init(target);
   Wire::Init(target);
+  Face::Init(target);  
+  ShapeIterator::Init(target);
 
   target->Set(String::NewSymbol("createBox"),FunctionTemplate::New(createBox)->GetFunction());
+  target->Set(String::NewSymbol("makePrism"),FunctionTemplate::New(Solid::makePrism)->GetFunction());
   target->Set(String::NewSymbol("writeSTEP"),FunctionTemplate::New(writeSTEP)->GetFunction());
   target->Set(String::NewSymbol("oceVersion"), String::New("0.11"));
 
