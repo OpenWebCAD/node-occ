@@ -28,6 +28,8 @@
 			"src/Vertex.cc",
 			"src/Edge.h",
 			"src/Edge.cc",
+			"src/Wire.h",
+			"src/Wire.cc",
 			"src/Mesh.h",
 			"src/Mesh.cc",
 			"src/Tools.cc",

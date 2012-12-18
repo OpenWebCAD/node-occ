@@ -10,20 +10,20 @@
 
 void extractShapes(Local<Value>& value,std::vector<Shape*>& shapes)
 {
-	if (value->IsObject()) {
+	if (value->IsArray())  {
+
+		Array* arr = Array::Cast(*value);
+		for (uint32_t i=0;i<arr->Length();i++) {
+			extractShapes(arr->Get(i),shapes);
+		}
+	} else if (value->IsObject()) {
 	   // it must be of type 
 		Handle<Object> obj = value->ToObject();
 		if (Solid::constructor->HasInstance(obj)) {
 			shapes.push_back(node::ObjectWrap::Unwrap<Shape>(obj));
 		}
 												  
-	} else if (value->IsArray())  {
-
-		Array* arr = Array::Cast(*value);
-		for (uint32_t i=0;i<arr->Length();i++) {
-			extractShapes(arr->Get(i),shapes);
-		}
-	}
+	}  
 
 }
 

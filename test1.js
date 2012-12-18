@@ -4,7 +4,7 @@ var occ = require('./');
 
 
 var v = new occ.Vertex();
-var e = new occ.Edge();
+var e = new occ.Edge().createLine([10,20,30],[10,14,15]);
 console.log(e.length)
 
 edge = new occ.Edge();
