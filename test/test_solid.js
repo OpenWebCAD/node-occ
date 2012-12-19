@@ -215,4 +215,43 @@ describe("testing solid construction",function(){
 
         });
     });
+    describe("makeCylinder",function(){
+        var solid;
+        before(function(){
+            var radius = 50;
+            var height = 100;
+            solid = new occ.Solid().makeCylinder(radius,height);
+        })
+        it("should have 3 faces", function() {
+            solid.numFaces.should.equal(3);
+        })
+    })
+    describe("makeCone",function(){
+        var solid;
+        before(function(){
+            var radius1 = 50;
+            var radius2 = 70;
+            var height =  30;
+            solid = new occ.Solid().makeCone(radius1,radius2,height);
+        })
+        it("should have 3 faces", function() {
+            solid.numFaces.should.equal(3);
+        })
+    })
+    describe("makeSphere",function(){
+        var solid;
+        before(function(){
+            var center = [10,20,30];
+            var radius = 70;
+            solid = new occ.Solid().makeSphere(center,radius);
+        })
+        it("should have 1 face", function() {
+            solid.numFaces.should.equal(1);
+            solid.getEdges().length.should.equal(4)
+            var edges = solid.getEdges()
+            for ( var edge in edges) {
+                // todo : do some investigation
+            }
+        })
+    })
 });

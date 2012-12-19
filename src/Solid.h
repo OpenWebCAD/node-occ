@@ -52,6 +52,9 @@ protected:
 	// primitive constructions
 	static Handle<v8::Value> makeBox(const v8::Arguments& args) ;
  	static Handle<v8::Value> makePrism(const Arguments& arg);
+ 	static Handle<v8::Value> makeCylinder(const Arguments& arg);
+ 	static Handle<v8::Value> makeCone(const Arguments& arg);
+ 	static Handle<v8::Value> makeSphere(const Arguments& arg);
 
 
 
