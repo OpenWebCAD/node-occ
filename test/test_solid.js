@@ -206,7 +206,12 @@ describe("testing solid construction",function(){
         it("should be possible to round the corner...",function(){
             solid.numFaces.should.equal(6);
             solid.fillet(solid.getEdges(),3);
-            solid.numFaces.should.be.greaterThan(24);
+            //    6 flat surfaces       -> 6*4 edges
+            // + 12 rounded corners     ->12*4 edges
+            // + 8  corners             -> 8*(3+1 degenerated) edges
+            //==> 26 faces
+            solid.numFaces.should.be.equal(26);
+            solid.getEdges().length.should.be.equal(6*4+12*4+8*4);
 
         });
     });
