@@ -193,12 +193,31 @@ Handle<Value> Base::fixShape(const Arguments& args)
 {
     HandleScope scope;
    if (args.Length()!=0) {
-      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+      ThrowException(Exception::Error(String::New("Wrong arguments")));
       return scope.Close(Undefined());
    }
    Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());	 
 
    pThis->fixShape();
+
+   return scope.Close(args.This());
+}
+
+
+Handle<v8::Value> Base::boundingBox(const v8::Arguments& args)
+{
+   HandleScope scope;
+   if (args.Length()!=0) {
+      ThrowException(Exception::Error(String::New("Wrong arguments")));
+      return scope.Close(Undefined());
+   }
+   Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());	
+
+   Local<Object> bBox = Object::New();
+   
+
+   // bBox->Set(String::New("near"),
+
 
    return scope.Close(args.This());
 }

@@ -4,7 +4,11 @@ var occ = require('./');
 
 var shapeFactory = require('./lib/shapeFactory.js');
 
-var bottle = shapeFactory.makeBottle();
+var bbox = new occ.BoundingBox();
+console.log(bbox.nearPt);
+console.log(bbox.nearPt.x);
+
+//var bottle = shapeFactory.makeBottle();
 
 function test3()
 {
@@ -13,6 +17,8 @@ function test3()
     solid.fillet(solid.getEdges(),5);
 
 }
+test3();
+
 function test2(){
     var trsf ;
     trsf=new occ.Transformation();

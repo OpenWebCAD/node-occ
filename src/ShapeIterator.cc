@@ -7,8 +7,7 @@
 			 
 
 
-
-Handle<Object> buildWrapper(TopAbs_ShapeEnum type)
+Local<Object> buildEmptyWrapper(TopAbs_ShapeEnum type)
 {
 	switch(type) {
 	case  TopAbs_COMPOUND:
@@ -28,7 +27,15 @@ Handle<Object> buildWrapper(TopAbs_ShapeEnum type)
 	case TopAbs_SHAPE:
 		break;
 	}
-	return Handle<Object>();
+	return Local<Object>();
+}
+Local<Object> buildWrapper(const TopoDS_Shape shape)
+{								
+	HandleScope scope;
+	Local<Object> obj = Local<Object>(buildEmptyWrapper(shape.ShapeType()));
+	Base*  pShape = node::ObjectWrap::Unwrap<Base>(obj);		
+	pShape->setShape(shape);
+	return scope.Close(obj);
 }
 
 bool ShapeIterator::more()
@@ -38,23 +45,19 @@ bool ShapeIterator::more()
 
 Handle<Value> ShapeIterator::next() 
 {
-				   
+	HandleScope scope;
+
 	if (ex.More()) {
 
-		Handle<Object>  obj = buildWrapper(this->m_toFind);
-
-		Base*  shape = node::ObjectWrap::Unwrap<Base>(obj);
-		
-		shape->setShape(ex.Current());
-
+		Local<Object>  obj = buildWrapper(ex.Current());
 
 		this->handle_->Set(String::NewSymbol("current"),obj);
 
 		ex.Next();
 
-		return obj;
+		return scope.Close(obj);
 	} else {
-		return Undefined();
+		return scope.Close(Undefined());
 	}
 }
 

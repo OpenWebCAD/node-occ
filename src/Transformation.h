@@ -3,25 +3,15 @@
 #include "OCC.h"
 #include "Util.h"
 
+#include "Point3Wrap.h"
 
-// expose a point 
-class Point3Wrap	 : public node::ObjectWrap 
-{
-   virtual const gp_XYZ& get() const = 0;
 
-   double x() { return get().X(); }
-   double y() { return get().Y(); }
-   double z() { return get().Z(); }
-  // Methods exposed to JavaScripts
-  static void Init(Handle<Object> target);
-
-};
 
 class Transformation : public node::ObjectWrap 
 {
 public:
+  typedef class Transformation _ThisType ;
   Transformation()
-//xx	  :m_translationPart_Acc(*this)
   {}
   static Handle<Value> makeTranslation(const Arguments& args);
   static Handle<Value> makePlaneMirror(const Arguments& args);
@@ -31,19 +21,13 @@ public:
 
   double scaleFactor() { return m_trsf.ScaleFactor(); }
 
+  const gp_XYZ translationPart() const  { return m_trsf.TranslationPart(); }
 
-  
+  TEAROFF_POINT(Transformation,translationPart,Point3Wrap,gp_XYZ);
+
   gp_Trsf m_trsf;
 
-  //class MyXYZMember : public Point3Wrap
-  //{
-  //   Transformation& m_parent;
-  //public:
-  //   MyXYZMember(Transformation& parent):m_parent(parent){};
-  //   virtual const gp_XYZ& get() const{ return m_parent.m_transformation.TranslationPart();}
-  //} m_translationPart_Acc;
-  //friend class MyXYZMember;
-  // Point3Wrap& translationPart() { return m_translationPart_Acc; } 
+  
 
 
   // Methods exposed to JavaScripts

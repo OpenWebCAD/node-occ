@@ -29,9 +29,13 @@ public:
   static Handle<Value> transformed(const Arguments& args);
   static Handle<Value> fixShape(const Arguments&);
 
+  static Handle<v8::Value> boundingBox(const v8::Arguments& args);
+
   static void  InitProto(Handle<ObjectTemplate> target);
 };
 
+v8::Local<v8::Object> buildEmptyWrapper(TopAbs_ShapeEnum type);
+v8::Local<v8::Object> buildWrapper(const TopoDS_Shape shape);
 
 #define CATCH_AND_RETHROW(message)									\
    catch(Standard_Failure& ) {										\

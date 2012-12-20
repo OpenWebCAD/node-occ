@@ -9,7 +9,7 @@ class Solid : public Shape
 
 protected:
     Solid() {};
-    virtual ~Solid() {};
+    virtual ~Solid() { m_cacheMesh.Dispose(); };
 
  public:  
     virtual Local<Object>  Clone() ;
@@ -48,7 +48,10 @@ protected:
 	// default mesh
 	static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
 	static Handle<v8::Value> createMesh(const v8::Arguments& args); // custom mesh
-  
+	
+	static Handle<v8::Value> getEdges(const v8::Arguments& args);
+
+
 	// primitive constructions
 	static Handle<v8::Value> makeBox(const v8::Arguments& args) ;
  	static Handle<v8::Value> makePrism(const Arguments& arg);

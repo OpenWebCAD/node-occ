@@ -205,22 +205,47 @@ describe("testing solid construction",function(){
         });
         it("should be possible to round the corner...",function(){
             solid.numFaces.should.equal(6);
-            solid.fillet(solid.getEdges(),3);
-            //    6 flat surfaces       -> 6*4 edges
-            // + 12 rounded corners     ->12*4 edges
-            // + 8  corners             -> 8*(3+1 degenerated) edges
+            solid.fillet(solid.getEdges(),2.0);
+            //    6 flat surfaces       -> 6*4  edges
+            // + 12 rounded corners     -> shared
+            // + 8  corners             -> 8*3   edges
             //==> 26 faces
             solid.numFaces.should.be.equal(26);
-            solid.getEdges().length.should.be.equal(6*4+12*4+8*4);
+            solid.getEdges().length.should.be.equal(6*4+8*3);
 
         });
     });
-    describe("makeCylinder",function(){
+    describe("makeCylinder (variation 1)",function(){
         var solid;
         before(function(){
             var radius = 50;
             var height = 100;
             solid = new occ.Solid().makeCylinder(radius,height);
+        })
+        it("should have 3 faces", function() {
+            solid.numFaces.should.equal(3);
+        })
+    })
+
+    describe("makeCylinder (variation 2)",function(){
+        var solid;
+        before(function(){
+            var position = [ [0,0,1] , [0,1,0] ];
+            var radius = 50;
+            var height = 100;
+            solid = new occ.Solid().makeCylinder(position ,radius,height);
+        })
+        it("should have 3 faces", function() {
+            solid.numFaces.should.equal(3);
+        })
+    })
+    describe("makeCylinder (variation 3 : with 2 points and a height)",function(){
+        var solid;
+        before(function(){
+            var startPoint = [10,20,40];
+            var endPoint   = [20,30,40];
+            var height = 100;
+            solid = new occ.Solid().makeCylinder(startPoint ,endPoint,height);
         })
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);
@@ -245,9 +270,9 @@ describe("testing solid construction",function(){
             var radius = 70;
             solid = new occ.Solid().makeSphere(center,radius);
         })
-        it("should have 1 face", function() {
+        it("should have 1 face and one egde", function() {
             solid.numFaces.should.equal(1);
-            solid.getEdges().length.should.equal(4)
+            solid.getEdges().length.should.equal(1)
             var edges = solid.getEdges()
             for ( var edge in edges) {
                 // todo : do some investigation

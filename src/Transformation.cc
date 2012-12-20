@@ -2,22 +2,6 @@
 #include "Util.h"
 
 
-// Methods exposed to JavaScripts
-void Point3Wrap::Init(Handle<Object> target)
-{
-   // Prepare constructor template
-  Local<FunctionTemplate> tpl = FunctionTemplate::New(Transformation::New);
-  tpl->SetClassName(String::NewSymbol("Point3"));
-
-  // object has one internal filed ( the C++ object)
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-  // Prototype
-  Local<ObjectTemplate> objTemplate = tpl->PrototypeTemplate();
-
-
-}
-
 
 
 Handle<Value> Transformation::makeTranslation(const Arguments& args)

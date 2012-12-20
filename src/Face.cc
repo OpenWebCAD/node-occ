@@ -33,6 +33,8 @@ double Face::area()
     BRepGProp::SurfaceProperties(shape(), prop);
     return prop.Mass();
 }
+
+
 // DVec Face::inertia() {
 //    DVec ret;
 //    GProp_GProps prop;
@@ -61,6 +63,7 @@ double Face::area()
 
 
 Persistent<FunctionTemplate> Face::constructor;
+
 
 
 

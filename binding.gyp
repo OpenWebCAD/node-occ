@@ -16,6 +16,8 @@
       "sources": [
 			"src/Base.h",
 			"src/Base.cc",
+			"src/BoundingBox.h",
+			"src/BoundingBox.cc",
 			"src/Edge.h",
 			"src/Edge.cc",
 			"src/Face.h",
@@ -26,6 +28,8 @@
 			"src/Mesh.cc",
 			"src/NodeV8.h",
 			"src/OCC.h",
+			"src/Point3Wrap.h",
+			"src/Point3Wrap.cc",
 			"src/Shape.h",
 			"src/Shape.cc",
 			"src/ShapeIterator.h",

@@ -38,6 +38,8 @@ Persistent<FunctionTemplate> Solid::constructor;
   EXPOSE_METHOD(Solid,fillet);
   EXPOSE_METHOD(Solid,chamfer);
 
+  EXPOSE_METHOD(Solid,getEdges);
+
 
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
@@ -162,21 +164,19 @@ Handle<Value> Solid::makePrism(const Arguments& args)
 
 	if (!pFace || direction.IsEqual(gp_Vec(0,0,0),1E-7,1E-8)) {
 		ThrowException(Exception::TypeError(String::New("invalid arguments : expecting <FACE>,<VECTOR>")));
-	}
-
-																
+	}																
 
     try {		   
-        const TopoDS_Shape& shp = pFace->face();
+        const TopoDS_Shape& face = pFace->face();
         //// Only accept Edge or Wire
         //TopAbs_ShapeEnum type = shp.ShapeType();
         //if (type != TopAbs_EDGE && type != TopAbs_WIRE) {
         //    StdFail_NotDone::Raise("expected Edge or Wire");
         //}
        
-        BRepPrimAPI_MakePrism prismMaker(shp, direction);
+        BRepPrimAPI_MakePrism prismMaker(face, direction);
 		
-		prismMaker.Check();
+		//xx prismMaker.Check();
 
         pThis->setShape(prismMaker.Shape());
         
@@ -218,6 +218,33 @@ Handle<Value> Solid::makeSphere(const Arguments& args)
     return scope.Close(pJhis);
 }
 
+bool ReadAx2(Handle<Value>& value,gp_Ax2* ax2)
+{
+	assert(ax2);
+	try {
+		if (value->IsArray()) {
+			Handle<Array> arr= Handle<Array>::Cast(value);
+			gp_Pnt origin;
+			ReadPoint(arr->Get(0),&origin);
+			if (arr->Length() == 2) {
+				// variation 2 :  gp_Ax2(const gp_Pnt& P,const gp_Dir& V);
+				gp_Dir V;
+				ReadDir(arr->Get(1),&V);
+				*ax2 =  gp_Ax2(origin,V);
+				return true;
+			}
+			if (arr->Length() == 3) {								
+				// variation 1 : gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
+				gp_Dir N,Vx;
+				ReadDir(arr->Get(1),&N);
+				ReadDir(arr->Get(2),&Vx);
+				*ax2 =  gp_Ax2(origin,N,Vx);
+				return true;
+			}
+		}	
+	} CATCH_AND_RETHROW("Failed to extract position");
+	return false;
+}
 Handle<Value> Solid::makeCylinder(const Arguments& args)
 {
 	HandleScope scope;
@@ -226,17 +253,23 @@ Handle<Value> Solid::makeCylinder(const Arguments& args)
 	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
 		// create a new object
 		pJhis = constructor->GetFunction()->CallAsConstructor(0,0)->ToObject();
-	}					 						
+	}					 		
 	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
+
+	//  gp_Ax2& Axes
+	//  gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
  	// Standard_EXPORT   BRepPrimAPI_MakeCylinder(const Standard_Real R,const Standard_Real H);
 	// Standard_EXPORT   BRepPrimAPI_MakeCylinder(const Standard_Real R,const Standard_Real H,const Standard_Real Angle);
     // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,const Standard_Real H);
 	// Standard_EXPORT   BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,const Standard_Real H,const Standard_Real Angle);
     const double epsilon = 1E-3;
 
-
+	gp_Ax2 axis;
  	if (args.Length()==2) {
+
+		// variation 1	 <R:number> <H:number> 
+		// a vertical cylinder of radius R starting a (0,0,0) ending at (0,0,H)
 		double R  = args[0]->ToNumber()->Value();
 		double H  = args[1]->ToNumber()->Value();
 
@@ -245,8 +278,52 @@ Handle<Value> Solid::makeCylinder(const Arguments& args)
 		}
 		try {
 			pThis->setShape(BRepPrimAPI_MakeCylinder(R,H).Shape());
-		} CATCH_AND_RETHROW("Failed to create sphere ");
-	}  else {
+		} CATCH_AND_RETHROW("Failed to create cylinder ");
+
+	} else if (args.Length()==3) {
+
+		if (args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsNumber()) {
+			// variation 2
+			//  <[ <Origin[x,yz]>, <VZn[x,yz]>,<VXn[x,yz]>] <R:number> <H:number>
+			gp_Ax2  ax2;
+			bool success = ReadAx2(args[0],&ax2);
+
+ 			double R  = args[1]->ToNumber()->Value();
+			double H  = args[2]->ToNumber()->Value();
+
+			if ( R < epsilon || H < epsilon ) {
+				ThrowException(Exception::Error(String::New("invalid value for arguments")));
+			}
+			try {
+				pThis->setShape(BRepPrimAPI_MakeCylinder(ax2,R,H).Shape());
+			} CATCH_AND_RETHROW("Failed to create cylinder ");
+
+		} else if (args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber()) {
+			// variation 3
+			gp_Pnt p1;
+			ReadPoint(args[0],&p1);
+			
+			gp_Pnt p2;
+			ReadPoint(args[1],&p1);
+
+			double R  = args[2]->ToNumber()->Value();
+			      
+			const double dx = p2.X() - p1.X();
+			const double dy = p2.Y() - p1.Y();
+			const double dz = p2.Z() - p1.Z();
+
+			const double H = sqrt(dx*dx + dy*dy + dz*dz);
+			if (H < epsilon ) {
+				ThrowException(Exception::Error(String::New("cannot build a cylinder on two coincident points")));
+			}
+			gp_Vec aV(dx / H, dy / H, dz / H);
+			gp_Ax2 ax2(p1, aV);
+			try {
+				pThis->setShape(BRepPrimAPI_MakeCylinder(ax2,R,H).Shape());
+			} CATCH_AND_RETHROW("Failed to create cylinder ");
+			
+		}
+	} else {
 		ThrowException(Exception::Error(String::New("invalid arguments")));
 	}
 
@@ -292,8 +369,35 @@ Handle<Value> Solid::makeCone(const Arguments& args)
 }
 
 
- int Solid::chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances)
- {
+Handle<Value> Solid::getEdges(const v8::Arguments& args)
+{
+
+	HandleScope scope;
+    // can work with this
+	Handle<Object> pJhis = args.This();
+	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+		// create a new object
+		ThrowException(Exception::Error(String::New("invalid object")));
+	}					 		
+	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+    TopTools_IndexedMapOfShape edgeMap;
+    // TopExp::MapShapes(pThis->shape(), TopAbs_EDGE, edgeMap);
+	BRepTools::Map3DEdges(pThis->shape(), edgeMap);
+
+
+	int nbEdges =edgeMap.Extent(); 
+	Local<Array> arr = Array::New(nbEdges);
+
+	for (int i=0;i<nbEdges;i++)  {
+		Local<Object> obj=  buildWrapper(edgeMap(i+1)); // 1 based !!!
+		arr->Set(i,obj);
+	}
+	return scope.Close(arr);
+}
+
+int Solid::chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances)
+{
 
     size_t edges_size = edges.size();
     size_t distances_size = distances.size();
@@ -638,8 +742,9 @@ Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
    return scope.Close(pThis->m_cacheMesh);
 }
 
+
 //void Solid::Mesh() 
-//{
+//{												
 //    TopExp_Explorer Ex; 
 //    int numFaces = 0;
 //    for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 

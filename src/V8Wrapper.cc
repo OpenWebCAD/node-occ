@@ -1,6 +1,7 @@
 #include "NodeV8.h"
 #include "Util.h"
 #include "GeometryBuilder.h"
+#include "BoundingBox.h"
 #include "Solid.h"
 #include "Mesh.h"
 #include "Edge.h"
@@ -38,6 +39,8 @@ void Initialize(Handle<Object> target)
   Wire::Init(target);
   Face::Init(target);  
   ShapeIterator::Init(target);
+  Point3Wrap::Init(target);
+  BoundingBox::Init(target);
 
   target->Set(String::NewSymbol("createBox"),FunctionTemplate::New(createBox)->GetFunction());
   target->Set(String::NewSymbol("makePrism"),FunctionTemplate::New(Solid::makePrism)->GetFunction());
