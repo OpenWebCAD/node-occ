@@ -36,12 +36,6 @@ protected:
 	int boolean(Solid *tool, BoolOpType op);
 	int chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances);
 	int fillet(const std::vector<Edge*>& edges, const std::vector<double>& distances);
-	// boolean operation
-	static Handle<v8::Value> _boolean(const v8::Arguments& args,BoolOpType op);
-	static Handle<v8::Value> fuse(const v8::Arguments& args);
-	static Handle<v8::Value> cut(const v8::Arguments& args);
-	static Handle<v8::Value> common(const v8::Arguments& args);
-
 	static Handle<v8::Value> fillet(const v8::Arguments& args);
 	static Handle<v8::Value> chamfer(const v8::Arguments& args);
 
@@ -51,19 +45,10 @@ protected:
 	
 	static Handle<v8::Value> getEdges(const v8::Arguments& args);
 
-
-	// primitive constructions
-	static Handle<v8::Value> makeBox(const v8::Arguments& args) ;
- 	static Handle<v8::Value> makePrism(const Arguments& arg);
- 	static Handle<v8::Value> makeCylinder(const Arguments& arg);
- 	static Handle<v8::Value> makeCone(const Arguments& arg);
- 	static Handle<v8::Value> makeSphere(const Arguments& arg);
-
-
-
 	// Methods exposed to JavaScripts
 	static void Init(Handle<Object> target);
 	static Handle<v8::Value> NewInstance(const v8::Arguments& args);
+	static Handle<Value>     NewInstance(TopoDS_Shape& shape);
 	static Handle<v8::Value> New(const v8::Arguments& args);     
 
 	static Persistent<FunctionTemplate> constructor;

@@ -23,8 +23,7 @@ describe("testing solid construction",function(){
 	describe("makeBox with 2 points", function() {
 	    var solid;
 		before(function() {
-			solid = new occ.Solid();		
-			solid.makeBox([10,20,30],[20,40,60]);
+			solid = occ.makeBox([10,20,30],[20,40,60]);
 		});
 		it("should have 6 faces", function() { 
 			solid.numFaces.should.equal(6);
@@ -62,14 +61,9 @@ describe("testing solid construction",function(){
 	    var solid1;
 	    var solid2;
 		before(function() {
-			solid1 = new occ.Solid();		
-			solid1.makeBox([10,20,30],[20,40,60]);
-			solid2 = new occ.Solid();		
-			solid2.makeBox([15,25,35],[-20,-40,-60]);
-			
-			solid1.fuse(solid2);
-			//xx var solid3= solid1.fuse(solid2,true);
-			//xx var solid3= occ.fuse(solid1,solid2);
+			solid1 = occ.makeBox([10,20,30],[20,40,60]);
+			solid2 = occ.makeBox([15,25,35],[-20,-40,-60]);
+			solid1 = occ.fuse(solid1,solid2);
 		});
 		it("should have 12 faces", function() { 
 			solid1.numFaces.should.equal(12);
@@ -82,12 +76,10 @@ describe("testing solid construction",function(){
 	    var solid1;
 	    var solid2;
 		before(function() {
-			solid1 = new occ.Solid();		
-			solid1.makeBox([10,20,30],[20,40,60]);
-			solid2 = new occ.Solid();		
-			solid2.makeBox([15,25,35],[-20,-40,-60]);
+			solid1 = occ.makeBox([10,20,30],[20,40,60]);
+			solid2 = occ.makeBox([15,25,35],[-20,-40,-60]);
 			
-			solid1.cut(solid2);
+			solid1 = occ.cut(solid1,solid2);
 
 		});
 		it("should have 9 faces", function() { 
@@ -101,9 +93,7 @@ describe("testing solid construction",function(){
         describe("Meshing a box", function() {
             var solid;
             before(function(){
-                solid = new occ.Solid();
-                solid.makeBox([10,20,30],[20,30,40]);
-
+                solid = occ.makeBox([10,20,30],[20,30,40]);
             });
             it("should have a mesh with 4*6 vertices", function() {
                 solid.mesh.numVertices.should.equal(24);
@@ -120,11 +110,10 @@ describe("testing solid construction",function(){
 	describe("Testing  Shape __prototype", function() {
 		 var solid;
             before(function(){
-                solid = new occ.Solid();
-                solid.makeBox([10,20,30],[20,30,40]);
+                solid = occ.makeBox([10,20,30],[20,30,40]);
             });
 			it("should expose the expected properties ", function() {
-			   var expected = ["shapeType","numFaces","isNull","isValid","rotate","fuse"];
+			   var expected = ["shapeType","numFaces","isNull","isValid"];
 			   var actual = []
                for ( var j in occ.Solid.prototype) {
 			      actual.push(j.toString())	
@@ -143,10 +132,8 @@ describe("testing solid construction",function(){
     describe("exporting a solid to STEP ", function() {
         var solid1,solid2;
         before(function(){
-            solid1 = new occ.Solid();
-            solid1.makeBox([10,20,30],[20,30,40]);
-            solid1 = new occ.Solid();
-            solid1.makeBox([20,30,50],[110,40,00]);
+            solid1 = occ.makeBox([10,20,30],[20,30,40]);
+            solid1 = occ.makeBox([20,30,50],[110,40,00]);
         });
         it("should export a single solid to STEP", function() {
             occ.writeSTEP("toto1.step",solid1);
@@ -159,8 +146,7 @@ describe("testing solid construction",function(){
         var solid;
         var shapeIt;
         before(function() {
-            solid = new occ.Solid();
-            solid.makeBox([10,20,30],[20,40,60]);
+            solid = occ.makeBox([10,20,30],[20,40,60]);
         });
         it("should iterate on 6 faces", function() {
 
@@ -200,7 +186,7 @@ describe("testing solid construction",function(){
     describe("testing fillet on a box..",function(){
         var solid;
         before(function(){
-            solid = new occ.Solid().makeBox([10,20,30],[30,40,50]);
+            solid = occ.makeBox([10,20,30],[30,40,50]);
 
         });
         it("should be possible to round the corner...",function(){
@@ -220,7 +206,7 @@ describe("testing solid construction",function(){
         before(function(){
             var radius = 50;
             var height = 100;
-            solid = new occ.Solid().makeCylinder(radius,height);
+            solid = occ.makeCylinder(radius,height);
         })
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);
@@ -233,7 +219,7 @@ describe("testing solid construction",function(){
             var position = [ [0,0,1] , [0,1,0] ];
             var radius = 50;
             var height = 100;
-            solid = new occ.Solid().makeCylinder(position ,radius,height);
+            solid = occ.makeCylinder(position ,radius,height);
         })
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);
@@ -245,7 +231,7 @@ describe("testing solid construction",function(){
             var startPoint = [10,20,40];
             var endPoint   = [20,30,40];
             var height = 100;
-            solid = new occ.Solid().makeCylinder(startPoint ,endPoint,height);
+            solid = occ.makeCylinder(startPoint ,endPoint,height);
         })
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);
@@ -257,7 +243,7 @@ describe("testing solid construction",function(){
             var radius1 = 50;
             var radius2 = 70;
             var height =  30;
-            solid = new occ.Solid().makeCone(radius1,radius2,height);
+            solid = occ.makeCone(radius1,radius2,height);
         })
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);
@@ -268,7 +254,7 @@ describe("testing solid construction",function(){
         before(function(){
             var center = [10,20,30];
             var radius = 70;
-            solid = new occ.Solid().makeSphere(center,radius);
+            solid = occ.makeSphere(center,radius);
         })
         it("should have 1 face and one egde", function() {
             solid.numFaces.should.equal(1);

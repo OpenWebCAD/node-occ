@@ -1,26 +1,27 @@
 #include "Base.h"
 #include "Util.h"
+#include "BoundingBox.h"
 
 bool Base::isNull() 
 {
-    return shape().IsNull() ? true : false;
+	return shape().IsNull() ? true : false;
 }
 
 bool Base::isValid()
 {
-    if (shape().IsNull()) {
-        return false;
+	if (shape().IsNull()) {
+		return false;
 	}
-    BRepCheck_Analyzer aChecker(shape());
-    return aChecker.IsValid() ? true : false;
+	BRepCheck_Analyzer aChecker(shape());
+	return aChecker.IsValid() ? true : false;
 }
 
 const char* Base::shapeType()
 {
- 
-  switch(shape().ShapeType()) {
-    case	TopAbs_COMPOUND:	return "COMPOUND"; break;	
-    case	TopAbs_COMPSOLID: 	return "COMPSOLID"; break;	
+
+	switch(shape().ShapeType()) {
+	case	TopAbs_COMPOUND:	return "COMPOUND"; break;	
+	case	TopAbs_COMPSOLID: 	return "COMPSOLID"; break;	
 	case	TopAbs_SOLID: 		return "SOLID"; break;	
 	case	TopAbs_SHELL: 		return "SHELL"; break;	
 	case	TopAbs_FACE: 		return "FACE"; break;	
@@ -28,81 +29,81 @@ const char* Base::shapeType()
 	case	TopAbs_EDGE: 		return "EDGE"; break;	
 	case	TopAbs_VERTEX: 		return "VERTEX"; break;	
 	case	TopAbs_SHAPE: 		return "SHAPE"; break;	
-  }
-  assert(0=="invalid case");
-  return "???";
+	}
+	assert(0=="invalid case");
+	return "???";
 }
 
 
 Handle<Value> Base::translate(const Arguments& args) 
 {
-  HandleScope scope;
-  Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+	HandleScope scope;
+	Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
-  gp_Trsf transformation;
+	gp_Trsf transformation;
 
-  double x=0,y=0,z=0;
-  ReadPoint(args[0],&x,&y,&z);
-  transformation.SetTranslation(gp_Vec(x,y,z));
+	double x=0,y=0,z=0;
+	ReadPoint(args[0],&x,&y,&z);
+	transformation.SetTranslation(gp_Vec(x,y,z));
 
-  pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+	pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
 
-  return scope.Close(args.This());
+	return scope.Close(args.This());
 
 }
 
 Handle<Value> Base::rotate(const Arguments& args) 
 {
-  HandleScope scope;
-  Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+	HandleScope scope;
+	Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
-  return scope.Close(args.This());
+	return scope.Close(args.This());
 }
 
 Handle<Value> Base::mirror(const Arguments& args) 
 {
-  HandleScope scope;
-  Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+	HandleScope scope;
+	Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
-  return scope.Close(args.This());
+	return scope.Close(args.This());
 }
 
 Handle<Value>  Base::applyTransform(const Arguments& args)
 {
-  HandleScope scope;
-  Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+	HandleScope scope;
+	Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
-  return scope.Close(args.This());
+	return scope.Close(args.This());
 }
 
 #include "Transformation.h"
 
 
- Handle<Value> Base::transformed(const Arguments& args)
- {
-   HandleScope scope;
-   if (args.Length()!=1 && !Transformation::constructor->HasInstance(args[0])) {
-      ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-      return scope.Close(Undefined());
-   }
-   
-   Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());		  
+Handle<Value> Base::transformed(const Arguments& args)
+{
+	HandleScope scope;
+	if (args.Length()!=1 && !Transformation::constructor->HasInstance(args[0])) {
+		ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+		return scope.Close(Undefined());
+	}
 
-   Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());	
-   const gp_Trsf& trsf =  pTrans->m_trsf;
-   gp_Trsf transformation = 	trsf;
+	Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());		  
 
-   Local<Object> copy	= pThis->Clone();
-					
-   if (!pThis->shape().IsNull()){
+	Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());	
+	const gp_Trsf& trsf =  pTrans->m_trsf;
+	gp_Trsf transformation = 	trsf;
+
+	Local<Object> copy	= pThis->Clone();
+
+	if (!pThis->shape().IsNull()){
 		pThis->Unwrap(copy)->setShape(
-		   BRepBuilderAPI_Transform(pThis->shape(),
-				transformation,Standard_True).Shape());
-   }
+			BRepBuilderAPI_Transform(pThis->shape(),
+			transformation,Standard_True).Shape());
+	}
 
-   return scope.Close(copy);			
-																							   
- }			    
+	return scope.Close(copy);			
+
+}			    
 
 
 //void Shape::ApplyWorkplane(Handle<Object> json) {
@@ -167,14 +168,14 @@ Handle<Value>  Base::applyTransform(const Arguments& args)
 //}
 bool Base::fixShape()
 {
-    if (this->shape().IsNull()) {
+	if (this->shape().IsNull()) {
 		return false;  
 	}
 	BRepCheck_Analyzer aChecker(this->shape()); 
 	if (!aChecker.IsValid()) {       
 		ShapeFix_ShapeTolerance aSFT; 
 		aSFT.LimitTolerance(this->shape(),Precision::Confusion(),Precision::Confusion());
-		
+
 		occHandle(ShapeFix_Shape) aSfs = new ShapeFix_Shape(this->shape()); 
 		aSfs->SetPrecision(Precision::Confusion());
 		aSfs->Perform(); 
@@ -191,48 +192,48 @@ bool Base::fixShape()
 
 Handle<Value> Base::fixShape(const Arguments& args)
 {
-    HandleScope scope;
-   if (args.Length()!=0) {
-      ThrowException(Exception::Error(String::New("Wrong arguments")));
-      return scope.Close(Undefined());
-   }
-   Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());	 
+	HandleScope scope;
+	if (args.Length()!=0) {
+		ThrowException(Exception::Error(String::New("Wrong arguments")));
+		return scope.Close(Undefined());
+	}
+	Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());	 
 
-   pThis->fixShape();
+	pThis->fixShape();
 
-   return scope.Close(args.This());
+	return scope.Close(args.This());
 }
 
 
-Handle<v8::Value> Base::boundingBox(const v8::Arguments& args)
+Handle<v8::Value> Base::getBoundingBox(const v8::Arguments& args)
 {
-   HandleScope scope;
-   if (args.Length()!=0) {
-      ThrowException(Exception::Error(String::New("Wrong arguments")));
-      return scope.Close(Undefined());
-   }
-   Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());	
+	HandleScope scope;
+	if (args.Length()!=0) {
+		ThrowException(Exception::Error(String::New("Wrong arguments")));
+		return scope.Close(Undefined());
+	}
+	Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());	
 
-   Local<Object> bBox = Object::New();
-   
+	const double tolerance= 1E-12;
+	const TopoDS_Shape& shape = pThis->shape();
+	Bnd_Box aBox;
+	BRepBndLib::Add(shape, aBox);
+	aBox.SetGap(tolerance);
 
-   // bBox->Set(String::New("near"),
-
-
-   return scope.Close(args.This());
+	return scope.Close(BoundingBox::NewInstance(aBox));
 }
 
 void  Base::InitProto(Handle<ObjectTemplate> proto)
 {
-  EXPOSE_METHOD(Base,translate);
-  EXPOSE_METHOD(Base,rotate);
-  EXPOSE_METHOD(Base,mirror);
+	EXPOSE_METHOD(Base,translate);
+	EXPOSE_METHOD(Base,rotate);
+	EXPOSE_METHOD(Base,mirror);
 
-  EXPOSE_METHOD(Base,transformed);
+	EXPOSE_METHOD(Base,transformed);
 
-  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
-  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isValid);
-  EXPOSE_READ_ONLY_PROPERTY_CONST_STRING (Base,shapeType);
+	EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
+	EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isValid);
+	EXPOSE_READ_ONLY_PROPERTY_CONST_STRING (Base,shapeType);
 
 }
 

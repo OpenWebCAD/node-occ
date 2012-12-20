@@ -11,21 +11,8 @@
 #include "Transformation.h"
 #include "ShapeIterator.h"
 #include "Tools.h"
+#include "ShapeFactory.h"
 
-Handle<Value> createBox(const Arguments& args)
-{
-  HandleScope scope;
-  
-  if (args.Length() < 1) {
-    ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-    return scope.Close(Undefined());
-  }
-  
-  // resulting object
-  Handle<Value> obj = Solid::NewInstance(args);  
-
-  return scope.Close(Solid::makeBox(args));
-}
 
 
 void Initialize(Handle<Object> target) 
@@ -42,10 +29,19 @@ void Initialize(Handle<Object> target)
   Point3Wrap::Init(target);
   BoundingBox::Init(target);
 
-  target->Set(String::NewSymbol("createBox"),FunctionTemplate::New(createBox)->GetFunction());
-  target->Set(String::NewSymbol("makePrism"),FunctionTemplate::New(Solid::makePrism)->GetFunction());
-  target->Set(String::NewSymbol("writeSTEP"),FunctionTemplate::New(writeSTEP)->GetFunction());
-  target->Set(String::NewSymbol("oceVersion"), String::New("0.11"));
+  target->Set(String::NewSymbol("makeBox"),     FunctionTemplate::New(ShapeFactory::makeBox)->GetFunction());
+  target->Set(String::NewSymbol("makeCylinder"),FunctionTemplate::New(ShapeFactory::makeCylinder)->GetFunction());
+  target->Set(String::NewSymbol("makeCone"),    FunctionTemplate::New(ShapeFactory::makeCone)->GetFunction());
+  target->Set(String::NewSymbol("makeSphere"),  FunctionTemplate::New(ShapeFactory::makeSphere)->GetFunction());
+  target->Set(String::NewSymbol("makePrism"),   FunctionTemplate::New(ShapeFactory::makePrism)->GetFunction());
+
+  target->Set(String::NewSymbol("fuse"),        FunctionTemplate::New(ShapeFactory::fuse)->GetFunction());
+  target->Set(String::NewSymbol("cut"),         FunctionTemplate::New(ShapeFactory::cut)->GetFunction());
+  target->Set(String::NewSymbol("common"),      FunctionTemplate::New(ShapeFactory::common)->GetFunction());
+
+  target->Set(String::NewSymbol("writeSTEP"),      FunctionTemplate::New(writeSTEP)->GetFunction());
+
+  target->Set(String::NewSymbol("oceVersion"),  String::New("0.11"));
 
 }
 NODE_MODULE(occ, Initialize)

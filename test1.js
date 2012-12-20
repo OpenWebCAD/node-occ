@@ -1,8 +1,26 @@
 var util   = require('util');
 var assert = require('assert');
+
 var occ = require('./');
 
+
 var shapeFactory = require('./lib/shapeFactory.js');
+
+
+var CSGbuilder =require('./lib/CSGbuilder');
+
+function testCSG()
+{
+    var simple_csg = {
+        "box": { type: "makeBox" , parameters:  [[-10,-10,-10] , [10,10,10]] },
+        "sphere": { type: "makeSphere" , parameters: [[0,0,0] , 3 ] },
+        "solid":  { type: "common", parameters: ["box","sphere"]  }
+    };
+    CSGbuilder.build(simple_csg);
+
+}
+testCSG();
+
 
 var bbox = new occ.BoundingBox();
 console.log(bbox.nearPt);
@@ -12,9 +30,8 @@ console.log(bbox.nearPt.x);
 
 function test3()
 {
-    solid = new occ.Solid();
-    solid.makeBox([10,20,30],[20,40,60]);
-    solid.fillet(solid.getEdges(),5);
+    solid = occ.makeBox([10,20,30],[20,40,60]);
+    solid.fillet(solid.getEdges(),2);
 
 }
 test3();
@@ -33,18 +50,11 @@ function test1() {
 var solid;
 var shapeIt;
 
-solid = new occ.Solid();
-solid.makeBox([10,20,30],[20,40,60]);
+solid = occ.makeBox([10,20,30],[20,40,60]);
+
 shapeIt = new occ.ShapeIterator(solid,"FACE");
     shapeIt.more.should.be.true;
     assert(shapeIt.current === undefined);
-    for (var i=0;i<12;i++) {
-        shapeIt.more.should.be.true;
-        shapeIt.next();
-        shapeIt.current.should.not.be.undefined;
-    }
-    shapeIt.more.should.be.false;
-    shapeIt.current.should.not.be.undefined;
 
 }
 test1();
@@ -77,7 +87,7 @@ var box1 = new occ.Solid();
 assert(box1.isNull);
 assert(!box1.isValid);
 
-box1.makeBox([10,20,30],[30,40,50]);
+box1 = occ.makeBox([10,20,30],[30,40,50]);
 
 //xx for (var i in box1.mesh) {
 //xx     console.log( " i=",i,"  => ", box1.mesh[i]);
@@ -89,10 +99,8 @@ console.log( " i=",i,"  => ", box1.mesh.vertices);
 assert(!box1.isNull);
 assert(box1.isValid);
 
-var box2 = new occ.Solid();
-box1.makeBox([10,20,30],[100,100,100]);
-var box3 = new occ.Solid();
-box3.makeBox([10,20,30],100,100,100);
+var box2 = occ.makeBox([10,20,30],[100,100,100]);
+var box3 = occ.makeBox([10,20,30],100,100,100);
 
 //xx console.log("box1.x",box1.location.x);
 //xx console.log("box1.x",box1.location.y);
@@ -100,8 +108,7 @@ box3.makeBox([10,20,30],100,100,100);
 //xx console.log("cuboid",JSON.stringify(box1));
 
 
-var solid = new occ.Solid();
-solid.makeBox([10,20,30],[20,30,40]);
+var solid = occ.makeBox([10,20,30],[20,30,40]);
 
 
 for ( var i in solid) {

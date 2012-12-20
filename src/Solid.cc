@@ -3,6 +3,7 @@
 #include "Util.h"
 #include "Face.h"
 #include "Edge.h"
+#include "BoundingBox.h"
 
 
 Persistent<FunctionTemplate> Solid::constructor;
@@ -26,20 +27,12 @@ Persistent<FunctionTemplate> Solid::constructor;
 
   Base::InitProto(proto);
 
-  EXPOSE_METHOD(Solid,makeBox);
-  EXPOSE_METHOD(Solid,makeCone);
-  EXPOSE_METHOD(Solid,makeSphere);
-  EXPOSE_METHOD(Solid,makeCylinder);
-
-  EXPOSE_METHOD(Solid,fuse);
-  EXPOSE_METHOD(Solid,cut);
-  EXPOSE_METHOD(Solid,common);
 
   EXPOSE_METHOD(Solid,fillet);
   EXPOSE_METHOD(Solid,chamfer);
 
   EXPOSE_METHOD(Solid,getEdges);
-
+  EXPOSE_METHOD(Solid,getBoundingBox);
 
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
@@ -75,297 +68,19 @@ Local<Object>  Solid::Clone()
   return scope.Close(instance);
 }	
 
-Handle<v8::Value> Solid::NewInstance(const v8::Arguments& args) 
+Handle<Value> Solid::NewInstance(TopoDS_Shape& shape)
 {
   HandleScope scope;
-
-  const unsigned argc = 1;
-  Handle<v8::Value> argv[argc] = { args[0] };
-  Local<Object> instance = constructor->GetFunction()->NewInstance(argc, argv);
-
+  Local<Object> instance = Solid::constructor->GetFunction()->NewInstance(0,0);
+  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
+  pThis->setShape(shape);
   return scope.Close(instance);
 }
 
-
-
-
-
-Handle<v8::Value> Solid::makeBox(const v8::Arguments& args) 
+Handle<v8::Value> Solid::NewInstance(const v8::Arguments& args) 
 {
-
-   // could be :
-   //    3 numbers dx,dy,dz
-   //    2 points  p1,p2
-   //TODO   1 point + 3 numbers dx,dy,dz 
-   //TODO    1 object with { x: 1,y: 2,z: 3, dw:
-   Solid* pThis = ObjectWrap::Unwrap<Solid>(args.This());
-   
-   double dx = 10;
-   double dy = 10;
-   double dz = 10;
-      
-   try {
-     if (args.Length() == 3 && args[0]->IsNumber() && args[1]->IsNumber()  && args[2]->IsNumber() ) {
-        dx  = args[0]->ToNumber()->Value();
-        dy  = args[1]->ToNumber()->Value();
-        dz  = args[2]->ToNumber()->Value();
-        pThis->shape_ = BRepPrimAPI_MakeBox(dx, dy, dz).Shape();
-     } else if (args.Length() == 2) {
-
-       gp_Pnt p1;
-       ReadPoint(args[0],&p1);
-
-       gp_Pnt p2;
-       ReadPoint(args[1],&p2);
-
-       pThis->shape_ = BRepPrimAPI_MakeBox(p1,p2).Shape();
-
-     } else if (args.Length() == 3) {
-
-       gp_Pnt p1;
-       ReadPoint(args[0],&p1);
-
-       dx  = args[2]->ToNumber()->Value();
-       dy  = args[3]->ToNumber()->Value();
-       dz  = args[4]->ToNumber()->Value();
-     
-       pThis->shape_ = BRepPrimAPI_MakeBox(p1,dx, dy, dz).Shape();
-
-
-     } 
-   }
-   catch(Standard_Failure&) {
-      pThis->shape_.Nullify();
-   }
-   // xx pThis->PostProcess(json);
-   return args.This();
-
-}
-
-
-Handle<Value> Solid::makePrism(const Arguments& args)
-{
-	HandleScope scope;
-    // can work with this
-	Handle<Object> pJhis = args.This();
-	if ( pJhis.IsEmpty() || !Solid::constructor->HasInstance(pJhis))  {
-		// create a new fapce;
-		pJhis = constructor->GetFunction()->CallAsConstructor(0,0)->ToObject();
-	}					 						
-	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-	// <FACE> [x,y,z]
-	// <FACE> [x,y,z] [x,y,z]
-	// OCCBase *shape, OCCStruct3d p1, OCCStruct3d p2) 
-	Face* pFace = DynamicCast<Face>(args[0]);
-
-	gp_Vec direction(0,0,10);
-	ReadVector(args[1],&direction);
-
-	if (!pFace || direction.IsEqual(gp_Vec(0,0,0),1E-7,1E-8)) {
-		ThrowException(Exception::TypeError(String::New("invalid arguments : expecting <FACE>,<VECTOR>")));
-	}																
-
-    try {		   
-        const TopoDS_Shape& face = pFace->face();
-        //// Only accept Edge or Wire
-        //TopAbs_ShapeEnum type = shp.ShapeType();
-        //if (type != TopAbs_EDGE && type != TopAbs_WIRE) {
-        //    StdFail_NotDone::Raise("expected Edge or Wire");
-        //}
-       
-        BRepPrimAPI_MakePrism prismMaker(face, direction);
-		
-		//xx prismMaker.Check();
-
-        pThis->setShape(prismMaker.Shape());
-        
-        // possible fix shape
-        if (!pThis->fixShape())	 {
-            StdFail_NotDone::Raise("Shapes not valid");
-		}
-        
-    } CATCH_AND_RETHROW("Failed to create prism ");
-
-    return scope.Close(pJhis);
-}
-
-
-Handle<Value> Solid::makeSphere(const Arguments& args)
-{
-	HandleScope scope;
-    // can work with this
-	Handle<Object> pJhis = args.This();
-	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
-		// create a new object
-		pJhis = constructor->GetFunction()->CallAsConstructor(0,0)->ToObject();
-	}					 						
-	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-	gp_Pnt center(0,0,0);
-	ReadPoint(args[0],&center);
-	double radius = args[1]->ToNumber()->Value();
-	if (radius < 1E-7) {
-	   ThrowException(Exception::Error(String::New("invalid radius")));
-	    return scope.Close(pJhis);
-	}
-    try {
-       
-        pThis->setShape(BRepPrimAPI_MakeSphere(center, radius).Shape());
-
-    } CATCH_AND_RETHROW("Failed to create sphere ");
-
-    return scope.Close(pJhis);
-}
-
-bool ReadAx2(Handle<Value>& value,gp_Ax2* ax2)
-{
-	assert(ax2);
-	try {
-		if (value->IsArray()) {
-			Handle<Array> arr= Handle<Array>::Cast(value);
-			gp_Pnt origin;
-			ReadPoint(arr->Get(0),&origin);
-			if (arr->Length() == 2) {
-				// variation 2 :  gp_Ax2(const gp_Pnt& P,const gp_Dir& V);
-				gp_Dir V;
-				ReadDir(arr->Get(1),&V);
-				*ax2 =  gp_Ax2(origin,V);
-				return true;
-			}
-			if (arr->Length() == 3) {								
-				// variation 1 : gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
-				gp_Dir N,Vx;
-				ReadDir(arr->Get(1),&N);
-				ReadDir(arr->Get(2),&Vx);
-				*ax2 =  gp_Ax2(origin,N,Vx);
-				return true;
-			}
-		}	
-	} CATCH_AND_RETHROW("Failed to extract position");
-	return false;
-}
-Handle<Value> Solid::makeCylinder(const Arguments& args)
-{
-	HandleScope scope;
-    // can work with this
-	Handle<Object> pJhis = args.This();
-	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
-		// create a new object
-		pJhis = constructor->GetFunction()->CallAsConstructor(0,0)->ToObject();
-	}					 		
-	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-
-	//  gp_Ax2& Axes
-	//  gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
- 	// Standard_EXPORT   BRepPrimAPI_MakeCylinder(const Standard_Real R,const Standard_Real H);
-	// Standard_EXPORT   BRepPrimAPI_MakeCylinder(const Standard_Real R,const Standard_Real H,const Standard_Real Angle);
-    // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,const Standard_Real H);
-	// Standard_EXPORT   BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,const Standard_Real H,const Standard_Real Angle);
-    const double epsilon = 1E-3;
-
-	gp_Ax2 axis;
- 	if (args.Length()==2) {
-
-		// variation 1	 <R:number> <H:number> 
-		// a vertical cylinder of radius R starting a (0,0,0) ending at (0,0,H)
-		double R  = args[0]->ToNumber()->Value();
-		double H  = args[1]->ToNumber()->Value();
-
-		if ( R < epsilon || H < epsilon ) {
-			ThrowException(Exception::Error(String::New("invalid value for arguments")));
-		}
-		try {
-			pThis->setShape(BRepPrimAPI_MakeCylinder(R,H).Shape());
-		} CATCH_AND_RETHROW("Failed to create cylinder ");
-
-	} else if (args.Length()==3) {
-
-		if (args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsNumber()) {
-			// variation 2
-			//  <[ <Origin[x,yz]>, <VZn[x,yz]>,<VXn[x,yz]>] <R:number> <H:number>
-			gp_Ax2  ax2;
-			bool success = ReadAx2(args[0],&ax2);
-
- 			double R  = args[1]->ToNumber()->Value();
-			double H  = args[2]->ToNumber()->Value();
-
-			if ( R < epsilon || H < epsilon ) {
-				ThrowException(Exception::Error(String::New("invalid value for arguments")));
-			}
-			try {
-				pThis->setShape(BRepPrimAPI_MakeCylinder(ax2,R,H).Shape());
-			} CATCH_AND_RETHROW("Failed to create cylinder ");
-
-		} else if (args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber()) {
-			// variation 3
-			gp_Pnt p1;
-			ReadPoint(args[0],&p1);
-			
-			gp_Pnt p2;
-			ReadPoint(args[1],&p1);
-
-			double R  = args[2]->ToNumber()->Value();
-			      
-			const double dx = p2.X() - p1.X();
-			const double dy = p2.Y() - p1.Y();
-			const double dz = p2.Z() - p1.Z();
-
-			const double H = sqrt(dx*dx + dy*dy + dz*dz);
-			if (H < epsilon ) {
-				ThrowException(Exception::Error(String::New("cannot build a cylinder on two coincident points")));
-			}
-			gp_Vec aV(dx / H, dy / H, dz / H);
-			gp_Ax2 ax2(p1, aV);
-			try {
-				pThis->setShape(BRepPrimAPI_MakeCylinder(ax2,R,H).Shape());
-			} CATCH_AND_RETHROW("Failed to create cylinder ");
-			
-		}
-	} else {
-		ThrowException(Exception::Error(String::New("invalid arguments")));
-	}
-
-    return scope.Close(pJhis);
-}
-
-
-Handle<Value> Solid::makeCone(const Arguments& args)
-{							
-	HandleScope scope;
-    // can work with this
-	Handle<Object> pJhis = args.This();
-	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
-		// create a new object
-		pJhis = constructor->GetFunction()->CallAsConstructor(0,0)->ToObject();
-	}					 						
-	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-
-
-    const double epsilon = 1E-3;
-
-
-    // Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H);
-	// Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
-	// Standard_EXPORT   BRepPrimAPI_MakeCone(const gp_Ax2& Axes,const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
-	if (args.Length()==3) {
-		double R1 = args[0]->ToNumber()->Value();
-		double R2 = args[1]->ToNumber()->Value();
-		double H  = args[2]->ToNumber()->Value();
-
-		if ( R1 < epsilon || R2 < epsilon || H < epsilon ) {
-			ThrowException(Exception::Error(String::New("invalid value for arguments")));
-		}
-		try {
-			pThis->setShape(BRepPrimAPI_MakeCone(R1, R2,H).Shape());
-		} CATCH_AND_RETHROW("Failed to create sphere ");
-	}  else {
-		ThrowException(Exception::Error(String::New("invalid arguments")));
-	}
-
-    return scope.Close(pJhis);
+  TopoDS_Shape shape;
+  return NewInstance(shape);
 }
 
 
@@ -395,6 +110,9 @@ Handle<Value> Solid::getEdges(const v8::Arguments& args)
 	}
 	return scope.Close(arr);
 }
+
+
+
 
 int Solid::chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances)
 {
@@ -521,6 +239,40 @@ int Solid::fillet(const std::vector<Edge*>& edges,const  std::vector<double>& ra
 	return 1;
     
 }
+Handle<v8::Value> Solid::fillet(const v8::Arguments& args) 
+{
+	HandleScope scope;
+	// [ <list of edges ], radius ]
+	// [ <list of edges ], radius ]
+	std::vector<Edge*> edges;
+	extractArray<Edge>(args[0],edges);
+	std::vector<double> radii;
+
+	if (args[1]->IsNumber()) {	
+		double radius = args[1]->ToNumber()->Value();
+		if (radius < 1E-7 ) {
+			//TODO
+		}
+		radii.push_back(radius);
+	}
+
+	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(args.This());
+
+	pThis->fillet(edges,radii);
+
+	// size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
+	return args.This();
+}
+Handle<v8::Value> Solid::chamfer(const v8::Arguments& args) 
+{
+	HandleScope scope;
+	// [ <list of edges ], radius ]
+	// [ <list of edges ], radius ]
+
+	// size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
+	return Handle<v8::Value>(Undefined());
+}
+
 
 
 int Solid::numSolids()
@@ -592,139 +344,7 @@ double Solid::volume()
 //}
 
 
-typedef enum BoolOpType {
-  BOOL_FUSE,
-  BOOL_CUT,
-  BOOL_COMMON,
-} BoolOpType;
 
-int Solid::boolean(Solid *tool, BoolOpType op)
-{
-    try {
-        TopoDS_Shape shape;
-        switch (op) {
-            case BOOL_FUSE:
-            {
-                BRepAlgoAPI_Fuse FU (tool->shape(), this->shape());
-                if (!FU.IsDone())
-                    Standard_ConstructionError::Raise("operation failed");
-                shape = FU.Shape();
-                break;
-            }
-            case BOOL_CUT:
-            {
-                BRepAlgoAPI_Cut CU (this->shape(), tool->shape());
-                if (!CU.IsDone())
-                    Standard_ConstructionError::Raise("operation failed");
-                shape = CU.Shape();
-                break;
-            }
-            case BOOL_COMMON:
-            {
-                BRepAlgoAPI_Common CO (tool->shape(), this->shape());
-                if (!CO.IsDone())
-                    Standard_ConstructionError::Raise("operation failed");
-                shape = CO.Shape();
-                break;
-            }
-            default:
-                Standard_ConstructionError::Raise("unknown operation");
-                break;
-        }
-        
-        // check for empty compund shape
-        TopoDS_Iterator It (shape, Standard_True, Standard_True);
-        int found = 0;
-        for (; It.More(); It.Next())
-            found++;
-        if (found == 0) {
-            Standard_ConstructionError::Raise("result object is empty compound");
-        }
-        
-        this->setShape(shape);
-        
-        // possible fix shape
-        if (!this->fixShape())
-            StdFail_NotDone::Raise("Shapes not valid");
-        
-    } catch(Standard_Failure &) {
-        Handle_Standard_Failure e = Standard_Failure::Caught();
-        const Standard_CString msg = e->GetMessageString();
-        if (msg != NULL && strlen(msg) > 1) {
-            setErrorMessage(msg);
-        } else {
-            setErrorMessage("Failed in boolean operation");
-        }
-        return 0;
-    }
-    return 1;
-}
-
-
-Handle<v8::Value> Solid::_boolean(const v8::Arguments& args,BoolOpType op) 
-{
-  HandleScope scope;
-  
-  Local<v8::Value> v = args[0];
-  if (v.IsEmpty() || !v->IsObject()) {
-      ThrowException(Exception::TypeError(String::New("Wrong v8::Arguments")));
-      return scope.Close(Undefined());
-  }
-  Solid* pThis = ObjectWrap::Unwrap<Solid>(args.This());
-  Solid* pTool = ObjectWrap::Unwrap<Solid>(v->ToObject());
-
-  int ret =  pThis->boolean(pTool, op);
-
-  return scope.Close(args.This());
-
-}
-Handle<v8::Value> Solid::fuse(const v8::Arguments& args) 
-{
-  return _boolean(args,BOOL_FUSE);
-}
-Handle<v8::Value> Solid::cut(const v8::Arguments& args) 
-{
-  return _boolean(args,BOOL_CUT);
-}
-Handle<v8::Value> Solid::common(const v8::Arguments& args) 
-{
-  return _boolean(args,BOOL_COMMON);
-}
-
-Handle<v8::Value> Solid::fillet(const v8::Arguments& args) 
-{
-  HandleScope scope;
-  // [ <list of edges ], radius ]
-  // [ <list of edges ], radius ]
-  std::vector<Edge*> edges;
-  extractArray<Edge>(args[0],edges);
-  std::vector<double> radii;
-
-  if (args[1]->IsNumber()) {	
-	  double radius = args[1]->ToNumber()->Value();
-	  if (radius < 1E-7 ) {
-		  //TODO
-	  }
-	  radii.push_back(radius);
-  }
-  
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(args.This());
-
-  pThis->fillet(edges,radii);
-
-  // size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
-  return args.This();
-}
-Handle<v8::Value> Solid::chamfer(const v8::Arguments& args) 
-{
-  HandleScope scope;
-  // [ <list of edges ], radius ]
-  // [ <list of edges ], radius ]
-
-  // size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
-  return Handle<v8::Value>(Undefined());
-}
-  
 
 Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
 {
