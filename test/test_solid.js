@@ -225,16 +225,26 @@ describe("testing solid construction",function(){
             solid.numFaces.should.equal(3);
         })
     })
-    describe("makeCylinder (variation 3 : with 2 points and a height)",function(){
+    describe("makeCylinder (variation 3 : with 2 points and a radius)",function(){
         var solid;
+        var bbox;
         before(function(){
-            var startPoint = [10,20,40];
-            var endPoint   = [20,30,40];
-            var height = 100;
-            solid = occ.makeCylinder(startPoint ,endPoint,height);
+            var startPoint = [-100,20,40];
+            var endPoint   = [ 100,20,40];
+            var radius = 20;
+            solid = occ.makeCylinder(startPoint ,endPoint,radius);
+            bbox = solid.getBoundingBox();
+
         })
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);
+        })
+        it("should have a bounding box that includes X=-100,20,40", function() {
+            bbox.nearPt.y.should.be.within(-2, 0);
+            bbox.farPt.y.should.be.within( 40,42);
+
+            bbox.nearPt.x.should.be.within(-101,-100);
+            bbox.farPt.x.should.be.within( 100,101);
         })
     })
     describe("makeCone",function(){

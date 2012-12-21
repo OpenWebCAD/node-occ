@@ -1,11 +1,39 @@
+
 <!DOCTYPE html>
 <html>
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/javascripts/three.js"></script>
+    <script src="/javascripts/TrackballControls.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
   </head>
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+
+    <textarea style="margin: 2px; height: 200px; width: 900px;"  row="20" col="80" id="csg">
+
+"c1":     { "type": "makeCylinder" , "parameters": [ [-20,  0, 0] ,  [ 20, 0, 0] , 5]  },
+"c2":     { "type": "makeCylinder" , "parameters": [  [  0,-20, 0] , [  0,20, 0] , 5.01 ] },
+"c3":     { "type": "makeCylinder" , "parameters": [  [  0,  0,-20] , [  0,0, 20] ,4.992] },
+"c4":     { "type": "fuse" ,         "parameters": [ "c1", "c2" ] },
+"cross":  { "type": "fuse" ,         "parameters": [ "c4", "c3" ] },
+"box":    { "type": "makeBox" ,      "parameters": [ [-10,-10,-10] , [10,10,10] ] },
+"sphere": { "type": "makeSphere" ,   "parameters": [ [0,0,0] , 15 ] },
+"blob":   { "type": "common",        "parameters": [ "box", "sphere"]  },
+"solid":  { "type": "cut",           "parameters": [ "blob", "cross"]  }
+
+    </textarea>
+    <button id="button"> Test</button>
+    <div id="3DView" style="width:400px;height:400px;background-color:black">
+
+    </div>
+
+    <pre id="ascii_mesh" style="font-size=0.8em"><pre>
+
+    <script src="/javascripts/threejsView.js"></script>
+
+    </script>
   </body>
 </html>

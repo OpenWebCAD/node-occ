@@ -79,3 +79,4 @@ void Vertex::Init(Handle<Object> target)
 
   target->Set(String::NewSymbol("Vertex"), constructor->GetFunction());
 }
+

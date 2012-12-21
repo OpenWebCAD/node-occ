@@ -4,6 +4,13 @@ var assert = require('assert');
 var occ = require('./');
 
 
+function testCyl()
+{
+   var cyl =oc.makeCylinder([-100,20,30],[100,20,30],40);
+
+}
+testCyl();
+
 var shapeFactory = require('./lib/shapeFactory.js');
 
 

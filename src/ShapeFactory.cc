@@ -204,12 +204,13 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
 			} CATCH_AND_RETHROW("Failed to create cylinder ");
 
 		} else if (args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber()) {
-			// variation 3
+
+			// variation 3 ( 2 points and a radius  ) 
 			gp_Pnt p1;
 			ReadPoint(args[0],&p1);
 
 			gp_Pnt p2;
-			ReadPoint(args[1],&p1);
+			ReadPoint(args[1],&p2);
 
 			double R  = args[2]->ToNumber()->Value();
 
@@ -272,14 +273,14 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
 
 
 
-TopoDS_Shape ShapeFactory::createBoolean(Solid* firstObject,Solid* secondObject, BoolOpType op)
+TopoDS_Shape ShapeFactory::createBoolean(const TopoDS_Shape& firstObject,const TopoDS_Shape& secondObject, BoolOpType op)
 {
 	TopoDS_Shape shape;
 	try {
 		switch (op) {
 		case BOOL_FUSE:
 			{
-				BRepAlgoAPI_Fuse tool(firstObject->shape(), secondObject->shape());
+				BRepAlgoAPI_Fuse tool(firstObject, secondObject);
 				if (!tool.IsDone())
 					Standard_ConstructionError::Raise("operation failed");
 				shape = tool.Shape();
@@ -287,7 +288,7 @@ TopoDS_Shape ShapeFactory::createBoolean(Solid* firstObject,Solid* secondObject,
 			}
 		case BOOL_CUT:
 			{
-				BRepAlgoAPI_Cut tool (firstObject->shape(), secondObject->shape());
+				BRepAlgoAPI_Cut tool(firstObject, secondObject);
 				if (!tool.IsDone())
 					Standard_ConstructionError::Raise("operation failed");
 				shape = tool.Shape();
@@ -295,7 +296,7 @@ TopoDS_Shape ShapeFactory::createBoolean(Solid* firstObject,Solid* secondObject,
 			}
 		case BOOL_COMMON:
 			{
-				BRepAlgoAPI_Common tool (firstObject->shape(), secondObject->shape());
+				BRepAlgoAPI_Common tool(firstObject, secondObject);
 				if (!tool.IsDone())
 					Standard_ConstructionError::Raise("operation failed");
 				shape = tool.Shape();
@@ -322,6 +323,36 @@ TopoDS_Shape ShapeFactory::createBoolean(Solid* firstObject,Solid* secondObject,
 }
 
 
+
+Handle<v8::Object> ShapeFactory::add(const std::vector<Solid*>& solids)
+{
+	HandleScope scope;
+    TopoDS_Compound compound;
+	BRep_Builder builder;
+	try {
+
+        builder.MakeCompound(compound);
+        for (size_t i = 0; i < solids.size(); i++) {
+            builder.Add(compound, solids[i]->shape());
+        }
+       
+
+    } CATCH_AND_RETHROW("Failed in boolean operation");
+	return scope.Close(Solid::NewInstance(compound)->ToObject());
+
+}
+Handle<v8::Value> ShapeFactory::add(const v8::Arguments& args)
+{
+	HandleScope scope;
+	std::vector<Solid*> solids;
+	for (int i=0;i<args.Length();i++) {
+		if (Solid::constructor->HasInstance(args[i]->ToObject())) {
+			Solid* pSolid = node::ObjectWrap::Unwrap<Solid>(args[i]->ToObject());
+			solids.push_back(pSolid);
+		}
+	}
+	return add(solids);
+}
 Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BoolOpType op) 
 {
 	HandleScope scope;
@@ -332,9 +363,18 @@ Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BoolOpType op
 	}
 
 	Solid* pSolid1 = node::ObjectWrap::Unwrap<Solid>(args[0]->ToObject());
-	Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(args[1]->ToObject());
 
-	return scope.Close(Solid::NewInstance(createBoolean(pSolid1, pSolid2,op) ) );
+	std::vector<Solid*> other_solids;
+	for (int i=1;i<args.Length();i++) {
+		if(Solid::constructor->HasInstance(args[i])) {
+			Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(args[i]->ToObject());
+			other_solids.push_back(pSolid2);
+		}
+	}
+	Handle<Object> compound = ShapeFactory::add(other_solids);
+	Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(compound);
+
+	return scope.Close(Solid::NewInstance(createBoolean(pSolid1->shape(), pSolid2->shape(),op) ) );
 
 }
 Handle<v8::Value> ShapeFactory::fuse(const v8::Arguments& args) 

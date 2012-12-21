@@ -263,8 +263,8 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
 template <class T> struct _typeMatcher{	 static ExternalArrayType get() ;};
 
 template <> struct _typeMatcher<float>       {	static ExternalArrayType get() { return kExternalFloatArray ; } };
-template <> struct _typeMatcher<int>         {	static ExternalArrayType get() { return kExternalShortArray ; } };
-template <> struct _typeMatcher<unsigned int>{	static ExternalArrayType get() { return kExternalUnsignedShortArray ; } };
+template <> struct _typeMatcher<int>         {	static ExternalArrayType get() { return kExternalIntArray ; } };
+template <> struct _typeMatcher<unsigned int>{	static ExternalArrayType get() { return kExternalUnsignedIntArray ; } };
 
 template<class T>
 void UpdateExternalArray(Handle<Object>& pThis,const char* name,const T* data,size_t _length)

@@ -21,3 +21,4 @@ build
 .idea
 /toto.STEP
 /backup
+/debugHelper

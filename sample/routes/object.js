@@ -1,4 +1,5 @@
-
+var occ  = require('../../lib/occ')
+  , CSGBuilder = require('../../lib/CSGBuilder');
 
 exports.get = function(req, res) {
 
@@ -35,4 +36,26 @@ exports.list = function(req, res) {
             res.send(database.solidMap);
         }
     });
+}
+
+
+exports.buildCSG = function(req,res)
+{
+    var jsonStr = ""
+    var csgStr = CSGBuilder.sample_csg_tree;
+    csgStr = req.body;
+
+
+    try {
+        var solid  = CSGBuilder.build(csgStr);
+        var mesh   = solid.mesh;
+         jsonStr = mesh.toJSON();
+        console.log ( jsonStr);
+    }
+    catch(err) {
+        res.send(501,"Error building solid : "+ err.message + err.toString());
+        return;
+    }
+    res.send(jsonStr);
+
 }
