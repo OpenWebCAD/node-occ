@@ -10,7 +10,8 @@ describe("Building a csg",function() {
 
     describe("building a simple box",function(){
         var simple_csg = {
-            "solid":  { type: "makeBox",  parameters: [[10,20,30],[40,50,70]]  }
+            "solid":  { type: "makeBox",  parameters: [[10,20,30],[40,50,70]]  },
+            "root" : "solid"
         };
         var solid;
         before(function(){
@@ -22,7 +23,8 @@ describe("Building a csg",function() {
     });
     describe("building a simple cylinder",function(){
         var simple_csg = {
-            "solid": { type: "makeCylinder" , parameters: [ [-20,  0, 0] ,  [ 20, 0, 0] , 4]  }
+            "solid": { type: "makeCylinder" , parameters: [ [-20,  0, 0] ,  [ 20, 0, 0] , 4]  },
+            "root" : "solid"
         };
         var solid;
         before(function(){
@@ -38,7 +40,8 @@ describe("Building a csg",function() {
         var simple_csg = {
             "box": { type: "makeBox" , parameters:  [[-10,-10,-10] , [10,10,10]] },
             "sphere": { type: "makeSphere" , parameters: [[0,0,0] , 15 ] },
-            "solid":  { type: "common", parameters: ["box","sphere"]  }
+            "solid":  { type: "common", parameters: ["box","sphere"]  },
+            "root" : "solid"
         };
         var solid;
         before(function(){
@@ -56,8 +59,8 @@ describe("Building a csg",function() {
         before(function(){
             solid = CSGbuilder.build(simple_csg);
         });
-        it("should have 18 faces",function(){
-            solid.numFaces.should.equal(18);
+        it("should have 20 faces",function(){
+            solid.numFaces.should.equal(20);
         })
 
     });

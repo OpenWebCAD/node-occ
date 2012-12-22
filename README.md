@@ -29,6 +29,14 @@ occ.writeSTEP("somefile.step",box)
 
 
 
+dependencies:
+    - threejs    : https://github.com/mrdoob/three.js
+    - codemirror : https://github.com/marijnh/CodeMirror
+
+acknowledgement:
+    - OpenCascade : http://www.opencascade.org
+    - occmodel    : https://github.com/tenko/occmodel
+    - ShapeSmith  : https://github.com/bjnortier/shapesmith
 
 
 ### MIT License

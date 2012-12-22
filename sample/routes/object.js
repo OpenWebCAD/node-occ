@@ -45,12 +45,10 @@ exports.buildCSG = function(req,res)
     var csgStr = CSGBuilder.sample_csg_tree;
     csgStr = req.body;
 
-
     try {
         var solid  = CSGBuilder.build(csgStr);
         var mesh   = solid.mesh;
-         jsonStr = mesh.toJSON();
-        console.log ( jsonStr);
+        jsonStr = mesh.toJSON();
     }
     catch(err) {
         res.send(501,"Error building solid : "+ err.message + err.toString());

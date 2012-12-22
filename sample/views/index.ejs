@@ -6,25 +6,83 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <script src="/javascripts/three.js"></script>
     <script src="/javascripts/TrackballControls.js"></script>
+    <script src="http://www.janthor.com/lib/TinyTrackballControls.js"></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <script src="/codemirror/lib/codemirror.js"></script>
+    <script src="/codemirror/mode/javascript/javascript.js"></script>
+    <script src="/codemirror/lib/util/matchbrackets.js"></script>
+    <script src="/codemirror/lib/util/continuecomment.js"></script>
+    <script src="/codemirror/lib/util/simple-hint.js"></script>
+    <script src="/codemirror/lib/util/javascript-hint.js"></script>
+    <link rel="stylesheet" href="/codemirror//lib/util/simple-hint.css">
+
+    <link rel="stylesheet" href="/codemirror/theme/neat.css">
+    <link rel="stylesheet" href="/codemirror/theme/elegant.css">
+    <link rel="stylesheet" href="/codemirror/theme/erlang-dark.css">
+    <link rel="stylesheet" href="/codemirror/theme/night.css">
+    <link rel="stylesheet" href="/codemirror/theme/monokai.css">
+    <link rel="stylesheet" href="/codemirror/theme/cobalt.css">
+    <link rel="stylesheet" href="/codemirror/theme/eclipse.css">
+    <link rel="stylesheet" href="/codemirror/theme/rubyblue.css">
+    <link rel="stylesheet" href="/codemirror/theme/lesser-dark.css">
+    <link rel="stylesheet" href="/codemirror/theme/xq-dark.css">
+    <link rel="stylesheet" href="/codemirror/theme/ambiance.css">
+    <link rel="stylesheet" href="/codemirror/theme/blackboard.css">
+    <link rel="stylesheet" href="/codemirror/theme/vibrant-ink.css">
+    <link rel="stylesheet" href="/codemirror/theme/solarized.css">
+    <link rel="stylesheet" href="/codemirror/theme/twilight.css">
+
+    <link rel=stylesheet href="codemirror/lib/codemirror.css"/>
+
+    <script src="/CSGTree.js"></script>
+
+    <style type=text/css>
+      .CodeMirror {
+        float: left;
+        width: 50%;
+        border: 1px solid black;
+      }
+       .3DView {
+        width: 49%;
+        float: left;
+        height: 300px;
+        border: 1px solid black;
+        border-left: 0px;
+      }
+    </style>
+
+
   </head>
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
 
-    <textarea style="margin: 2px; height: 200px; width: 900px;"  row="20" col="80" id="csg">
+<textarea id="code" name="code" style="margin: 2px; height: 200px; width: 900px;"  row="20" col="80" >
+    var height = 20;
+    var thickness = 2;
+    var radius  =10.0;
 
-"c1":     { "type": "makeCylinder" , "parameters": [ [-20,  0, 0] ,  [ 20, 0, 0] , 5]  },
-"c2":     { "type": "makeCylinder" , "parameters": [  [  0,-20, 0] , [  0,20, 0] , 5.01 ] },
-"c3":     { "type": "makeCylinder" , "parameters": [  [  0,  0,-20] , [  0,0, 20] ,4.992] },
-"c4":     { "type": "fuse" ,         "parameters": [ "c1", "c2" ] },
-"cross":  { "type": "fuse" ,         "parameters": [ "c4", "c3" ] },
-"box":    { "type": "makeBox" ,      "parameters": [ [-10,-10,-10] , [10,10,10] ] },
-"sphere": { "type": "makeSphere" ,   "parameters": [ [0,0,0] , 15 ] },
-"blob":   { "type": "common",        "parameters": [ "box", "sphere"]  },
-"solid":  { "type": "cut",           "parameters": [ "blob", "cross"]  }
 
-    </textarea>
+
+    var s1 = csg.makeCylinder([0,0,0],[0,0,height] , radius);
+    var s2 = csg.makeSphere([0,0,0], radius);
+    var s3 = csg.makeCylinder([0,0,-radius*0.7],[0,0,height], radius*2);
+    var s4 = csg.fuse(s1,s2);
+    var s5 = csg.common(s4,s3);
+
+
+    var r1 = csg.makeCylinder([0,0,thickness],[0,0,height] , radius-thickness);
+    var r2 = csg.makeSphere([0,0,0],radius-thickness);
+    var r3 = csg.makeCylinder( [0,0,-radius*0.7+thickness],[0,0,height], radius*2);
+    var r4 = csg.fuse(r1,r2);
+    var r5 = csg.common(r4,r3);
+
+    var solid  = csg.cut(s5,r5);
+    return solid;
+</textarea>
+
     <button id="button"> Test</button>
     <div id="3DView" style="width:400px;height:400px;background-color:black">
 
@@ -35,5 +93,7 @@
     <script src="/javascripts/threejsView.js"></script>
 
     </script>
+
+
   </body>
 </html>

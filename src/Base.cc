@@ -233,7 +233,12 @@ void  Base::InitProto(Handle<ObjectTemplate> proto)
 
 	EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
 	EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isValid);
+	EXPOSE_READ_ONLY_PROPERTY_INTEGER(Base,hashCode);
 	EXPOSE_READ_ONLY_PROPERTY_CONST_STRING (Base,shapeType);
 
 }
 
+int Base::hashCode() 
+{
+	return shape().HashCode(std::numeric_limits<int>::max());
+}

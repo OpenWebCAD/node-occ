@@ -261,9 +261,10 @@ describe("testing solid construction",function(){
     })
     describe("makeSphere",function(){
         var solid;
+        var radius = 10;
+        var epsilon = radius* 1E-1;
         before(function(){
             var center = [10,20,30];
-            var radius = 70;
             solid = occ.makeSphere(center,radius);
         })
         it("should have 1 face and one egde", function() {
@@ -273,6 +274,17 @@ describe("testing solid construction",function(){
             for ( var edge in edges) {
                 // todo : do some investigation
             }
-        })
+        });
+        it("should have a area of 4*Pi*R",function(){
+            var expected_area = 4*3.14159265*radius*radius;
+            solid.area.should.be.within( expected_area-epsilon,expected_area+epsilon)
+        });
+        it("should have a volume of 4/3*Pi*R*2",function(){
+
+            var expected_volume = 4./3.0*3.14159265*radius*radius*radius;
+            solid.volume.should.be.within( expected_volume-epsilon,4./3.0*3.1415*radius*radius*radius+epsilon)
+
+        });
+
     })
 });

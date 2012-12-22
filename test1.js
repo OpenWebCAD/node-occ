@@ -6,7 +6,7 @@ var occ = require('./');
 
 function testCyl()
 {
-   var cyl =oc.makeCylinder([-100,20,30],[100,20,30],40);
+   var cyl =occ.makeCylinder([-100,20,30],[100,20,30],40);
 
 }
 testCyl();
@@ -16,11 +16,18 @@ var shapeFactory = require('./lib/shapeFactory.js');
 
 var CSGbuilder =require('./lib/CSGbuilder');
 
+function testCSG1()
+{
+    var solid = shapeFactory.cooker();
+
+}
+testCSG1();
+
 function testCSG()
 {
     var simple_csg = {
-        "box": { type: "makeBox" , parameters:  [[-10,-10,-10] , [10,10,10]] },
-        "sphere": { type: "makeSphere" , parameters: [[0,0,0] , 3 ] },
+        "box":    { type: "makeBox" , parameters:  [ [-10,-10,-10] , [10,10,10]] },
+        "sphere": { type: "makeSphere" , parameters: [ [0,0,0] , 3 ] },
         "solid":  { type: "common", parameters: ["box","sphere"]  }
     };
     CSGbuilder.build(simple_csg);
