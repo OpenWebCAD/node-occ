@@ -54,6 +54,9 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+app.get('/test', function(req,res) {
+   res.render("sample",{});
+})
 app.get('/', routes.index);
 app.get('/objects(""|\.json|\.html)', object.list);
 app.get('/object/:id', object.get);

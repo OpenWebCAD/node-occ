@@ -243,12 +243,7 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
 	Handle<v8::Value> pJhis = Solid::NewInstance(TopoDS_Shape());
 	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
 
-
-
-
 	const double epsilon = 1E-3;
-
-
 	// Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H);
 	// Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
 	// Standard_EXPORT   BRepPrimAPI_MakeCone(const gp_Ax2& Axes,const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
@@ -315,6 +310,15 @@ TopoDS_Shape ShapeFactory::createBoolean(const TopoDS_Shape& firstObject,const T
 		}
 		if (found == 0) {
 			Standard_ConstructionError::Raise("result object is empty compound");
+		}
+       
+		// simplify compound with one solid into a Solid
+		if (shape.ShapeType() == TopAbs_COMPOUND) {
+			TopTools_IndexedMapOfShape shapeMap;
+			TopExp::MapShapes(shape, TopAbs_SOLID, shapeMap);
+			if (shapeMap.Extent() == 1) {
+				shape = shapeMap(1);
+			}
 		}
 
 	}

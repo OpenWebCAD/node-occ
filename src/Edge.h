@@ -18,6 +18,8 @@ public:
 	double length();
 
 
+
+
 	// OCCTesselation *tesselate(double factor, double angle);
 
 	int createLine(Vertex *start, Vertex *end);
@@ -45,7 +47,10 @@ public:
 	static Handle<v8::Value> createCircle(const v8::Arguments& args);
 	static Handle<v8::Value> createArc3P(const v8::Arguments& args);
 
-   static void Init(Handle<Object> target);
-   static Handle<Value> New(const Arguments& args);
-   static Persistent<FunctionTemplate> constructor;
-};
+	Handle<Value> startVertex();
+	Handle<Value> endVertex();
+
+    static void Init(Handle<Object> target);
+    static Handle<Value> New(const Arguments& args);
+    static Persistent<FunctionTemplate> constructor;
+}; 

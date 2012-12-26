@@ -12,22 +12,24 @@
 #include "ShapeIterator.h"
 #include "Tools.h"
 #include "ShapeFactory.h"
+#include "Shell.h"
 
 
 
 void Initialize(Handle<Object> target) 
 {
   
+  BoundingBox::Init(target);
+  Edge::Init(target);
+  Face::Init(target);  
+  Mesh::Init(target);
+  Point3Wrap::Init(target);
+  ShapeIterator::Init(target);
+  Shell::Init(target);
   Solid::Init(target);
   Transformation::Init(target);
-  Mesh::Init(target);
-  Edge::Init(target);
   Vertex::Init(target);
   Wire::Init(target);
-  Face::Init(target);  
-  ShapeIterator::Init(target);
-  Point3Wrap::Init(target);
-  BoundingBox::Init(target);
 
   target->Set(String::NewSymbol("makeBox"),     FunctionTemplate::New(ShapeFactory::makeBox)->GetFunction());
   target->Set(String::NewSymbol("makeCylinder"),FunctionTemplate::New(ShapeFactory::makeCylinder)->GetFunction());

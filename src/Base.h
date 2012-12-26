@@ -12,7 +12,7 @@ public:
    bool isNull();
    bool isValid();
    const char* shapeType(); 
-    
+   const char* orientation();
    bool fixShape();
 
    virtual const TopoDS_Shape& shape() const = 0;

@@ -6,14 +6,35 @@ var container,
     scene,
     renderer,
     camera,
-    control;
+    control,
+    editor,
+    myLayout;
 
+
+function installLayout()
+{
+    // $('#container').layout({ applyDemoStyles: true });
+    myLayout = $('body').layout(
+        {
+            west__onresize:    function() { editor.resize(); },
+            center__onresize:  function() {
+                // resize webgl view
+                onWindowResize();
+            }
+        }
+    );
+    myLayout.sizePane("west", 400);
+}
 $(document).ready(function() {
+
+    installLayout();
 
     installEditor();
 
-    container = $("#3DView");
-
+    container = $("#graphical_view");
+    if (container.size() === 0 ) {
+        throw Error("Cannot find graphical view div");
+    }
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, container.width()/container.height(), 0.1, 1000);
     camera.position.z = 400;
@@ -40,8 +61,8 @@ $(document).ready(function() {
 
 
 
-    renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0xFF0000, clearAlpha: 1 } );
-    renderer.setClearColorHex(0xEEEEEE, 1.0);
+    renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0x121212, clearAlpha: 1 } );
+    renderer.setClearColorHex(0x121212, 1.0);
     renderer.clear();
 
     container.append(renderer.domElement);
@@ -122,10 +143,26 @@ function shapeCenterOfGravity(geometry)
 
     return center;
 }
-var editor;
+
+
+
 var delay;
-function installEditor()
+var editor;
+function installACEEditor()
 {
+    editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.getSession().setMode("ace/mode/javascript");
+    editor.getSession().on('change', function(e) {
+        clearTimeout(delay);
+        delay = setTimeout(updatePreview, 2000);
+        // e.type, etc
+    });
+    setTimeout(updatePreview, 2000);
+}
+
+
+function installCodeMirrorEditor(){
     editor = CodeMirror.fromTextArea(document.getElementById("code"), {
             lineNumbers: true,
             theme: "ambiance",
@@ -134,6 +171,8 @@ function installEditor()
                 "Enter": "newlineAndIndentContinueComment" ,
                 "Ctrl-Space": "autocomplete"
             }});
+    $('.CodeMirror').css({ "float":"top",width:"50%",height:"auto",position:"absolute" , "overflow-x": "auto", "overflow-y": "hidden"});
+
     CodeMirror.commands.autocomplete = function(cm) {
             CodeMirror.simpleHint(cm, CodeMirror.javascriptHint);
     }
@@ -145,10 +184,11 @@ function installEditor()
 
     setTimeout(updatePreview, 2000);
 }
+function installEditor() { return installACEEditor(); }
+
 
 function updatePreview() {
     send_and_build_up_csg();
-
 }
 
 
@@ -195,7 +235,7 @@ function send_and_build_up_csg()
 
         function(json) {
 
-            var beautified = JSON.stringify(json,null," ");
+            var beautified = JSON.stringify(json,null,"");
             $("#ascii_mesh").text(beautified);
             json.scale = 0.1;
             var jsonLoader = new THREE.JSONLoader();

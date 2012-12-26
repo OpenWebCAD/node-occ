@@ -9,7 +9,7 @@ bool Base::isNull()
 
 bool Base::isValid()
 {
-	if (shape().IsNull()) {
+	if (isNull()) {
 		return false;
 	}
 	BRepCheck_Analyzer aChecker(shape());
@@ -18,7 +18,9 @@ bool Base::isValid()
 
 const char* Base::shapeType()
 {
-
+	if (isNull()) {
+		return "UNDEFINED";
+	}
 	switch(shape().ShapeType()) {
 	case	TopAbs_COMPOUND:	return "COMPOUND"; break;	
 	case	TopAbs_COMPSOLID: 	return "COMPSOLID"; break;	
@@ -34,7 +36,21 @@ const char* Base::shapeType()
 	return "???";
 }
 
-
+const char* Base::orientation()
+{
+	if (isNull()) {
+		return "UNDEFINED";
+	}
+	TopAbs_Orientation value = shape().Orientation();
+	switch(value) {
+	case TopAbs_FORWARD: return "FORWARD"; break;
+	case TopAbs_REVERSED: return "REVERSED"; break;
+	case TopAbs_INTERNAL: return "INTERNAL"; break;
+	case TopAbs_EXTERNAL: return "EXTERNAL"; break; 
+	}
+	return "???";
+}
+  
 Handle<Value> Base::translate(const Arguments& args) 
 {
 	HandleScope scope;
@@ -234,7 +250,8 @@ void  Base::InitProto(Handle<ObjectTemplate> proto)
 	EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
 	EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isValid);
 	EXPOSE_READ_ONLY_PROPERTY_INTEGER(Base,hashCode);
-	EXPOSE_READ_ONLY_PROPERTY_CONST_STRING (Base,shapeType);
+	EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,shapeType);
+	EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,orientation);
 
 }
 

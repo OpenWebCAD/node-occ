@@ -4,7 +4,7 @@
 #include "Wire.h"
 #include "Edge.h"
 #include "Vertex.h"
-			 
+#include "Shell.h"			 
 
 
 Local<Object> buildEmptyWrapper(TopAbs_ShapeEnum type)
@@ -15,6 +15,7 @@ Local<Object> buildEmptyWrapper(TopAbs_ShapeEnum type)
 	case  TopAbs_SOLID:
 		return Solid::constructor->GetFunction()->NewInstance(0,0)->ToObject();
 	case TopAbs_SHELL:
+		return Shell::constructor->GetFunction()->NewInstance(0,0)->ToObject();;
 		break;
 	case TopAbs_FACE:
 		return Face::constructor->GetFunction()->NewInstance(0,0)->ToObject();

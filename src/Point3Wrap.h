@@ -83,4 +83,4 @@ public:
 
 
 #define EXPOSE_TEAROFF(THISTYPE,ACCESSOR)                           \
-	proto->SetAccessor(String::NewSymbol(#ACCESSOR), &t##ACCESSOR::getter,  0,Handle<v8::Value>(),DEFAULT,ReadOnly)
+	proto->SetAccessor(String::NewSymbol(#ACCESSOR), &t##ACCESSOR::getter,  0,Handle<v8::Value>(),DEFAULT,(PropertyAttribute)(ReadOnly|DontDelete))

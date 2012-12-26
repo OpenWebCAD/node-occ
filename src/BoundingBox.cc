@@ -80,8 +80,6 @@ void BoundingBox::Init(Handle<Object> target)
 	// Prototype
 	Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-	Base::InitProto(proto);
-
 	EXPOSE_METHOD(BoundingBox,addPoint);
 	EXPOSE_METHOD(BoundingBox,isOut);
 

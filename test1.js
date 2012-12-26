@@ -4,6 +4,29 @@ var assert = require('assert');
 var occ = require('./');
 
 
+function testOuterShell()
+{
+    var solid1 = occ.makeBox([10,20,30],[20,40,60]);
+    var solid2 = occ.makeBox([15,25,35],[-20,-40,-60]);
+    var solid = occ.fuse(solid1,solid2);
+
+
+    solid1 = occ.makeBox([0,0,0],[20,20,20]);
+    solid2 = occ.makeBox([10,10,10],[15,15,15]);
+    solid = occ.cut(solid1,solid2);
+
+    solid.getOuterShell();
+
+    var shells = solid.getShells();
+    for (var i in shells) {
+        var shell = shells[i];
+        console.log(shell.shapeType,shell.numFaces);
+    }
+}
+testOuterShell();
+
+console.log("-------------------");
+
 function testCyl()
 {
    var cyl =occ.makeCylinder([-100,20,30],[100,20,30],40);
@@ -18,7 +41,7 @@ var CSGbuilder =require('./lib/CSGbuilder');
 
 function testCSG1()
 {
-    var solid = shapeFactory.cooker();
+    var solid = shapeFactory.makePan(occ);
 
 }
 testCSG1();

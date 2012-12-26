@@ -19,22 +19,38 @@ describe("testing solid construction",function(){
 		it("should have no solid", function() { 
 			solid.numSolids.should.equal(0);
 		});
+        it("should have no shell", function() {
+            solid.numShells.should.equal(0);
+        });
+        it("should have no outerShell", function() {
+            assert( solid.outerShell === undefined);
+        });
 	});
 	describe("makeBox with 2 points", function() {
 	    var solid;
 		before(function() {
 			solid = occ.makeBox([10,20,30],[20,40,60]);
 		});
-		it("should have 6 faces", function() { 
+        it("should be a SOLID",function() {
+            solid.shapeType.should.equal("SOLID");
+        });
+        it("should have 1 solid", function() {
+            solid.numSolids.should.equal(1);
+        });
+        it("should have 1 shell", function() {
+            solid.numShells.should.equal(1);
+        });
+		it("should have 6 faces", function() {
 			solid.numFaces.should.equal(6);
 		});
-		it("should have 1 solid", function() { 
-			solid.numSolids.should.equal(1);
-		});
-		it("should have a shapeType beeing 'SOLID' ", function() { 
-			solid.shapeType.should.equal("SOLID");
-		});
-		it("should have (20-10)*(40-20)*(60-30) as a volume", function() { 
+        it("should have an outerShell with 6 faces", function() {
+            assert( solid.getOuterShell() !== undefined);
+            solid.getOuterShell().numFaces.should.equal(6);
+        });
+        it("should have an outerShell with a forward orientation", function() {
+            solid.getOuterShell().orientation.should.equal("FORWARD");
+        });
+		it("should have (20-10)*(40-20)*(60-30) as a volume", function() {
 			solid.volume.should.equal( (20-10)*(40-20)*(60-30));
 		});
 
@@ -65,12 +81,23 @@ describe("testing solid construction",function(){
 			solid2 = occ.makeBox([15,25,35],[-20,-40,-60]);
 			solid1 = occ.fuse(solid1,solid2);
 		});
-		it("should have 12 faces", function() { 
+        it("should be a SOLID",function() {
+            console.log(solid1.shapeType);
+            solid1.shapeType.should.equal("SOLID");
+        });
+        it("should have 1 solid", function() {
+            solid1.numSolids.should.equal(1);
+        });
+        it("should have 1 shell", function() {
+            solid1.numShells.should.equal(1);
+        });
+		it("should have 12 faces", function() {
 			solid1.numFaces.should.equal(12);
 		});
-		it("should have 1 solid", function() { 
-			solid1.numSolids.should.equal(1);
-		});
+        it("should have an outerShell with 12 faces", function() {
+            assert( solid1.getOuterShell() !== undefined);
+            solid1.getOuterShell().numFaces.should.equal(12);
+        });
 	});
 	describe("cut a corner of a box", function() {
 	    var solid1;
@@ -78,17 +105,106 @@ describe("testing solid construction",function(){
 		before(function() {
 			solid1 = occ.makeBox([10,20,30],[20,40,60]);
 			solid2 = occ.makeBox([15,25,35],[-20,-40,-60]);
-			
 			solid1 = occ.cut(solid1,solid2);
-
 		});
-		it("should have 9 faces", function() { 
+        it("should be a SOLID",function() {
+            solid1.shapeType.should.equal("SOLID");
+        });
+        it("should have 9 faces", function() {
 			solid1.numFaces.should.equal(9);
 		});
 		it("should have 1 solid", function() { 
 			solid1.numSolids.should.equal(1);
 		});
+        it("should have 1 shell", function() {
+            solid1.numShells.should.equal(1);
+        });
+
+
 	});
+    describe("Hollow  box  ( 1 solid with 2 shells )", function() {
+        var solid1;
+        var solid2;
+        before(function() {
+            solid1 = occ.makeBox([0,0,0],[20,20,20]);
+            solid2 = occ.makeBox([10,10,10],[15,15,15]);
+
+            solid1 = occ.cut(solid1,solid2);
+
+        });
+        it("should be a SOLID",function() {
+            solid1.shapeType.should.equal("SOLID");
+        });
+        it("should have 12 faces", function() {
+            solid1.numFaces.should.equal(12);
+        });
+        it("should have 1 solid", function() {
+            solid1.numSolids.should.equal(1);
+        });
+        it("should have 2 shells", function() {
+            solid1.numShells.should.equal(2);
+        });
+        it("should have an outer shell with 6 faces", function() {
+            var outerShell = solid1.getOuterShell();
+            outerShell.numFaces.should.equal(6);
+        });
+        it("should have an outer shell with 6 faces", function() {
+            var outerShell = solid1.getOuterShell();
+            outerShell.orientation.should.equal("FORWARD");
+        });
+        it("should expose 2 shells (getOuterShell)",function(){
+
+            var shells = solid1.getShells();
+
+            var outerShell = solid1.getOuterShell();
+            assert(outerShell != undefined );
+
+            shells.length.should.equal(2);
+            for (var i in shells) {
+                var shell = shells[i];
+                if (outerShell.hashCode!==shell.hashCode) {
+                    console.log(shell.shapeType);
+                    shell.orientation.should.equal("FORWARD");
+                }
+            }
+        });
+    });
+    describe("split boxes", function() {
+
+        var solid1;
+        var solid2;
+        var splitBoxes;
+        before(function() {
+            solid1 = occ.makeBox([0,0,0],[20,20,20]);
+            solid2 = occ.makeBox([-100,-100,10],[100,100,15]);
+
+            splitBoxes = occ.cut(solid1,solid2);
+
+        });
+        it("should be a COMPOUND", function(){
+            splitBoxes.shapeType.should.equal("COMPOUND")
+        });
+        it("should have 12 faces", function() {
+            splitBoxes.numFaces.should.equal(12);
+        });
+        it("should have 2 solids", function() {
+            splitBoxes.numSolids.should.equal(2);
+        });
+        it("should have 2 shells", function() {
+            splitBoxes.numShells.should.equal(2);
+        });
+        it("should have an outer shell with 6 faces", function() {
+            // var solids = splitBoxes.getSolids();
+            //var outerShell1 = solids[0].getOuterShell();
+            //outerShell1.numFaces.should.equal(6);
+            //var outerShell2 = solids[1].getOuterShell();
+            //outerShell2.numFaces.should.equal(6);
+
+        });
+
+    });
+
+
     describe("Meshing a simple solid", function() {
         describe("Meshing a box", function() {
             var solid;

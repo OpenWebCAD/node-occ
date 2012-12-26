@@ -19,6 +19,7 @@ protected:
 
 	int numSolids();
 	int numFaces();
+	int numShells();
 
 	double volume();
 	double area();
@@ -44,6 +45,10 @@ protected:
 	static Handle<v8::Value> createMesh(const v8::Arguments& args); // custom mesh
 	
 	static Handle<v8::Value> getEdges(const v8::Arguments& args);
+	static Handle<v8::Value> getFaces(const v8::Arguments& args);
+	static Handle<v8::Value> getShells(const v8::Arguments& args);
+	static Handle<v8::Value> getSolids(const v8::Arguments& args);
+	static Handle<v8::Value> getOuterShell(const v8::Arguments& args);
 
 	// Methods exposed to JavaScripts
 	static void Init(Handle<Object> target);

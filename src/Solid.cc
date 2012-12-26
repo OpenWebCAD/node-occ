@@ -32,10 +32,16 @@ Persistent<FunctionTemplate> Solid::constructor;
   EXPOSE_METHOD(Solid,chamfer);
 
   EXPOSE_METHOD(Solid,getEdges);
+  EXPOSE_METHOD(Solid,getFaces);
+  EXPOSE_METHOD(Solid,getOuterShell);
+  EXPOSE_METHOD(Solid,getShells);
+  EXPOSE_METHOD(Solid,getSolids);
   EXPOSE_METHOD(Solid,getBoundingBox);
 
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
+
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,volume);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,area);
   EXPOSE_READ_ONLY_PROPERTY(Solid,_mesh,mesh);
@@ -112,6 +118,105 @@ Handle<Value> Solid::getEdges(const v8::Arguments& args)
 }
 
 
+Handle<v8::Value> Solid::getOuterShell(const v8::Arguments& args)
+{
+	HandleScope scope;
+    // can work with this
+	Handle<Object> pJhis = args.This();
+	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+		// create a new object
+		ThrowException(Exception::Error(String::New("invalid object")));
+	}					 		
+	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+	if (pThis->shape().ShapeType() == TopAbs_COMPOUND) {
+		return scope.Close(Undefined());
+	}
+	try {
+		TopoDS_Solid solid = TopoDS::Solid(pThis->shape());
+		TopoDS_Shell shell = BRepTools::OuterShell(solid);
+		return scope.Close(buildWrapper(shell));
+
+	 } CATCH_AND_RETHROW("Failed to extract Outer Shell ");
+
+	return scope.Close(Undefined());
+}
+
+Handle<Value> Solid::getFaces(const v8::Arguments& args)
+{
+
+	HandleScope scope;
+    // can work with this
+	Handle<Object> pJhis = args.This();
+	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+		// create a new object
+		ThrowException(Exception::Error(String::New("invalid object")));
+	}					 		
+	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+    TopTools_IndexedMapOfShape shapeMap;
+    TopExp::MapShapes(pThis->shape(), TopAbs_FACE, shapeMap);
+
+	int nbSubShapes =shapeMap.Extent(); 
+	Local<Array> arr = Array::New(nbSubShapes);
+
+	for (int i=0;i<nbSubShapes;i++)  {
+		Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
+		arr->Set(i,obj);
+	}
+	return scope.Close(arr);
+}
+
+
+Handle<Value> Solid::getSolids(const v8::Arguments& args)
+{
+
+	HandleScope scope;
+    // can work with this
+	Handle<Object> pJhis = args.This();
+	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+		// create a new object
+		ThrowException(Exception::Error(String::New("invalid object")));
+	}					 		
+	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+    TopTools_IndexedMapOfShape shapeMap;
+    TopExp::MapShapes(pThis->shape(), TopAbs_SOLID, shapeMap);
+
+	int nbSubShapes =shapeMap.Extent(); 
+	Local<Array> arr = Array::New(nbSubShapes);
+
+	for (int i=0;i<nbSubShapes;i++)  {
+		Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
+		arr->Set(i,obj);
+	}
+	return scope.Close(arr);
+}
+
+Handle<Value> Solid::getShells(const v8::Arguments& args)
+{
+
+	HandleScope scope;
+	   // can work with this
+	Handle<Object> pJhis = args.This();
+	if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+		// create a new object
+		ThrowException(Exception::Error(String::New("invalid object")));
+	}					 		
+	Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+	TopTools_IndexedMapOfShape shapeMap;
+	TopExp::MapShapes(pThis->shape(), TopAbs_SHELL, shapeMap);
+
+	int nbShapes =shapeMap.Extent(); 
+	Local<Array> arr = Array::New(nbShapes);
+
+	for (int i=0;i<nbShapes;i++)  {
+		Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
+		arr->Set(i,obj);
+	}
+	return scope.Close(arr);
+}
 
 
 int Solid::chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances)
@@ -303,6 +408,12 @@ int Solid::numFaces()
     return anIndices.Extent();
 }
 
+int Solid::numShells()
+{
+    TopTools_IndexedMapOfShape anIndices;
+    TopExp::MapShapes(this->shape(), TopAbs_SHELL, anIndices);
+    return anIndices.Extent();
+}
 
 double Solid::area() 
 {

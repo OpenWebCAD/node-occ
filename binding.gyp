@@ -34,6 +34,8 @@
 			"src/Shape.cc",
 			"src/ShapeIterator.h",
 			"src/ShapeIterator.cc",
+			"src/Shell.h",
+			"src/Shell.cc",
 			"src/Solid.h",
 			"src/Solid.cc",
 			"src/Tools.h",
