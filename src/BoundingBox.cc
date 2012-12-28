@@ -1,6 +1,7 @@
 #include "BoundingBox.h"
 
 #include "Util.h"
+#include <limits.h>
 
 Persistent<FunctionTemplate> BoundingBox::constructor;
 

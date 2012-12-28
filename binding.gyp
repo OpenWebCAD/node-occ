@@ -2,6 +2,8 @@
   "targets": [
     {
       "target_name": "occ",
+          'cflags!' : [ '-fno-exceptions' ],
+          'cflags_cc!' : ['-fno-exceptions' ],
 	  "msvs_settings": {
 
 				'VCLinkerTool': {					
@@ -51,34 +53,18 @@
 			"src/V8Wrapper.cc",
 			],
 			
-	  "defines": [],
+	  "defines": [ "OCE_HAVE_IOSTREAM", "OCE_HAVE_CLIMITS" ],
 	
 	  "include_dirs": [  
-    	"/projects/oce-0.11/include/oce",
-	    "/projet/oce/inc",			    ],				
+               "/home/pi/oce/inc",
+               "/projects/oce-0.11/include/oce",
+	       "/projet/oce/inc",			    ],				
 
 	"libraries": [ 
-		'TKAdvToolsd.lib',
-		'TKBOd.lib',
-		'TKBoold.lib',
-		'TKBRepd.lib',
-		'TKerneld.lib',
-		'TKFeatd.lib',
-		'TKFilletd.lib',
-		'TKG2dd.lib',
-		'TKG3dd.lib',
-		'TKGeomAlgod.lib',
-		'TKGeomBased.lib',
-		'TKHLRd.lib',
-		'TKMathd.lib',
-		'TKMeshd.lib',
-		'TKOffsetd.lib',
-		'TKPrimd.lib',
-		'TKShHealingd.lib',
-		'TKTopAlgod.lib',
-		'TKXMeshd.lib',
-		'TKStepd.lib',
-		'TKIGESd.lib',
+
+		'-lTKAdvTools',
+		'-lTKMath',
+		'-lTKernel',
 		],
     }
   ]

@@ -13,6 +13,14 @@ class Solid;
 class ShapeFactory
 {
 public:
+	// vertex
+	static Handle<v8::Value> makeVertex(const v8::Arguments& args);
+	// edges
+	static Handle<v8::Value> makeLine(const v8::Arguments& args);
+	static Handle<v8::Value> makeCirle(const v8::Arguments& args);
+	static Handle<v8::Value> makeArc3Points(const v8::Arguments& args);
+	// wires
+	// faces
 	// boolean operation
 	static Handle<v8::Value> fuse(const v8::Arguments& args);
 	static Handle<v8::Value> cut(const v8::Arguments& args);

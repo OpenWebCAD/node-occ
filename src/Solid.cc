@@ -468,7 +468,7 @@ Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
   }
    Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
    if (pThis->m_cacheMesh.IsEmpty()) {
-      pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.001,3,true));
+      pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.001,1,true));
    }
    return scope.Close(pThis->m_cacheMesh);
 }

@@ -4,6 +4,7 @@
 #include <list>
 #include <algorithm>
 #include <map>
+#include <limits>
 #include <assert.h>
 
 
@@ -280,7 +281,7 @@ void UpdateExternalArray(Handle<Object>& pThis,const char* name,const T* data,si
 
 	extArray->Set(String::NewSymbol("length"), Int32::New(length), DontDelete);
 	assert(	 extArray->GetIndexedPropertiesExternalArrayDataLength() ==   length);
-	assert(	 extArray->Get(String::NewSymbol("length"))->ToInt32()->Uint32Value() ==   length);
+	assert(	 extArray->Get(String::NewSymbol("length"))->ToInt32()->Uint32Value() ==   _length);
 }
 
 void Mesh::updateJavaScriptArray()

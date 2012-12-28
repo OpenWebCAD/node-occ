@@ -59,6 +59,7 @@ Handle<Value> Base::translate(const Arguments& args)
 	gp_Trsf transformation;
 
 	double x=0,y=0,z=0;
+       
 	ReadPoint(args[0],&x,&y,&z);
 	transformation.SetTranslation(gp_Vec(x,y,z));
 

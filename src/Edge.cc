@@ -115,7 +115,7 @@ int Edge::createCircle(const gp_Pnt& center, const gp_Dir& normal, double radius
 }
 
 
-Vertex* getOrCreateVertex(Handle<Value>& arg)
+Vertex* getOrCreateVertex(Handle<Value> arg)
 {
    if(arg->IsArray()) {
 		

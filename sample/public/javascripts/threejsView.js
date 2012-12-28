@@ -8,16 +8,18 @@ var container,
     camera,
     control,
     editor,
-    myLayout;
+    myLayout,
+    COG = new THREE.Vector3() ;
 
 
-function installLayout()
-{
+function installLayout() {
     // $('#container').layout({ applyDemoStyles: true });
     myLayout = $('body').layout(
         {
-            west__onresize:    function() { editor.resize(); },
-            center__onresize:  function() {
+            west__onresize:    function(x, ui) {
+                editor.resize();
+            },
+            center__onresize:  function(x, ui) {
                 // resize webgl view
                 onWindowResize();
             }
@@ -25,6 +27,7 @@ function installLayout()
     );
     myLayout.sizePane("west", 400);
 }
+
 $(document).ready(function() {
 
     installLayout();
@@ -58,10 +61,7 @@ $(document).ready(function() {
 
     controls.addEventListener( 'change', render );
 
-
-
-
-    renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0x121212, clearAlpha: 1 } );
+    renderer =  new THREE.WebGLRenderer();//  { antialias: true, clearColor: 0x121212, clearAlpha: 1 } );
     renderer.setClearColorHex(0x121212, 1.0);
     renderer.clear();
 
@@ -80,7 +80,7 @@ $(document).ready(function() {
     }
 
 
-
+    var plate1 = new THREE.CubeGeometry()
 
     var light = new THREE.AmbientLight( 0x222222 );
     scene.add( light );
@@ -124,14 +124,14 @@ function animate() {
     render();
     controls.update();
     //xx stats.update();
+    updateAJS();
 }
 
-function render()
-{
+function render() {
     renderer.render( scene, camera );
 }
-function shapeCenterOfGravity(geometry)
-{
+
+function shapeCenterOfGravity(geometry) {
     geometry.computeBoundingBox();
 
     var bb = geometry.boundingBox;
@@ -139,17 +139,14 @@ function shapeCenterOfGravity(geometry)
     var center = new THREE.Vector3();
 
     center.add( bb.min, bb.max );
-    center.multiplyScalar( -0.5 );
+    center.multiplyScalar(0.5 );
 
     return center;
 }
 
-
-
 var delay;
-var editor;
-function installACEEditor()
-{
+
+function installACEEditor() {
     editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/javascript");
@@ -161,8 +158,7 @@ function installACEEditor()
     setTimeout(updatePreview, 2000);
 }
 
-
-function installCodeMirrorEditor(){
+function installCodeMirrorEditor() {
     editor = CodeMirror.fromTextArea(document.getElementById("code"), {
             lineNumbers: true,
             theme: "ambiance",
@@ -184,16 +180,14 @@ function installCodeMirrorEditor(){
 
     setTimeout(updatePreview, 2000);
 }
-function installEditor() { return installACEEditor(); }
 
+function installEditor() { return installACEEditor(); }
 
 function updatePreview() {
     send_and_build_up_csg();
 }
 
-
-function send_and_build_up_csg()
-{
+function send_and_build_up_csg() {
     var object;
     var err_txt= "";
     $("#ascii_mesh").text(err_txt);
@@ -237,7 +231,7 @@ function send_and_build_up_csg()
 
             var beautified = JSON.stringify(json,null,"");
             $("#ascii_mesh").text(beautified);
-            json.scale = 0.1;
+            json.scale = 1.0;
             var jsonLoader = new THREE.JSONLoader();
              model = jsonLoader.createModel( json,
                  function(geometry,material ){
@@ -248,10 +242,39 @@ function send_and_build_up_csg()
                      var newObj = new THREE.Mesh(geometry,sphereMaterial);
                      newObj.name ="CSG";
                      scene.add(newObj);
-
-                     camera.lookAt(shapeCenterOfGravity(geometry));
+                     COG = shapeCenterOfGravity(geometry);
+                     camera.lookAt(COG);
+                     controls.target.set( COG.x, COG.y, COG.z );
 
                  },/* texturePath */ undefined)
         });
 }
 
+function SceneCtrl($scope) {
+    $scope.getCamera =function() {
+        return camera;
+    }
+    $scope.COG = COG; // center of gravity
+
+/*
+    //xx $scope.__defineGetter__("camera", function(){
+
+    //xx     return camera;
+    //xx });
+    $scope.camera1 = {};
+    $scope.camera1.position = {};
+
+    $scope.camera1.position.x = camera.position.x;
+    $scope.camera1.position.y = camera.position.y;
+    $scope.camera1.position.z = camera.position.z;
+*/
+}
+
+function updateAJS() {
+    // get Angular scope from the known DOM element
+    var e = document.getElementById('myAngularApp');
+    var scope = angular.element(e).scope();
+
+    SceneCtrl(scope);
+    scope.$apply();
+}

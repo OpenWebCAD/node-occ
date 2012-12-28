@@ -3,6 +3,8 @@
 #include "Shape.h"
 #include "Point3Wrap.h"
 
+#include <limits>
+
 const double qNaN = std::numeric_limits<double>::quiet_NaN();
 
 class BoundingBox : public node::ObjectWrap 

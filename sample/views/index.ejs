@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en" ng-app>
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
@@ -8,11 +8,13 @@
     <script src="/javascripts/TrackballControls.js"></script>
     <script src="http://www.janthor.com/lib/TinyTrackballControls.js"></script>
 
-      <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
-      <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-      <script src="http://layout.jquery-dev.net/lib/js/jquery.layout-latest.js"></script>
-      <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css"/>
-      <link rel="stylesheet" href="/stylesheets/layout-default-latest.css"/>
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script src="http://layout.jquery-dev.net/lib/js/jquery.layout-latest.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css"/>
+    <link rel="stylesheet" href="/stylesheets/layout-default-latest.css"/>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.js"></script>
 
 <!--      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -127,7 +129,20 @@
         <pre id="ascii_mesh" style="font-size=0.8em"><pre>
      </div>
   </div>
-  <div class="pane ui-layout-east">East</div>
+  <div class="pane ui-layout-east">
+      <div id="myAngularApp" ng-controller='SceneCtrl'>
+          <p>Nothing here {{'yet' + '!'  }}</p>
+
+          <p>{{ getCamera().position.x}}</p>
+          <p>{{ getCamera().position.y}}</p>
+          <p>{{ getCamera().position.z}}</p>
+
+          <p>{{ COG.x }}</p>
+          <p>{{ COG.y }}</p>
+          <p>{{ COG.z }}</p>
+
+      </div>
+  </div>
   <div class="pane ui-layout-west">
 
       <div id="editor" class="editor"  >

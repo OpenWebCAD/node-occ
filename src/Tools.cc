@@ -8,7 +8,7 @@
 #include <vector>
 
 
-void extractShapes(Local<Value>& value,std::vector<Shape*>& shapes)
+void extractShapes(Local<Value> value,std::vector<Shape*>& shapes)
 {
 	if (value->IsArray())  {
 
