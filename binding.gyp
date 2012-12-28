@@ -2,17 +2,18 @@
   "targets": [
     {
       "target_name": "occ",
-          'cflags!' : [ '-fno-exceptions' ],
-          'cflags_cc!' : ['-fno-exceptions' ],
+      "cflags!"    : [ '-fno-exceptions' ],
+      "cflags_cc!" : ['-fno-exceptions' ],
+
 	  "msvs_settings": {
 
-				'VCLinkerTool': {					
-					'AdditionalLibraryDirectories': [
-						#	"/projects/oce-0.11/Win64/lib/",
-							"../deps/Win64/lib",
-					],
-					# 'AdditionalOptions': ["/FORCE",],						
-				},	  
+		'VCLinkerTool': {					
+			'AdditionalLibraryDirectories': [
+				#	"/projects/oce-0.11/Win64/lib/",
+					"../deps/Win64/lib",
+			],
+			# 'AdditionalOptions': ["/FORCE",],						
+		},	  
 	  },
 		
       "sources": [
@@ -34,6 +35,8 @@
 			"src/Point3Wrap.cc",
 			"src/Shape.h",
 			"src/Shape.cc",
+			"src/ShapeFactory.h",
+			"src/ShapeFactory.cc",
 			"src/ShapeIterator.h",
 			"src/ShapeIterator.cc",
 			"src/Shell.h",
@@ -53,18 +56,35 @@
 			"src/V8Wrapper.cc",
 			],
 			
-	  "defines": [ "OCE_HAVE_IOSTREAM", "OCE_HAVE_CLIMITS" ],
-	
-	  "include_dirs": [  
-               "/home/pi/oce/inc",
-               "/projects/oce-0.11/include/oce",
-	       "/projet/oce/inc",			    ],				
+	  "defines": [
+		 "OCE_HAVE_IOMANIP",
+		 "OCE_HAVE_IOSTREAM",
+		 "OCE_HAVE_CLIMITS" 
+	  ],
 
-	"libraries": [ 
+	  "library_dirs": [
+	     "/usr/local/libs",
+	  ],
+	  "include_dirs": [  
+           "/usr/local/include/oce",
+           "../oce/inc",
+		   "/home/pi/oce/inc",
+           "/projects/oce-0.11/include/oce",
+	       "/projet/oce/inc",			    
+	  ],				
+
+	  "libraries": [ 
 
 		'-lTKAdvTools',
 		'-lTKMath',
 		'-lTKernel',
+		'-lTKG2d',
+		'-lTKG3d',
+		'-lTKIGES',
+		'-lTKSTEP',
+		'-lTKFillet',
+		'-lTKMesh',
+
 		],
     }
   ]

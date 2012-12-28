@@ -1,7 +1,7 @@
 #pragma once
 #include "OCC.h"
 #include "NodeV8.h"
- 
+
 
 int ReadInt(Handle<Object> obj,const char* name,int defaultValue);
 double ReadDouble(Handle<Object> obj,const char* name,double defaultValue=0.0);

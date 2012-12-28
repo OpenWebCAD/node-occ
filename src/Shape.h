@@ -3,15 +3,14 @@
 #include "OCC.h"
 #include "Base.h"
 
-class Shape : public Base
-{
+class Shape : public Base {
 
 public:
     Shape() {};
     virtual ~Shape() {};
-    
+
 protected:
-    TopoDS_Shape shape_;    
+    TopoDS_Shape shape_;
 
 
 
@@ -19,12 +18,12 @@ protected:
 // constructors
 
 public:
-   virtual const TopoDS_Shape& shape() const;
-   virtual void setShape( const TopoDS_Shape&);
+    virtual const TopoDS_Shape& shape() const;
+    virtual void setShape( const TopoDS_Shape&);
 
 
 
-   void setErrorMessage(const char* message){};
+    void setErrorMessage(const char* message) {};
 
 };
 

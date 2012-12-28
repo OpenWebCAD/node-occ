@@ -15,31 +15,39 @@ struct Triangle3i {
 };
 class Mesh : public  node::ObjectWrap  {
 public:
-  Mesh();
-  int extractFaceMesh(const TopoDS_Face& face, bool qualityNormals);
-  void optimize();
+    Mesh();
+    int extractFaceMesh(const TopoDS_Face& face, bool qualityNormals);
+    void optimize();
 
-  static Handle<Value> New(const Arguments& args);
-  static void Init(Handle<Object> target);
+    static Handle<Value> New(const Arguments& args);
+    static void Init(Handle<Object> target);
 
 
 private:
-  std::vector<Coord3f> normals;
-  std::vector<Coord3f> vertices;
-  std::vector<Triangle3i> triangles;
-  std::vector<unsigned int> edgeindices;
-  std::vector<int> edgeranges;
-  std::vector<int> edgehash;
-  friend class MeshOptimizer;
+    std::vector<Coord3f> normals;
+    std::vector<Coord3f> vertices;
+    std::vector<Triangle3i> triangles;
+    std::vector<unsigned int> edgeindices;
+    std::vector<int> edgeranges;
+    std::vector<int> edgehash;
+    friend class MeshOptimizer;
 
-  void updateJavaScriptArray();
+    void updateJavaScriptArray();
 public:
- static Persistent<FunctionTemplate> constructor;
- int32_t numTriangles()  { return  (int32_t) triangles.size(); }
- int32_t numVertices()  { return (int32_t)vertices.size(); }
- int32_t numNormals()  { return (int32_t)normals.size(); }
- int32_t numEdges()  { return (int32_t)edgeindices.size(); }
+    static Persistent<FunctionTemplate> constructor;
+    int32_t numTriangles()  {
+        return  (int32_t) triangles.size();
+    }
+    int32_t numVertices()  {
+        return (int32_t)vertices.size();
+    }
+    int32_t numNormals()  {
+        return (int32_t)normals.size();
+    }
+    int32_t numEdges()  {
+        return (int32_t)edgeindices.size();
+    }
 
-   void setErrorMessage(const char* message){};
+    void setErrorMessage(const char* message) {};
 
 };

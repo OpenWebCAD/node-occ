@@ -4,28 +4,34 @@
 
 using namespace std;
 
-																				  
 
 
 
-void ReadPropertyPointFromArray(Handle<Array> arr,double* x,double* y, double*z ) 
+
+void ReadPropertyPointFromArray(Handle<Array> arr,double* x,double* y, double*z )
 {
 //    Local<Object> obj = value->ToObject();
 //    Handle<Array> art = Handle<Array>::Cast(obj);
     int length = arr->Length();
     // int length = obj->Get(String::New("length"))->ToObject()->Uint32Value();
 
-     if (length>=1) {  *x = arr->Get(0)->NumberValue();  }
-     if (length>=2) {  *y = arr->Get(1)->NumberValue();  }
-     if (length>=3) {  *z = arr->Get(2)->NumberValue();  }
-  
+    if (length>=1) {
+        *x = arr->Get(0)->NumberValue();
+    }
+    if (length>=2) {
+        *y = arr->Get(1)->NumberValue();
+    }
+    if (length>=3) {
+        *z = arr->Get(2)->NumberValue();
+    }
+
 }
 
 
-//void ReadPropertyPoint(Handle<Object> obj,const char* name,double* x,double* y, double*z ) 
+//void ReadPropertyPoint(Handle<Object> obj,const char* name,double* x,double* y, double*z )
 //{
 //  if (!obj.IsEmpty()) {
-//    // for exemple a THREE.Vector3 
+//    // for exemple a THREE.Vector3
 //    // ( we try to read the "x","y","z" property )
 //    Handle<Value> v = obj->Get(String::New(name));
 //    return ReadPropertyPointFromArray(v->ToObject(),x,y,z);
@@ -38,14 +44,14 @@ void ReadPropertyPointFromArray(Handle<Array> arr,double* x,double* y, double*z 
 
 double ReadDouble(Handle<Object> value,const char* name,double defaultValue)
 {
-   Local<Value> _v = value->ToObject()->Get(String::New(name));
-   return _v->ToNumber()->Value();
+    Local<Value> _v = value->ToObject()->Get(String::New(name));
+    return _v->ToNumber()->Value();
 }
 
 int ReadInt(Handle<Object> value,const char* name,int defaultValue)
 {
-   Local<Value> _v = value->ToObject()->Get(String::New(name));
-   return _v->ToInteger()->ToInt32()->Value();
+    Local<Value> _v = value->ToObject()->Get(String::New(name));
+    return _v->ToInteger()->ToInt32()->Value();
 }
 
 void ReadXYZ(Handle<Object> obj,double* x,double* y,double* z)
@@ -57,17 +63,17 @@ void ReadXYZ(Handle<Object> obj,double* x,double* y,double* z)
 
 void ReadPoint(Local<Value> value,double* x,double* y, double*z)
 {
-  if (value->IsArray()) {
-    Handle<Array> arr = Handle<Array>::Cast(value);
-    ReadPropertyPointFromArray(arr,x,y,z);
-       return;
-  }
-  if (value->IsObject()) {
-    // object must have x,y,z property set
-    Handle<Object> obj = Handle<Object>::Cast(value);
-    ReadXYZ(obj,x,y,z);
-   return;
-  }
+    if (value->IsArray()) {
+        Handle<Array> arr = Handle<Array>::Cast(value);
+        ReadPropertyPointFromArray(arr,x,y,z);
+        return;
+    }
+    if (value->IsObject()) {
+        // object must have x,y,z property set
+        Handle<Object> obj = Handle<Object>::Cast(value);
+        ReadXYZ(obj,x,y,z);
+        return;
+    }
 }
 
 void ReadUVW(Handle<Object> obj,double* x,double* y,double* z)
@@ -80,19 +86,19 @@ void ReadUVW(Handle<Object> obj,double* x,double* y,double* z)
 
 void ReadPoint(Local<v8::Value> value,gp_Pnt* pt)
 {
-  double x=0,y=0,z=0;
-  ReadPoint(value,&x,&y,&z);
-  pt->SetCoord(x,y,z);
+    double x=0,y=0,z=0;
+    ReadPoint(value,&x,&y,&z);
+    pt->SetCoord(x,y,z);
 }
 void ReadDir(Local<v8::Value> value,gp_Dir* pt)
 {
-  double x=0,y=0,z=0;
-  ReadPoint(value,&x,&y,&z);
-  pt->SetCoord(x,y,z);
+    double x=0,y=0,z=0;
+    ReadPoint(value,&x,&y,&z);
+    pt->SetCoord(x,y,z);
 }
 void ReadVector(Local<v8::Value> value,gp_Vec* pt)
 {
-  double x=0,y=0,z=0;
-  ReadPoint(value,&x,&y,&z);
-  pt->SetCoord(x,y,z);
+    double x=0,y=0,z=0;
+    ReadPoint(value,&x,&y,&z);
+    pt->SetCoord(x,y,z);
 }

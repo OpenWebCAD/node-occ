@@ -4,58 +4,62 @@
 
 class Edge;
 // a multi body shape
-class Solid : public Shape 
-{
+class Solid : public Shape {
 
 protected:
     Solid() {};
-    virtual ~Solid() { m_cacheMesh.Dispose(); };
+    virtual ~Solid() {
+        m_cacheMesh.Dispose();
+    };
 
- public:  
+public:
     virtual Local<Object>  Clone() ;
-    virtual Base* Unwrap(v8::Local<v8::Object> obj) { return node::ObjectWrap::Unwrap<Solid>(obj); }
+    virtual Base* Unwrap(v8::Local<v8::Object> obj) {
+        return node::ObjectWrap::Unwrap<Solid>(obj);
+    }
 
-	Persistent<Object> m_cacheMesh;
+    Persistent<Object> m_cacheMesh;
 
-	int numSolids();
-	int numFaces();
-	int numShells();
+    int numSolids();
+    int numFaces();
+    int numShells();
 
-	double volume();
-	double area();
-   
-	Handle<Object>  mesh();
+    double volume();
+    double area();
 
-	Handle<Object> createMesh(double factor, double angle, bool qualityNormals = true);
+    Handle<Object>  mesh();
 
-	typedef enum BoolOpType {
-		BOOL_FUSE,
-		BOOL_CUT,
-		BOOL_COMMON,
-	} BoolOpType;
+    Handle<Object> createMesh(double factor, double angle, bool qualityNormals = true);
 
-	int boolean(Solid *tool, BoolOpType op);
-	int chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances);
-	int fillet(const std::vector<Edge*>& edges, const std::vector<double>& distances);
-	static Handle<v8::Value> fillet(const v8::Arguments& args);
-	static Handle<v8::Value> chamfer(const v8::Arguments& args);
+    typedef enum BoolOpType {
+        BOOL_FUSE,
+        BOOL_CUT,
+        BOOL_COMMON,
+    } BoolOpType;
 
-	// default mesh
-	static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
-	static Handle<v8::Value> createMesh(const v8::Arguments& args); // custom mesh
-	
-	static Handle<v8::Value> getEdges(const v8::Arguments& args);
-	static Handle<v8::Value> getFaces(const v8::Arguments& args);
-	static Handle<v8::Value> getShells(const v8::Arguments& args);
-	static Handle<v8::Value> getSolids(const v8::Arguments& args);
-	static Handle<v8::Value> getOuterShell(const v8::Arguments& args);
+    int boolean(Solid *tool, BoolOpType op);
+    int chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances);
+    int fillet(const std::vector<Edge*>& edges, const std::vector<double>& distances);
+    static Handle<v8::Value> fillet(const v8::Arguments& args);
+    static Handle<v8::Value> chamfer(const v8::Arguments& args);
 
-	// Methods exposed to JavaScripts
-	static void Init(Handle<Object> target);
-	static Handle<v8::Value> NewInstance(const v8::Arguments& args);
-	static Handle<Value>     NewInstance(TopoDS_Shape& shape);
-	static Handle<v8::Value> New(const v8::Arguments& args);     
+    // default mesh
+    static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
+    static Handle<v8::Value> createMesh(const v8::Arguments& args); // custom mesh
 
-	static Persistent<FunctionTemplate> constructor;
+    static Handle<v8::Value> getEdges(const v8::Arguments& args);
+    static Handle<v8::Value> getFaces(const v8::Arguments& args);
+    static Handle<v8::Value> getShells(const v8::Arguments& args);
+    static Handle<v8::Value> getSolids(const v8::Arguments& args);
+    static Handle<v8::Value> getOuterShell(const v8::Arguments& args);
+
+    // Methods exposed to JavaScripts
+    static void Init(Handle<Object> target);
+    static Handle<v8::Value> NewInstance(const v8::Arguments& args);
+    static Handle<Value>     NewInstance(TopoDS_Shape shape);
+    static Handle<Value>     NewInstance();
+    static Handle<v8::Value> New(const v8::Arguments& args);
+
+    static Persistent<FunctionTemplate> constructor;
 };
 

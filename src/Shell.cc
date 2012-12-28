@@ -5,22 +5,22 @@
 #include "Util.h"
 
 
-const TopoDS_Shape&  Shell::shape() const 
-{ 
-	return shell(); 
+const TopoDS_Shape&  Shell::shape() const
+{
+    return shell();
 }
 
 void Shell::setShape(const TopoDS_Shape& shape)
 {
-	m_shell = TopoDS::Shell(shape);
+    m_shell = TopoDS::Shell(shape);
 }
 
 int Shell::numFaces()
 {
-	if(shape().IsNull()) return 0;
-    TopTools_IndexedMapOfShape anIndices;   
-	TopExp::MapShapes(shape(), TopAbs_FACE, anIndices);
-	return anIndices.Extent();
+    if(shape().IsNull()) return 0;
+    TopTools_IndexedMapOfShape anIndices;
+    TopExp::MapShapes(shape(), TopAbs_FACE, anIndices);
+    return anIndices.Extent();
 }
 
 
@@ -65,40 +65,40 @@ Persistent<FunctionTemplate> Shell::constructor;
 
 Handle<Value> Shell::New(const Arguments& args)
 {
-  HandleScope scope;
-  
-  Shell* obj = new Shell();
-  obj->Wrap(args.This());
+    HandleScope scope;
 
-  return args.This();
+    Shell* obj = new Shell();
+    obj->Wrap(args.This());
+
+    return args.This();
 }
 
 Local<Object>  Shell::Clone()
 {
-  HandleScope scope;
-  Shell* obj = new Shell();
-  Local<Object> instance = constructor->GetFunction()->NewInstance();
-  obj->Wrap(instance);
-  obj->setShape(this->shape());
-  return scope.Close(instance);
-}	
+    HandleScope scope;
+    Shell* obj = new Shell();
+    Local<Object> instance = constructor->GetFunction()->NewInstance();
+    obj->Wrap(instance);
+    obj->setShape(this->shape());
+    return scope.Close(instance);
+}
 
 void Shell::Init(Handle<Object> target)
 {
-  // Prepare constructor template
-  constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Shell::New));
-  constructor->SetClassName(String::NewSymbol("Shell"));
+    // Prepare constructor template
+    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Shell::New));
+    constructor->SetClassName(String::NewSymbol("Shell"));
 
-  // object has one internal filed ( the C++ object)
-  constructor->InstanceTemplate()->SetInternalFieldCount(1);
+    // object has one internal filed ( the C++ object)
+    constructor->InstanceTemplate()->SetInternalFieldCount(1);
 
-  // Prototype
-  Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+    // Prototype
+    Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-  Base::InitProto(proto);
+    Base::InitProto(proto);
 
-  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Shell,numFaces);
-  EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Shell,area);
+    EXPOSE_READ_ONLY_PROPERTY_INTEGER(Shell,numFaces);
+    EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Shell,area);
 
-  target->Set(String::NewSymbol("Shell"), constructor->GetFunction());
+    target->Set(String::NewSymbol("Shell"), constructor->GetFunction());
 }

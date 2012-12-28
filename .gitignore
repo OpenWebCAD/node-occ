@@ -1,8 +1,9 @@
 # Compiled Object files
+toto*.step
 *.slo
 *.lo
 *.o
-
+*.orig
 # Compiled Dynamic libraries
 *.so
 *.dylib

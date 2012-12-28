@@ -21,20 +21,20 @@
 #define   occHandle(ClassName)      Handle_##ClassName
 using namespace v8;
 
-template<class T,typename T1,typename T2,T2 (T::*func)() >  
+template<class T,typename T1,typename T2,T2 (T::*func)() >
 Handle<Value> ee(Local<String> property,const AccessorInfo &info)
 {
-  HandleScope scope;
-  if (info.This().IsEmpty() ) {
-     return scope.Close(Undefined());
-  }
-  if (info.This()->InternalFieldCount() == 0 ) {
-      return scope.Close(Undefined());
-  }
-  T* obj = node::ObjectWrap::Unwrap<T>(info.This());
-  return scope.Close(T1::New((obj->*func)()));
+    HandleScope scope;
+    if (info.This().IsEmpty() ) {
+        return scope.Close(Undefined());
+    }
+    if (info.This()->InternalFieldCount() == 0 ) {
+        return scope.Close(Undefined());
+    }
+    T* obj = node::ObjectWrap::Unwrap<T>(info.This());
+    return scope.Close(T1::New((obj->*func)()));
 }
-		   
+
 
 #define EXPOSE_METHOD(ClassName,staticMethod) \
 	proto->Set(String::NewSymbol(#staticMethod),FunctionTemplate::New(staticMethod)->GetFunction());
@@ -44,7 +44,7 @@ Handle<Value> ee(Local<String> property,const AccessorInfo &info)
 
 #define EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(ClassName,name) \
 	EXPOSE_READ_ONLY_PROPERTY(proto, (ee< ClassName, Boolean, bool, &ClassName::name>) , name )
-					  
+
 #define EXPOSE_READ_ONLY_PROPERTY_INTEGER(ClassName,name) \
 	EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Integer,int,&ClassName::name>),name)
 
@@ -56,14 +56,15 @@ Handle<Value> ee(Local<String> property,const AccessorInfo &info)
 
 
 
-/** 
+/**
  *  Extracts a C string from a V8 Utf8Value.
  * <code>
  *    v8::String::Utf8Value str(args[i]);
  *    const char* cstr = ToCString(str);
  * </code>
  */
-inline const char* ToCString(const v8::String::Utf8Value& value) {
-  return *value ? *value : "<string conversion failed>";
+inline const char* ToCString(const v8::String::Utf8Value& value)
+{
+    return *value ? *value : "<string conversion failed>";
 }
 

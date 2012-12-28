@@ -1,7 +1,7 @@
 var assert = require("assert");
 
 var occ = require("../lib/occ");
-var CSGbuilder =require('../lib/CSGbuilder');
+var CSGbuilder =require('../lib/CSGBuilder');
 
 var shapeFactory = require('../lib/shapeFactory');
 
