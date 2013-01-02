@@ -1,6 +1,7 @@
 #include "Base.h"
 #include "Util.h"
 #include "BoundingBox.h"
+#include "Transformation.h"
 
 bool Base::isNull()
 {
@@ -100,9 +101,13 @@ Handle<Value> Base::rotate(const Arguments& args)
     HandleScope scope;
     Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
+	gp_Trsf  transformation;
+	ReadRotationFromArgs(args,transformation);
+
+	pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+
     return scope.Close(args.This());
 }
-
 Handle<Value> Base::mirror(const Arguments& args)
 {
     HandleScope scope;
@@ -116,10 +121,18 @@ Handle<Value>  Base::applyTransform(const Arguments& args)
     HandleScope scope;
     Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
+	if (args.Length()!=1 && !Transformation::constructor->HasInstance(args[0])) {
+		ThrowException(Exception::Error(String::New("invalid  tansformation")));
+        return scope.Close(Undefined());
+	}
+
+	Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
+
+	const gp_Trsf& transformation = pTrans->m_trsf;
+	pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+
     return scope.Close(args.This());
 }
-
-#include "Transformation.h"
 
 
 Handle<Value> Base::transformed(const Arguments& args)

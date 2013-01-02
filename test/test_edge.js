@@ -13,9 +13,9 @@ describe("testing Edges ",function(){
         var edge;
         before(function(){
           edge = new occ.Edge();
-        })
+        });
         it("should be valid", function(){
-            edge.isNull.should.be.true;
+            edge.isNull.should.equal(true);
         });
         it("should have a zero length", function(){
             edge.length.should.equal(0);
@@ -24,10 +24,10 @@ describe("testing Edges ",function(){
             edge.numVertices.should.equal(0);
         });
         it("should be degenerated", function(){
-            edge.isDegenerated.should.be.true;
+            edge.isDegenerated.should.equal(true);
         });
         it("shouldn't be closed", function(){
-            edge.isClosed.should.be.false;
+            edge.isClosed.should.equal(false);
         });
     });
     describe("an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ",function(){
@@ -38,18 +38,18 @@ describe("testing Edges ",function(){
             edge = new occ.Edge();
             edge.createLine(v1,v2);
 
-        })
-        it("should have a length of 40.0 ", function(){
+        });
+        it("should have a length of 40.0 ", function() {
             edge.length.should.equal(40.0);
         });
-        it("should have two vertices ", function(){
+        it("should have two vertices ", function() {
             edge.numVertices.should.equal(2.0);
         });
-        it("shouldn't be closed", function(){
-            edge.isClosed.should.be.false;
+        it("shouldn't be closed", function() {
+            edge.isClosed.should.equal(false);
         });
-        it("shouldn't be degenerated", function(){
-            edge.isDegenerated.should.be.false;
+        it("shouldn't be degenerated", function() {
+            edge.isDegenerated.should.equal(false);
         });
     });
     describe("an  Edge constructed as a Circle on the Z+ plan with a radius of 20" ,function(){
@@ -59,7 +59,7 @@ describe("testing Edges ",function(){
             edge = new occ.Edge();
             edge.createCircle([10,10,10],[0,0,1],20);
 
-        })
+        });
         it("should have a length of 2*PI*20.0 ", function(){
             var epsilon = 1E-2;
             var PI = 3.1415;
@@ -69,10 +69,10 @@ describe("testing Edges ",function(){
             edge.numVertices.should.equal(1);
         });
         it("should be closed", function(){
-            edge.isClosed.should.be.true;
+            edge.isClosed.should.equal(true);
         });
         it("shouldn't be degenerated", function(){
-            edge.isDegenerated.should.be.false;
+            edge.isDegenerated.should.equal(false);
         });
     });
 });

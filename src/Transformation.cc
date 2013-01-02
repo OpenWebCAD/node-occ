@@ -92,24 +92,19 @@ Handle<Value> Transformation::makeScale(const Arguments& args)
     return args.This();
 }
 
+
+
 Handle<Value> Transformation::makeRotation(const Arguments& args)
 {
     HandleScope scope;
     Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
+
     if( args.Length()!=3) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-        return scope.Close(Undefined());
+        ThrowException(Exception::TypeError(String::New("Wrong arguments in makeRotation")));
+        return Undefined();
     }
 
-    double x=0,y=0,z=0;
-    ReadPoint(args[0],&x,&y,&z);
-
-    double u=0,v=0,w=0;
-    ReadPoint(args[1],&u,&v,&w);
-
-    double angle=args[2]->NumberValue();
-
-    pThis->m_trsf.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),angle/180.0*M_PI);
+	ReadRotationFromArgs(args, pThis->m_trsf);
 
     return args.This();
 }

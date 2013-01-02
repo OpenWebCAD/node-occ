@@ -107,13 +107,16 @@
         border: 1px solid black;
       }
 
-          .ui-layout-west {
-              overflow: hidden;
-          }
-          .ui-layout-center {
-              overflow: hidden;
-          }
-    </style>
+      .ui-layout-west {
+          overflow: hidden;
+      }
+      .ui-layout-center {
+          overflow: hidden;
+      }
+
+
+
+      </style>
 
 
   </head>
@@ -125,17 +128,25 @@
       <button id="button"> Test</button>
   </div>
   <div class="pane ui-layout-south" style="background: #f0f8ff">
+      <div id='loadingDiv'> Please wait...  <img src='/images/spinner_24.gif' />  </div>
       <div style="">
         <pre id="ascii_mesh" style="font-size=0.8em"><pre>
      </div>
   </div>
   <div class="pane ui-layout-east">
+
       <div id="myAngularApp" ng-controller='SceneCtrl'>
           <p>Nothing here {{'yet' + '!'  }}</p>
 
           <p>{{ getCamera().position.x}}</p>
           <p>{{ getCamera().position.y}}</p>
           <p>{{ getCamera().position.z}}</p>
+          <p>{{ getCamera().rotation.x}}</p>
+          <p>{{ getCamera().rotation.y}}</p>
+          <p>{{ getCamera().rotation.z}}</p>
+          <p>{{ getCamera().near}}</p>
+          <p>{{ getCamera().far}}</p>
+          <p>{{ getCamera().fov}}</p>
 
           <p>{{ COG.x }}</p>
           <p>{{ COG.y }}</p>

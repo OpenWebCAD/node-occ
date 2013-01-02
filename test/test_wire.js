@@ -19,7 +19,7 @@ describe("testing Wire ",function(){
             wire.numVertices.should.equal(0);
         });
         it("should not be closed", function() {
-            wire.isClosed.should.be.false;
+            wire.isClosed.should.equal(false);
         });
     });
 });

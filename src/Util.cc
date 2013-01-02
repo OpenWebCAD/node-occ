@@ -41,11 +41,17 @@ void ReadPropertyPointFromArray(Handle<Array> arr,double* x,double* y, double*z 
 //  //xx }
 //}
 
-
+void ReadDouble(Handle<Value> _v,double& value)
+{
+	if (_v->IsNumber()) {
+		value =  _v->ToNumber()->Value();
+	} 
+}
 double ReadDouble(Handle<Object> value,const char* name,double defaultValue)
 {
     Local<Value> _v = value->ToObject()->Get(String::New(name));
-    return _v->ToNumber()->Value();
+	ReadDouble(_v,defaultValue);
+	return defaultValue;
 }
 
 int ReadInt(Handle<Object> value,const char* name,int defaultValue)
@@ -101,4 +107,18 @@ void ReadVector(Local<v8::Value> value,gp_Vec* pt)
     double x=0,y=0,z=0;
     ReadPoint(value,&x,&y,&z);
     pt->SetCoord(x,y,z);
+}
+
+void ReadRotationFromArgs(const v8::Arguments& args,gp_Trsf& trans)
+{
+
+    double x=0,y=0,z=0;
+    ReadPoint(args[0],&x,&y,&z);
+
+    double u=0,v=0,w=0;
+    ReadPoint(args[1],&u,&v,&w);
+
+    double angle=args[2]->NumberValue();
+
+    trans.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),angle/180.0*M_PI);
 }

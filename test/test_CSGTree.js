@@ -45,13 +45,13 @@ describe("Building a csg on the client side",function() {
 
     });
     it("should produce a parsable JSON string",function(){
-        console.log(JSON.stringify(compiled_csg))
+        console.log(JSON.stringify(compiled_csg));
     });
     it("should have a root element",function(){
-       compiled_csg.hasOwnProperty('root').should.be.true;
+       compiled_csg.hasOwnProperty('root').should.equal(true);
     });
     it("should have a operation matching root element",function(){
-        compiled_csg.hasOwnProperty(compiled_csg["root"]).should.be.true;
+        compiled_csg.should.have.ownProperty("root");
     });
     it("should have 12 operations",function(){
         Object.keys(compiled_csg).length.should.equal(12);

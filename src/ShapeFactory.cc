@@ -266,8 +266,38 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
             pThis->setShape(BRepPrimAPI_MakeCone(R1, R2,H).Shape());
         }
         CATCH_AND_RETHROW("Failed to create sphere ");
-    }  else {
-        ThrowException(Exception::Error(String::New("invalid arguments")));
+	} else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber() && args[3]->IsNumber()) {
+		// Point, point , R1,R2);
+        // variation 3 ( 2 points and a radius  )
+        gp_Pnt p1;
+        ReadPoint(args[0],&p1);
+		
+		gp_Pnt p2;
+        ReadPoint(args[1],&p2);
+
+        double R1  = 10;
+		ReadDouble(args[2],R1);
+
+        double R2  = 11;
+		ReadDouble(args[3],R2);
+
+        const double dx = p2.X() - p1.X();
+        const double dy = p2.Y() - p1.Y();
+        const double dz = p2.Z() - p1.Z();
+
+        const double H = sqrt(dx*dx + dy*dy + dz*dz);
+        if (H < epsilon ) {
+            ThrowException(Exception::Error(String::New("cannot build a cone on two coincident points")));
+        }
+        gp_Vec aV(dx / H, dy / H, dz / H);
+        gp_Ax2 ax2(p1, aV);
+        try {
+            pThis->setShape(BRepPrimAPI_MakeCone(ax2,R1,R2,H).Shape());
+        }
+        CATCH_AND_RETHROW("Failed to create cone ");
+
+	}  else {
+        ThrowException(Exception::Error(String::New("invalid arguments (cone)")));
     }
 
     return scope.Close(pJhis);

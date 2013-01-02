@@ -42,14 +42,14 @@ describe("testing Vertex ",function(){
             vertex.z.should.equal(30);
         });
         it("should be valid", function() {
-            vertex.isValid.should.equal(true)
+            vertex.isValid.should.equal(true);
         });
     });
     describe("constructing a  vertex and applying a translation",function(){
         var vertex;
         before(function() {
             vertex = new occ.Vertex([10,20,30]);
-            vertex.translate([10,20,30])
+            vertex.translate([10,20,30]);
         });
         it("should be translated",function(){
             vertex.x.should.equal(20);

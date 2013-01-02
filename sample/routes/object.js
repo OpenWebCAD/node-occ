@@ -1,5 +1,11 @@
 var occ  = require('../../lib/occ')
-  , CSGBuilder = require('../../lib/CSGBuilder');
+  , CSGBuilder = require('../../lib/CSGBuilder')
+   , jailguard = require('jailguard');
+
+var fs = require('fs');
+var fileUtils = require ("file-utils");
+var File = fileUtils.File;
+var SecurityManager = fileUtils.SecurityManager;
 
 exports.get = function(req, res) {
 
@@ -55,5 +61,143 @@ exports.buildCSG = function(req,res)
         return;
     }
     res.send(jsonStr);
+
+}
+
+var vm = require('vm');
+var util = require('util');
+
+function getBlockedFunctionConstructor() {
+
+    function FakeFunction(execCode) {
+        var code = "FUNCTION_CONSTRUCTOR_DETECTED";
+        var message = "function constructor with code: " + execCode;
+        error = {code: code, message: message};
+
+        return function() {};
+    }
+
+    return FakeFunction;
+}
+
+
+
+exports.buildCSG1 = function(req,res)
+{
+    try {
+        var  solidBuilderScript = decodeURIComponent(req.body.script);
+        //xx console.log( "csg" , solidBuilderScript);
+
+        var env = {
+            csg: occ ,
+            occ: occ ,
+            'eval':        function() { throw "eval is forbidden";        },
+            'require':     function() { throw "require is forbidden";     },
+            'setTimeout':  function() { throw "setTimeout is forbidden";  },
+            'setInterval': function() { throw "setInterval is forbidden"; },
+            solid: null ,
+            error: null } ;
+        // console.log("env = ",env );
+
+        var code = "function buildSolid() { " + solidBuilderScript + "\n} solid = buildSolid();"
+
+        var settings = {
+            prefix: "foo",
+            suffix: ".bar",
+            directory: "/temp/"
+        };
+
+        File.createTempFile (settings, function (error, file){
+            if (!error) {
+                var filename = file.toString ();
+                console.log (" temporary file =",file.toString ()); //Prints: foo<random number>bar
+                fs.writeFile(filename,code,function(err){
+                    function customPrepareStackTrace(error, structuredStackTrace) {
+
+                        console.log(structuredStackTrace);
+
+                        return structuredStackTrace[0].getLineNumber();
+
+                    }
+                    // code = "solid = {} ; solid.mesh= {}; solid.mesh.toJSON = function(){ return {toto: 'toto'}; }";
+                    // code = " var util=  require('util'); solid=  csg.makeSphere([0,0,0],10);" ;
+                    Error.prepareStackTrace = customPrepareStackTrace;
+                    try {
+                        vm.runInNewContext(code,env,filename);
+                        //xx console.log(util.inspect(env));
+
+                        //xx console.log("code = ",code);
+                        //xx console.log("env = ",env);
+                        var mesh   = env.solid.mesh;
+                        jsonStr = mesh.toJSON();
+                        //xx console.log( "jsonStr",jsonStr);
+                        res.send(jsonStr);
+
+                    }
+                    catch(err) {
+
+
+
+                        function getLineNumber() {
+
+                            var original = Error.prepareStackTrace;
+
+
+
+                            var error = {};
+
+                            Error.captureStackTrace(error, getLineNumber);
+
+                            var lineNumber = error.stack;
+
+                            Error.prepareStackTrace = original;
+
+                            return lineNumber;
+
+                        }
+
+                        console.log("transaction ended with an error",err.message + "  " + err.toString() + " " + err.stack);
+                        res.send(501,"Error building solid : "+ err.message + "    "+ err.toString());
+
+                    }
+                });
+
+
+            }
+        });
+
+        if (1) {
+
+
+        }else {
+            // execute script in a special vm
+            //xx code ="solid = 'toto';"
+                        var jg = jailguard.create({timeout: 100});
+                        jg.run(code, env, function(err) {
+                            console.log("err = ",err);
+                            console.log("env = ",env);
+
+                            if (!err) {
+
+                                var mesh   = env.solid.mesh;
+                                jsonStr = mesh.toJSON();
+                                res.send(jsonStr);
+
+                            } else {
+                                console.log(" error in jailguard:", err,JSON.stringify(err));
+                                res.send(501,"Error building solid : "+ err.message + err.toString());
+
+                            }
+
+                        });
+        }
+
+
+    }
+    catch(err) {
+        console.log(err.message + err.toString());
+        res.send(501,"Error building solid : "+ err.message + "    "+ err.toString());
+        return;
+    }
 
 }

@@ -6,11 +6,12 @@ var container,
     scene,
     renderer,
     camera,
-    control,
+    controls,
     editor,
     myLayout,
     COG = new THREE.Vector3() ;
 
+var lightContainer;
 
 function installLayout() {
     // $('#container').layout({ applyDemoStyles: true });
@@ -28,19 +29,37 @@ function installLayout() {
     myLayout.sizePane("west", 400);
 }
 
+
+function zoomAll()
+{
+    "use strict";
+    // get scene bounding box
+    var bbox = scene.boundingSphere();
+
+    var distToCenter = bbox.radius/Math.sin(camera.fov);
+
+    // camera
+}
+
 $(document).ready(function() {
+    "use strict";
 
     installLayout();
 
     installEditor();
+
+    installSpinnerOnAjaxCall();
+
 
     container = $("#graphical_view");
     if (container.size() === 0 ) {
         throw Error("Cannot find graphical view div");
     }
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, container.width()/container.height(), 0.1, 1000);
-    camera.position.z = 400;
+    camera = new THREE.PerspectiveCamera(25, container.width()/container.height(), 1, 100000);
+    camera.position.z = 100;
+
+
     controls = new THREE.TrackballControls( camera ,container[0]);
 
 
@@ -53,13 +72,15 @@ $(document).ready(function() {
 
     controls.staticMoving = false;
     controls.dynamicDampingFactor = 0.3;
-    var radius =100;
+    var radius =1;
     controls.minDistance = radius * 1.1;
-    controls.maxDistance = radius * 100;
+    controls.maxDistance = radius * 10000;
 
-    controls.keys = [ 65, 83, 68 ];
+    controls.keys = [ /*A*/65, /*S*/ 83, /*D*/68 ];
 
-    controls.addEventListener( 'change', render );
+    controls.addEventListener( 'change', function() {
+
+    });
 
     renderer =  new THREE.WebGLRenderer();//  { antialias: true, clearColor: 0x121212, clearAlpha: 1 } );
     renderer.setClearColorHex(0x121212, 1.0);
@@ -67,14 +88,24 @@ $(document).ready(function() {
 
     container.append(renderer.domElement);
 
+    lightContainer = new THREE.Object3D();
+    lightContainer.matrixWorld = camera.matrix;
+    lightContainer.matrixAutoUpdate = false;
+
+    scene.add(lightContainer);
+
     for (var x= -1 ; x<2;x=x+2) {
         for (var y= -1 ; y<2;y=y+2) {
             for (var z= -1 ; z<2;z=z+2) {
-                var pointLight = new THREE.PointLight( 0xFFFFFF,0.2 );
-                pointLight.position.x = 1000 * x;
-                pointLight.position.y = 1000 * y;
-                pointLight.position.z = 1000 * y;
-                scene.add(pointLight);
+
+                var pointLight =  new THREE.PointLight( 0xFFFFFF,0.2 );
+                pointLight.position.x = 100 * x;
+                pointLight.position.y = 100 * y;
+                pointLight.position.z = 100 * z;
+                pointLight.matrixAutoUpdate = true;
+
+                lightContainer.add(pointLight);
+                lightContainer.add(new THREE.PointLightHelper(pointLight,10));
             }
         }
     }
@@ -84,18 +115,6 @@ $(document).ready(function() {
 
     var light = new THREE.AmbientLight( 0x222222 );
     scene.add( light );
-    // -----------------------------
-    var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xCC0000 });
-
-    var radius = 50, segments = 16, rings = 16;
-
-    var sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(radius, segments, rings ),
-        sphereMaterial
-    );
-
-
-    //xx scene.add(sphere);
 
     animate();
 
@@ -117,13 +136,15 @@ function onWindowResize( event ) {
     camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
     camera.updateProjectionMatrix();
 
+
+
 }
 
 function animate() {
+    "use strict";
     requestAnimationFrame( animate );
-    render();
     controls.update();
-    //xx stats.update();
+    render();
     updateAJS();
 }
 
@@ -143,10 +164,12 @@ function shapeCenterOfGravity(geometry) {
 
     return center;
 }
-
+var lastAjaxStart ;
+var lastAjaxDuration;
 var delay;
 
 function installACEEditor() {
+
     editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/javascript");
@@ -187,7 +210,86 @@ function updatePreview() {
     send_and_build_up_csg();
 }
 
-function send_and_build_up_csg() {
+
+function handle_json_error(request, statusText, errorThrown) {
+
+    "use strict";
+    console.log(request);
+    lastAjaxDuration = new Date() - lastAjaxStart;
+
+    // var obj = JSON.parse(err.responseText);
+    $("#ascii_mesh").text(request.responseText + " duration :  " + lastAjaxDuration);
+
+
+}
+function install_json_mesh(json) {
+    "use strict";
+
+    var beautified = JSON.stringify(json,null,"");
+    $("#ascii_mesh").text("duration: " + lastAjaxDuration + "  vertices :" + json.vertices.length + " faces : " + json.faces.length + " size :" + beautified.length + " bytes" );
+
+    json.scale = 1.0;
+    var jsonLoader = new THREE.JSONLoader();
+
+    var model;
+
+    model = jsonLoader.createModel( json,
+
+        function(geometry,material ){
+            var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xCC0000 });
+
+            var oldObj = scene.getChildByName("CSG");
+            if (oldObj) { scene.remove(oldObj); }
+            var newObj = new THREE.Mesh(geometry,sphereMaterial);
+            newObj.name ="CSG";
+            scene.add(newObj);
+            COG = shapeCenterOfGravity(geometry);
+            camera.lookAt(COG);
+            controls.target.set( COG.x, COG.y, COG.z );
+
+        },/* texturePath */ undefined)
+}
+
+
+/**
+ * In send_and_build_up_csg_method1 the construction script is passed to the server as a text string
+ * and executed by the server in a sandbox to produce the corresponding mesh.
+ */
+function send_and_build_up_csg_method2() {
+    "use strict";
+    var encoded_script = encodeURIComponent(editor.getValue());
+    lastAjaxStart = new Date();
+
+    $.ajax({
+        url: "/csg1" ,
+        data: JSON.stringify({ script: encoded_script}),
+        type: "POST",
+        contentType: "application/json",
+        cache: false,
+        dataType:"json",
+        statusCode: {
+            404: function() {
+                $("#response").html('Could not contact server.');
+            },
+            500: function() {
+                $("#response").html('A server-side error has occurred.');
+            }
+        },
+
+        error: handle_json_error
+    }).done( function(json) {
+            lastAjaxDuration = new Date() - lastAjaxStart;
+            install_json_mesh(json);
+     });
+}
+
+/**
+ * In send_and_build_up_csg_method1 the construction script is executed on the client javascript engine
+ * to produce a JSON object that contains the modeling instructions. The JSON data structure is sent
+ * to the server to produce the mesh of the corresponding solid
+ */
+function send_and_build_up_csg_method1() {
+    "use strict";
     var object;
     var err_txt= "";
     $("#ascii_mesh").text(err_txt);
@@ -200,7 +302,7 @@ function send_and_build_up_csg() {
             code = " var csg = new CSGTree();" + "var b__ = function() { " + code + "}; b__(); return csg; " ;
 
         // interpret the script
-        var solid = new Function(code)();
+        object = new Function(code)();
 
         err_txt= '';
     } catch (e) {
@@ -208,52 +310,29 @@ function send_and_build_up_csg() {
         $("#ascii_mesh").text(err_txt);
         return;
     }
-    object = solid;
-
 
     $.ajax({
         url: "/csg" ,
-        data: JSON.stringify(object), // { object: object } ,
+        data: JSON.stringify(object),
         type: "POST",
         contentType: "application/json",
         cache: false,
         dataType:"json",
-        error: function(err) {
-            var obj = JSON.parse(err.responseText)
-            //xx alert(" error " + JSON.stringify(obj,null," "));
-            $("#ascii_mesh").text(obj.error.stack);
-        }
-    }).done(
-
-
-
-        function(json) {
-
-            var beautified = JSON.stringify(json,null,"");
-            $("#ascii_mesh").text(beautified);
-            json.scale = 1.0;
-            var jsonLoader = new THREE.JSONLoader();
-             model = jsonLoader.createModel( json,
-                 function(geometry,material ){
-                     var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xCC0000 });
-
-                     var oldObj = scene.getChildByName("CSG");
-                     if (oldObj) { scene.remove(oldObj); }
-                     var newObj = new THREE.Mesh(geometry,sphereMaterial);
-                     newObj.name ="CSG";
-                     scene.add(newObj);
-                     COG = shapeCenterOfGravity(geometry);
-                     camera.lookAt(COG);
-                     controls.target.set( COG.x, COG.y, COG.z );
-
-                 },/* texturePath */ undefined)
-        });
+        error: handle_json_error
+    }).done( function(json) { install_json_mesh(json); });
 }
 
+
+function send_and_build_up_csg() {
+    "use strict";
+    send_and_build_up_csg_method2();
+}
 function SceneCtrl($scope) {
+    "use strict";
     $scope.getCamera =function() {
         return camera;
-    }
+    };
+
     $scope.COG = COG; // center of gravity
 
 /*
@@ -277,4 +356,21 @@ function updateAJS() {
 
     SceneCtrl(scope);
     scope.$apply();
+}
+
+
+
+function installSpinnerOnAjaxCall()
+{
+
+    $('#loadingDiv')
+    .hide()  // hide it initially
+    .ajaxStart(function() {
+        $(this).show();
+        lastJQueryStart = new Date();
+    })
+    .ajaxStop(function() {
+        $(this).hide();
+        lastAjaxDuration=new Date() - lastJQueryStart;
+    });
 }

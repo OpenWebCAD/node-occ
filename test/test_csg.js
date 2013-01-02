@@ -19,7 +19,7 @@ describe("Building a csg",function() {
         });
         it("should have 6 faces",function(){
             solid.numFaces.should.equal(6);
-        })
+        });
     });
     describe("building a simple cylinder",function(){
         var simple_csg = {
@@ -32,7 +32,7 @@ describe("Building a csg",function() {
         });
         it("should have 3 faces (top,bottom,side",function(){
             solid.numFaces.should.equal(3);
-        })
+        });
     });
 
 
@@ -49,7 +49,7 @@ describe("Building a csg",function() {
         });
         it("should have  14 faces",function(){
             solid.numFaces.should.equal(14);
-        })
+        });
 
     });
 
@@ -61,7 +61,7 @@ describe("Building a csg",function() {
         });
         it("should have 20 faces",function(){
             solid.numFaces.should.equal(20);
-        })
+        });
 
     });
 });

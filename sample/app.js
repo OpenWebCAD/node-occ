@@ -62,8 +62,9 @@ app.get('/objects(""|\.json|\.html)', object.list);
 app.get('/object/:id', object.get);
 app.post('/object', object.get);
 app.get('/csg', object.buildCSG);
+app.get('/csg1', object.buildCSG1);
 app.post('/csg', object.buildCSG);
-app.post('/csg', object.buildCSG);
+app.post('/csg1', object.buildCSG1);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
