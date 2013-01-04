@@ -1,5 +1,6 @@
 var occ  = require('../../lib/occ')
   , CSGBuilder = require('../../lib/CSGBuilder')
+    , shapeFactory = require('../../lib/shapeFactory')
    , jailguard = require('jailguard');
 
 var fs = require('fs');
@@ -91,6 +92,8 @@ exports.buildCSG1 = function(req,res)
         var env = {
             csg: occ ,
             occ: occ ,
+            shapeFactory: shapeFactory,
+
             'eval':        function() { throw "eval is forbidden";        },
             'require':     function() { throw "require is forbidden";     },
             'setTimeout':  function() { throw "setTimeout is forbidden";  },
@@ -112,16 +115,16 @@ exports.buildCSG1 = function(req,res)
                 var filename = file.toString ();
                 console.log (" temporary file =",file.toString ()); //Prints: foo<random number>bar
                 fs.writeFile(filename,code,function(err){
+
+/*
                     function customPrepareStackTrace(error, structuredStackTrace) {
-
                         console.log(structuredStackTrace);
-
                         return structuredStackTrace[0].getLineNumber();
-
                     }
-                    // code = "solid = {} ; solid.mesh= {}; solid.mesh.toJSON = function(){ return {toto: 'toto'}; }";
-                    // code = " var util=  require('util'); solid=  csg.makeSphere([0,0,0],10);" ;
+
                     Error.prepareStackTrace = customPrepareStackTrace;
+*/
+
                     try {
                         vm.runInNewContext(code,env,filename);
                         //xx console.log(util.inspect(env));
@@ -136,13 +139,11 @@ exports.buildCSG1 = function(req,res)
                     }
                     catch(err) {
 
-
+                        console.trace("Here I am!");
 
                         function getLineNumber() {
 
                             var original = Error.prepareStackTrace;
-
-
 
                             var error = {};
 
@@ -152,12 +153,15 @@ exports.buildCSG1 = function(req,res)
 
                             Error.prepareStackTrace = original;
 
-                            return lineNumber;
+                            return lineNumber ;
 
                         }
 
-                        console.log("transaction ended with an error",err.message + "  " + err.toString() + " " + err.stack);
-                        res.send(501,"Error building solid : "+ err.message + "    "+ err.toString());
+                        console.log("transaction ended with an error",err.message);
+                        console.log("error string = ", err.toString() );
+                        console.log("error stack  = ", err.stack);
+
+                        res.send(501,"Error building solid : "+ err.message + "    "+ err.stack);
 
                     }
                 });

@@ -9,6 +9,7 @@
     "express": "3.0.4",
     "ejs": "*",
     "jailguard":"*",
-     "file-utils": "*"
+     "file-utils": "*",
+     "stack-trace": "*"
   }
 }
