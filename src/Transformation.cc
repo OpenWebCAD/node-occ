@@ -104,7 +104,7 @@ Handle<Value> Transformation::makeRotation(const Arguments& args)
         return Undefined();
     }
 
-	ReadRotationFromArgs(args, pThis->m_trsf);
+    ReadRotationFromArgs(args, pThis->m_trsf);
 
     return args.This();
 }

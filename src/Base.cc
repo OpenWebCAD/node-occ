@@ -23,31 +23,31 @@ const char* Base::shapeType()
         return "UNDEFINED";
     }
     switch(shape().ShapeType()) {
-    case	TopAbs_COMPOUND:
+    case    TopAbs_COMPOUND:
         return "COMPOUND";
         break;
-    case	TopAbs_COMPSOLID:
+    case    TopAbs_COMPSOLID:
         return "COMPSOLID";
         break;
-    case	TopAbs_SOLID:
+    case    TopAbs_SOLID:
         return "SOLID";
         break;
-    case	TopAbs_SHELL:
+    case    TopAbs_SHELL:
         return "SHELL";
         break;
-    case	TopAbs_FACE:
+    case    TopAbs_FACE:
         return "FACE";
         break;
-    case	TopAbs_WIRE:
+    case    TopAbs_WIRE:
         return "WIRE";
         break;
-    case	TopAbs_EDGE:
+    case    TopAbs_EDGE:
         return "EDGE";
         break;
-    case	TopAbs_VERTEX:
+    case    TopAbs_VERTEX:
         return "VERTEX";
         break;
-    case	TopAbs_SHAPE:
+    case    TopAbs_SHAPE:
         return "SHAPE";
         break;
     }
@@ -101,10 +101,10 @@ Handle<Value> Base::rotate(const Arguments& args)
     HandleScope scope;
     Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
-	gp_Trsf  transformation;
-	ReadRotationFromArgs(args,transformation);
+    gp_Trsf  transformation;
+    ReadRotationFromArgs(args,transformation);
 
-	pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+    pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
 
     return scope.Close(args.This());
 }
@@ -121,15 +121,15 @@ Handle<Value>  Base::applyTransform(const Arguments& args)
     HandleScope scope;
     Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
-	if (args.Length()!=1 && !Transformation::constructor->HasInstance(args[0])) {
-		ThrowException(Exception::Error(String::New("invalid  tansformation")));
+    if (args.Length()!=1 && !Transformation::constructor->HasInstance(args[0])) {
+        ThrowException(Exception::Error(String::New("invalid  tansformation")));
         return scope.Close(Undefined());
-	}
+    }
 
-	Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
+    Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
 
-	const gp_Trsf& transformation = pTrans->m_trsf;
-	pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+    const gp_Trsf& transformation = pTrans->m_trsf;
+    pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
 
     return scope.Close(args.This());
 }
@@ -147,9 +147,9 @@ Handle<Value> Base::transformed(const Arguments& args)
 
     Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
     const gp_Trsf& trsf =  pTrans->m_trsf;
-    gp_Trsf transformation = 	trsf;
+    gp_Trsf transformation =     trsf;
 
-    Local<Object> copy	= pThis->Clone();
+    Local<Object> copy    = pThis->Clone();
 
     if (!pThis->shape().IsNull()) {
         pThis->Unwrap(copy)->setShape(

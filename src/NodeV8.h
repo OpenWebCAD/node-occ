@@ -32,27 +32,35 @@ Handle<Value> ee(Local<String> property,const AccessorInfo &info)
         return scope.Close(Undefined());
     }
     T* obj = node::ObjectWrap::Unwrap<T>(info.This());
-    return scope.Close(T1::New((obj->*func)()));
+
+
+    try {
+        return scope.Close(T1::New((obj->*func)()));
+    } catch(...) {
+        ThrowException(Exception::Error(String::New("exception caught in C++ code")));
+        return scope.Close(Undefined());
+    }
+
 }
 
 
 #define EXPOSE_METHOD(ClassName,staticMethod) \
-	proto->Set(String::NewSymbol(#staticMethod),FunctionTemplate::New(staticMethod)->GetFunction());
+    proto->Set(String::NewSymbol(#staticMethod),FunctionTemplate::New(staticMethod)->GetFunction());
 
 #define EXPOSE_READ_ONLY_PROPERTY(ClassName,staticMethod,name) \
-	proto->SetAccessor(String::NewSymbol(#name), &staticMethod,  0,Handle<v8::Value>(),DEFAULT,ReadOnly)
+    proto->SetAccessor(String::NewSymbol(#name), &staticMethod,  0,Handle<v8::Value>(),DEFAULT,ReadOnly)
 
 #define EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(ClassName,name) \
-	EXPOSE_READ_ONLY_PROPERTY(proto, (ee< ClassName, Boolean, bool, &ClassName::name>) , name )
+    EXPOSE_READ_ONLY_PROPERTY(proto, (ee< ClassName, Boolean, bool, &ClassName::name>) , name )
 
 #define EXPOSE_READ_ONLY_PROPERTY_INTEGER(ClassName,name) \
-	EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Integer,int,&ClassName::name>),name)
+    EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Integer,int,&ClassName::name>),name)
 
 #define EXPOSE_READ_ONLY_PROPERTY_DOUBLE(ClassName,name) \
-	EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Number,double,&ClassName::name>),name)
+    EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Number,double,&ClassName::name>),name)
 
 #define EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(ClassName,name) \
-	EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,String,const char*,&ClassName::name>),name)
+    EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,String,const char*,&ClassName::name>),name)
 
 
 

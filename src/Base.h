@@ -36,15 +36,15 @@ public:
 v8::Local<v8::Object> buildEmptyWrapper(TopAbs_ShapeEnum type);
 v8::Local<v8::Object> buildWrapper(const TopoDS_Shape shape);
 
-#define CATCH_AND_RETHROW(message)									\
-   catch(Standard_Failure& ) {										\
-        Handle_Standard_Failure e = Standard_Failure::Caught();		\
-        Standard_CString msg = e->GetMessageString();				\
-        if (msg == NULL || strlen(msg) < 1) {						\
-            msg = message;											\
-        }															\
-		ThrowException(Exception::Error(String::New(msg)));		\
-    }																\
+#define CATCH_AND_RETHROW(message)                                    \
+   catch(Standard_Failure& ) {                                        \
+        Handle_Standard_Failure e = Standard_Failure::Caught();       \
+        Standard_CString msg = e->GetMessageString();                 \
+        if (msg == NULL || strlen(msg) < 1) {                         \
+            msg = message;                                            \
+        }                                                             \
+        ThrowException(Exception::Error(String::New(msg)));           \
+    }                                                                 \
  
 template<class ClassType>
 size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
@@ -94,5 +94,5 @@ Base*  DynamicCast(const Handle<Value>& value)
 {
     ObjType1* obj = DynamicCast<ObjType1>(value);
     if (obj) return obj;
-    return 	 DynamicCast<ObjType2>(value);
+    return      DynamicCast<ObjType2>(value);
 }

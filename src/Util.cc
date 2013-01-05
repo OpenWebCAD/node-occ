@@ -41,17 +41,17 @@ void ReadPropertyPointFromArray(Handle<Array> arr,double* x,double* y, double*z 
 //  //xx }
 //}
 
-void ReadDouble(Handle<Value> _v,double& value)
+void ReadDouble(const Handle<Value>& _v,double& value)
 {
-	if (_v->IsNumber()) {
-		value =  _v->ToNumber()->Value();
-	} 
+    if (_v->IsNumber()) {
+        value =  _v->ToNumber()->Value();
+    }
 }
 double ReadDouble(Handle<Object> value,const char* name,double defaultValue)
 {
     Local<Value> _v = value->ToObject()->Get(String::New(name));
-	ReadDouble(_v,defaultValue);
-	return defaultValue;
+    ReadDouble(_v,defaultValue);
+    return defaultValue;
 }
 
 int ReadInt(Handle<Object> value,const char* name,int defaultValue)

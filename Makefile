@@ -11,3 +11,6 @@ packet:
 
 copy: 
 	COPY D:\projet\oce-build\bin\Debug\*.dll build\Release
+
+format:
+	astyle --indent=spaces=4 src/*

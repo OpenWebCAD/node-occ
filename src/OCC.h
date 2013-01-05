@@ -1,11 +1,19 @@
 // OpenCASCADE
 #pragma once
 
+
+#include <Bnd_Box.hxx>
+
 #include <BRep_Tool.hxx>
+#include <BRepCheck_Analyzer.hxx>
+#include <BRepMesh_FastDiscret.hxx>
+
 #include <BRepTools.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <BRepBndLib.hxx>
+#include <BRepGProp.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeCone.hxx>
@@ -27,45 +35,32 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 
+#include <BRepCheck_Analyzer.hxx>
+
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
 
 #include <BRepClass3d_SolidExplorer.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
-#include <ShapeFix_Solid.hxx>
 
-#include <StlAPI_Writer.hxx>
-#include <StlAPI_Reader.hxx>
-
-
-#include <gce_MakeCirc.hxx>
-#include <gce_MakePln.hxx>
 #include <ElCLib.hxx>
+
+#include <FSD_BinaryFile.hxx>
+
+#include <Geom_BezierCurve.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_TrimmedCurve.hxx>
+
+#include <GCPnts_UniformDeflection.hxx>
 
 #include <gp.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Elips.hxx>
 #include <gp_Sphere.hxx>
-#include <Geom_BezierCurve.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <GCPnts_UniformDeflection.hxx>
 
-#include <TopExp_Explorer.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Wire.hxx>
-#include <TopoDS_Face.hxx>
-
-#include <Poly_Triangulation.hxx>
-#include <Poly_Connect.hxx>
-
-#include <TColgp_Array1OfDir.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
-#include <StdPrs_ToolShadedShape.hxx>
-
-#include <FSD_BinaryFile.hxx>
+#include <gce_MakeCirc.hxx>
+#include <gce_MakePln.hxx>
 
 #include <GC_MakeSegment.hxx>
 #include <GC_MakeArcOfCircle.hxx>
@@ -74,34 +69,54 @@
 #include <GC_MakePlane.hxx>
 #include <GC_MakeTrimmedCone.hxx>
 
-#include <Storage_Data.hxx>
+
+
+
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+
+#include <GeomLProp_SLProps.hxx>
+#include <GeomLib_IsPlanarSurface.hxx>
+
+#include <GProp_GProps.hxx>
+
+
+#include <Interface_Static.hxx>
+
+//xx #include <MgtBRep.hxx>
+
+#include <Poly_Triangulation.hxx>
+#include <Poly_Connect.hxx>
+#include <Poly_PolygonOnTriangulation.hxx>
+
+#include <ShapeFix_ShapeTolerance.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <ShapeFix_Solid.hxx>
+
+#include <STEPControl_Writer.hxx>
+
 #include <ShapeSchema.hxx>
 
-#include <MgtBRep.hxx>
+#include <StdPrs_ToolShadedShape.hxx>
 
+#include <Storage_Data.hxx>
 #include <Storage_HSeqOfRoot.hxx>
 #include <Storage_HSeqOfRoot.hxx>
 #include <Storage_Root.hxx>
-#include <BRepCheck_Analyzer.hxx>
+
+#include <StlAPI_Writer.hxx>
+#include <StlAPI_Reader.hxx>
+
+#include <TColgp_Array1OfDir.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 
 #include <TopExp.hxx>
-#include <GProp_GProps.hxx>
-#include <BRepGProp.hxx>
-#include <BRepBndLib.hxx>
-#include <Bnd_Box.hxx>
-#include <BRepMesh_FastDiscret.hxx>
-#include <Poly_Triangulation.hxx>
-#include <GeomAPI_ProjectPointOnSurf.hxx>
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-#include <GeomLProp_SLProps.hxx>
-#include <Poly_PolygonOnTriangulation.hxx>
-#include "BRepCheck_Analyzer.hxx"
-#include "ShapeFix_ShapeTolerance.hxx"
-#include "ShapeFix_Shape.hxx"
-#include "STEPControl_Writer.hxx"
-#include "Interface_Static.hxx"
-/*
-#include <PTColStd_PersistentTransientMap.hxx>
-#include <PTColStd_TransientPersistentMap.hxx>
-*/
+#include <TopExp_Explorer.hxx>
+
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopoDS_Face.hxx>
+
+
 #undef Handle

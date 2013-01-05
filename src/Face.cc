@@ -35,31 +35,42 @@ double Face::area()
 }
 
 
-// DVec Face::inertia() {
-//    DVec ret;
-//    GProp_GProps prop;
-//    BRepGProp::SurfaceProperties(this->getShape(), prop);
-//    gp_Mat mat = prop.MatrixOfInertia();
-//    ret.push_back(mat(1,1)); // Ixx
-//    ret.push_back(mat(2,2)); // Iyy
-//    ret.push_back(mat(3,3)); // Izz
-//    ret.push_back(mat(1,2)); // Ixy
-//    ret.push_back(mat(1,3)); // Ixz
-//    ret.push_back(mat(2,3)); // Iyz
-//    return ret;
-//}
-//
-//OCCStruct3d Face::centreOfMass() {
-//    OCCStruct3d ret;
-//    GProp_GProps prop;
-//    BRepGProp::SurfaceProperties(this->getShape(), prop);
-//    gp_Pnt cg = prop.CentreOfMass();
-//    ret.x = cg.X();
-//    ret.y = cg.Y();
-//    ret.z = cg.Z();
-//    return ret;
-//}
-//
+std::vector<double> Face::inertia()
+{
+    std::vector<double> ret;
+    GProp_GProps prop;
+    BRepGProp::SurfaceProperties(this->shape(), prop);
+    gp_Mat mat = prop.MatrixOfInertia();
+    ret.push_back(mat(1,1)); // Ixx
+    ret.push_back(mat(2,2)); // Iyy
+    ret.push_back(mat(3,3)); // Izz
+    ret.push_back(mat(1,2)); // Ixy
+    ret.push_back(mat(1,3)); // Ixz
+    ret.push_back(mat(2,3)); // Iyz
+    return ret;
+}
+
+
+const gp_XYZ Face::centreOfMass() const
+{
+
+    GProp_GProps prop;
+    BRepGProp::SurfaceProperties(this->shape(), prop);
+    gp_Pnt cg = prop.CentreOfMass();
+
+    return cg.Coord();
+}
+
+bool Face::isPlanar()
+{
+
+    Handle_Geom_Surface surf = BRep_Tool::Surface(this->m_face);
+    GeomLib_IsPlanarSurface tool(surf);
+    return tool.IsPlanar() ? true : false;
+}
+
+
+
 
 
 Persistent<FunctionTemplate> Face::constructor;
@@ -121,13 +132,23 @@ Handle<Value> Face::New(const Arguments& args)
     return args.This();
 }
 
-Local<Object>  Face::Clone()
+Local<Object> Face::Clone()
 {
     HandleScope scope;
     Face* obj = new Face();
     Local<Object> instance = constructor->GetFunction()->NewInstance();
     obj->Wrap(instance);
     obj->setShape(this->shape());
+    return scope.Close(instance);
+}
+
+Handle<Object> Face::NewInstance(const TopoDS_Face& face)
+{
+    HandleScope scope;
+    Face* obj = new Face();
+    Local<Object> instance = constructor->GetFunction()->NewInstance();
+    obj->Wrap(instance);
+    obj->setShape(face);
     return scope.Close(instance);
 }
 
@@ -147,6 +168,8 @@ void Face::Init(Handle<Object> target)
 
     EXPOSE_READ_ONLY_PROPERTY_INTEGER(Face,numWires);
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
-
+    EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,isPlanar);
+    EXPOSE_TEAROFF(Face,centreOfMass);
     target->Set(String::NewSymbol("Face"), constructor->GetFunction());
 }
+

@@ -131,7 +131,7 @@ Vertex* getOrCreateVertex(Handle<Value> arg)
         Vertex* vertex = node::ObjectWrap::Unwrap<Vertex>(objV->ToObject());
         return vertex;
 
-    } 	else if(arg->IsObject()) {
+    }     else if(arg->IsObject()) {
 
         Handle<Object> obj = arg->ToObject();
         if (!Vertex::constructor->HasInstance(obj)) {
@@ -156,8 +156,8 @@ Handle<v8::Value> Edge::createLine(const v8::Arguments& args)
         return scope.Close(Undefined());
     }
 
-    Vertex* v1 = 	getOrCreateVertex(args[0]);
-    Vertex* v2 = 	getOrCreateVertex(args[1]);
+    Vertex* v1 =     getOrCreateVertex(args[0]);
+    Vertex* v2 =     getOrCreateVertex(args[1]);
     if (!v1 || !v2) {
         ThrowException(Exception::TypeError(String::New("expecting 2 arguments : <vertex|point> , <vertex|point> ")));
         return scope.Close(Undefined());
@@ -218,10 +218,10 @@ Handle<v8::Value> Edge::createArc3P(const v8::Arguments& args)
         return scope.Close(Undefined());
     }
 
-    Vertex* v1 = 	getOrCreateVertex(arg1);
+    Vertex* v1 =     getOrCreateVertex(arg1);
     gp_Pnt  p2;
     ReadPoint(arg2,&p2);
-    Vertex* v3 = 	getOrCreateVertex(arg3);
+    Vertex* v3 =     getOrCreateVertex(arg3);
 
     Edge* pThis = ObjectWrap::Unwrap<Edge>(args.This());
 

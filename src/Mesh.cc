@@ -292,8 +292,8 @@ void UpdateExternalArray(Handle<Object>& pThis,const char* name,const T* data,si
     extArray->SetIndexedPropertiesToExternalArrayData(const_cast<T*>(data), _typeMatcher<T>::get(), length);
 
     extArray->Set(String::NewSymbol("length"), Int32::New(length), DontDelete);
-    assert(	 extArray->GetIndexedPropertiesExternalArrayDataLength() ==   length);
-    assert(	 extArray->Get(String::NewSymbol("length"))->ToInt32()->Uint32Value() ==   _length);
+    assert(     extArray->GetIndexedPropertiesExternalArrayDataLength() ==   length);
+    assert(     extArray->Get(String::NewSymbol("length"))->ToInt32()->Uint32Value() ==   _length);
 }
 
 void Mesh::updateJavaScriptArray()
@@ -315,7 +315,7 @@ float square(float b)
 
 float distance2( const Coord3f& a,const Coord3f& b)
 {
-    return square(a.x -b.x) + square(a.y -b.y)	+ square(a.y -b.y);
+    return square(a.x -b.x) + square(a.y -b.y)    + square(a.y -b.y);
 }
 int findPt(const std::vector<Coord3f>& arrayPts, const Coord3f pt,double tolerance)
 {

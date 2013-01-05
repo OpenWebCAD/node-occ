@@ -20,6 +20,7 @@ public:
 
     Persistent<Object> m_cacheMesh;
 
+
     int numSolids();
     int numFaces();
     int numShells();
@@ -52,6 +53,7 @@ public:
     static Handle<v8::Value> getShells(const v8::Arguments& args);
     static Handle<v8::Value> getSolids(const v8::Arguments& args);
     static Handle<v8::Value> getOuterShell(const v8::Arguments& args);
+    static Handle<v8::Value> getShapeName(const v8::Arguments& args);
 
     // Methods exposed to JavaScripts
     static void Init(Handle<Object> target);
@@ -61,5 +63,9 @@ public:
     static Handle<v8::Value> New(const v8::Arguments& args);
 
     static Persistent<FunctionTemplate> constructor;
+
+
+    void _registerNamedShape(const char* name,const TopoDS_Shape& shape);
+    std::string _getShapeName(const TopoDS_Shape& shape);
 };
 

@@ -13,9 +13,17 @@
 #include "Tools.h"
 #include "ShapeFactory.h"
 #include "Shell.h"
+#include "BooleanOperation.h"
 
 
 
+Handle<Value>  ForceGC(const Arguments& args)
+{
+    HandleScope scope;
+    while(!V8::IdleNotification()) {}
+    return scope.Close(Undefined());
+
+}
 void Initialize(Handle<Object> target)
 {
 
@@ -30,6 +38,7 @@ void Initialize(Handle<Object> target)
     Transformation::Init(target);
     Vertex::Init(target);
     Wire::Init(target);
+    BooleanOperation::Init(target);
 
     target->Set(String::NewSymbol("makeBox"),     FunctionTemplate::New(ShapeFactory::makeBox)->GetFunction());
     target->Set(String::NewSymbol("makeCylinder"),FunctionTemplate::New(ShapeFactory::makeCylinder)->GetFunction());
@@ -44,6 +53,8 @@ void Initialize(Handle<Object> target)
     target->Set(String::NewSymbol("writeSTEP"),      FunctionTemplate::New(writeSTEP)->GetFunction());
 
     target->Set(String::NewSymbol("oceVersion"),  String::New("0.11"));
+    target->Set(String::NewSymbol("gc"),     FunctionTemplate::New(ForceGC)->GetFunction());
+
 
 }
 NODE_MODULE(occ, Initialize)

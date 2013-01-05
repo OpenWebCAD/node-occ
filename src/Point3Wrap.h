@@ -29,7 +29,7 @@ public:
 
 template <class _ThisType, class Wrapper,class CLASS,const CLASS (_ThisType::*ACCESSOR)() const>
 class Accessor : public Wrapper {
-//	typedef Accessor<_ThisType, Wrapper,CLASS,ACCESSOR> THIS;
+//    typedef Accessor<_ThisType, Wrapper,CLASS,ACCESSOR> THIS;
     _ThisType& m_parent;
 public:
     Accessor(_ThisType& parent)
@@ -65,10 +65,10 @@ public:
 
 
 #define TEAROFF_POINT(THISTYPE,ACCESSOR,WRAPPER,CLASS)                         \
-	typedef Accessor<THISTYPE,WRAPPER,CLASS,&THISTYPE::ACCESSOR> t##ACCESSOR;  \
+    typedef Accessor<THISTYPE,WRAPPER,CLASS,&THISTYPE::ACCESSOR> t##ACCESSOR;  \
  
 
 
 
 #define EXPOSE_TEAROFF(THISTYPE,ACCESSOR)                           \
-	proto->SetAccessor(String::NewSymbol(#ACCESSOR), &t##ACCESSOR::getter,  0,Handle<v8::Value>(),DEFAULT,(PropertyAttribute)(ReadOnly|DontDelete))
+    proto->SetAccessor(String::NewSymbol(#ACCESSOR), &t##ACCESSOR::getter,  0,Handle<v8::Value>(),DEFAULT,(PropertyAttribute)(ReadOnly|DontDelete))

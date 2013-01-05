@@ -91,7 +91,7 @@ Handle<Value> Wire::New(const Arguments& args)
 
             status = mkWire.IsDone();
             err = mkWire.Error();
-        }	 else if (Wire::constructor->HasInstance(args[i]->ToObject())) {
+        }     else if (Wire::constructor->HasInstance(args[i]->ToObject())) {
 
             Wire* wire = node::ObjectWrap::Unwrap<Wire>(args[i]->ToObject());
             mkWire.Add(wire->wire());
@@ -103,7 +103,7 @@ Handle<Value> Wire::New(const Arguments& args)
     err = mkWire.Error();
     if (BRepBuilderAPI_WireDone == err) {
         pThis->setShape(mkWire.Wire());
-    }	else {
+    }    else {
         ThrowException(Exception::Error(String::New((std::string("Invalid Wire err:=")+toString(mkWire.Error()) ).c_str())));
         return scope.Close(Undefined());
     }

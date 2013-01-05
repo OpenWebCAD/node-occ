@@ -3,6 +3,7 @@
 #include "NodeV8.h"
 
 #include "Base.h"
+#include "Point3Wrap.h"
 
 #include <vector>
 class Wire;
@@ -13,6 +14,12 @@ public:
     int numWires();
     double area();
     bool fixShape();
+    bool isPlanar();
+    std::vector<double> inertia();
+
+    const gp_XYZ centreOfMass() const;
+
+    TEAROFF_POINT(Face,centreOfMass,Point3Wrap,gp_XYZ);
 
     virtual const TopoDS_Shape& shape() const;
     const  TopoDS_Face& face() const {
@@ -30,6 +37,7 @@ public:
         return node::ObjectWrap::Unwrap<Face>(obj);
     }
     static void Init(Handle<Object> target);
+    static Handle<Object> NewInstance(const TopoDS_Face& box);
     static Handle<Value> New(const Arguments& args);
     static Persistent<FunctionTemplate> constructor;
 };

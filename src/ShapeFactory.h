@@ -3,11 +3,7 @@
 #include "OCC.h"
 #include <vector>
 
-typedef enum BoolOpType {
-    BOOL_FUSE,
-    BOOL_CUT,
-    BOOL_COMMON,
-} BoolOpType;
+
 
 class Solid;
 class ShapeFactory {
@@ -16,7 +12,7 @@ public:
     static Handle<v8::Value> makeVertex(const v8::Arguments& args);
     // edges
     static Handle<v8::Value> makeLine(const v8::Arguments& args);
-    static Handle<v8::Value> makeCirle(const v8::Arguments& args);
+    static Handle<v8::Value> makeCircle(const v8::Arguments& args);
     static Handle<v8::Value> makeArc3Points(const v8::Arguments& args);
     // wires
     // faces
@@ -32,8 +28,7 @@ public:
     static Handle<v8::Value> makeCone(const Arguments& arg);
     static Handle<v8::Value> makeSphere(const Arguments& arg);
 private:
-    static Handle<v8::Value> _boolean(const v8::Arguments& args,BoolOpType op);
-    static TopoDS_Shape createBoolean(const TopoDS_Shape& firstObject,const TopoDS_Shape& secondObject, BoolOpType op);
+    static Handle<v8::Value> _boolean(const v8::Arguments& args,BOP_Operation op);
     static Handle<v8::Object> add(const std::vector<Solid*>& solids);
 
 };

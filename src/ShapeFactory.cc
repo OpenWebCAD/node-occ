@@ -6,6 +6,17 @@
 
 
 
+static void registerMakeBoxFaces(Solid* pThis,BRepPrimAPI_MakeBox& tool)
+{
+    pThis->_registerNamedShape("top",   tool.TopFace());
+    pThis->_registerNamedShape("bottom",tool.BottomFace());
+    pThis->_registerNamedShape("right", tool.RightFace());
+    pThis->_registerNamedShape("left",  tool.LeftFace());
+    pThis->_registerNamedShape("front", tool.FrontFace());
+    pThis->_registerNamedShape("back",  tool.BackFace());
+}
+
+
 Handle<v8::Value> ShapeFactory::makeBox(const v8::Arguments& args)
 {
     // could be :
@@ -29,7 +40,11 @@ Handle<v8::Value> ShapeFactory::makeBox(const v8::Arguments& args)
             dy  = args[1]->ToNumber()->Value();
             dz  = args[2]->ToNumber()->Value();
 
-            pThis->setShape(BRepPrimAPI_MakeBox(dx, dy, dz).Shape());
+            BRepPrimAPI_MakeBox  tool(dx, dy, dz);
+            pThis->setShape(tool.Shape());
+            registerMakeBoxFaces(pThis,tool);
+
+
 
         } else if (args.Length() == 2) {
 
@@ -39,7 +54,10 @@ Handle<v8::Value> ShapeFactory::makeBox(const v8::Arguments& args)
             gp_Pnt p2;
             ReadPoint(args[1],&p2);
 
-            pThis->setShape(BRepPrimAPI_MakeBox(p1,p2).Shape());
+            BRepPrimAPI_MakeBox tool(p1,p2);
+            pThis->setShape(tool.Shape());
+            registerMakeBoxFaces(pThis,tool);
+
 
         } else if (args.Length() == 3) {
 
@@ -50,7 +68,9 @@ Handle<v8::Value> ShapeFactory::makeBox(const v8::Arguments& args)
             dy  = args[3]->ToNumber()->Value();
             dz  = args[4]->ToNumber()->Value();
 
-            pThis->setShape(BRepPrimAPI_MakeBox(p1,dx, dy, dz).Shape());
+            BRepPrimAPI_MakeBox tool(p1,dx, dy, dz);
+            pThis->setShape(tool.Shape());
+            registerMakeBoxFaces(pThis,tool);
 
 
         }
@@ -105,7 +125,40 @@ Handle<Value> ShapeFactory::makePrism(const Arguments& args)
     return scope.Close(pJhis);
 }
 
-
+static void registerMakeSphereFaces(Solid* pThis,BRepPrim_Sphere& tool)
+{
+    pThis->_registerNamedShape("lateral",tool.LateralFace());
+    if (tool.HasSides())   {
+        pThis->_registerNamedShape("start",  tool.StartFace());
+        pThis->_registerNamedShape("end",    tool.EndFace());
+    }
+    if (tool.HasTop())     {
+        pThis->_registerNamedShape("top",    tool.TopFace());
+    }
+    if (tool.HasBottom())  {
+        pThis->_registerNamedShape("bottom", tool.BottomFace());
+    }
+    /*
+         TopoDS_Wire& AxisStartWire() ;
+         TopoDS_Wire& EndWire() ;
+         TopoDS_Wire& AxisEndWire() ;
+         TopoDS_Edge& AxisEdge() ;
+         TopoDS_Edge& StartEdge() ;
+         TopoDS_Edge& EndEdge() ;
+         TopoDS_Edge& StartTopEdge() ;
+         TopoDS_Edge& StartBottomEdge() ;
+         TopoDS_Edge& EndTopEdge() ;
+         TopoDS_Edge& EndBottomEdge() ;
+         TopoDS_Edge& TopEdge() ;
+         TopoDS_Edge& BottomEdge() ;
+         TopoDS_Vertex& AxisTopVertex() ;
+         TopoDS_Vertex& AxisBottomVertex() ;
+         TopoDS_Vertex& TopStartVertex() ;
+         TopoDS_Vertex& TopEndVertex() ;
+         TopoDS_Vertex& BottomStartVertex() ;
+         TopoDS_Vertex& BottomEndVertex() ;
+    */
+}
 Handle<Value> ShapeFactory::makeSphere(const Arguments& args)
 {
     HandleScope scope;
@@ -121,9 +174,9 @@ Handle<Value> ShapeFactory::makeSphere(const Arguments& args)
         return scope.Close(pJhis);
     }
     try {
-
-        pThis->setShape(BRepPrimAPI_MakeSphere(center, radius).Shape());
-
+        BRepPrimAPI_MakeSphere tool(center, radius);
+        pThis->setShape(tool.Shape());
+        registerMakeSphereFaces(pThis,tool.Sphere());
     }
     CATCH_AND_RETHROW("Failed to create sphere ");
 
@@ -266,20 +319,20 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
             pThis->setShape(BRepPrimAPI_MakeCone(R1, R2,H).Shape());
         }
         CATCH_AND_RETHROW("Failed to create sphere ");
-	} else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber() && args[3]->IsNumber()) {
-		// Point, point , R1,R2);
+    } else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber() && args[3]->IsNumber()) {
+        // Point, point , R1,R2);
         // variation 3 ( 2 points and a radius  )
         gp_Pnt p1;
         ReadPoint(args[0],&p1);
-		
-		gp_Pnt p2;
+
+        gp_Pnt p2;
         ReadPoint(args[1],&p2);
 
         double R1  = 10;
-		ReadDouble(args[2],R1);
+        ReadDouble(args[2],R1);
 
         double R2  = 11;
-		ReadDouble(args[3],R2);
+        ReadDouble(args[3],R2);
 
         const double dx = p2.X() - p1.X();
         const double dy = p2.Y() - p1.Y();
@@ -296,47 +349,141 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
         }
         CATCH_AND_RETHROW("Failed to create cone ");
 
-	}  else {
+    }  else {
         ThrowException(Exception::Error(String::New("invalid arguments (cone)")));
     }
 
     return scope.Close(pJhis);
 }
+#include <TopTools_ListOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 
-
-
-TopoDS_Shape ShapeFactory::createBoolean(const TopoDS_Shape& firstObject,const TopoDS_Shape& secondObject, BoolOpType op)
+static void registeredShape(Solid* result,Solid* pSolid,char* op, int operand,int counter,const TopoDS_Shape& originalShape,TopoDS_Shape& modifiedShape)
 {
+    std::string originalName = pSolid->_getShapeName(originalShape);
+    std::stringstream s ;
+    s << op << operand << ":"  << originalName;
+    if (counter >=0) {
+        s << ":" << counter ;
+    }
+    s << std::ends;
+    result->_registerNamedShape(s.str().c_str(),modifiedShape);
+}
+
+
+static void registerShapes(BRepAlgoAPI_BooleanOperation* pTool,Solid* result,Solid* pSolid,int operand)
+{
+    const TopoDS_Shape& shape = pSolid->shape();
+
+    TopTools_MapOfShape alreadyProcessedShapes;
+
+
+    TopExp_Explorer shapeExplorer(shape,TopAbs_FACE);
+    for (; shapeExplorer.More(); shapeExplorer.Next ()) {
+        const TopoDS_Shape& current = shapeExplorer.Current();
+        if (alreadyProcessedShapes.Contains(current))
+            continue;
+        alreadyProcessedShapes.Add(current);
+
+        if (pTool->IsDeleted(current)) {
+            continue; // skipping deleted shapes
+        }
+
+        int actionCounter = 0;
+        {
+            const TopTools_ListOfShape& generatedShapes = pTool->Generated(current);
+            int counter =0;
+            TopTools_ListIteratorOfListOfShape it(generatedShapes);
+            for (; it.More (); it.Next ()) {
+                TopoDS_Shape& newShape = it.Value();
+                if (current.IsSame(newShape)) {
+                    registeredShape(result,pSolid,"S",operand,counter++,current,newShape);
+                    actionCounter++;
+                } else {
+                    registeredShape(result,pSolid,"g",operand,counter++,current,newShape);
+                    actionCounter++;
+                }
+                //xx Builder.Generated (root,newShape );
+                //xx registerGeneratedShape(pSolid,shape,current,newShape);
+            }
+        }
+
+        {
+            int counter =0;
+            const TopTools_ListOfShape& modifiedShapes = pTool->Modified2(current);
+            TopTools_ListIteratorOfListOfShape it(modifiedShapes);
+            for (; it.More (); it.Next ()) {
+                TopoDS_Shape& newShape = it.Value();
+                if (current.IsSame(newShape)) {
+                    // same !
+                    registeredShape(result,pSolid,"s",operand,counter++,current,newShape);
+                    actionCounter++;
+                } else {
+                    registeredShape(result,pSolid,"m",operand,counter++,current,newShape);
+                    actionCounter++;
+                }
+                //xx Builder.Generated (root,newShape );
+                //xx registerGeneratedShape(pSolid,shape,current,newShape);
+            }
+        }
+        if (actionCounter == 0 ) {
+            // the entity is not deleted, not modified , not generated ...
+            // it must be unmodified in resulting shape
+            registeredShape(result,pSolid,"i",operand,-1,current,const_cast<TopoDS_Shape&>(current));
+        }
+    }
+}
+static Handle<v8::Value>  ShapeFactory_createBoolean(Solid* pSolid1, Solid* pSolid2, BOP_Operation op)
+{
+    HandleScope scope;
+
+    const TopoDS_Shape& firstObject= pSolid1->shape();
+    const TopoDS_Shape& secondObject= pSolid2->shape();
+
+    std::auto_ptr<BRepAlgoAPI_BooleanOperation> pTool;
+
+
+
+
     TopoDS_Shape shape;
     try {
         switch (op) {
-        case BOOL_FUSE: {
-            BRepAlgoAPI_Fuse tool(firstObject, secondObject);
-            if (!tool.IsDone())
-                Standard_ConstructionError::Raise("operation failed");
-            shape = tool.Shape();
+        case BOP_FUSE:
+            pTool = std::auto_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Fuse(firstObject, secondObject));
             break;
-        }
-        case BOOL_CUT: {
-            BRepAlgoAPI_Cut tool(firstObject, secondObject);
-            if (!tool.IsDone())
-                Standard_ConstructionError::Raise("operation failed");
-            shape = tool.Shape();
+        case BOP_CUT:
+            pTool = std::auto_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Cut(firstObject, secondObject));
             break;
-        }
-        case BOOL_COMMON: {
-            BRepAlgoAPI_Common tool(firstObject, secondObject);
-            if (!tool.IsDone())
-                Standard_ConstructionError::Raise("operation failed");
-            shape = tool.Shape();
+        case BOP_COMMON:
+            pTool = std::auto_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Common(firstObject, secondObject));
             break;
-        }
         default:
             Standard_ConstructionError::Raise("unknown operation");
             break;
         }
+        if (!pTool->IsDone()) {
+            Standard_ConstructionError::Raise("operation failed");
+        }
+        shape = pTool->Shape();
 
+        Handle<Value> result(Solid::NewInstance(shape));
+
+        Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+
+        registerShapes(pTool.get(),pResult,pSolid1,1);
+        registerShapes(pTool.get(),pResult,pSolid2,2);
+
+        if (pTool->HasDeleted())  {
+            // the boolean operation causes some shape from s1 or s2 to be deleted
+        }
+        if (pTool->HasGenerated()) {
+            // the boolean operation causes some shape from s1 or s2 to be created
+
+        }
+        if (pTool->HasModified()) {
+            // the boolean operation causes some shape from s1 or s2 to be created
+        }
         // check for empty compund shape
         TopoDS_Iterator It (shape, Standard_True, Standard_True);
         int found = 0;
@@ -352,15 +499,15 @@ TopoDS_Shape ShapeFactory::createBoolean(const TopoDS_Shape& firstObject,const T
             TopTools_IndexedMapOfShape shapeMap;
             TopExp::MapShapes(shape, TopAbs_SOLID, shapeMap);
             if (shapeMap.Extent() == 1) {
-                shape = shapeMap(1);
+                pResult->setShape(shapeMap(1));
             }
         }
+        return scope.Close(result);
 
     }
     CATCH_AND_RETHROW("Failed in boolean operation");
-    return shape;
+    return scope.Close(Undefined());
 }
-
 
 
 Handle<v8::Object> ShapeFactory::add(const std::vector<Solid*>& solids)
@@ -392,7 +539,7 @@ Handle<v8::Value> ShapeFactory::add(const v8::Arguments& args)
     }
     return add(solids);
 }
-Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BoolOpType op)
+Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BOP_Operation op)
 {
     HandleScope scope;
 
@@ -403,29 +550,31 @@ Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BoolOpType op
 
     Solid* pSolid1 = node::ObjectWrap::Unwrap<Solid>(args[0]->ToObject());
 
-    std::vector<Solid*> other_solids;
-    for (int i=1; i<args.Length(); i++) {
-        if(Solid::constructor->HasInstance(args[i])) {
-            Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(args[i]->ToObject());
-            other_solids.push_back(pSolid2);
+    Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(args[1]->ToObject());
+    /*
+        std::vector<Solid*> other_solids;
+        for (int i=1; i<args.Length(); i++) {
+            if(Solid::constructor->HasInstance(args[i])) {
+                Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(args[i]->ToObject());
+                other_solids.push_back(pSolid2);
+            }
         }
-    }
-    Handle<Object> compound = ShapeFactory::add(other_solids);
-    Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(compound);
-
-    return scope.Close(Solid::NewInstance(createBoolean(pSolid1->shape(), pSolid2->shape(),op) ) );
+        Handle<Object> compound = ShapeFactory::add(other_solids);
+        Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(compound);
+    */
+    return scope.Close(ShapeFactory_createBoolean(pSolid1,pSolid2,op));
 
 }
 Handle<v8::Value> ShapeFactory::fuse(const v8::Arguments& args)
 {
-    return _boolean(args,BOOL_FUSE);
+    return _boolean(args,BOP_FUSE);
 }
 Handle<v8::Value> ShapeFactory::cut(const v8::Arguments& args)
 {
-    return _boolean(args,BOOL_CUT);
+    return _boolean(args,BOP_CUT);
 }
 Handle<v8::Value> ShapeFactory::common(const v8::Arguments& args)
 {
-    return _boolean(args,BOOL_COMMON);
+    return _boolean(args,BOP_COMMON);
 }
 
