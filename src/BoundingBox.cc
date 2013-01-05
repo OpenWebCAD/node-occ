@@ -26,14 +26,8 @@ Handle<Object> BoundingBox::NewInstance(const gp_Pnt& nearPt,const gp_Pnt& farPt
     return NewInstance(box);
 }
 
-Handle<Value> BoundingBox::New(const v8::Arguments& args)
+void BoundingBox::Update(BoundingBox* pThis,const v8::Arguments& args)
 {
-
-
-    HandleScope scope;
-    BoundingBox* pThis = new BoundingBox();
-    pThis->Wrap(args.This());
-
     // args could be one or several points
     // or a array of point
     for (int i=0; i<args.Length(); i++) {
@@ -49,22 +43,45 @@ Handle<Value> BoundingBox::New(const v8::Arguments& args)
             }
         }
     }
+}
+Handle<Value> BoundingBox::New(const v8::Arguments& args)
+{
+    HandleScope scope;
+    BoundingBox* pThis = new BoundingBox();
+    pThis->Wrap(args.This());
+	BoundingBox::Update(pThis,args);
     return args.This();
 }
 
 Handle<v8::Value> BoundingBox::addPoint(const v8::Arguments& args)
 {
     HandleScope scope;
-
-    return Undefined();
+	BoundingBox* pThis = ObjectWrap::Unwrap<BoundingBox>(args.This());
+	BoundingBox::Update(pThis,args);
+	return args.This();
 }
-
+bool checkCoerceToPoint(const Handle<Value>& v) 
+{ 
+	// TODO ...
+	return true;
+}
 Handle<v8::Value> BoundingBox::isOut(const v8::Arguments& args)
 {
     HandleScope scope;
+	BoundingBox* pThis = ObjectWrap::Unwrap<BoundingBox>(args.This());
     bool _itOut = false;
-    // pThis->isOut(pnt);
-    return scope.Close(Boolean::New(_itOut));
+	
+	if (args.Length() != 1 || !checkCoerceToPoint(args[0])) {
+	
+		ThrowException(Exception::Error(String::New(" error expecting a point or a arrya of 3 doubles")));
+		return scope.Close(Undefined());
+	}
+	gp_Pnt point;
+    ReadPoint(args[0],&point);
+
+    bool retVal = pThis->m_box.IsOut(point)?true:false;
+
+    return scope.Close(retVal?True():False());
 }
 
 

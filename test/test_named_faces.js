@@ -172,3 +172,110 @@ describe("testing face naming on a box whose top/right/front corner is carved wi
         should.not.exist(solid.getShapeName(box2.faces.front));
     });
 });
+describe("testing face naming on a box with a split face ('top' face)",function() {
+    var solid,block,cutting_solid;
+    before(function() {
+        block = occ.makeBox([0,0,0],[100,100,25]);
+        cutting_solid = occ.makeBox([40,-10,10],[60,110,50]);
+        solid = occ.cut(block,cutting_solid);
+        console.log(solid.faces);
+    });
+    it(" should expose 10 named faces", function() {
+        Object.keys(solid.faces).length.should.equal(10);
+    });
+    it("should have a preserved front/bottom/back faces ",function() {
+        should.exist(solid.getShapeName(block.faces.front));
+        should.exist(solid.getShapeName(block.faces.bottom));
+        should.exist(solid.getShapeName(block.faces.back));
+    });
+    it("should have modified right/top/left faces ",function() {
+        should.not.exist(solid.getShapeName(block.faces.right));
+        should.not.exist(solid.getShapeName(block.faces.top));
+        should.not.exist(solid.getShapeName(block.faces.left));
+    });
+
+    it("should ... ",function() {});
+    it("should ... ",function() {});
+    it("should ... ",function() {});
+})
+
+describe("testing face naming on a box with a top face split twice)",function() {
+    //
+    // // in this sample, the top face of the block will be split in two pieces
+    // during the first cut operation.Then  each part will be split in two pieces again
+    // during the second cut operation.
+    //
+    var solid,block,cutting_solid1,cutting_solid2;
+    before(function() {
+        block = occ.makeBox([0,0,0],[100,100,25]);
+        cutting_solid1 = occ.makeBox([40,-10,10],[60,110,50]);
+        cutting_solid2 = occ.makeBox([-10,40,10],[110,60,50]);
+        solid = occ.cut(block,cutting_solid1);
+        solid = occ.cut(solid,cutting_solid2);
+        console.log(solid.faces);
+    });
+    it("should expose 22 named faces", function() {
+        Object.keys(solid.faces).length.should.equal(22);
+    });
+    it("should have a preserved bottom face",function() {
+        should.exist(solid.getShapeName(block.faces.bottom));
+    });
+    it("should have modified front/back/right/top/left faces ",function() {
+        should.not.exist(solid.getShapeName(block.faces.front));
+        should.not.exist(solid.getShapeName(block.faces.back));
+        should.not.exist(solid.getShapeName(block.faces.right));
+        should.not.exist(solid.getShapeName(block.faces.top));
+        should.not.exist(solid.getShapeName(block.faces.left));
+    });
+
+
+});
+describe("testing face naming on a box with a top face split by a cross shape leading to 4 isolated corners",function() {
+    //
+    // in this sample, the top face of the block will be split in 4 pieces
+    // during the single cut operation
+    //
+    var solid,block,cutting_solid1,cutting_solid2,cutting_solid;
+    before(function() {
+        block = occ.makeBox([0,0,0],[100,100,25]);
+        cutting_solid1 = occ.makeBox([40,-10,10],[60,110,50]);
+        cutting_solid2 = occ.makeBox([-10,40,10],[110,60,50]);
+        cutting_solid = occ.fuse(cutting_solid1,cutting_solid2);
+        solid = occ.cut(block,cutting_solid);
+        console.log(solid.faces);
+    });
+    it("should expose 22 named faces", function() {
+        Object.keys(solid.faces).length.should.equal(22);
+    });
+    it("should have a preserved bottom face",function() {
+        should.exist(solid.getShapeName(block.faces.bottom));
+    });
+    it("should have modified front/back/right/top/left faces ",function() {
+        should.not.exist(solid.getShapeName(block.faces.front));
+        should.not.exist(solid.getShapeName(block.faces.back));
+        should.not.exist(solid.getShapeName(block.faces.right));
+        should.not.exist(solid.getShapeName(block.faces.top));
+        should.not.exist(solid.getShapeName(block.faces.left));
+
+        solid.faces.should.have.property("m1:"+ "front"+ ":0");
+        solid.faces.should.have.property("m1:"+ "back" + ":0");
+        solid.faces.should.have.property("m1:"+ "top"  + ":0");
+        solid.faces.should.have.property("m1:"+ "left" + ":0");
+
+        solid.faces.should.not.have.property("m1:"+ "front"+ ":1");
+        solid.faces.should.not.have.property("m1:"+ "back" + ":1");
+        solid.faces.should.not.have.property("m1:"+ "left" + ":1");
+
+    });
+
+    it("should have 4 (and only 4) faces that have been generated from the top face of the original block",function() {
+        // this could be tested using face names
+        var name = block.getShapeName(block.faces.top);
+
+        solid.faces.should.have.property("m1:"+ name+ ":0");
+        solid.faces.should.have.property("m1:"+ name+ ":1");
+        solid.faces.should.have.property("m1:"+ name+ ":2");
+        solid.faces.should.have.property("m1:"+ name+ ":3");
+        solid.faces.should.not.have.property("m1:"+ name+ ":4");
+    });
+});

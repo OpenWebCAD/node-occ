@@ -54,4 +54,7 @@ public:
 
     static Handle<Value> New(const v8::Arguments& args);
     static void Init(Handle<Object> target);
+
+protected:
+	static void Update(BoundingBox* pThis,const v8::Arguments& args);
 };
