@@ -152,17 +152,41 @@ function render() {
     renderer.render( scene, camera );
 }
 
-function shapeCenterOfGravity(geometry) {
-    geometry.computeBoundingBox();
+function shapeCenterOfGravity(obj) {
 
-    var bb = geometry.boundingBox;
+    if (obj instanceof THREE.Mesh) {
 
-    var center = new THREE.Vector3();
+        var geometry = obj.geometry;
 
-    center.add( bb.min, bb.max );
-    center.multiplyScalar(0.5 );
+        geometry.computeBoundingBox();
 
-    return center;
+        var bb = geometry.boundingBox;
+
+        var center = new THREE.Vector3();
+        center.add( bb.min, bb.max );
+        center.multiplyScalar(0.5 );
+
+        return center;
+
+    }
+    if (obj instanceof THREE.Object3D) {
+        // scene
+        var p = shapeCenterOfGravity(obj.children[0]);
+
+        var bb = new THREE.Box3(p,p);
+        for (var i= 1;i < obj.children.length;i++) {
+
+            p = shapeCenterOfGravity(obj.children[i]);
+
+            bb.expandByPoint(p);
+        }
+        var center = new THREE.Vector3();
+        center.add( bb.min, bb.max );
+        center.multiplyScalar(0.5 );
+
+        return center;
+
+    }
 }
 var lastAjaxStart ;
 var lastAjaxDuration;
@@ -222,32 +246,61 @@ function handle_json_error(request, statusText, errorThrown) {
 
 
 }
-function install_json_mesh(json) {
-    "use strict";
 
-    var beautified = JSON.stringify(json,null,"");
-    $("#ascii_mesh").text("duration: " + lastAjaxDuration + "  vertices :" + json.vertices.length + " faces : " + json.faces.length + " size :" + beautified.length + " bytes" );
+function rgb2hex( rgb ) {
 
-    json.scale = 1.0;
+    return ( rgb[ 0 ] * 255 << 16 ) + ( rgb[ 1 ] * 255 << 8 ) + rgb[ 2 ] * 255;
+
+}
+function process_single_mesh(rootNode,jsonEntry)
+{
+    var jsonFace = jsonEntry.mesh;
+    $("#ascii_mesh").append("<p>face "+  jsonEntry.name + " vertices :" + jsonFace.vertices.length + ", faces : " + jsonFace.faces.length + " color = " +  jsonEntry.color + " </p>");
+
+    jsonFace.scale = 1.0;
     var jsonLoader = new THREE.JSONLoader();
 
     var model;
 
-    model = jsonLoader.createModel( json,
+    model = jsonLoader.createModel( jsonFace,
 
         function(geometry,material ){
-            var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xCC0000 });
+            material = new THREE.MeshLambertMaterial({color: rgb2hex(jsonFace.materials[0].colorDiffuse) });
+            var mesh = new THREE.Mesh(geometry,material);
+            console.log("material" ,material );
+            rootNode.add(mesh);
 
-            var oldObj = scene.getChildByName("CSG");
-            if (oldObj) { scene.remove(oldObj); }
-            var newObj = new THREE.Mesh(geometry,sphereMaterial);
-            newObj.name ="CSG";
-            scene.add(newObj);
-            COG = shapeCenterOfGravity(geometry);
-            camera.lookAt(COG);
-            controls.target.set( COG.x, COG.y, COG.z );
+        },/* texturePath */ undefined);
 
-        },/* texturePath */ undefined)
+}
+function install_json_mesh(json) {
+
+    "use strict";
+
+
+    var oldObj = scene.getChildByName("CSG");
+    if (oldObj) { scene.remove(oldObj); }
+    var rootNode  = new THREE.Object3D();
+    rootNode.name ="CSG";
+    scene.add(rootNode);
+
+    $("#ascii_mesh").text("");
+
+    var beautified = JSON.stringify(json,null,"");
+    $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + "size :" + beautified.length + " bytes</p><br/>");
+
+
+    for (var i=0;i<json.length;i++){
+        var jsonFace = json[i];
+        process_single_mesh(rootNode,jsonFace);
+    }
+
+    // Refocus camera to the center of the new object
+    COG = shapeCenterOfGravity(rootNode);
+    camera.lookAt(COG);
+    controls.target.set( COG.x, COG.y, COG.z );
+
+
 }
 
 

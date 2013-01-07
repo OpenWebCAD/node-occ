@@ -28,8 +28,7 @@ public:
     double volume();
     double area();
 
-    Handle<Object>  mesh();
-
+ 
     Handle<Object> createMesh(double factor, double angle, bool qualityNormals = true);
 
     typedef enum BoolOpType {

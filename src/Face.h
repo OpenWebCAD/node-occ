@@ -10,11 +10,16 @@ class Wire;
 class Face:  public Base {
 
     TopoDS_Face m_face;
+    Persistent<Object> m_cacheMesh;
+    virtual ~Face() {
+        m_cacheMesh.Dispose();
+    };
 public:
     int numWires();
     double area();
     bool fixShape();
     bool isPlanar();
+	bool hasMesh();
     std::vector<double> inertia();
 
     const gp_XYZ centreOfMass() const;
@@ -34,8 +39,13 @@ public:
     virtual Local<Object> Clone() ;
 
     virtual Base* Unwrap(v8::Local<v8::Object> obj) {
-        return node::ObjectWrap::Unwrap<Face>(obj);
+       return node::ObjectWrap::Unwrap<Face>(obj);
     }
+
+
+	static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
+	Handle<Object> createMesh(double factor, double angle, bool qualityNormals);
+
     static void Init(Handle<Object> target);
     static Handle<Object> NewInstance(const TopoDS_Face& box);
     static Handle<Value> New(const Arguments& args);

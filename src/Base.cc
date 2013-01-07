@@ -3,6 +3,11 @@
 #include "BoundingBox.h"
 #include "Transformation.h"
 
+
+Base::~Base()
+{
+}
+
 bool Base::isNull()
 {
     return shape().IsNull() ? true : false;
@@ -286,6 +291,7 @@ void  Base::InitProto(Handle<ObjectTemplate> proto)
     EXPOSE_METHOD(Base,mirror);
 
     EXPOSE_METHOD(Base,transformed);
+	EXPOSE_METHOD(Base,getBoundingBox);
 
     EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
     EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isValid);

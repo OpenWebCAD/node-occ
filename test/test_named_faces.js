@@ -17,6 +17,7 @@ describe("testing face naming on simple box",function() {
     });
     it("should have a face called 'top'",function(){
         solid.faces.should.have.property("top");
+        console.log("face mesh = ", solid.faces.top.mesh);
     });
     it("should have a face called 'bottom'",function(){
         solid.faces.should.have.property("bottom");
@@ -182,6 +183,7 @@ describe("testing face naming on a box with a split face ('top' face)",function(
     });
     it(" should expose 10 named faces", function() {
         Object.keys(solid.faces).length.should.equal(10);
+        solid.getFaces().length.should.equal(10);
     });
     it("should have a preserved front/bottom/back faces ",function() {
         should.exist(solid.getShapeName(block.faces.front));
@@ -197,9 +199,45 @@ describe("testing face naming on a box with a split face ('top' face)",function(
     it("should ... ",function() {});
     it("should ... ",function() {});
     it("should ... ",function() {});
-})
-
-describe("testing face naming on a box with a top face split twice)",function() {
+});
+describe("testing face naming on a box fused with a box that have a common face , leading to 4 merging faces",function (){
+    var box1;
+    var box2;
+    var solid;
+    before(function(){
+        //        +------+       +------+
+        //        |`.     `.     |\      \
+        //        |  `+------+   | +------+
+        //        |   |      |   | |      |
+        //        +   |      |   + |      |
+        //         `. |      |    \|      |
+        //           `+------+     +------+
+        //
+        box1 = occ.makeBox([0,0,0],[10,10,10]);
+        box2 = occ.makeBox([10,0,0],[20,10,10]); // box2 back face is same as box1.front frace
+        solid = occ.fuse(box1,box2);
+    });
+    it("should expose 10 faces",function(){
+        //
+        //   +----++----+        +----++----+
+        //   |    ||    |        |          |
+        //   |    ||    |   =>   |          |
+        //   +----++----+        +----++----+
+        //
+        // Although the side surface could be merged
+        //
+        Object.keys(solid.faces).length.should.equal(10);
+        solid.getFaces().length.should.equal(10);
+        occ.gc();
+        var faces =  solid.getFaces()
+        for (var i in faces ){
+            var face = faces[i];
+            var bbox = face.getBoundingBox();
+            console.log("face i ", solid.getShapeName(face),bbox.toString());
+        }
+    });
+});
+describe("testing face naming on a box with a top face split twice leading to 4 isolated corners)",function() {
     //
     // // in this sample, the top face of the block will be split in two pieces
     // during the first cut operation.Then  each part will be split in two pieces again
@@ -216,6 +254,7 @@ describe("testing face naming on a box with a top face split twice)",function() 
     });
     it("should expose 22 named faces", function() {
         Object.keys(solid.faces).length.should.equal(22);
+        solid.getFaces().length.should.equal(22);
     });
     it("should have a preserved bottom face",function() {
         should.exist(solid.getShapeName(block.faces.bottom));
@@ -246,6 +285,7 @@ describe("testing face naming on a box with a top face split by a cross shape le
     });
     it("should expose 22 named faces", function() {
         Object.keys(solid.faces).length.should.equal(22);
+        solid.getFaces().length.should.equal(22);
     });
     it("should have a preserved bottom face",function() {
         should.exist(solid.getShapeName(block.faces.bottom));

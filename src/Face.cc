@@ -2,6 +2,7 @@
 #include "Wire.h"
 #include "Edge.h"
 #include "Util.h"
+#include "Mesh.h"
 
 
 const TopoDS_Shape&  Face::shape() const
@@ -34,6 +35,12 @@ double Face::area()
     return prop.Mass();
 }
 
+bool Face::hasMesh()
+{
+	TopLoc_Location loc;
+	occHandle(Poly_Triangulation) triangulation = BRep_Tool::Triangulation(this->face(), loc);
+	return triangulation.IsNull()?false:true;
+}
 
 std::vector<double> Face::inertia()
 {
@@ -69,14 +76,7 @@ bool Face::isPlanar()
     return tool.IsPlanar() ? true : false;
 }
 
-
-
-
-
 Persistent<FunctionTemplate> Face::constructor;
-
-
-
 
 bool Face::buildFace(std::vector<Wire*>& wires)
 {
@@ -113,7 +113,7 @@ bool Face::buildFace(std::vector<Wire*>& wires)
         }
 
     }
-    CATCH_AND_RETHROW("Failed to create arc");
+    CATCH_AND_RETHROW("Failed to create a face");
     return true;
 }
 
@@ -152,6 +152,43 @@ Handle<Object> Face::NewInstance(const TopoDS_Face& face)
     return scope.Close(instance);
 }
 
+Handle<v8::Value> Face::_mesh(Local<String> property,const AccessorInfo &info)
+{
+    HandleScope scope;
+    if (info.This().IsEmpty()) {
+        return scope.Close(Undefined());
+    }
+    if (info.This()->InternalFieldCount() == 0 ) {
+        return scope.Close(Undefined());
+    }
+    Face* pThis = ObjectWrap::Unwrap<Face>(info.This());
+    if (pThis->m_cacheMesh.IsEmpty()) {
+        pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.001,0.1,true));
+    }
+    return scope.Close(pThis->m_cacheMesh);
+}
+
+Handle<Object> Face::createMesh(double factor, double angle, bool qualityNormals)
+{
+    HandleScope scope;
+
+    const unsigned argc = 0;
+    Handle<v8::Value> argv[1] = {  };
+    Local<Object> theMesh = Mesh::constructor->GetFunction()->NewInstance(argc, argv);
+
+    Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
+
+    const TopoDS_Shape& shape = this->shape();
+
+	try {
+		// this code assume that the triangulation has been created
+		// on the parent object
+		mesh->extractFaceMesh(this->face(), qualityNormals);
+
+    } CATCH_AND_RETHROW("Failed to mesh solid ");
+    mesh->optimize();
+    return scope.Close(theMesh);
+}
 void Face::Init(Handle<Object> target)
 {
     // Prepare constructor template
@@ -169,6 +206,8 @@ void Face::Init(Handle<Object> target)
     EXPOSE_READ_ONLY_PROPERTY_INTEGER(Face,numWires);
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
     EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,isPlanar);
+    EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,hasMesh);
+	EXPOSE_READ_ONLY_PROPERTY(Face,_mesh,mesh);
     EXPOSE_TEAROFF(Face,centreOfMass);
     target->Set(String::NewSymbol("Face"), constructor->GetFunction());
 }

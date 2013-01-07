@@ -1,7 +1,7 @@
-var occ  = require('../../lib/occ')
-  , CSGBuilder = require('../../lib/CSGBuilder')
-    , shapeFactory = require('../../lib/shapeFactory')
-   , jailguard = require('jailguard');
+var occ  = require('../../lib/occ'),
+    CSGBuilder = require('../../lib/CSGBuilder'),
+    shapeFactory = require('../../lib/shapeFactory'),
+    jailguard = require('jailguard');
 
 var fs = require('fs');
 var fileUtils = require ("file-utils");
@@ -48,7 +48,9 @@ exports.list = function(req, res) {
 
 exports.buildCSG = function(req,res)
 {
-    var jsonStr = ""
+    "use strict";
+    var jsonStr = "";
+
     var csgStr = CSGBuilder.sample_csg_tree;
     csgStr = req.body;
 
@@ -63,12 +65,13 @@ exports.buildCSG = function(req,res)
     }
     res.send(jsonStr);
 
-}
+};
 
 var vm = require('vm');
 var util = require('util');
 
 function getBlockedFunctionConstructor() {
+    "use strict";
 
     function FakeFunction(execCode) {
         var code = "FUNCTION_CONSTRUCTOR_DETECTED";
@@ -81,8 +84,48 @@ function getBlockedFunctionConstructor() {
     return FakeFunction;
 }
 
+function buildMesh(solid)
+{
+    return buildFacesMesh(solid);
+
+    var mesh   = solid.mesh ;
+    jsonStr = mesh.toJSON();
+    return jsonStr;
+}
+
+function buildFacesMesh(solid)
+{
+    // make sure object is mesh
+    var mesh = solid.mesh;
+
+    // produce each faces
+    var faces = solid.getFaces();
+    var face;
+    var responseObject =[];
+    for (var i=0;i<faces.length;i++) {
+        face = faces[i];
+
+        var r = Math.floor((Math.random()*250)+1);
+        var g = Math.floor((Math.random()*250)+1);
+        var b = Math.floor((Math.random()*250)+1);
+
+        if (! face.hasMesh) {
+            continue;
+        }
 
 
+        var entry =  {
+                name: solid.getShapeName(face),
+                color:(r*255+g)*255+b,
+                mesh: face.mesh.toJSON()
+        };
+        entry.mesh.materials[0].colorDiffuse = [ Math.random(),Math.random(),Math.random()];
+        responseObject.push( entry);
+    }
+
+    return responseObject;
+
+}
 exports.buildCSG1 = function(req,res)
 {
     try {
@@ -131,10 +174,8 @@ exports.buildCSG1 = function(req,res)
 
                         //xx console.log("code = ",code);
                         //xx console.log("env = ",env);
-                        var mesh   = env.solid.mesh;
-                        jsonStr = mesh.toJSON();
                         //xx console.log( "jsonStr",jsonStr);
-                        res.send(jsonStr);
+                        res.send(buildMesh(env.solid));
 
                     }
                     catch(err) {
@@ -183,9 +224,7 @@ exports.buildCSG1 = function(req,res)
 
                             if (!err) {
 
-                                var mesh   = env.solid.mesh;
-                                jsonStr = mesh.toJSON();
-                                res.send(jsonStr);
+                                res.send(buildMesh(env.solid));
 
                             } else {
                                 console.log(" error in jailguard:", err,JSON.stringify(err));

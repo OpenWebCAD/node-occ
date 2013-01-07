@@ -37,7 +37,6 @@ void Solid::Init(Handle<Object> target)
     EXPOSE_METHOD(Solid,getOuterShell);
     EXPOSE_METHOD(Solid,getShells);
     EXPOSE_METHOD(Solid,getSolids);
-    EXPOSE_METHOD(Solid,getBoundingBox);
     EXPOSE_METHOD(Solid,getShapeName);
 
 
@@ -512,7 +511,6 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
     Handle<v8::Value> argv[1] = {  };
     Local<Object> theMesh = Mesh::constructor->GetFunction()->NewInstance(argc, argv);
 
-
     Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
 
     const TopoDS_Shape& shape = this->shape();
@@ -537,9 +535,9 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
         if (shape.ShapeType() == TopAbs_COMPSOLID || shape.ShapeType() == TopAbs_COMPOUND) {
             TopExp_Explorer exSolid, exFace;
             for (exSolid.Init(shape, TopAbs_SOLID); exSolid.More(); exSolid.Next()) {
-                const TopoDS_Solid& solid = static_cast<const TopoDS_Solid &>(exSolid.Current());
+                const TopoDS_Solid& solid = TopoDS::Solid(exSolid.Current());
                 for (exFace.Init(solid, TopAbs_FACE); exFace.More(); exFace.Next()) {
-                    const TopoDS_Face& face = static_cast<const TopoDS_Face &>(exFace.Current());
+                    const TopoDS_Face& face = TopoDS::Face(exFace.Current());
                     if (face.IsNull()) continue;
                     mesh->extractFaceMesh(face, qualityNormals);
                 }
@@ -547,21 +545,12 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
         }  else {
             TopExp_Explorer exFace;
             for (exFace.Init(shape, TopAbs_FACE); exFace.More(); exFace.Next()) {
-                const TopoDS_Face& face = static_cast<const TopoDS_Face &>(exFace.Current());
+                const TopoDS_Face& face = TopoDS::Face(exFace.Current());
                 if (face.IsNull()) continue;
                 mesh->extractFaceMesh(face, qualityNormals);
             }
         }
-    } catch(Standard_Failure&) {
-        Handle_Standard_Failure e = Standard_Failure::Caught();
-        const Standard_CString msg = e->GetMessageString();
-        if (msg != NULL && strlen(msg) > 1) {
-            setErrorMessage(msg);
-        } else {
-            setErrorMessage("Failed to mesh object");
-        }
-        return  scope.Close(Object::New());
-    }
+    } CATCH_AND_RETHROW("Failed to mesh solid ");
     mesh->optimize();
     return scope.Close(theMesh);
 }

@@ -18,6 +18,8 @@ public:
     virtual void setShape(const TopoDS_Shape& ) = 0;
     virtual Local<Object>  Clone() =0;
     virtual Base* Unwrap(v8::Local<v8::Object> obj) =0;//  { return node::ObjectWrap::Unwrap<Edge>(obj); }
+
+	 virtual ~Base();
 public:
 // Methods exposed to JavaScripts
     static Handle<Value> translate(const Arguments& args);
