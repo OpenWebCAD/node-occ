@@ -19,6 +19,8 @@
       "sources": [
 			"src/Base.h",
 			"src/Base.cc",
+			"src/BooleanOperation.h",
+			"src/BooleanOperation.cc",
 			"src/BoundingBox.h",
 			"src/BoundingBox.cc",
 			"src/Edge.h",

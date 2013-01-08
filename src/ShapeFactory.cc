@@ -5,6 +5,7 @@
 #include "Util.h"
 
 
+#include <memory>
 
 static void registerMakeBoxFaces(Solid* pThis,BRepPrimAPI_MakeBox& tool)
 {
@@ -249,7 +250,7 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
             // variation 2
             //  <[ <Origin[x,yz]>, <VZn[x,yz]>,<VXn[x,yz]>] <R:number> <H:number>
             gp_Ax2  ax2;
-            bool success = ReadAx2(args[0],&ax2);
+            bool success = ReadAx2(args[0],&ax2); (void)success;
 
             double R  = args[1]->ToNumber()->Value();
             double H  = args[2]->ToNumber()->Value();
@@ -359,7 +360,7 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 
 
-static void registeredShape(Solid* result,Solid* pSolid,char* op, int operand,int counter,const TopoDS_Shape& originalShape,TopoDS_Shape& modifiedShape)
+static void registeredShape(Solid* result,Solid* pSolid,const char* op, int operand,int counter,const TopoDS_Shape& originalShape,TopoDS_Shape& modifiedShape)
 {
     std::string originalName = pSolid->_getShapeName(originalShape);
     std::stringstream s ;
