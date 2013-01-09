@@ -46,10 +46,22 @@ void Solid::Init(Handle<Object> target)
 
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,volume);
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,area);
-    EXPOSE_READ_ONLY_PROPERTY(Solid,_mesh,mesh);
+    EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
 
     target->Set(String::NewSymbol("Solid"), constructor->GetFunction());
 
+}
+
+
+void Solid::InitNew(const v8::Arguments& args)
+{
+	Shape::InitNew(args);
+	REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,area);
+	REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,volume);
+
+    REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
+    REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
+    REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
 }
 
 Handle<v8::Value> Solid::New(const v8::Arguments& args)
@@ -62,9 +74,12 @@ Handle<v8::Value> Solid::New(const v8::Arguments& args)
 
     Solid* pThis = new Solid();
     pThis->Wrap(args.This());
+	pThis->InitNew(args);
 
-    args.This()->Set(String::NewSymbol("faces"),   Object::New());
-    args.This()->Set(String::NewSymbol("_reversedMap"),   Object::New());
+    args.This()->Set(String::NewSymbol("faces"),          v8::Object::New() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
+    args.This()->Set(String::NewSymbol("_reversedMap"),   v8::Object::New() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
+
+	/// args.This()->SetAccessor(String::NewSymbol("_area"),ee< Solid, Number, double, &Solid::area>,0,Number::New(12),DEFAULT,None);
 
     // return scope.Close(args.This());
     return args.This();
@@ -72,11 +87,28 @@ Handle<v8::Value> Solid::New(const v8::Arguments& args)
 
 Local<Object>  Solid::Clone()
 {
-    HandleScope scope;
-    Solid* obj = new Solid();
-    Local<Object> instance = constructor->GetFunction()->NewInstance();
-    obj->Wrap(instance);
-    obj->setShape(this->shape());
+	HandleScope scope;
+	Handle<Object> instance = Solid::NewInstance()->ToObject();
+	Solid* pClone = node::ObjectWrap::Unwrap<Solid>(instance);
+
+    pClone->setShape(this->shape());
+
+
+	if (!this->shape().IsNull()) {
+		TopTools_IndexedMapOfShape shapeMap;
+		TopExp::MapShapes(this->shape(), TopAbs_FACE, shapeMap);
+
+		int nbSubShapes =shapeMap.Extent();
+
+
+		for (int i=0; i<nbSubShapes; i++)  {
+			int hc = shapeMap(i+1).HashCode(std::numeric_limits<int>::max());
+
+			// TODO pClone->_registerNamedShape(name,
+		}
+	}
+	
+
     return scope.Close(instance);
 }
 
@@ -380,7 +412,12 @@ Handle<v8::Value> Solid::fillet(const v8::Arguments& args)
 
     Solid* pThis = node::ObjectWrap::Unwrap<Solid>(args.This());
 
-    pThis->fillet(edges,radii);
+	try {
+		pThis->fillet(edges,radii);
+	}
+	catch(...){
+
+	}
 
     // size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
     return args.This();

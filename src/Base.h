@@ -20,6 +20,9 @@ public:
     virtual Base* Unwrap(v8::Local<v8::Object> obj) =0;//  { return node::ObjectWrap::Unwrap<Edge>(obj); }
 
 	 virtual ~Base();
+
+	 virtual void InitNew(const v8::Arguments& args);
+
 public:
 // Methods exposed to JavaScripts
     static Handle<Value> translate(const Arguments& args);
@@ -29,6 +32,7 @@ public:
     static Handle<Value> applyTransform(const Arguments& args);
     static Handle<Value> transformed(const Arguments& args);
     static Handle<Value> fixShape(const Arguments&);
+    static Handle<Value> clone(const Arguments&);
 
     static Handle<v8::Value> getBoundingBox(const v8::Arguments& args);
 

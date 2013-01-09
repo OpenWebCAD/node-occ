@@ -265,10 +265,10 @@ Handle<Value> Base::fixShape(const Arguments& args)
     return scope.Close(args.This());
 }
 
-
 Handle<v8::Value> Base::getBoundingBox(const v8::Arguments& args)
 {
     HandleScope scope;
+
     if (args.Length()!=0) {
         ThrowException(Exception::Error(String::New("Wrong arguments")));
         return scope.Close(Undefined());
@@ -284,8 +284,28 @@ Handle<v8::Value> Base::getBoundingBox(const v8::Arguments& args)
     return scope.Close(BoundingBox::NewInstance(aBox));
 }
 
+
+Handle<Value> Base::clone(const Arguments& args)
+{
+    HandleScope scope;
+
+    if (args.Length()!=0) {
+        ThrowException(Exception::Error(String::New("Wrong arguments")));
+        return scope.Close(Undefined());
+    }
+    Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());
+	return scope.Close(pThis->Clone());
+}
+
+void Base::InitNew(const v8::Arguments& args)
+{
+	REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,shapeType);
+	REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,orientation);
+}
+
 void  Base::InitProto(Handle<ObjectTemplate> proto)
 {
+    EXPOSE_METHOD(Base,clone);
     EXPOSE_METHOD(Base,translate);
     EXPOSE_METHOD(Base,rotate);
     EXPOSE_METHOD(Base,mirror);

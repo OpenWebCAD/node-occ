@@ -41,7 +41,7 @@ public:
     virtual Base* Unwrap(v8::Local<v8::Object> obj) {
        return node::ObjectWrap::Unwrap<Face>(obj);
     }
-
+	virtual void InitNew(const v8::Arguments& args);
 
 	static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
 	Handle<Object> createMesh(double factor, double angle, bool qualityNormals);

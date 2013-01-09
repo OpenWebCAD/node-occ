@@ -28,7 +28,8 @@ public:
     double volume();
     double area();
 
- 
+	virtual void InitNew(const v8::Arguments& args);
+
     Handle<Object> createMesh(double factor, double angle, bool qualityNormals = true);
 
     typedef enum BoolOpType {

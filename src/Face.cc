@@ -123,6 +123,7 @@ Handle<Value> Face::New(const Arguments& args)
 
     Face* obj = new Face();
     obj->Wrap(args.This());
+	obj->InitNew(args);
 
     std::vector<Wire*> wires;
     extractArgumentList(args,wires);
@@ -189,6 +190,18 @@ Handle<Object> Face::createMesh(double factor, double angle, bool qualityNormals
     mesh->optimize();
     return scope.Close(theMesh);
 }
+
+
+void Face::InitNew(const v8::Arguments& args)
+{
+	Base::InitNew(args);
+	REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
+
+    REXPOSE_READ_ONLY_PROPERTY_INTEGER(Face,numWires);
+    REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
+    REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,isPlanar);
+    REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,hasMesh);
+}
 void Face::Init(Handle<Object> target)
 {
     // Prepare constructor template
@@ -207,7 +220,7 @@ void Face::Init(Handle<Object> target)
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
     EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,isPlanar);
     EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,hasMesh);
-	EXPOSE_READ_ONLY_PROPERTY(Face,_mesh,mesh);
+	EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
     EXPOSE_TEAROFF(Face,centreOfMass);
     target->Set(String::NewSymbol("Face"), constructor->GetFunction());
 }

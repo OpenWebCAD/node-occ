@@ -47,23 +47,35 @@ Handle<Value> ee(Local<String> property,const AccessorInfo &info)
 #define EXPOSE_METHOD(ClassName,staticMethod) \
     proto->Set(String::NewSymbol(#staticMethod),FunctionTemplate::New(staticMethod)->GetFunction());
 
-#define EXPOSE_READ_ONLY_PROPERTY(ClassName,staticMethod,name) \
-    proto->SetAccessor(String::NewSymbol(#name), &staticMethod,  0,Handle<v8::Value>(),DEFAULT,ReadOnly)
+#define __EXPOSE_READ_ONLY_PROPERTY(element,staticMethod,name) \
+    element->SetAccessor(String::NewSymbol(#name), &staticMethod,  0,Handle<v8::Value>(),DEFAULT,ReadOnly)
+
+
+#define EXPOSE_READ_ONLY_PROPERTY(staticMethod,name) \
+    __EXPOSE_READ_ONLY_PROPERTY(proto,staticMethod,name)
 
 #define EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(ClassName,name) \
-    EXPOSE_READ_ONLY_PROPERTY(proto, (ee< ClassName, Boolean, bool, &ClassName::name>) , name )
+    __EXPOSE_READ_ONLY_PROPERTY(proto, (ee< ClassName, Boolean, bool, &ClassName::name>) , name )
 
 #define EXPOSE_READ_ONLY_PROPERTY_INTEGER(ClassName,name) \
-    EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Integer,int,&ClassName::name>),name)
+    __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Integer,int,&ClassName::name>),name)
 
 #define EXPOSE_READ_ONLY_PROPERTY_DOUBLE(ClassName,name) \
-    EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Number,double,&ClassName::name>),name)
+    __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,Number,double,&ClassName::name>),name)
 
 #define EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(ClassName,name) \
-    EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,String,const char*,&ClassName::name>),name)
+    __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,String,const char*,&ClassName::name>),name)
 
 
+#define REXPOSE_READ_ONLY_PROPERTY_DOUBLE(ClassName,name) \
+    __EXPOSE_READ_ONLY_PROPERTY(args.This(),(ee< ClassName, Number, double, &ClassName::name>) , name )
+#define REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(ClassName,name) \
+    __EXPOSE_READ_ONLY_PROPERTY(args.This(),(ee< ClassName, Boolean, bool, &ClassName::name>) , name )
+#define REXPOSE_READ_ONLY_PROPERTY_INTEGER(ClassName,name) \
+    __EXPOSE_READ_ONLY_PROPERTY(args.This(), (ee<ClassName,Integer,int,&ClassName::name>),name)
 
+#define REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(ClassName,name) \
+    __EXPOSE_READ_ONLY_PROPERTY(args.This(), (ee<ClassName,String,const char*,&ClassName::name>),name)
 /**
  *  Extracts a C string from a V8 Utf8Value.
  * <code>

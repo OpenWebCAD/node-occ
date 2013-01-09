@@ -14,7 +14,8 @@ describe("testing solid construction",function() {
             solid = new occ.Solid();        
         });
         it("should have no faces", function() { 
-            solid.numFaces.should.equal(0);    
+            solid.numFaces.should.equal(0);
+            Object.keys(solid.faces).length.should.equal(0);
         });
         it("should have no solid", function() { 
             solid.numSolids.should.equal(0);
@@ -42,10 +43,12 @@ describe("testing solid construction",function() {
         });
         it("should have 6 faces", function() {
             solid.numFaces.should.equal(6);
+            Object.keys(solid.faces).length.should.equal(6);
         });
         it("should have an outerShell with 6 faces", function() {
             assert( solid.getOuterShell() !== undefined);
             solid.getOuterShell().numFaces.should.equal(6);
+            // Object.keys(solid.getOuterShell().faces).length.should.equal(6);
         });
         it("should have an outerShell with a forward orientation", function() {
             solid.getOuterShell().orientation.should.equal("FORWARD");
@@ -93,6 +96,7 @@ describe("testing solid construction",function() {
         });
         it("should have 12 faces", function() {
             solid1.numFaces.should.equal(12);
+            Object.keys(solid1.faces).length.should.equal(12);
         });
         it("should have an outerShell with 12 faces", function() {
             assert( solid1.getOuterShell() !== undefined);
@@ -112,6 +116,7 @@ describe("testing solid construction",function() {
         });
         it("should have 9 faces", function() {
             solid1.numFaces.should.equal(9);
+            Object.keys(solid1.faces).length.should.equal(9);
         });
         it("should have 1 solid", function() { 
             solid1.numSolids.should.equal(1);
@@ -137,6 +142,8 @@ describe("testing solid construction",function() {
         });
         it("should have 12 faces", function() {
             solid1.numFaces.should.equal(12);
+            Object.keys(solid1.faces).length.should.equal(12);
+
         });
         it("should have 1 solid", function() {
             solid1.numSolids.should.equal(1);
@@ -186,6 +193,7 @@ describe("testing solid construction",function() {
         });
         it("should have 12 faces", function() {
             splitBoxes.numFaces.should.equal(12);
+            Object.keys(splitBoxes.faces).length.should.equal(12);
         });
         it("should have 2 solids", function() {
             splitBoxes.numSolids.should.equal(2);

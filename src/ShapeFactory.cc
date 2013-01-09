@@ -83,6 +83,14 @@ Handle<v8::Value> ShapeFactory::makeBox(const v8::Arguments& args)
 }
 
 
+static void registerMakeBoxFaces(Solid* pThis,BRepPrimAPI_MakePrism& tool)
+{
+	pThis->_registerNamedShape("bottom",   tool.FirstShape());
+	pThis->_registerNamedShape("top",      tool.LastShape());
+
+    // const TopTools_ListOfShape& list = tool.Generated(S);
+}
+
 Handle<Value> ShapeFactory::makePrism(const Arguments& args)
 {
     HandleScope scope;
@@ -103,17 +111,12 @@ Handle<Value> ShapeFactory::makePrism(const Arguments& args)
 
     try {
         const TopoDS_Shape& face = pFace->face();
-        //// Only accept Edge or Wire
-        //TopAbs_ShapeEnum type = shp.ShapeType();
-        //if (type != TopAbs_EDGE && type != TopAbs_WIRE) {
-        //    StdFail_NotDone::Raise("expected Edge or Wire");
-        //}
 
         BRepPrimAPI_MakePrism prismMaker(face, direction);
 
-        //xx prismMaker.Check();
 
         pThis->setShape(prismMaker.Shape());
+		registerMakeBoxFaces(pThis,prismMaker);
 
         // possible fix shape
         if (!pThis->fixShape())   {
@@ -126,7 +129,7 @@ Handle<Value> ShapeFactory::makePrism(const Arguments& args)
     return scope.Close(pJhis);
 }
 
-static void registerMakeSphereFaces(Solid* pThis,BRepPrim_Sphere& tool)
+static void registerOneAxisFaces(Solid* pThis,BRepPrim_OneAxis& tool)
 {
     pThis->_registerNamedShape("lateral",tool.LateralFace());
     if (tool.HasSides())   {
@@ -177,7 +180,7 @@ Handle<Value> ShapeFactory::makeSphere(const Arguments& args)
     try {
         BRepPrimAPI_MakeSphere tool(center, radius);
         pThis->setShape(tool.Shape());
-        registerMakeSphereFaces(pThis,tool.Sphere());
+        registerOneAxisFaces(pThis,tool.Sphere());
     }
     CATCH_AND_RETHROW("Failed to create sphere ");
 
@@ -259,7 +262,9 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
                 ThrowException(Exception::Error(String::New("invalid value for arguments")));
             }
             try {
-                pThis->setShape(BRepPrimAPI_MakeCylinder(ax2,R,H).Shape());
+				BRepPrimAPI_MakeCylinder tool(ax2,R,H);
+                pThis->setShape(tool.Shape());
+				registerOneAxisFaces(pThis,tool.Cylinder());
             }
             CATCH_AND_RETHROW("Failed to create cylinder ");
 
@@ -285,7 +290,9 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
             gp_Vec aV(dx / H, dy / H, dz / H);
             gp_Ax2 ax2(p1, aV);
             try {
-                pThis->setShape(BRepPrimAPI_MakeCylinder(ax2,R,H).Shape());
+				BRepPrimAPI_MakeCylinder tool(ax2,R,H);
+                pThis->setShape(tool.Shape());
+				registerOneAxisFaces(pThis,tool.Cylinder());
             }
             CATCH_AND_RETHROW("Failed to create cylinder ");
 
@@ -317,7 +324,9 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
             ThrowException(Exception::Error(String::New("invalid value for arguments")));
         }
         try {
-            pThis->setShape(BRepPrimAPI_MakeCone(R1, R2,H).Shape());
+			BRepPrimAPI_MakeCone tool(R1, R2,H);
+            pThis->setShape(tool.Shape());
+			registerOneAxisFaces(pThis,tool.Cone());
         }
         CATCH_AND_RETHROW("Failed to create sphere ");
     } else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber() && args[3]->IsNumber()) {
@@ -346,7 +355,9 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
         gp_Vec aV(dx / H, dy / H, dz / H);
         gp_Ax2 ax2(p1, aV);
         try {
-            pThis->setShape(BRepPrimAPI_MakeCone(ax2,R1,R2,H).Shape());
+            BRepPrimAPI_MakeCone tool(ax2,R1,R2,H);
+			pThis->setShape(tool.Shape());
+			registerOneAxisFaces(pThis,tool.Cone());
         }
         CATCH_AND_RETHROW("Failed to create cone ");
 
