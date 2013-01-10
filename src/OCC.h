@@ -94,6 +94,7 @@
 #include <ShapeFix_Solid.hxx>
 
 #include <STEPControl_Writer.hxx>
+#include <STEPControl_Reader.hxx>
 
 #include <ShapeSchema.hxx>
 
