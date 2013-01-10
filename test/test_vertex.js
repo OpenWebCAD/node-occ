@@ -49,7 +49,7 @@ describe("testing Vertex ",function(){
         var vertex;
         before(function() {
             vertex = new occ.Vertex([10,20,30]);
-            vertex.translate([10,20,30]);
+            vertex = vertex.translate([10,20,30]);
         });
         it("should be translated",function(){
             vertex.x.should.equal(20);

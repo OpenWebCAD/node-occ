@@ -85,7 +85,6 @@ describe("testing solid construction",function() {
             solid1 = occ.fuse(solid1,solid2);
         });
         it("should be a SOLID",function() {
-            console.log(solid1.shapeType);
             solid1.shapeType.should.equal("SOLID");
         });
         it("should have 1 solid", function() {
@@ -170,7 +169,6 @@ describe("testing solid construction",function() {
             for (var i in shells) {
                 var shell = shells[i];
                 if (outerShell.hashCode!==shell.hashCode) {
-                    console.log(shell.shapeType);
                     shell.orientation.should.equal("FORWARD");
                 }
             }
@@ -242,7 +240,6 @@ describe("testing solid construction",function() {
                for ( var j in occ.Solid.prototype) {
                   actual.push(j.toString());
                }
-               // console.log(actual);
                var missing = [];
                for (j in expected) {
                    if (actual.indexOf(expected[j]) == -1) {
@@ -437,7 +434,7 @@ describe("testing solid construction",function() {
             bbox.nearPt.x.should.be.greaterThan(10.0-epsilon);
             bbox.nearPt.y.should.be.greaterThan(10.0-epsilon);
 
-            solid.rotate([0,0,0],[0,0,1],90);
+            solid = solid.rotate([0,0,0],[0,0,1],90);
 
             bbox = solid.getBoundingBox();
             bbox.farPt.x.should.be.within(-10.0-epsilon,-10+epsilon);

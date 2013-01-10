@@ -13,13 +13,15 @@ describe("testing face mesh ",function() {
         solid.faces.should.have.property("top");
         var topFace = solid.faces.top;
         should.exist(topFace);
-        console.log(topFace.area);
+
+        //xx topFace.area.should.equal(100.0);
 
         topFace.hasMesh.should.equal(false);
         // now mesh the solid
         solid.mesh;
         topFace.hasMesh.should.equal(true);
-        console.log(topFace.mesh.toJSON())
+
+        // topFace.mesh.toJSON();
     });
 });
 

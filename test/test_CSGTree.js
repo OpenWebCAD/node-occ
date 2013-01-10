@@ -45,7 +45,7 @@ describe("Building a csg on the client side",function() {
 
     });
     it("should produce a parsable JSON string",function(){
-        console.log(JSON.stringify(compiled_csg));
+        var str = JSON.stringify(compiled_csg);
     });
     it("should have a root element",function(){
        compiled_csg.hasOwnProperty('root').should.equal(true);
@@ -74,13 +74,12 @@ describe("Building a csg on the client and using occ shall produce the same resu
         compiled_csg = csg.toJSON();
 
         // executing the csg using the CSGBuilderEngine
-        console.log("----- building object with CSGBuilder");
+
         solid1 = CSGBuilder.build(compiled_csg);
-        console.log("... done");
-        // executing on occ
-        console.log("----- building object directly with occ");
+
+        // execute same scg using occ
         solid2 = build_cooker_base(occ);
-        console.log("... done");
+
 
     });
     it("it should produce the same geometry",function() {

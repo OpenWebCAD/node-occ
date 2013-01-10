@@ -10,14 +10,12 @@ describe("testing face naming on simple box",function() {
     var solid;
     before(function(){
         solid = occ.makeBox([0,0,0],[10,20,30]);
-        // console.log( solid.faces);
     });
     it("should have only six named faces",function(){
         Object.keys(solid.faces).length.should.equal(6);
     });
     it("should have a face called 'top'",function(){
         solid.faces.should.have.property("top");
-        console.log("face mesh = ", solid.faces.top.mesh);
     });
     it("should have a face called 'bottom'",function(){
         solid.faces.should.have.property("bottom");
@@ -96,7 +94,6 @@ describe("testing face naming on simple sphere",function() {
     var solid;
     before(function(){
         solid = occ.makeSphere([0,0,0],30);
-        // console.log( "faces = ",solid.faces);
     });
     it("should have only one named face",function(){
         Object.keys(solid.faces).length.should.equal(1);
@@ -115,7 +112,6 @@ describe("testing face naming on combined boxes",function() {
       box1 = occ.makeBox([0,0,0],[10,10,10]);
       box2 = occ.makeBox([5,5,5],[15,15,15]);
       solid = occ.fuse(box1,box2);
-       console.log(solid.faces);
    });
    it(" should expose 12 named faces", function() {
         Object.keys(solid.faces).length.should.equal(12);
@@ -147,7 +143,6 @@ describe("testing face naming on a box whose top/right/front corner is carved wi
         box1 = occ.makeBox([0,0,0],[10,10,10]);
         box2 = occ.makeBox([5,5,5],[15,15,15]);
         solid = occ.cut(box1,box2);
-        console.log(solid.faces);
     });
     it(" should expose 9 named faces", function() {
         Object.keys(solid.faces).length.should.equal(9);
@@ -179,7 +174,6 @@ describe("testing face naming on a box with a split face ('top' face)",function(
         block = occ.makeBox([0,0,0],[100,100,25]);
         cutting_solid = occ.makeBox([40,-10,10],[60,110,50]);
         solid = occ.cut(block,cutting_solid);
-        console.log(solid.faces);
     });
     it(" should expose 10 named faces", function() {
         Object.keys(solid.faces).length.should.equal(10);
@@ -233,7 +227,7 @@ describe("testing face naming on a box fused with a box that have a common face 
         for (var i in faces ){
             var face = faces[i];
             var bbox = face.getBoundingBox();
-            console.log("face i ", solid.getShapeName(face),bbox.toString());
+            //xx console.log("face i ", solid.getShapeName(face),bbox.toString());
         }
     });
 });
@@ -250,7 +244,6 @@ describe("testing face naming on a box with a top face split twice leading to 4 
         cutting_solid2 = occ.makeBox([-10,40,10],[110,60,50]);
         solid = occ.cut(block,cutting_solid1);
         solid = occ.cut(solid,cutting_solid2);
-        console.log(solid.faces);
     });
     it("should expose 22 named faces", function() {
         Object.keys(solid.faces).length.should.equal(22);
@@ -281,7 +274,6 @@ describe("testing face naming on a box with a top face split by a cross shape le
         cutting_solid2 = occ.makeBox([-10,40,10],[110,60,50]);
         cutting_solid = occ.fuse(cutting_solid1,cutting_solid2);
         solid = occ.cut(block,cutting_solid);
-        console.log(solid.faces);
     });
     it("should expose 22 named faces", function() {
         Object.keys(solid.faces).length.should.equal(22);
