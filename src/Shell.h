@@ -22,10 +22,8 @@ public:
     }
     virtual void setShape(const TopoDS_Shape&);
 
-    virtual Base* Unwrap(v8::Local<v8::Object> obj) {
-        return node::ObjectWrap::Unwrap<Shell>(obj);
-    }
-    virtual Local<Object> Clone() ;
+    virtual Base* Unwrap(v8::Local<v8::Object> obj) const {   return node::ObjectWrap::Unwrap<Shell>(obj);  }
+    virtual Local<Object> Clone() const ;
 
     static void Init(Handle<Object> target);
     static Handle<Value> New(const Arguments& args);

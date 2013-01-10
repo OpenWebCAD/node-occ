@@ -17,8 +17,8 @@ public:
         return m_vertex;
     }
     virtual void setShape( const TopoDS_Shape&);
-    virtual Local<Object>  Clone() ;
-    virtual Base* Unwrap(v8::Local<v8::Object> obj) {
+    virtual Local<Object>  Clone() const ;
+    virtual Base* Unwrap(v8::Local<v8::Object> obj) const {
         return node::ObjectWrap::Unwrap<Vertex>(obj);
     }
 

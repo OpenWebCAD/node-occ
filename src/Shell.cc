@@ -73,7 +73,7 @@ Handle<Value> Shell::New(const Arguments& args)
     return args.This();
 }
 
-Local<Object>  Shell::Clone()
+Local<Object>  Shell::Clone() const
 {
     HandleScope scope;
     Shell* obj = new Shell();

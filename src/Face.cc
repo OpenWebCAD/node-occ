@@ -133,7 +133,7 @@ Handle<Value> Face::New(const Arguments& args)
     return args.This();
 }
 
-Local<Object> Face::Clone()
+Local<Object> Face::Clone() const
 {
     HandleScope scope;
     Face* obj = new Face();

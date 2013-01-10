@@ -110,7 +110,7 @@ Handle<Value> Wire::New(const Arguments& args)
     return args.This();
 }
 
-Local<Object>  Wire::Clone()
+Local<Object>  Wire::Clone() const
 {
     HandleScope scope;
     Wire* obj = new Wire();

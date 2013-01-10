@@ -85,7 +85,7 @@ Handle<v8::Value> Solid::New(const v8::Arguments& args)
     return args.This();
 }
 
-Local<Object>  Solid::Clone()
+Local<Object>  Solid::Clone() const
 {
 	HandleScope scope;
 	Handle<Object> instance = Solid::NewInstance()->ToObject();

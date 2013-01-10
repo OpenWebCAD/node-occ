@@ -254,7 +254,7 @@ Handle<Value> Edge::New(const Arguments& args)
     return args.This();
 }
 
-Local<Object>  Edge::Clone()
+Local<Object>  Edge::Clone() const
 {
     HandleScope scope;
     Edge* obj = new Edge();

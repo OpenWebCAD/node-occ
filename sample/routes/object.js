@@ -6,6 +6,9 @@ var occ  = require('../../lib/occ'),
 var fs = require('fs');
 var fileUtils = require ("file-utils");
 var File = fileUtils.File;
+
+var fastocc = require('../../lib/fastbuilder').fastBuilder;
+
 var SecurityManager = fileUtils.SecurityManager;
 
 exports.get = function(req, res) {
@@ -133,8 +136,8 @@ exports.buildCSG1 = function(req,res)
         //xx console.log( "csg" , solidBuilderScript);
 
         var env = {
-            csg: occ ,
-            occ: occ ,
+            csg: fastocc ,
+            occ: fastocc ,
             shapeFactory: shapeFactory,
 
             'eval':        function() { throw "eval is forbidden";        },
@@ -159,22 +162,10 @@ exports.buildCSG1 = function(req,res)
                 console.log (" temporary file =",file.toString ()); //Prints: foo<random number>bar
                 fs.writeFile(filename,code,function(err){
 
-/*
-                    function customPrepareStackTrace(error, structuredStackTrace) {
-                        console.log(structuredStackTrace);
-                        return structuredStackTrace[0].getLineNumber();
-                    }
-
-                    Error.prepareStackTrace = customPrepareStackTrace;
-*/
-
                     try {
-                        vm.runInNewContext(code,env,filename);
-                        //xx console.log(util.inspect(env));
 
-                        //xx console.log("code = ",code);
-                        //xx console.log("env = ",env);
-                        //xx console.log( "jsonStr",jsonStr);
+                        vm.runInNewContext(code,env,filename);
+
                         res.send(buildMesh(env.solid));
 
                     }

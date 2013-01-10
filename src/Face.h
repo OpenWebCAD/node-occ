@@ -36,9 +36,9 @@ public:
 
     static Handle<Value> extrude(const Arguments& arg);
 
-    virtual Local<Object> Clone() ;
+    virtual Local<Object> Clone() const;
 
-    virtual Base* Unwrap(v8::Local<v8::Object> obj) {
+    virtual Base* Unwrap(v8::Local<v8::Object> obj) const {
        return node::ObjectWrap::Unwrap<Face>(obj);
     }
 	virtual void InitNew(const v8::Arguments& args);

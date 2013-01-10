@@ -47,8 +47,8 @@ public:
     virtual void setShape(const TopoDS_Shape& shape) {
         m_edge = TopoDS::Edge(shape);
     }
-    virtual Local<Object>  Clone() ;
-    virtual Base* Unwrap(v8::Local<v8::Object> obj)  {
+    virtual Local<Object>  Clone() const ;
+    virtual Base* Unwrap(v8::Local<v8::Object> obj) const  {
         return node::ObjectWrap::Unwrap<Edge>(obj);
     }
 

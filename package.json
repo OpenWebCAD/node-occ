@@ -4,7 +4,9 @@
   "description": "OpenCascade OCE Wrapper for Node js",
   "dependencies": {
       "should": "latest",
-	  "assert": "latest"	  
+      "colors": "latest",
+	  "assert": "latest"
+
   },
   "main": "lib/occ",
   "engines": { "node": ">= 0.6.13 " }

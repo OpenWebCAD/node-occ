@@ -86,7 +86,7 @@ const char* Base::orientation()
 Handle<Value> Base::translate(const Arguments& args)
 {
     HandleScope scope;
-    Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+    const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
     gp_Trsf transformation;
 
@@ -95,30 +95,34 @@ Handle<Value> Base::translate(const Arguments& args)
     ReadPoint(args[0],&x,&y,&z);
     transformation.SetTranslation(gp_Vec(x,y,z));
 
-    pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+    Local<Object> copy    = pThis->Clone();
 
-    return scope.Close(args.This());
+    pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
+
+    return scope.Close(copy);
 
 }
 
 Handle<Value> Base::rotate(const Arguments& args)
 {
     HandleScope scope;
-    Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+    const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
     gp_Trsf  transformation;
     ReadRotationFromArgs(args,transformation);
 
-    pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+	Local<Object> copy    = pThis->Clone();
+    pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
 
-    return scope.Close(args.This());
+    return scope.Close(copy);
 }
 Handle<Value> Base::mirror(const Arguments& args)
 {
     HandleScope scope;
-    Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
-
-    return scope.Close(args.This());
+    const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+	// TODO 
+	Local<Object> copy    = pThis->Clone();
+    return scope.Close(copy);
 }
 
 Handle<Value>  Base::applyTransform(const Arguments& args)

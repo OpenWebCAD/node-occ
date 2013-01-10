@@ -13,10 +13,8 @@ protected:
     };
 
 public:
-    virtual Local<Object>  Clone() ;
-    virtual Base* Unwrap(v8::Local<v8::Object> obj) {
-        return node::ObjectWrap::Unwrap<Solid>(obj);
-    }
+    virtual Local<Object>  Clone() const;
+    virtual Base* Unwrap(v8::Local<v8::Object> obj) const { return node::ObjectWrap::Unwrap<Solid>(obj); }
 
     Persistent<Object> m_cacheMesh;
 

@@ -59,7 +59,7 @@ Handle<Value> Vertex::New(const Arguments& args)
 }
 
 
-Local<Object>  Vertex::Clone()
+Local<Object>  Vertex::Clone() const
 {
     HandleScope scope;
     Vertex* obj = new Vertex();
