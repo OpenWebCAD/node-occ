@@ -210,6 +210,27 @@ describe("testing solid construction",function() {
 
     });
 
+    describe("creating a compound",function(){
+        var compound;
+        before(function(){
+            var solids = [];
+            var solid1 = occ.makeBox(10,20,30);
+            for (var i=0;i<10;i++) {
+                var s = solid1.rotate([0,0,0],[0,0,1],i*15);
+                s.numFaces.should.equal(6);
+                solids.push(s);
+            }
+            compound = occ.compound(solids);
+        });
+
+        it("should be a compound",function(){
+            compound.shapeType.should.equal("COMPOUND");
+        });
+        it("should have 10 solids",function() {
+            console.log(compound);
+            compound.numSolids.should.equal(10);
+        });
+    });
 
     describe("Meshing a simple solid", function() {
         describe("Meshing a box", function() {
@@ -441,6 +462,14 @@ describe("testing solid construction",function() {
             bbox.farPt.y.should.be.within( 20.0-epsilon, 20+epsilon);
             bbox.nearPt.x.should.be.within(-20.0-epsilon,-20+epsilon);
             bbox.nearPt.y.should.be.within( 10.0-epsilon, 10+epsilon);
+
+        });
+    });
+    describe(" making a illegal solid ( with bad arguments) shall raise exception", function(){
+        it("should raise exception when trying to build a box with illegal arguments", function(){
+            (function(){
+                var solid = makebox("illegal");
+            }).should.thr
 
         });
     });

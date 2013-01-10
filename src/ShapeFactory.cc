@@ -522,34 +522,56 @@ static Handle<v8::Value>  ShapeFactory_createBoolean(Solid* pSolid1, Solid* pSol
 }
 
 
-Handle<v8::Object> ShapeFactory::add(const std::vector<Solid*>& solids)
+Handle<v8::Value> ShapeFactory::add(const std::vector<Base*>& shapes)
 {
-    HandleScope scope;
     TopoDS_Compound compound;
     BRep_Builder builder;
-    try {
+
+	Handle<v8::Value> pJhis(Solid::NewInstance());
+    Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+    
+	try {
 
         builder.MakeCompound(compound);
-        for (size_t i = 0; i < solids.size(); i++) {
-            builder.Add(compound, solids[i]->shape());
+        
+		for (size_t i = 0; i < shapes.size(); i++) {
+
+		   const TopoDS_Shape&  shape = shapes[i]->shape();
+           builder.Add(compound, shape);
         }
 
+		pThis->setShape(compound);
+
+		std::cout << " num solid " << pThis->numSolids() << std::endl;
+
     }
-    CATCH_AND_RETHROW("Failed in boolean operation");
-    return scope.Close(Solid::NewInstance(compound)->ToObject());
+    CATCH_AND_RETHROW("Failed in compound operation");
+
+	return pJhis;
 
 }
-Handle<v8::Value> ShapeFactory::add(const v8::Arguments& args)
+Handle<v8::Value> ShapeFactory::compound(const v8::Arguments& args)
 {
     HandleScope scope;
-    std::vector<Solid*> solids;
+    std::vector<Base*> shapes;
     for (int i=0; i<args.Length(); i++) {
-        if (Solid::constructor->HasInstance(args[i]->ToObject())) {
-            Solid* pSolid = node::ObjectWrap::Unwrap<Solid>(args[i]->ToObject());
-            solids.push_back(pSolid);
-        }
+		Handle<Object> obj = args[i]->ToObject();
+        if (Solid::constructor->HasInstance(obj)) {
+            Base* pShape = node::ObjectWrap::Unwrap<Solid>(obj);
+            shapes.push_back(pShape);
+        } else if (args[i]->IsArray()) {
+			Handle<Array> arr = Handle<Array>::Cast(args[i]);
+			int length = arr->Length();
+			for(int j=0;j<length;j++) {
+				 Handle<Object> obj1 = arr->Get(j)->ToObject();
+				 if (Solid::constructor->HasInstance(obj1)) {
+					Base* pShape = node::ObjectWrap::Unwrap<Solid>(obj1);
+					shapes.push_back(pShape);
+				 }
+			}
+		}
     }
-    return add(solids);
+    return scope.Close(add(shapes));
 }
 Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BOP_Operation op)
 {
@@ -589,4 +611,6 @@ Handle<v8::Value> ShapeFactory::common(const v8::Arguments& args)
 {
     return _boolean(args,BOP_COMMON);
 }
+
+
 

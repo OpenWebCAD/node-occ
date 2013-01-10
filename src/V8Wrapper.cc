@@ -49,8 +49,9 @@ void Initialize(Handle<Object> target)
     target->Set(String::NewSymbol("fuse"),        FunctionTemplate::New(ShapeFactory::fuse)->GetFunction());
     target->Set(String::NewSymbol("cut"),         FunctionTemplate::New(ShapeFactory::cut)->GetFunction());
     target->Set(String::NewSymbol("common"),      FunctionTemplate::New(ShapeFactory::common)->GetFunction());
+    target->Set(String::NewSymbol("compound"),    FunctionTemplate::New(ShapeFactory::compound)->GetFunction());
 
-    target->Set(String::NewSymbol("writeSTEP"),      FunctionTemplate::New(writeSTEP)->GetFunction());
+    target->Set(String::NewSymbol("writeSTEP"),   FunctionTemplate::New(writeSTEP)->GetFunction());
 
     target->Set(String::NewSymbol("oceVersion"),  String::New("0.11"));
     target->Set(String::NewSymbol("gc"),     FunctionTemplate::New(ForceGC)->GetFunction());

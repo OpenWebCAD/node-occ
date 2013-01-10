@@ -6,6 +6,7 @@
 
 
 class Solid;
+class Base;
 class ShapeFactory {
 public:
     // vertex
@@ -20,7 +21,7 @@ public:
     static Handle<v8::Value> fuse(const v8::Arguments& args);
     static Handle<v8::Value> cut(const v8::Arguments& args);
     static Handle<v8::Value> common(const v8::Arguments& args);
-    static Handle<v8::Value> add(const v8::Arguments& args);
+	static Handle<v8::Value> compound(const v8::Arguments& args);
     // primitive constructions
     static Handle<v8::Value> makeBox(const v8::Arguments& args) ;
     static Handle<v8::Value> makePrism(const Arguments& arg);
@@ -29,6 +30,6 @@ public:
     static Handle<v8::Value> makeSphere(const Arguments& arg);
 private:
     static Handle<v8::Value> _boolean(const v8::Arguments& args,BOP_Operation op);
-    static Handle<v8::Object> add(const std::vector<Solid*>& solids);
+    static Handle<v8::Value> add(const std::vector<Base*>& shapes);
 
 };

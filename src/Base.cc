@@ -87,19 +87,22 @@ Handle<Value> Base::translate(const Arguments& args)
 {
     HandleScope scope;
     const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+	try {
 
-    gp_Trsf transformation;
+		gp_Trsf transformation;
 
-    double x=0,y=0,z=0;
+		double x=0,y=0,z=0;
 
-    ReadPoint(args[0],&x,&y,&z);
-    transformation.SetTranslation(gp_Vec(x,y,z));
+		ReadPoint(args[0],&x,&y,&z);
+		transformation.SetTranslation(gp_Vec(x,y,z));
 
-    Local<Object> copy    = pThis->Clone();
+		Local<Object> copy    = pThis->Clone();
 
-    pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
+		pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
 
-    return scope.Close(copy);
+		return scope.Close(copy);
+	} CATCH_AND_RETHROW("Failed to calculate a translated shape ");
+	return  scope.Close(Undefined());
 
 }
 
@@ -108,13 +111,16 @@ Handle<Value> Base::rotate(const Arguments& args)
     HandleScope scope;
     const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
 
-    gp_Trsf  transformation;
-    ReadRotationFromArgs(args,transformation);
+	try {
+		gp_Trsf  transformation;
+		ReadRotationFromArgs(args,transformation);
 
-	Local<Object> copy    = pThis->Clone();
-    pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
+		Local<Object> copy    = pThis->Clone();
+		pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
+	    return scope.Close(copy);
 
-    return scope.Close(copy);
+	} CATCH_AND_RETHROW("Failed to calculate a rotated shape ");
+	return  scope.Close(Undefined());
 }
 Handle<Value> Base::mirror(const Arguments& args)
 {
@@ -134,13 +140,16 @@ Handle<Value>  Base::applyTransform(const Arguments& args)
         ThrowException(Exception::Error(String::New("invalid  tansformation")));
         return scope.Close(Undefined());
     }
+	try {
 
-    Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
+		Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
 
-    const gp_Trsf& transformation = pTrans->m_trsf;
-    pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+		const gp_Trsf& transformation = pTrans->m_trsf;
+		pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
 
-    return scope.Close(args.This());
+		return scope.Close(args.This());
+	} CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
+	return  scope.Close(Undefined());
 }
 
 
@@ -154,19 +163,22 @@ Handle<Value> Base::transformed(const Arguments& args)
 
     Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());
 
-    Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
-    const gp_Trsf& trsf =  pTrans->m_trsf;
-    gp_Trsf transformation =     trsf;
+	try {
+		Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
+		const gp_Trsf& trsf =  pTrans->m_trsf;
+		gp_Trsf transformation =     trsf;
 
-    Local<Object> copy    = pThis->Clone();
+		Local<Object> copy    = pThis->Clone();
 
-    if (!pThis->shape().IsNull()) {
-        pThis->Unwrap(copy)->setShape(
-            BRepBuilderAPI_Transform(pThis->shape(),
-                                     transformation,Standard_True).Shape());
-    }
+		if (!pThis->shape().IsNull()) {
+			pThis->Unwrap(copy)->setShape(
+				BRepBuilderAPI_Transform(pThis->shape(),
+										 transformation,Standard_True).Shape());
+		}
 
-    return scope.Close(copy);
+		return scope.Close(copy);
+	} CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
+	return  scope.Close(Undefined());
 
 }
 

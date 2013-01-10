@@ -242,7 +242,7 @@ function handle_json_error(request, statusText, errorThrown) {
     lastAjaxDuration = new Date() - lastAjaxStart;
 
     // var obj = JSON.parse(err.responseText);
-    $("#ascii_mesh").text(request.responseText + " duration :  " + lastAjaxDuration);
+    $("#ascii_mesh").text(request.responseText + " duration :  " + lastAjaxDuration + " ms");
 
 
 }
@@ -255,7 +255,7 @@ function rgb2hex( rgb ) {
 function process_single_mesh(rootNode,jsonEntry)
 {
     var jsonFace = jsonEntry.mesh;
-    $("#ascii_mesh").append("<p>face "+  jsonEntry.name + " vertices :" + jsonFace.vertices.length + ", faces : " + jsonFace.faces.length + " color = " +  jsonEntry.color + " </p>");
+   //  $("#ascii_mesh").append("<p>face "+  jsonEntry.name + " vertices :" + jsonFace.vertices.length + ", faces : " + jsonFace.faces.length + " color = " +  jsonEntry.color + " </p>");
 
     jsonFace.scale = 1.0;
     var jsonLoader = new THREE.JSONLoader();
@@ -287,7 +287,7 @@ function install_json_mesh(json) {
     $("#ascii_mesh").text("");
 
     var beautified = JSON.stringify(json,null,"");
-    $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + "size :" + beautified.length + " bytes</p><br/>");
+    $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + " ms   - size :" + beautified.length + " bytes</p><br/>");
 
 
     for (var i=0;i<json.length;i++){
