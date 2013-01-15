@@ -52,5 +52,5 @@ lid = lid.translate([0,0,20]);
 
 var pan = makePan(20,40);
 
-return occ.fuse(pan,lid);
+return csg.fuse(pan,lid);
 
