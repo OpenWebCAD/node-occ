@@ -401,13 +401,13 @@ describe("testing solid construction",function() {
             solid.numFaces.should.equal(3);
         });
     });
-    describe("makeCone - variation 2 ( point, point, R1,R2",function(){
+    describe("makeCone - variation 2 ( point,R1, point, R2",function(){
         var solid;
         before(function(){
             var radius1 = 50;
             var radius2 = 70;
             var height =  30;
-            solid = occ.makeCone([0,0,0],[0,0,height],radius1,radius2);
+            solid = occ.makeCone([0,0,0],radius1,[0,0,height],radius2);
         });
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);

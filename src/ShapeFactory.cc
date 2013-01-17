@@ -315,13 +315,15 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
     // Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H);
     // Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
     // Standard_EXPORT   BRepPrimAPI_MakeCone(const gp_Ax2& Axes,const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
-    if (args.Length()==3) {
+    if (args.Length()==3 && args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber()) {
+
         double R1 = args[0]->ToNumber()->Value();
         double R2 = args[1]->ToNumber()->Value();
         double H  = args[2]->ToNumber()->Value();
 
         if ( R1 < epsilon || R2 < epsilon || H < epsilon ) {
             ThrowException(Exception::Error(String::New("invalid value for arguments")));
+			return scope.Close(Undefined());
         }
         try {
 			BRepPrimAPI_MakeCone tool(R1, R2,H);
@@ -329,17 +331,32 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
 			registerOneAxisFaces(pThis,tool.Cone());
         }
         CATCH_AND_RETHROW("Failed to create sphere ");
-    } else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber() && args[3]->IsNumber()) {
+	} else if (args.Length()==3 && args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsNumber()) {
+		
+		gp_Dir axis;
+		ReadDir(args[0],&axis);
+
+		double angleInRadian = 0;
+		ReadDouble(args[1],angleInRadian);
+
+		double height = 0;
+		ReadDouble(args[1],height);
+
+		ThrowException(Exception::Error(String::New("Cone with [u,v,w],angle,height not implemented yet")));
+		return scope.Close(Undefined());
+
+    } else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsArray() && args[3]->IsNumber()) {
         // Point, point , R1,R2);
         // variation 3 ( 2 points and a radius  )
         gp_Pnt p1;
         ReadPoint(args[0],&p1);
 
-        gp_Pnt p2;
-        ReadPoint(args[1],&p2);
+		double R1  = 10;
+        ReadDouble(args[1],R1);
 
-        double R1  = 10;
-        ReadDouble(args[2],R1);
+
+        gp_Pnt p2;
+        ReadPoint(args[2],&p2);
 
         double R2  = 11;
         ReadDouble(args[3],R2);
@@ -351,6 +368,7 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
         const double H = sqrt(dx*dx + dy*dy + dz*dz);
         if (H < epsilon ) {
             ThrowException(Exception::Error(String::New("cannot build a cone on two coincident points")));
+			return scope.Close(Undefined());
         }
         gp_Vec aV(dx / H, dy / H, dz / H);
         gp_Ax2 ax2(p1, aV);

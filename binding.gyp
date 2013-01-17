@@ -101,7 +101,7 @@
 		'-lTKIGESd',
 		'-lTKSTEPd',
 		'-lTKFilletd',
-
+		'-lTKXSBased',
 		],
     }
   ]
