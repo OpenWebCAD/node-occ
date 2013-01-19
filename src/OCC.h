@@ -6,11 +6,14 @@
 
 #include <BRep_Tool.hxx>
 #include <BRepCheck_Analyzer.hxx>
+
+#include <BRepMesh.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepMesh_FastDiscret.hxx>
 
 #include <BRepTools.hxx>
 #include <BRepLib.hxx>
-#include <BRepMesh.hxx>
+
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepGProp.hxx>

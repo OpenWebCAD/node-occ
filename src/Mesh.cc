@@ -86,6 +86,11 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
 
         Standard_Real x,y,z;
 
+		this->normals.reserve(triangulation->NbNodes());
+		normals.reserve(triangulation->NbNodes());
+
+		this->vertices.reserve(triangulation->NbNodes());
+
         for (int i = 1; i <= triangulation->NbNodes(); i++) {
 
             const gp_Pnt& pnt = narr(i);
@@ -115,6 +120,9 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
             reversed = true;
 
         const Poly_Array1OfTriangle& triarr = triangulation->Triangles();
+
+		this->triangles.reserve(triangulation->NbTriangles());
+
         for (int i = 1; i <= triangulation->NbTriangles(); i++) {
             Poly_Triangle pt = triarr(i);
             Standard_Integer n1,n2,n3;
@@ -161,6 +169,8 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
         }
 
         if (qualityNormals) {
+
+
             Handle_Geom_Surface surface = BRep_Tool::Surface(face);
             gp_Vec normal;
             for (int i = 0; i < triangulation->NbNodes(); i++) {
@@ -201,6 +211,8 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
             }
         }
 
+
+		
         // extract edge indices from mesh
         std::set<int> seen;
         for (unsigned int i = 0; i < this->edgehash.size(); i++)

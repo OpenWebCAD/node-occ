@@ -401,18 +401,53 @@ describe("testing solid construction",function() {
             solid.numFaces.should.equal(3);
         });
     });
-    describe("makeCone - variation 2 ( point,R1, point, R2",function(){
+    describe("makeCone - variation 2 ( point,R1, point, R2 )",function(){
         var solid;
+        var radius1 = 50;
+        var radius2 = 70;
         before(function(){
-            var radius1 = 50;
-            var radius2 = 70;
             var height =  30;
             solid = occ.makeCone([0,0,0],radius1,[0,0,height],radius2);
         });
         it("should have 3 faces", function() {
             solid.numFaces.should.equal(3);
+            should.exist(solid.faces.top);
+            should.exist(solid.faces.lateral);
+            should.exist(solid.faces.bottom);
+        });
+        it("top face should have a area of radius**2*pi", function() {
+            var expectedArea = radius2*radius2*Math.PI;
+            var eps = 1.0;
+            solid.faces.top.area.should.be.within(expectedArea-eps,expectedArea+eps);
+        });
+        it("bottom face should have a area of radius**2*pi", function() {
+            var expectedArea = radius1*radius1*Math.PI;
+            var eps = 1.0;
+            solid.faces.bottom.area.should.be.within(expectedArea-eps,expectedArea+eps);
         });
     });
+    describe("makeCone - variation 3 ( axpex,dir, half_angle, height )",function(){
+        var solid;
+        var radius = 50;
+        var height =  30;
+        before(function(){
+            var angle  = Math.atan(radius/height);
+            solid = occ.makeCone([0,0,0],[0,0,1],angle,height);
+        });
+        it("should have 2 faces", function() {
+            solid.numFaces.should.equal(2);
+            should.exist(solid.faces.top);
+            should.exist(solid.faces.lateral);
+            should.not.exist(solid.faces.bottom);
+        });
+        it("top face should have a area of radius**2*pi", function() {
+            var expectedArea = radius*radius*Math.PI;
+            var eps = 1.0;
+            solid.faces.top.area.should.be.within(expectedArea-eps,expectedArea+eps);
+        });
+    
+    });
+    
     describe("makeSphere",function(){
         var solid;
         var radius = 10;
@@ -439,6 +474,18 @@ describe("testing solid construction",function() {
             solid.volume.should.be.within( expected_volume-epsilon,expected_volume+epsilon);
 
         });
+    });
+    describe("makeTorus", function() {
+       var solid;
+       before(function() {
+          solid = occ.makeTorus([0,0,0],[0,0,1],100,10);  
+       });
+       it("should have one single face",function(){
+          //console.log(solid.faces);
+          solid.numFaces.should.equal(1);
+          should.exist(solid.faces.lateral);
+       });
+       
     });
     describe("rotate apply on a solid", function() {
         var solid;
@@ -469,7 +516,7 @@ describe("testing solid construction",function() {
         it("should raise exception when trying to build a box with illegal arguments", function(){
             (function(){
                 var solid = makebox("illegal");
-            }).should.thr
+            }).should.throw();
 
         });
     });

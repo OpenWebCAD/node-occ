@@ -304,7 +304,6 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
     return scope.Close(pJhis);
 }
 
-
 Handle<Value> ShapeFactory::makeCone(const Arguments& args)
 {
     HandleScope scope;
@@ -330,7 +329,7 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
             pThis->setShape(tool.Shape());
 			registerOneAxisFaces(pThis,tool.Cone());
         }
-        CATCH_AND_RETHROW("Failed to create sphere ");
+        CATCH_AND_RETHROW("Failed to create Cone ");
 	} else if (args.Length()==3 && args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsNumber()) {
 		
 		gp_Dir axis;
@@ -351,7 +350,7 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
         gp_Pnt p1;
         ReadPoint(args[0],&p1);
 
-		double R1  = 10;
+        double R1  = 10;
         ReadDouble(args[1],R1);
 
 
@@ -368,23 +367,89 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
         const double H = sqrt(dx*dx + dy*dy + dz*dz);
         if (H < epsilon ) {
             ThrowException(Exception::Error(String::New("cannot build a cone on two coincident points")));
-			return scope.Close(Undefined());
+          return scope.Close(Undefined());
         }
         gp_Vec aV(dx / H, dy / H, dz / H);
         gp_Ax2 ax2(p1, aV);
         try {
             BRepPrimAPI_MakeCone tool(ax2,R1,R2,H);
-			pThis->setShape(tool.Shape());
-			registerOneAxisFaces(pThis,tool.Cone());
+            pThis->setShape(tool.Shape());  
+            registerOneAxisFaces(pThis,tool.Cone());
         }
         CATCH_AND_RETHROW("Failed to create cone ");
 
-    }  else {
+    } else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber() && args[3]->IsNumber()) {
+      // cone with a sharp apex 
+      // apex, direction ,  half_angle, height
+      gp_Pnt apex;
+      ReadPoint(args[0],&apex);
+
+      gp_Dir innerDir;
+      ReadDir(args[1],&innerDir);
+
+      double half_angle_in_radian=atan(1.0); // default : 45° 
+      ReadDouble(args[2],half_angle_in_radian);
+
+      double height = 100;
+      ReadDouble(args[3],height);
+      // r/h= tan(a);
+
+      try {
+        gp_Ax2 ax2(apex, innerDir);
+        BRepPrimAPI_MakeCone tool(ax2,0,height*tan(half_angle_in_radian),height);
+        pThis->setShape(tool.Shape());  
+        registerOneAxisFaces(pThis,tool.Cone());
+      }
+      CATCH_AND_RETHROW("Failed to create cone ");
+          
+          
+      
+     } else {
         ThrowException(Exception::Error(String::New("invalid arguments (cone)")));
     }
 
     return scope.Close(pJhis);
 }
+
+Handle<Value> ShapeFactory::makeTorus(const Arguments& args)
+{
+    HandleScope scope;
+    Handle<v8::Value> pJhis = Solid::NewInstance();
+    Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+
+	// variation 1
+	//  
+	//  Center as <x,y,z>
+	//  axis   as <u,v,w>
+	//  bigRadius
+	//  smallRadius
+    if (args.Length()==4 && args[2]->IsNumber() && args[3]->IsNumber()) {
+		//
+        gp_Pnt center;
+        ReadPoint(args[0],&center);
+		//
+		gp_Dir axis;
+		ReadDir(args[1],&axis);
+		
+		double bigR = 100;
+		ReadDouble(args[2],bigR);
+        double smallR = 10;
+		ReadDouble(args[3],smallR);
+
+        try {
+		    BRepPrimAPI_MakeTorus tool(gp_Ax2(center,axis),bigR,smallR);
+			pThis->setShape(tool.Shape());
+			registerOneAxisFaces(pThis,tool.Torus());
+			return scope.Close(pJhis);
+        }
+        CATCH_AND_RETHROW("Failed to create Torus ");
+	}
+	ThrowException(Exception::Error(String::New("invalid arguments (makeTorus)")));
+	return scope.Close(Undefined());
+}
+
+
+
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 

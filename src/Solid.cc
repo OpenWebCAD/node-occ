@@ -522,7 +522,7 @@ Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
     }
     Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
     if (pThis->m_cacheMesh.IsEmpty()) {
-        pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.001,0.1,true));
+        pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.2,10*3.14159/180.0,true));
     }
     return scope.Close(pThis->m_cacheMesh);
 }
@@ -553,6 +553,9 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
     const TopoDS_Shape& shape = this->shape();
 
     try {
+		BRepMesh_IncrementalMesh MSH(shape,factor,Standard_True,angle,Standard_True);
+
+/*
         Bnd_Box aBox;
         BRepBndLib::Add(shape, aBox);
 
@@ -564,10 +567,9 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
         maxd = std::max(maxd, fabs(aYmax - aYmin));
         maxd = std::max(maxd, fabs(aZmax - aZmin));
 
-        BRepMesh_FastDiscret MSH(factor*maxd, angle, aBox, Standard_True, Standard_True,
-                                 Standard_True, Standard_True);
-
+		BRepMesh_FastDiscret MSH(factor*maxd, angle, aBox, Standard_True, Standard_True,Standard_True, Standard_True);
         MSH.Perform(shape);
+*/
 
         if (shape.ShapeType() == TopAbs_COMPSOLID || shape.ShapeType() == TopAbs_COMPOUND) {
             TopExp_Explorer exSolid, exFace;

@@ -140,6 +140,8 @@ exports.buildCSG1 = function(req,res)
             occ: fastocc ,
             shapeFactory: shapeFactory,
 
+            'console':    { log: function() { 
+			console.log.apply(console,arguments); logs.push(arguments); } },
             'eval':        function() { throw "eval is forbidden";        },
             'require':     function() { throw "require is forbidden";     },
             'setTimeout':  function() { throw "setTimeout is forbidden";  },

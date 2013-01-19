@@ -164,7 +164,7 @@ Handle<v8::Value> Face::_mesh(Local<String> property,const AccessorInfo &info)
     }
     Face* pThis = ObjectWrap::Unwrap<Face>(info.This());
     if (pThis->m_cacheMesh.IsEmpty()) {
-        pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.001,0.1,true));
+        pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.01,0.5,true));
     }
     return scope.Close(pThis->m_cacheMesh);
 }
