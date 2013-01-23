@@ -1,10 +1,14 @@
-node-occ
-========
+# node-occ
 
-node extension for OpenCascade.
+OpenCascade nodejs extension for solid modeling.
 
-This node extension provides solid construction to node.
+This nodejs extension provides *solid construction* to nodejs. 
+It provides a simple yet powerful javascript api to construct 3D geometry models.
 
+This project comes with a set of V8 wrappers around OpenCascade API and a sample web application.
+
+
+### quick example
 
 
 ```javascript
@@ -25,14 +29,23 @@ occ.writeSTEP("somefile.step",box)
 ```
 
 
-''/sample'' : sample nodejs/express REST API server to build solid
+### list of features
+
+- creation of basic shapes ( box, cylinder , cone , torus )
+- boolean operation ( fuse , common , cut )
+- solid properties ( faces, edges, vertices, area , volume )
+- import export ( STEP BREP )
 
 
-installation prerequisite:
-==========================
 
-on ubuntu
----------
+### sample web application
+
+''/sample'' : sample nodejs/express REST API server to build solid , based on threejs
+
+
+## installation prerequisites:
+
+### on ubuntu
 
 installing node js
 ```bash
@@ -81,30 +94,27 @@ node app.js
 ```
 
 
-on windows
-----------
+### on windows
 
 
-on Mac
-------
+### on Mac
 
 
+## dependencies:
 
+ - threejs    : https://github.com/mrdoob/three.js
+ - codemirror : https://github.com/marijnh/CodeMirror
 
-
-dependencies:
-    - threejs    : https://github.com/mrdoob/three.js
-    - codemirror : https://github.com/marijnh/CodeMirror
-
-acknowledgement:
-    - OpenCascade : http://www.opencascade.org
-    - occmodel    : https://github.com/tenko/occmodel
-    - ShapeSmith  : https://github.com/bjnortier/shapesmith
+## acknowledgement:
+    
+ - OpenCascade : http://www.opencascade.org
+ - occmodel    : https://github.com/tenko/occmodel
+ - ShapeSmith  : https://github.com/bjnortier/shapesmith
 
 
 
+## MIT License
 
-### MIT License
 Copyright © 2012 E. Rossignon
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
