@@ -321,28 +321,28 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
         double H  = args[2]->ToNumber()->Value();
 
         if ( R1 < epsilon || R2 < epsilon || H < epsilon ) {
-            ThrowException(Exception::Error(String::New("invalid value for arguments")));
-			return scope.Close(Undefined());
+          ThrowException(Exception::Error(String::New("invalid value for arguments")));
+          return scope.Close(Undefined());
         }
         try {
-			BRepPrimAPI_MakeCone tool(R1, R2,H);
-            pThis->setShape(tool.Shape());
-			registerOneAxisFaces(pThis,tool.Cone());
+          BRepPrimAPI_MakeCone tool(R1, R2,H);
+          pThis->setShape(tool.Shape());
+          registerOneAxisFaces(pThis,tool.Cone());
         }
         CATCH_AND_RETHROW("Failed to create Cone ");
-	} else if (args.Length()==3 && args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsNumber()) {
-		
-		gp_Dir axis;
-		ReadDir(args[0],&axis);
+   } else if (args.Length()==3 && args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsNumber()) {
 
-		double angleInRadian = 0;
-		ReadDouble(args[1],angleInRadian);
+        gp_Dir axis;
+        ReadDir(args[0],&axis);
 
-		double height = 0;
-		ReadDouble(args[1],height);
+        double angleInRadian = 0;
+        ReadDouble(args[1],angleInRadian);
 
-		ThrowException(Exception::Error(String::New("Cone with [u,v,w],angle,height not implemented yet")));
-		return scope.Close(Undefined());
+        double height = 0;
+        ReadDouble(args[1],height);
+
+        ThrowException(Exception::Error(String::New("Cone with [u,v,w],angle,height not implemented yet")));
+        return scope.Close(Undefined());
 
     } else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsNumber() && args[2]->IsArray() && args[3]->IsNumber()) {
         // Point, point , R1,R2);
