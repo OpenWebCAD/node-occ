@@ -120,7 +120,7 @@
       <div id="graphical_view"  class="graphical_view"  style="top:0;left:0;width:100%;height:100%;background-color:#98fb98"></div>
   </div>
   <div class="pane ui-layout-north" style="background: #b22222">
-      <button id="button"> Test</button>
+      <button id="button">Update Geometry</button>
   </div>
   <div class="pane ui-layout-south" style="background: #f0f8ff">
       <div id='loadingDiv'> Please wait...  <img src='/images/spinner_24.gif' />  </div>
@@ -131,8 +131,7 @@
   <div class="pane ui-layout-east">
 
       <div id="myAngularApp" ng-controller='SceneCtrl'>
-          <p>Nothing here {{'yet' + '!'  }}</p>
-
+<!--        
           <p>{{ getCamera().position.x}}</p>
           <p>{{ getCamera().position.y}}</p>
           <p>{{ getCamera().position.z}}</p>
@@ -142,8 +141,8 @@
           <p>{{ getCamera().near}}</p>
           <p>{{ getCamera().far}}</p>
           <p>{{ getCamera().fov}}</p>
-
-          <p>{{ COG.x }}</p>
+-->
+          <p>Center of Gravity {{ COG.x }}</p>
           <p>{{ COG.y }}</p>
           <p>{{ COG.z }}</p>
 
@@ -152,8 +151,10 @@
   <div class="pane ui-layout-west">
 
       <div id="editor" class="editor"  >
+print(" ------------------ Creating youghurt pots -------");
+
 var height = 20;
-var thickness = 2;
+var thickness = 1;
 var radius  =10.0;
 
 var s1 = csg.makeCylinder([0,0,0],[0,0,height] , radius);
@@ -163,14 +164,23 @@ var s4 = csg.fuse(s1,s2);
 var s5 = csg.common(s4,s3);
 
 
-var r1 = csg.makeCylinder([0,0,thickness],[0,0,height] , radius-thickness);
-var r2 = csg.makeSphere([0,0,0],radius-thickness);
-var r3 = csg.makeCylinder( [0,0,-radius*0.7+thickness],[0,0,height], radius*2);
+var smallRadius = radius-thickness;
+var r1 = csg.makeCylinder([0,0,0],[0,0,height] , smallRadius);
+var r2 = csg.makeSphere([0,0,0],smallRadius);
+var r3 = csg.makeCylinder( [0,0,-radius*0.7 + thickness ],[0,0,height], radius*2);
 var r4 = csg.fuse(r1,r2);
 var r5 = csg.common(r4,r3);
 
 var solid  = csg.cut(s5,r5);
-return solid;
+
+var dist = 21;
+display(solid);
+display(solid.translate([dist,0,0]));
+display(solid.translate([-dist,0,0]));
+display(solid.translate([0,-dist,0]));
+display(solid.translate([0,dist,0]));
+
+
       </div>
 
   </div>

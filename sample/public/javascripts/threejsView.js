@@ -122,7 +122,6 @@ $(document).ready(function() {
     }
 
 
-    var plate1 = new THREE.CubeGeometry()
 
     var light = new THREE.AmbientLight( 0x222222 );
     scene.add( light );
@@ -132,7 +131,7 @@ $(document).ready(function() {
     onWindowResize();
 
 
-    $("#button").click( send_and_build_up_csg);
+    $("#button").click(send_and_build_up_csg);
 
 });
 
@@ -163,39 +162,30 @@ function render() {
     renderer.render( scene, camera );
 }
 
-function shapeCenterOfGravity(obj) {
+function boundingBox(obj) {
 
-    if (obj instanceof THREE.Mesh) {
+     if (obj instanceof THREE.Mesh) {
 
         var geometry = obj.geometry;
 
         geometry.computeBoundingBox();
 
-        var bb = geometry.boundingBox;
+        return  geometry.boundingBox;
 
-        var center = new THREE.Vector3().addVectors( bb.min, bb.max );
-        center.multiplyScalar(0.5 );
-
-        return center;
 
     }
     if (obj instanceof THREE.Object3D) {
-        // scene
-        var p = shapeCenterOfGravity(obj.children[0]);
 
-        var bb = new THREE.Box3(p,p);
-        for (var i= 1;i < obj.children.length;i++) {
-
-            p = shapeCenterOfGravity(obj.children[i]);
-
-            bb.expandByPoint(p);
+        var bb = new THREE.Box3();
+        for (var i=0;i < obj.children.length;i++) {
+            bb.union(boundingBox(obj.children[i]));
         }
-        var center = new THREE.Vector3().addVectors( bb.min, bb.max );
-        center.multiplyScalar(0.5 );
-
-        return center;
-
+        return bb;
     }
+}
+function shapeCenterOfGravity(obj) {
+
+    return boundingBox(obj).center();
 }
 var lastAjaxStart ;
 var lastAjaxDuration;
@@ -205,6 +195,8 @@ function restoreUserSession() {
     var script = decodeURIComponent(localStorage.getItem("myscript"));
     if (script) {
         editor.setValue(script);
+        editor.gotoLine(1,1,false);
+        editor.clearSelection();        
     }
 }
 
@@ -215,20 +207,53 @@ function saveUserSession() {
     }
 }
 
+function script_isValid()
+{
+    var lint_errors = [];
+    // editor.emit("jslint", lint_errors);
+
+
+    var annotations = editor.getSession().getAnnotations();
+    if (Object.keys(annotations).length == 0 ) {
+
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function installACEEditor() {
 
     editor = ace.edit("editor");
+    editor.isModified = false;
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/javascript");
+    editor.getSession().on('changeAnnotation',function () {
+        if (script_isValid()) {
+            if (editor.isModified) {
+                $("#button").show();
+            }
+        } else {
+            $("#button").hide();            
+        }
+    });
     editor.getSession().on('change', function(e) {
+        editor.isModified = true;
         clearTimeout(delay);
-        delay = setTimeout(updatePreview, 2000);
+        delay = setTimeout(function() {
+
+        }, 400);
         // e.type, etc
     });
-    setTimeout(updatePreview, 2000);
+
+
+    delay = setTimeout(updatePreview, 2000);
+    
+    updatePreview();
+
 }
 
-function installCodeMirrorEditor() {
+/*function installCodeMirrorEditor() {
     editor = CodeMirror.fromTextArea(document.getElementById("code"), {
             lineNumbers: true,
             theme: "ambiance",
@@ -244,17 +269,23 @@ function installCodeMirrorEditor() {
     }
 
     editor.on("change", function() {
-            clearTimeout(delay);
-            delay = setTimeout(updatePreview, 2000);
+          clearTimeout(delay);
+
+           delay = setTimeout(function() {
+             $("#button").show();
+           }, 2000);
     });
 
-    setTimeout(updatePreview, 2000);
+    delay = setTimeout(updatePreview, 2000);
 }
-
+*/
 function installEditor() { return installACEEditor(); }
 
 function updatePreview() {
     send_and_build_up_csg();
+    editor.isModified=false;
+    $("#button").hide();
+    clearTimeout();
 }
 
 
@@ -313,10 +344,22 @@ function install_json_mesh(json) {
     $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + " ms   - size :" + beautified.length + " bytes</p><br/>");
 
 
-    for (var i=0;i<json.length;i++){
-        var jsonFace = json[i];
-        process_single_mesh(rootNode,jsonFace);
-    }
+    var jsonFaces = json.faces;
+    jsonFaces.forEach(function(faceArray) {
+        // one object
+        faceArray.forEach(function(face){
+            // one face
+            process_single_mesh(rootNode,face);
+        });
+    });
+    // log
+    json.logs.forEach(function(line){
+        var str = "";
+        for ( var a in line ) {
+            str += line[a];
+        }
+        $("#ascii_mesh").append("<p>" + str + "</p>");
+    })
 
     // Refocus camera to the center of the new object
     COG = shapeCenterOfGravity(rootNode);

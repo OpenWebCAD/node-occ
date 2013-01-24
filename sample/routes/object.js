@@ -87,17 +87,19 @@ function getBlockedFunctionConstructor() {
     return FakeFunction;
 }
 
-function buildMesh(solid)
-{
-    return buildFacesMesh(solid);
+function buildResponse(solids,logs) {
+    
+    var response = { faces: [] , logs: [ ]};
 
-    var mesh   = solid.mesh ;
-    jsonStr = mesh.toJSON();
-    return jsonStr;
+    solids.forEach(function(solid){
+        response.faces.push(buildFacesMesh(solid));
+    })
+    response.logs = logs;
+    return response;
 }
 
-function buildFacesMesh(solid)
-{
+function buildFacesMesh(solid) {
+
     // make sure object is mesh
     var mesh = solid.mesh;
 
@@ -136,23 +138,30 @@ exports.buildCSG1 = function(req,res)
         //xx console.log( "csg" , solidBuilderScript);
 
         var env = {
-            csg: fastocc ,
-            occ: fastocc ,
+            csg: fastocc,
+            occ: fastocc,
+            logs: [],
+            solids: [],
+            print: function() { env.console.log.apply(env.console,arguments); },
             shapeFactory: shapeFactory,
 
-            'console':    { log: function() { 
-			console.log.apply(console,arguments);
-			logs.push(arguments);
-			} },
+                'console':    { 
+                    log: function() { 
+    			           console.log.apply(console,arguments);
+    			           env.logs.push(arguments);
+			            }  
+                },
             'eval':        function() { throw "eval is forbidden";        },
             'require':     function() { throw "require is forbidden";     },
             'setTimeout':  function() { throw "setTimeout is forbidden";  },
             'setInterval': function() { throw "setInterval is forbidden"; },
-            solid: null ,
+            'display':    function(obj) {
+                   env.solids.push(obj);
+            },
             error: null } ;
-        // console.log("env = ",env );
+       
 
-        var code = "function buildSolid() { " + solidBuilderScript + "\n} solid = buildSolid();"
+        var code = solidBuilderScript;
 
         var settings = {
             prefix: "foo",
@@ -170,7 +179,7 @@ exports.buildCSG1 = function(req,res)
 
                         vm.runInNewContext(code,env,filename);
 
-                        res.send(buildMesh(env.solid));
+                        res.send(buildResponse(env.solids,env.logs));
 
                     }
                     catch(err) {
