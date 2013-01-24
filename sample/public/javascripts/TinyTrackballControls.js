@@ -294,6 +294,7 @@ THREE.TinyTrackballControls = function ( object, domElement ) {
 			_keyPressed = true;
 
 		}
+		event.stopPropagation();
 
 	};
 
@@ -391,8 +392,8 @@ THREE.TinyTrackballControls = function ( object, domElement ) {
 	this.domElement.addEventListener( 'mousedown', mousedown, false );
 	this.domElement.addEventListener( 'mouseup', mouseup, false );
 
-	window.addEventListener( 'keydown', keydown, false );
-	window.addEventListener( 'keyup', keyup, false );
+	this.domElement.addEventListener( 'keydown', keydown, true );
+	this.domElement.addEventListener( 'keyup', keyup, true );
     
     document.addEventListener('scroll', this.relocate, false);
     window.addEventListener('resize', this.relocate, false);

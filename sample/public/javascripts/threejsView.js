@@ -41,6 +41,8 @@ function zoomAll()
     // camera
 }
 
+
+
 $(document).ready(function() {
     "use strict";
 
@@ -50,6 +52,7 @@ $(document).ready(function() {
 
     installSpinnerOnAjaxCall();
 
+    restoreUserSession();
 
     container = $("#graphical_view");
     if (container.size() === 0 ) {
@@ -60,7 +63,18 @@ $(document).ready(function() {
     camera.position.z = 100;
 
 
-    controls = new THREE.TrackballControls( camera ,container[0]);
+    renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0x121212, clearAlpha: 1 } );
+    renderer.setClearColorHex(0x121212, 1.0);
+    renderer.clear();
+
+
+    // make sure canvas can get focus;
+    // see http://jsfiddle.net/erossignon/bFraK/3/
+    renderer.domElement.setAttribute('tabindex','0');
+    container.append(renderer.domElement);
+
+
+    controls = new THREE.TrackballControls( camera , container[0]);
 
 
     controls.rotateSpeed = 1.0;
@@ -82,11 +96,8 @@ $(document).ready(function() {
 
     });
 
-    renderer =  new THREE.WebGLRenderer();//  { antialias: true, clearColor: 0x121212, clearAlpha: 1 } );
-    renderer.setClearColorHex(0x121212, 1.0);
-    renderer.clear();
 
-    container.append(renderer.domElement);
+
 
     lightContainer = new THREE.Object3D();
     lightContainer.matrixWorld = camera.matrix;
@@ -162,8 +173,7 @@ function shapeCenterOfGravity(obj) {
 
         var bb = geometry.boundingBox;
 
-        var center = new THREE.Vector3();
-        center.add( bb.min, bb.max );
+        var center = new THREE.Vector3().addVectors( bb.min, bb.max );
         center.multiplyScalar(0.5 );
 
         return center;
@@ -180,8 +190,7 @@ function shapeCenterOfGravity(obj) {
 
             bb.expandByPoint(p);
         }
-        var center = new THREE.Vector3();
-        center.add( bb.min, bb.max );
+        var center = new THREE.Vector3().addVectors( bb.min, bb.max );
         center.multiplyScalar(0.5 );
 
         return center;
@@ -191,6 +200,20 @@ function shapeCenterOfGravity(obj) {
 var lastAjaxStart ;
 var lastAjaxDuration;
 var delay;
+
+function restoreUserSession() {
+    var script = decodeURIComponent(localStorage.getItem("myscript"));
+    if (script) {
+        editor.setValue(script);
+    }
+}
+
+function saveUserSession() {
+    var script = encodeURIComponent(editor.getValue());
+    if (script) {
+        localStorage.setItem("myscript",script);
+    }
+}
 
 function installACEEditor() {
 
@@ -310,7 +333,12 @@ function install_json_mesh(json) {
  */
 function send_and_build_up_csg_method2() {
     "use strict";
+
+
     var encoded_script = encodeURIComponent(editor.getValue());
+
+    saveUserSession();
+
     lastAjaxStart = new Date();
 
     $.ajax({
