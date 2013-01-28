@@ -283,13 +283,9 @@ THREE.TrackballControls = function ( object, domElement ) {
 		event.preventDefault();
 		event.stopPropagation();
 
-		if ( ! _this.enabled ) return;
+		if ( _this.enabled === false ) return;
 
-
-
-
-
-		//xx window.removeEventListener( 'keydown', keydown );
+		_this.domElement.removeEventListener( 'keydown', keydown );
 
 		_prevState = _state;
 
@@ -325,20 +321,20 @@ THREE.TrackballControls = function ( object, domElement ) {
 		event.preventDefault();
 		event.stopPropagation();
 
-		if ( ! _this.enabled ) return;
+		if ( _this.enabled === false) return;
 
 		_state = _prevState;
 		
-		//xx  window.addEventListener( 'keydown', keydown, false );
+		_this.domElement.addEventListener( 'keydown', keydown, false );
 
 	}
 
 	function mousedown( event ) {
 		
 
-        _this.domElement.focus();
+		_this.domElement.focus();
 
-		if ( ! _this.enabled ) return;
+		if ( _this.enabled === false) return;
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -390,7 +386,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	function mouseup( event ) {
 
-		if ( ! _this.enabled ) return;
+		if ( _this.enabled === false ) return;
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -404,7 +400,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	function mousewheel( event ) {
 
-		if ( ! _this.enabled ) return;
+		if ( _this.enabled === false ) return;
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -505,9 +501,9 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 }
 
-    // see http://www.dbp-consulting.com/tutorials/canvas/CanvasKeyEvents.html
-    this.domElement.setAttribute('tabindex','0');
-    this.domElement.focus();
+	// see http://www.dbp-consulting.com/tutorials/canvas/CanvasKeyEvents.html
+	this.domElement.setAttribute('tabindex','0');
+	this.domElement.focus();
 
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
@@ -525,6 +521,5 @@ THREE.TrackballControls = function ( object, domElement ) {
 	this.domElement.addEventListener( 'keypressed', keypressed, false );
 
 	this.handleResize();
-
 
 };
