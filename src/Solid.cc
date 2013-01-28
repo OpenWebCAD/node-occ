@@ -38,6 +38,7 @@ void Solid::Init(Handle<Object> target)
     EXPOSE_METHOD(Solid,getShells);
     EXPOSE_METHOD(Solid,getSolids);
     EXPOSE_METHOD(Solid,getShapeName);
+    EXPOSE_METHOD(Solid,getAdjacentFaces);
 
 
     EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
@@ -393,6 +394,7 @@ int Solid::fillet(const std::vector<Edge*>& edges,const  std::vector<double>& ra
     return 1;
 
 }
+
 Handle<v8::Value> Solid::fillet(const v8::Arguments& args)
 {
     HandleScope scope;
@@ -432,7 +434,64 @@ Handle<v8::Value> Solid::chamfer(const v8::Arguments& args)
     return Handle<v8::Value>(Undefined());
 }
 
+Handle<v8::Value> Solid::getAdjacentFaces(const v8::Arguments& args)
+{
+    HandleScope scope;
+	
+	Face* pFace = 0 ;
+	if (!extractArg(args[0],pFace)) {
+		ThrowException(Exception::TypeError(String::New("invalid arguments : expecting <FACE>")));
+		return Handle<v8::Value>(Undefined());
+	}
+	assert(pFace);
 
+    // arguments : <face>  , face must belongs to solid
+    Solid* pThis = node::ObjectWrap::Unwrap<Solid>(args.This());
+	
+	
+	TopTools_IndexedDataMapOfShapeListOfShape map;
+	TopExp::MapShapesAndAncestors(pThis->shape(),TopAbs_EDGE,TopAbs_FACE,map);
+
+	TopTools_MapOfShape auxmap;
+
+    TopExp_Explorer edgeExplorer(pFace->shape(),TopAbs_EDGE);
+
+	for (; edgeExplorer.More(); edgeExplorer.Next()) {
+		TopoDS_Edge edge = TopoDS::Edge(edgeExplorer.Current());
+		
+
+		const TopTools_ListOfShape& list = map.FindFromKey(edge);
+	
+		// list of faces sh
+		TopTools_ListIteratorOfListOfShape it(list);
+
+	    for (; it.More(); it.Next()) {
+
+			if (pFace->shape() !=  it.Value()) {
+				if(!auxmap.Contains(it.Value())) {
+					auxmap.Add(it.Value());
+				}
+			}
+		}
+	}
+
+	// now build an array with the answer
+    int nbFaces = auxmap.Extent();
+
+    Local<Array> arr = Array::New(nbFaces);
+	
+	TopTools_MapIteratorOfMapOfShape it(auxmap);
+	int i=0;
+    for (; it.More(); it.Next()) {
+		const TopoDS_Shape& shape= it.Key();
+		Local<Object> obj= buildWrapper(shape); // 1 based !!!
+		arr->Set(i,obj);
+		i++;
+    }
+    return scope.Close(arr);
+
+  // return Handle<v8::Value>(Undefined());
+}
 
 int Solid::numSolids()
 {
@@ -522,7 +581,7 @@ Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
     }
     Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
     if (pThis->m_cacheMesh.IsEmpty()) {
-        pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.2,10*3.14159/180.0,true));
+        pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.1,5*3.14159/180.0,true));
     }
     return scope.Close(pThis->m_cacheMesh);
 }
@@ -639,5 +698,6 @@ void Solid::_registerNamedShape(const char* name,const TopoDS_Shape& shape)
     Handle<Object> reversedMap = this->handle_->Get(String::NewSymbol("_reversedMap"))->ToObject();
     reversedMap->Set(shape.HashCode(std::numeric_limits<int>::max()),String::NewSymbol(name));
 }
+
 
 

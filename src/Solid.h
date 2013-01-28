@@ -52,7 +52,7 @@ public:
     static Handle<v8::Value> getSolids(const v8::Arguments& args);
     static Handle<v8::Value> getOuterShell(const v8::Arguments& args);
     static Handle<v8::Value> getShapeName(const v8::Arguments& args);
-
+	static Handle<v8::Value> getAdjacentFaces(const v8::Arguments& args);
     // Methods exposed to JavaScripts
     static void Init(Handle<Object> target);
     static Handle<v8::Value> NewInstance(const v8::Arguments& args);

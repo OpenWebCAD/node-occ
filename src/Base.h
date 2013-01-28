@@ -64,6 +64,19 @@ size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elemen
     }
     return elements.size();
 }
+
+template<class ClassType> 
+bool extractArg(const Local<Value>& value,ClassType*& pObj)
+{
+	assert(pObj==0);
+	if (ClassType::constructor->HasInstance(value->ToObject())) {
+        pObj = node::ObjectWrap::Unwrap<ClassType>(value->ToObject());
+		return true;
+    }
+	return false;
+}
+
+
 template<class ClassType>
 size_t extractArray(const Handle<Value>& value,std::vector<ClassType*>& elements)
 {

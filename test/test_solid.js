@@ -520,4 +520,73 @@ describe("testing solid construction",function() {
 
         });
     });
+    describe("test adjacent faces",function(){
+        var solid ;
+        before(function(){
+            solid = occ.makeBox([0,0,0],[100,100,100]);
+        }); 
+        it("should have back/front/left/right faces adjacent to face 'top'",function(){
+           var adjFaces = solid.getAdjacentFaces(solid.faces.top);
+
+           adjFaces.length.should.equal(4);
+
+           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+
+           names.join("/").should.equal("back/front/left/right");
+
+        });
+        it("should have back/front/left/right faces adjacent to face 'bottom'",function(){
+           
+           var adjFaces = solid.getAdjacentFaces(solid.faces.bottom);
+
+           adjFaces.length.should.equal(4);
+
+           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+
+           names.join("/").should.equal("back/front/left/right");
+        });
+
+        it("should have bottom/left/right/top faces adjacent to face 'back'",function(){
+           
+           var adjFaces = solid.getAdjacentFaces(solid.faces.back);
+
+           adjFaces.length.should.equal(4);
+
+           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+
+           names.join("/").should.equal("bottom/left/right/top");
+        });
+
+        it("should have bottom/left/right/top faces adjacent to face 'front'",function(){
+           
+           var adjFaces = solid.getAdjacentFaces(solid.faces.front);
+
+           adjFaces.length.should.equal(4);
+
+           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+
+           names.join("/").should.equal("bottom/left/right/top");
+        });
+        it("should have back/bottom/front/top faces adjacent to face 'left'",function(){
+           
+           var adjFaces = solid.getAdjacentFaces(solid.faces.left);
+
+           adjFaces.length.should.equal(4);
+
+           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+
+           names.join("/").should.equal("back/bottom/front/top");
+        });
+
+        it("should have back/bottom/front/top faces adjacent to face 'right'",function(){
+           
+           var adjFaces = solid.getAdjacentFaces(solid.faces.right);
+
+           adjFaces.length.should.equal(4);
+
+           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+
+           names.join("/").should.equal("back/bottom/front/top");
+        });
+    });
 });
