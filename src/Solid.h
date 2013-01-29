@@ -18,6 +18,9 @@ public:
 
     Persistent<Object> m_cacheMesh;
 
+    const  TopoDS_Solid& solid() const {
+        return TopoDS::Solid(shape());
+    }
 
     int numSolids();
     int numFaces();
@@ -65,5 +68,7 @@ public:
 
     void _registerNamedShape(const char* name,const TopoDS_Shape& shape);
     std::string _getShapeName(const TopoDS_Shape& shape);
+
+
 };
 

@@ -40,12 +40,17 @@ void Initialize(Handle<Object> target)
     Wire::Init(target);
     BooleanOperation::Init(target);
 
-    target->Set(String::NewSymbol("makeBox"),     FunctionTemplate::New(ShapeFactory::makeBox)->GetFunction());
-    target->Set(String::NewSymbol("makeCylinder"),FunctionTemplate::New(ShapeFactory::makeCylinder)->GetFunction());
-    target->Set(String::NewSymbol("makeCone"),    FunctionTemplate::New(ShapeFactory::makeCone)->GetFunction());
-    target->Set(String::NewSymbol("makeSphere"),  FunctionTemplate::New(ShapeFactory::makeSphere)->GetFunction());
-    target->Set(String::NewSymbol("makeTorus"),   FunctionTemplate::New(ShapeFactory::makeTorus)->GetFunction());
-    target->Set(String::NewSymbol("makePrism"),   FunctionTemplate::New(ShapeFactory::makePrism)->GetFunction());
+    target->Set(String::NewSymbol("makeBox"),          FunctionTemplate::New(ShapeFactory::makeBox)->GetFunction());
+    target->Set(String::NewSymbol("makeCylinder"),     FunctionTemplate::New(ShapeFactory::makeCylinder)->GetFunction());
+    target->Set(String::NewSymbol("makeCone"),         FunctionTemplate::New(ShapeFactory::makeCone)->GetFunction());
+    target->Set(String::NewSymbol("makeSphere"),       FunctionTemplate::New(ShapeFactory::makeSphere)->GetFunction());
+    target->Set(String::NewSymbol("makeTorus"),        FunctionTemplate::New(ShapeFactory::makeTorus)->GetFunction());
+    target->Set(String::NewSymbol("makePrism"),        FunctionTemplate::New(ShapeFactory::makePrism)->GetFunction());
+    target->Set(String::NewSymbol("makeThickSolid"),   FunctionTemplate::New(ShapeFactory::makeThickSolid)->GetFunction());
+    target->Set(String::NewSymbol("makeDraftAngle"),   FunctionTemplate::New(ShapeFactory::makeDraftAngle)->GetFunction());
+
+	
+
 
     target->Set(String::NewSymbol("fuse"),        FunctionTemplate::New(ShapeFactory::fuse)->GetFunction());
     target->Set(String::NewSymbol("cut"),         FunctionTemplate::New(ShapeFactory::cut)->GetFunction());

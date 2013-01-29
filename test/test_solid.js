@@ -589,4 +589,33 @@ describe("testing solid construction",function() {
            names.join("/").should.equal("back/bottom/front/top");
         });
     });
+
+    describe("makeThickSolid (external ) on box",function(){
+        var initialBox;
+        var thickSolid;
+        before(function(){
+            initialBox = occ.makeBox(100,200,300);
+            thickSolid = occ.makeThickSolid(initialBox,initialBox.faces.top,10);
+        });
+        it("should have 23 (6 + 4 vertical faces + 4 vertical fillets + 1 horizontal face + 4 horizontal fillets + 4 rounded corners) faces",function(){
+            console.log( Object.keys(thickSolid.getFaces().map(function(el){ return thickSolid.getShapeName(el);})));
+            console.log( Object.keys(thickSolid.faces));
+            initialBox.numFaces.should.equal(6);
+            thickSolid.numFaces.should.equal(23);
+        })
+    });
+    describe("makeThickSolid (internal) on box",function(){
+        var initialBox;
+        var thickSolid;
+        before(function(){
+            initialBox = occ.makeBox(100,200,300);
+            thickSolid = occ.makeThickSolid(initialBox,initialBox.faces.top,-10);
+        });
+        it("should have 1 (1 top face modified + 5 old + 5 new) faces",function(){
+            console.log( Object.keys(thickSolid.getFaces().map(function(el){ return thickSolid.getShapeName(el);})));
+            console.log( Object.keys(thickSolid.faces));
+            initialBox.numFaces.should.equal(6);
+            thickSolid.numFaces.should.equal(11);
+        })
+    });
 });

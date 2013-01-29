@@ -65,3 +65,32 @@ describe("testing fast builder with array of shape",function(){
     });
 });
 
+describe("testing fast builder with makeThickSolid" , function() {
+    var s1;
+    var s2;
+    before(function(){
+        s1 = fastBuilder.makeBox([10,20,30],[110,120,130]);
+        s1 = fastBuilder.makeThickSolid(s1,s1.faces.top,6);
+
+        var occ = require("../lib/occ");
+        s2  = occ.makeBox([10,20,30],[110,120,130]);
+        s2  = occ.makeThickSolid(s2,s2.faces.top,6);
+
+    });
+    it(" should construct the same object as if using 'occ' ",function(){
+        s1.numFaces.should.equal(s2.numFaces);
+    })
+});
+
+describe("testing fast builder with makeBottle" , function() {
+    var s1;
+    var s2;
+    before(function(){
+        s1 = fastBuilder.makeBottle();
+
+
+    });
+    it(" should ...",function(){
+        s1.numFaces.should.be.greaterThan(16);
+    })    
+});

@@ -499,8 +499,7 @@ static void registerShapes(BRepAlgoAPI_BooleanOperation* pTool,Solid* result,Sol
                     registeredShape(result,pSolid,"g",operand,counter++,current,newShape);
                     actionCounter++;
                 }
-                //xx Builder.Generated (root,newShape );
-                //xx registerGeneratedShape(pSolid,shape,current,newShape);
+
             }
         }
 
@@ -518,8 +517,7 @@ static void registerShapes(BRepAlgoAPI_BooleanOperation* pTool,Solid* result,Sol
                     registeredShape(result,pSolid,"m",operand,counter++,current,newShape);
                     actionCounter++;
                 }
-                //xx Builder.Generated (root,newShape );
-                //xx registerGeneratedShape(pSolid,shape,current,newShape);
+
             }
         }
         if (actionCounter == 0 ) {
@@ -529,6 +527,70 @@ static void registerShapes(BRepAlgoAPI_BooleanOperation* pTool,Solid* result,Sol
         }
     }
 }
+
+
+static void registerShapes(BRepBuilderAPI_MakeShape* pTool,Solid* result,Solid* pSolid)
+{
+    const TopoDS_Shape& shape = pSolid->shape();
+
+    TopTools_MapOfShape alreadyProcessedShapes;
+
+
+    TopExp_Explorer shapeExplorer(shape,TopAbs_FACE);
+    for (; shapeExplorer.More(); shapeExplorer.Next ()) {
+        const TopoDS_Shape& current = shapeExplorer.Current();
+        if (alreadyProcessedShapes.Contains(current))
+            continue;
+        alreadyProcessedShapes.Add(current);
+
+        if (pTool->IsDeleted(current)) {
+            continue; // skipping deleted shapes
+        }
+	
+		int actionCounter = 0;
+		{
+			const TopTools_ListOfShape& generatedShapes = pTool->Generated(current);
+            int counter =0;
+            TopTools_ListIteratorOfListOfShape it(generatedShapes);
+            for (; it.More (); it.Next ()) {
+                TopoDS_Shape& newShape = it.Value();
+                if (current.IsSame(newShape)) {
+                    registeredShape(result,pSolid,"S",0,counter++,current,newShape);
+                    actionCounter++;
+                } else {
+                    registeredShape(result,pSolid,"g",0,counter++,current,newShape);
+                    actionCounter++;
+                }
+
+            }
+		}
+		{
+			const TopTools_ListOfShape& modifiedShapes = pTool->Modified(current);
+            TopTools_ListIteratorOfListOfShape it(modifiedShapes);
+            int counter =0;
+			for (; it.More (); it.Next ()) {
+                TopoDS_Shape& newShape = it.Value();
+                if (current.IsSame(newShape)) {
+                    // same !
+                    registeredShape(result,pSolid,"s",0,counter++,current,newShape);
+                    actionCounter++;
+                } else {
+                    registeredShape(result,pSolid,"m",0,counter++,current,newShape);
+                    actionCounter++;
+                }
+
+            }
+		}
+        if (actionCounter == 0 ) {
+            // the entity is not deleted, not modified , not generated ...
+            // it must be unmodified in resulting shape
+            registeredShape(result,pSolid,"i",0,-1,current,const_cast<TopoDS_Shape&>(current));
+        }
+	}
+}
+
+
+
 static Handle<v8::Value>  ShapeFactory_createBoolean(Solid* pSolid1, Solid* pSolid2, BOP_Operation op)
 {
     HandleScope scope;
@@ -656,8 +718,9 @@ Handle<v8::Value> ShapeFactory::compound(const v8::Arguments& args)
     }
     return scope.Close(add(shapes));
 }
-Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BOP_Operation op)
-{
+
+Handle<v8::Value> ShapeFactory::_boolean(const v8::Arguments& args,BOP_Operation op) {
+
     HandleScope scope;
 
     if (!Solid::constructor->HasInstance(args[0]) || !Solid::constructor->HasInstance(args[1])) {
@@ -694,6 +757,137 @@ Handle<v8::Value> ShapeFactory::common(const v8::Arguments& args)
 {
     return _boolean(args,BOP_COMMON);
 }
+
+
+
+
+bool extractListOfFaces(Local<v8::Value> value,TopTools_ListOfShape& faces)
+{
+	if (value->IsArray()) {
+		Handle<Array> arr = Handle<Array>::Cast(value);
+		int length = arr->Length();
+		for (int i=0;i<length;i++) {
+			Face* pFace =0;
+			if (extractArg(arr->Get(i),pFace)) {
+				faces.Append(pFace->face());
+			}
+		}
+	} else {
+		// could be a single face 
+		Face* pFace =0;
+		if (!extractArg(value,pFace)) {
+		   return false;
+		}
+		faces.Append(pFace->face());
+	}
+
+
+	return faces.Extent() >0;
+}
+
+
+
+
+Handle<v8::Value> ShapeFactory::makeThickSolid(const v8::Arguments& args)
+{
+	// variation 1 : <SOLID>,<FACE>,thickness
+	// variation 2 : <SOLID>,[ <FACE> ... ],thickness
+	HandleScope scope;
+	Solid* pSolid = 0;
+	if(!extractArg(args[0],pSolid)) {
+        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+        return scope.Close(Undefined());
+	}
+
+	
+	TopTools_ListOfShape faces;
+	if (!extractListOfFaces(args[1],faces)) {
+        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeThickSolid")));
+        return scope.Close(Undefined());
+	}
+
+	double offset = 0;
+	ReadDouble(args[2],offset);
+
+
+ 	BRepOffset_Mode mode           = BRepOffset_Skin;
+	Standard_Boolean bIntersection = Standard_False; 
+	Standard_Boolean bSelfInter    = Standard_False;
+	GeomAbs_JoinType joinType      = GeomAbs_Arc;
+	double tol = 0.01;
+	BRepOffsetAPI_MakeThickSolid tool(pSolid->solid(),faces,offset,tol,mode,bIntersection,bSelfInter,joinType);
+
+	TopoDS_Shape shape = tool.Shape();
+
+	Handle<Value> result(Solid::NewInstance(shape));
+
+	Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+
+
+	registerShapes(&tool,pResult,pSolid);
+
+    return scope.Close(result); 
+}
+
+
+bool ReadPlane(Local<v8::Value> value,gp_Pln& plane)
+{
+	// could be a planar face
+	Face* pFace =0;
+	if (!extractArg(value,pFace)) {
+	   return false;
+	}
+	 
+	Handle_Geom_Surface surf = BRep_Tool::Surface(pFace->face());
+	GeomLib_IsPlanarSurface tool(surf);
+	if (!tool.IsPlanar()) {
+		return false;
+	}
+	plane = tool.Plan();
+	
+	return true;
+}
+
+Handle<v8::Value> ShapeFactory::makeDraftAngle(const v8::Arguments& args)
+{
+    
+	// <SOLID>,<FACE>|[<FACE>...],<ANGLE>,<DIR>
+	HandleScope scope;
+	Solid* pSolid = 0;
+	if(!extractArg(args[0],pSolid)) {
+        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+        return scope.Close(Undefined());
+	}
+	
+	TopTools_ListOfShape faces;
+	if(!extractListOfFaces(args[1],faces)) {
+        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+        return scope.Close(Undefined());
+	}
+
+	double angle = 10.0;
+	ReadDouble(args[2],angle);
+
+    gp_Dir direction;
+    ReadDir(args[3],&direction);
+
+	gp_Pln neutralPlane;
+	if (!ReadPlane(args[4],neutralPlane)) {
+		// 
+        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+        return scope.Close(Undefined());
+	}
+
+
+	BRepOffsetAPI_DraftAngle tool(pSolid->shape());
+	
+	Standard_Boolean flag = Standard_False;
+	tool.Add(pFace->face(),direction,angle,neutralPlane,flag);
+
+
+    return scope.Close(Undefined()); 
+}
+
 
 
 

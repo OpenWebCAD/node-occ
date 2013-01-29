@@ -43,6 +43,10 @@
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
+#include <BRepOffsetAPI_MakeDraft.hxx>
+#include <BRepOffsetAPI_DraftAngle.hxx>
+#include <BRepOffsetAPI_MakeThickSolid.hxx>
+
 
 #include <BRepClass3d_SolidExplorer.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>

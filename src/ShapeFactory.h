@@ -29,6 +29,9 @@ public:
     static Handle<v8::Value> makeCone(const Arguments& arg);
     static Handle<v8::Value> makeSphere(const Arguments& arg);
 	static Handle<v8::Value> makeTorus(const Arguments& args);
+	//
+	static Handle<v8::Value> makeThickSolid(const Arguments& args);
+	static Handle<v8::Value> makeDraftAngle(const v8::Arguments& args);
 private:
     static Handle<v8::Value> _boolean(const v8::Arguments& args,BOP_Operation op);
     static Handle<v8::Value> add(const std::vector<Base*>& shapes);
