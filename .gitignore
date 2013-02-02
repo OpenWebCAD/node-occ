@@ -23,3 +23,4 @@ build
 /toto.STEP
 /backup
 /debugHelper
+/sample/public/javascripts/*.bak
