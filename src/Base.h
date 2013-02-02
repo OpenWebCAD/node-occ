@@ -69,6 +69,9 @@ template<class ClassType>
 bool extractArg(const Local<Value>& value,ClassType*& pObj)
 {
 	assert(pObj==0);
+	if ( value.IsEmpty()) return false;
+	if ( !value->IsObject()) return false;
+	
 	if (ClassType::constructor->HasInstance(value->ToObject())) {
         pObj = node::ObjectWrap::Unwrap<ClassType>(value->ToObject());
 		return true;
@@ -78,20 +81,29 @@ bool extractArg(const Local<Value>& value,ClassType*& pObj)
 
 
 template<class ClassType>
-size_t extractArray(const Handle<Value>& value,std::vector<ClassType*>& elements)
+bool _extractArray(const Handle<Value>& value,std::vector<ClassType*>& elements)
 {
     if (value->IsArray())  {
         Handle<Array> arr = Handle<Array>::Cast(value);
         int length = arr->Length();
         elements.reserve(elements.size()+length);
         for (int i=0; i<length; i++) {
+			if (!arr->Get(i)->IsObject()) {
+				return false; // element is not an object
+			}
             Handle<Object> obj = arr->Get(i)->ToObject();
             if (ClassType::constructor->HasInstance(obj)) {
                 elements.push_back(node::ObjectWrap::Unwrap<ClassType>(obj));
             }
         }
-    }
-    return elements.size();
+    } else if (value->IsObject())  {
+		// a single element
+		Handle<Object> obj = value->ToObject();
+        if (ClassType::constructor->HasInstance(obj)) {
+            elements.push_back(node::ObjectWrap::Unwrap<ClassType>(obj));
+        }
+	}
+    return elements.size() >=1;
 }
 
 

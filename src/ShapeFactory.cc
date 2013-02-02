@@ -1,12 +1,25 @@
 #include "ShapeFactory.h"
 
 #include "Solid.h"
+#include "Edge.h"
 #include "Face.h"
 #include "Util.h"
 
 
 #include <memory>
 
+char m(Primitives_Direction p)
+{
+	switch(p) {
+		case Primitives_XMin: return 'x';
+		case Primitives_YMin: return 'y';
+		case Primitives_ZMin: return 'z';
+		case Primitives_XMax: return 'X';
+		case Primitives_YMax: return 'Y';
+		case Primitives_ZMax: return 'Z';
+	}
+	return 0;
+}
 static void registerMakeBoxFaces(Solid* pThis,BRepPrimAPI_MakeBox& tool)
 {
     pThis->_registerNamedShape("top",   tool.TopFace());
@@ -15,6 +28,35 @@ static void registerMakeBoxFaces(Solid* pThis,BRepPrimAPI_MakeBox& tool)
     pThis->_registerNamedShape("left",  tool.LeftFace());
     pThis->_registerNamedShape("front", tool.FrontFace());
     pThis->_registerNamedShape("back",  tool.BackFace());
+
+	BRepPrim_GWedge& wedge = tool.Wedge(); 
+
+	for (int _p1 =Primitives_XMin; _p1 <=Primitives_YMax;_p1++) {
+		Primitives_Direction p1=(Primitives_Direction)_p1;
+		for (int _p2 = ((_p1>>1)+1)*2; _p2 <=Primitives_ZMax;_p2++) {
+			Primitives_Direction p2=(Primitives_Direction)_p2;
+			if (wedge.HasEdge(p1,p2)) {
+				char name[4];
+				name[0]='E';
+				name[1]=m(p1);
+				name[2]=m(p2);
+				name[3]=0;
+				pThis->_registerNamedShape(name,wedge.Edge(p1,p2));
+			}  
+			for (int _p3 = ((_p2>>1)+1)*2; _p3 <=Primitives_ZMax;_p3++) {
+				Primitives_Direction p3=(Primitives_Direction)_p3;
+				if(wedge.HasVertex(p1,p2,p3)) {
+					char name[4];
+					name[0]='V';
+					name[1]=m(p1);
+					name[2]=m(p2);
+					name[3]=m(p3);
+					name[4]=0;
+					pThis->_registerNamedShape(name,wedge.Vertex(p1,p2,p3));
+				}
+			}
+		}
+	}
 }
 
 
@@ -454,139 +496,329 @@ Handle<Value> ShapeFactory::makeTorus(const Arguments& args)
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 
 
-static void registeredShape(Solid* result,Solid* pSolid,const char* op, int operand,int counter,const TopoDS_Shape& originalShape,TopoDS_Shape& modifiedShape)
+
+
+
+class IShapeClassifierTool
 {
-    std::string originalName = pSolid->_getShapeName(originalShape);
-    std::stringstream s ;
-    s << op << operand << ":"  << originalName;
+public:
+	virtual const TopTools_ListOfShape& getGenerated(const TopoDS_Shape& shape) = 0;
+	virtual const TopTools_ListOfShape& getModified(const TopoDS_Shape& shape)  = 0;
+	virtual bool getDeleted(const TopoDS_Shape& shape)  = 0;
+};
+class IShapeNameAccessor
+{
+public:
+	virtual const TopoDS_Shape& shape() const = 0;
+	virtual std::string getShapeName(const TopoDS_Shape& oldshape) =0; 
+	virtual int operand() const =0;
+};
+class IShapeNameSetter
+{
+public:
+	virtual void setShapeName(const TopoDS_Shape& newshape,const char* name)=0;
+};
+	
+class ShapeClassifier 
+{
+public:
+	ShapeClassifier(
+		IShapeClassifierTool* tool,
+		IShapeNameAccessor* nameAccessor1,
+		IShapeNameAccessor* nameAccessor2, // optional : could be null
+		IShapeNameSetter* nameSetter,
+		const TopoDS_Shape& newShape);
+	void classify();
+
+private:
+	const TopoDS_Shape& m_newShape;
+	IShapeClassifierTool* m_tool;
+	IShapeNameAccessor*   m_nameAccessor1; //to get the name of a sub-shape of the old shape
+	IShapeNameAccessor*   m_nameAccessor2; //to get the name of a sub-shape of the old shape
+	IShapeNameSetter*     m_nameSetter;   //to set the name of a sub-shape on the new shape
+	
+
+    // sub-shape of new shape for which we have already computed a name
+	TopTools_MapOfShape   m_processedSubShapes; 
+
+	enum  ORIGIN { GENERATED, MODIFIED, IDENTICAL } ;
+	
+	void _classify(IShapeNameAccessor* originalBody,TopAbs_ShapeEnum shapeType);
+	void _classifyRemainingSubShape(TopAbs_ShapeEnum shapeType);
+	
+	void registerShape(ORIGIN org,IShapeNameAccessor* originalBody,const TopoDS_Shape& originalShape,const TopoDS_Shape& newShape,int counter); 
+
+	ShapeClassifier(const ShapeClassifier&);
+	void operator=(const ShapeClassifier&);
+};
+
+ShapeClassifier::ShapeClassifier(
+	IShapeClassifierTool* tool,
+	IShapeNameAccessor* nameAccessor1,
+	IShapeNameAccessor* nameAccessor2,
+	IShapeNameSetter* nameSetter,
+	const TopoDS_Shape& newShape
+)
+	: m_newShape(newShape)
+	, m_tool(tool)
+	, m_nameAccessor1(nameAccessor1)
+	, m_nameAccessor2(nameAccessor2)
+	, m_nameSetter(nameSetter)
+{
+
+}
+
+
+void ShapeClassifier::_classify(IShapeNameAccessor* obj,TopAbs_ShapeEnum shapeType)
+{
+
+    TopTools_IndexedMapOfShape map;
+	TopExp::MapShapes(obj->shape(), shapeType, map);
+
+    for (int i=0;i<map.Extent();i++) {        
+		const TopoDS_Shape& current = map.FindKey(i+1);
+
+		int counterG = 0;
+		int counterM = 0;
+		const TopTools_ListOfShape& generatedShapes = m_tool->getGenerated(current);
+		{
+			TopTools_ListIteratorOfListOfShape it(generatedShapes);
+			for (; it.More (); it.Next ()) {
+				TopoDS_Shape& newShape = it.Value();
+				if (this->m_processedSubShapes.Contains(newShape)) {
+					continue; // already processed
+				}
+				registerShape(GENERATED,obj,current,newShape,counterG++);
+			}
+		}
+		const TopTools_ListOfShape& modifiedShapes = m_tool->getModified(current);
+		{
+			TopTools_ListIteratorOfListOfShape it(modifiedShapes);
+			for (; it.More (); it.Next ()) {
+				TopoDS_Shape& newShape = it.Value();
+				if (this->m_processedSubShapes.Contains(newShape)) {
+					continue; // already processed
+				}
+				registerShape(MODIFIED,obj,current,newShape,counterM++);
+			}
+		}
+		if ( (counterG + counterM == 0)  && !m_tool->getDeleted(current)) {
+			registerShape(IDENTICAL,obj,current,current,-1);
+		}
+	}
+	
+}
+
+void ShapeClassifier::_classifyRemainingSubShape(TopAbs_ShapeEnum shapeType)
+{
+	TopTools_IndexedMapOfShape oldShapeMap1;
+	TopExp::MapShapes(m_nameAccessor1->shape(),shapeType,oldShapeMap1);
+	TopTools_IndexedMapOfShape oldShapeMap2;
+	if (m_nameAccessor2) {
+		TopExp::MapShapes(m_nameAccessor2->shape(),shapeType,oldShapeMap2);
+	}
+
+	TopTools_IndexedMapOfShape map;
+	TopExp::MapShapes(m_newShape,shapeType, map);
+    for (int i=0;i<map.Extent();i++) {        
+		const TopoDS_Shape& current = map.FindKey(i+1);
+
+		if (this->m_processedSubShapes.Contains(current)) {
+			continue; // already processed
+		}
+		if ( oldShapeMap1.Contains(current) ) {
+			// reuse name of old shape
+			registerShape(IDENTICAL,m_nameAccessor1,current,current,-1);
+		} else if ( oldShapeMap2.Contains(current) ) {
+			// reuse name of old shape
+			registerShape(IDENTICAL,m_nameAccessor2,current,current,-1);
+		} else {
+			// provide a default name based on hashCode
+		    std::stringstream s ;
+			s << shapeType << "tmp" << current.HashCode(std::numeric_limits<int>::max());
+			s << std::ends;
+			m_nameSetter->setShapeName(current,s.str().c_str());
+		}
+	}
+}
+void ShapeClassifier::classify()
+{
+	_classify(m_nameAccessor1,TopAbs_FACE);
+	_classify(m_nameAccessor1,TopAbs_EDGE);
+	_classify(m_nameAccessor1,TopAbs_VERTEX);
+	if (m_nameAccessor2) {
+		_classify(m_nameAccessor2,TopAbs_FACE);
+		_classify(m_nameAccessor2,TopAbs_EDGE);
+		_classify(m_nameAccessor2,TopAbs_VERTEX);
+	}
+
+
+
+	// 
+	// now check shape of the new solid that but that have'nt been processed yet
+	//
+	//   if the shape can be found in  old solid we can reuse the name of the
+	//   old sub-shape.
+	//   otherwise we give them a temporary name for completness
+	//
+	_classifyRemainingSubShape(TopAbs_FACE);
+	_classifyRemainingSubShape(TopAbs_EDGE);
+	_classifyRemainingSubShape(TopAbs_VERTEX);
+
+}
+
+void ShapeClassifier::registerShape(ORIGIN org,IShapeNameAccessor* nameAccessor,const TopoDS_Shape& originalShape,const TopoDS_Shape& newShape,int counter)
+{
+
+	std::string original_name = nameAccessor->getShapeName(originalShape);
+
+	std::stringstream s ;
+	
+	std::string op;
+	switch(org){
+		case GENERATED:
+			op ="g";
+			break;
+		case MODIFIED:
+			op ="m";
+			break;
+		case IDENTICAL:
+			break;
+	}
+
+    s << op ; 
+	bool wantSep = false;
+	if (nameAccessor->operand()>=0) {
+		wantSep = true;
+		s << nameAccessor->operand() ;
+	}
+	if (wantSep) {
+		s << ":" ;
+	}
+	s << original_name;
     if (counter >=0) {
         s << ":" << counter ;
     }
     s << std::ends;
-    result->_registerNamedShape(s.str().c_str(),modifiedShape);
+
+	std::string newName = s.str();
+
+	m_processedSubShapes.Add(newShape);
+	m_nameSetter->setShapeName(newShape,newName.c_str());
+
 }
 
-
-static void registerShapes(BRepAlgoAPI_BooleanOperation* pTool,Solid* result,Solid* pSolid,int operand)
+class BRepAlgoAPI_BooleanOperation_Adaptor: public IShapeClassifierTool
 {
-    const TopoDS_Shape& shape = pSolid->shape();
+public:
+	BRepAlgoAPI_BooleanOperation_Adaptor(BRepAlgoAPI_BooleanOperation* pTool)
+		:m_pTool(pTool)
+	{
+	};
+	virtual const TopTools_ListOfShape& getGenerated(const TopoDS_Shape& current)
+	{
+		return m_pTool->Generated(current);
+	};
+	virtual const TopTools_ListOfShape& getModified(const TopoDS_Shape& current) 
+	{
+		return m_pTool->Modified2(current);
+	};
+	virtual bool getDeleted(const TopoDS_Shape& shape) 
+	{
+		return m_pTool->IsDeleted(shape) ? true: false;
+	};
 
-    TopTools_MapOfShape alreadyProcessedShapes;
-
-
-    TopExp_Explorer shapeExplorer(shape,TopAbs_FACE);
-    for (; shapeExplorer.More(); shapeExplorer.Next ()) {
-        const TopoDS_Shape& current = shapeExplorer.Current();
-        if (alreadyProcessedShapes.Contains(current))
-            continue;
-        alreadyProcessedShapes.Add(current);
-
-        if (pTool->IsDeleted(current)) {
-            continue; // skipping deleted shapes
-        }
-
-        int actionCounter = 0;
-        {
-            const TopTools_ListOfShape& generatedShapes = pTool->Generated(current);
-            int counter =0;
-            TopTools_ListIteratorOfListOfShape it(generatedShapes);
-            for (; it.More (); it.Next ()) {
-                TopoDS_Shape& newShape = it.Value();
-                if (current.IsSame(newShape)) {
-                    registeredShape(result,pSolid,"S",operand,counter++,current,newShape);
-                    actionCounter++;
-                } else {
-                    registeredShape(result,pSolid,"g",operand,counter++,current,newShape);
-                    actionCounter++;
-                }
-
-            }
-        }
-
-        {
-            int counter =0;
-            const TopTools_ListOfShape& modifiedShapes = pTool->Modified2(current);
-            TopTools_ListIteratorOfListOfShape it(modifiedShapes);
-            for (; it.More (); it.Next ()) {
-                TopoDS_Shape& newShape = it.Value();
-                if (current.IsSame(newShape)) {
-                    // same !
-                    registeredShape(result,pSolid,"s",operand,counter++,current,newShape);
-                    actionCounter++;
-                } else {
-                    registeredShape(result,pSolid,"m",operand,counter++,current,newShape);
-                    actionCounter++;
-                }
-
-            }
-        }
-        if (actionCounter == 0 ) {
-            // the entity is not deleted, not modified , not generated ...
-            // it must be unmodified in resulting shape
-            registeredShape(result,pSolid,"i",operand,-1,current,const_cast<TopoDS_Shape&>(current));
-        }
-    }
-}
-
-
-static void registerShapes(BRepBuilderAPI_MakeShape* pTool,Solid* result,Solid* pSolid)
+	//
+	BRepAlgoAPI_BooleanOperation* m_pTool;
+};
+class BRepBuilderAPI_MakeShape_Adapator: public IShapeClassifierTool
 {
-    const TopoDS_Shape& shape = pSolid->shape();
+public:
+	BRepBuilderAPI_MakeShape_Adapator(BRepBuilderAPI_MakeShape* pTool)
+		:m_pTool(pTool)
+	{
+	};
+	virtual const TopTools_ListOfShape& getGenerated(const TopoDS_Shape& current)
+	{
+		return m_pTool->Generated(current);
+	};
+	virtual const TopTools_ListOfShape& getModified(const TopoDS_Shape& current) 
+	{
+		return m_pTool->Modified(current);
+	};
+	virtual bool getDeleted(const TopoDS_Shape& shape) 
+	{
+		return m_pTool->IsDeleted(shape) ? true: false;
+	};
 
-    TopTools_MapOfShape alreadyProcessedShapes;
+	//
+	BRepBuilderAPI_MakeShape* m_pTool;
+};
 
-
-    TopExp_Explorer shapeExplorer(shape,TopAbs_FACE);
-    for (; shapeExplorer.More(); shapeExplorer.Next ()) {
-        const TopoDS_Shape& current = shapeExplorer.Current();
-        if (alreadyProcessedShapes.Contains(current))
-            continue;
-        alreadyProcessedShapes.Add(current);
-
-        if (pTool->IsDeleted(current)) {
-            continue; // skipping deleted shapes
-        }
-	
-		int actionCounter = 0;
-		{
-			const TopTools_ListOfShape& generatedShapes = pTool->Generated(current);
-            int counter =0;
-            TopTools_ListIteratorOfListOfShape it(generatedShapes);
-            for (; it.More (); it.Next ()) {
-                TopoDS_Shape& newShape = it.Value();
-                if (current.IsSame(newShape)) {
-                    registeredShape(result,pSolid,"S",0,counter++,current,newShape);
-                    actionCounter++;
-                } else {
-                    registeredShape(result,pSolid,"g",0,counter++,current,newShape);
-                    actionCounter++;
-                }
-
-            }
-		}
-		{
-			const TopTools_ListOfShape& modifiedShapes = pTool->Modified(current);
-            TopTools_ListIteratorOfListOfShape it(modifiedShapes);
-            int counter =0;
-			for (; it.More (); it.Next ()) {
-                TopoDS_Shape& newShape = it.Value();
-                if (current.IsSame(newShape)) {
-                    // same !
-                    registeredShape(result,pSolid,"s",0,counter++,current,newShape);
-                    actionCounter++;
-                } else {
-                    registeredShape(result,pSolid,"m",0,counter++,current,newShape);
-                    actionCounter++;
-                }
-
-            }
-		}
-        if (actionCounter == 0 ) {
-            // the entity is not deleted, not modified , not generated ...
-            // it must be unmodified in resulting shape
-            registeredShape(result,pSolid,"i",0,-1,current,const_cast<TopoDS_Shape&>(current));
-        }
+class ShapeNameAccessor : public  IShapeNameAccessor
+{
+public:
+	ShapeNameAccessor(Solid* obj,int operand = -1):m_operand(operand),m_obj(obj){};
+	virtual const TopoDS_Shape& shape() const 
+	{
+		return m_obj->shape();
 	}
+	virtual std::string getShapeName(const TopoDS_Shape& shape)
+	{
+		std::string name = m_obj->_getShapeName(shape);
+		return name;
+	};
+	virtual int operand() const { return m_operand;}
+private:
+	Solid* m_obj;
+	int m_operand;
+};
+class ShapeNameSetter : public  IShapeNameSetter
+{
+public:
+	ShapeNameSetter(Solid* obj):m_obj(obj){};
+	virtual void setShapeName(const TopoDS_Shape& newshape,const char* name)
+	{
+		m_obj->_registerNamedShape(name,newshape);
+	};
+private:
+	Solid* m_obj;
+};
+
+
+
+
+static void registerShapes(BRepAlgoAPI_BooleanOperation* pTool,Solid* newSolid,Solid* oldSolid1,Solid* oldSolid2)
+{
+    const TopoDS_Shape& oldShape1 = oldSolid1->shape();
+    const TopoDS_Shape& oldShape2 = oldSolid2->shape();
+    const TopoDS_Shape& newShape = newSolid->shape();
+
+	
+	BRepAlgoAPI_BooleanOperation_Adaptor tool(pTool);
+	ShapeNameAccessor  na1(oldSolid1,1);
+	ShapeNameAccessor  na2(oldSolid2,2);
+	ShapeNameSetter    ns(newSolid);
+
+	ShapeClassifier classifier(&tool,&na1,&na2,&ns,newShape);
+
+	classifier.classify();
+
+}
+
+static void registerShapes(BRepBuilderAPI_MakeShape* pTool,Solid* newSolid,Solid* oldSolid)
+{
+    const TopoDS_Shape& oldShape = oldSolid->shape();
+    const TopoDS_Shape& newShape = newSolid->shape();
+	
+	BRepBuilderAPI_MakeShape_Adapator tool(pTool);
+	ShapeNameAccessor  na(oldSolid);
+	ShapeNameSetter    ns(newSolid);
+
+	TopoDS_Shape empty;
+	ShapeClassifier classifier(&tool,&na,NULL,&ns,newShape);
+
+	classifier.classify();
 }
 
 
@@ -628,8 +860,7 @@ static Handle<v8::Value>  ShapeFactory_createBoolean(Solid* pSolid1, Solid* pSol
 
         Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
 
-        registerShapes(pTool.get(),pResult,pSolid1,1);
-        registerShapes(pTool.get(),pResult,pSolid2,2);
+        registerShapes(pTool.get(),pResult,pSolid1,pSolid2);
 
         if (pTool->HasDeleted())  {
             // the boolean operation causes some shape from s1 or s2 to be deleted
@@ -674,7 +905,6 @@ Handle<v8::Value> ShapeFactory::add(const std::vector<Base*>& shapes)
 
 	Handle<v8::Value> pJhis(Solid::NewInstance());
     Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
-    
 	try {
 
         builder.MakeCompound(compound);
@@ -794,47 +1024,56 @@ Handle<v8::Value> ShapeFactory::makeThickSolid(const v8::Arguments& args)
 	// variation 2 : <SOLID>,[ <FACE> ... ],thickness
 	HandleScope scope;
 	Solid* pSolid = 0;
-	if(!extractArg(args[0],pSolid)) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
-        return scope.Close(Undefined());
-	}
+
+    try {
+	
+		if(!extractArg(args[0],pSolid)) {
+			ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+			return scope.Close(Undefined());
+		}
 
 	
-	TopTools_ListOfShape faces;
-	if (!extractListOfFaces(args[1],faces)) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeThickSolid")));
-        return scope.Close(Undefined());
-	}
+		TopTools_ListOfShape faces;
+		if (!extractListOfFaces(args[1],faces)) {
+			ThrowException(Exception::TypeError(String::New("Wrong arguments for makeThickSolid")));
+			return scope.Close(Undefined());
+		}
 
-	double offset = 0;
-	ReadDouble(args[2],offset);
-
-
- 	BRepOffset_Mode mode           = BRepOffset_Skin;
-	Standard_Boolean bIntersection = Standard_False; 
-	Standard_Boolean bSelfInter    = Standard_False;
-	GeomAbs_JoinType joinType      = GeomAbs_Arc;
-	double tol = 0.01;
-	BRepOffsetAPI_MakeThickSolid tool(pSolid->solid(),faces,offset,tol,mode,bIntersection,bSelfInter,joinType);
-
-	TopoDS_Shape shape = tool.Shape();
-
-	Handle<Value> result(Solid::NewInstance(shape));
-
-	Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+		double offset = 0;
+		ReadDouble(args[2],offset);
 
 
-	registerShapes(&tool,pResult,pSolid);
+ 		BRepOffset_Mode mode           = BRepOffset_Skin;
+		Standard_Boolean bIntersection = Standard_False; 
+		Standard_Boolean bSelfInter    = Standard_False;
+		GeomAbs_JoinType joinType      = GeomAbs_Arc;
+		double tol = 0.01;
+		BRepOffsetAPI_MakeThickSolid tool(pSolid->solid(),faces,offset,tol,mode,bIntersection,bSelfInter,joinType);
 
-    return scope.Close(result); 
+		TopoDS_Shape shape = tool.Shape();
+
+		Handle<Value> result(Solid::NewInstance(shape));
+
+		Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+
+
+		registerShapes(&tool,pResult,pSolid);
+	    
+		return scope.Close(result); 
+
+	}CATCH_AND_RETHROW("Failed in compound operation");
+	return scope.Close(Undefined());
 }
 
 
-bool ReadPlane(Local<v8::Value> value,gp_Pln& plane)
+bool ReadPlane(const Local<v8::Value>& value,gp_Pln& plane)
 {
+	if (value.IsEmpty()) {
+		return false;
+	}
 	// could be a planar face
 	Face* pFace =0;
-	if (!extractArg(value,pFace)) {
+	if (!extractArg<Face>(value,pFace)) {
 	   return false;
 	}
 	 
@@ -851,41 +1090,242 @@ bool ReadPlane(Local<v8::Value> value,gp_Pln& plane)
 Handle<v8::Value> ShapeFactory::makeDraftAngle(const v8::Arguments& args)
 {
     
-	// <SOLID>,<FACE>|[<FACE>...],<ANGLE>,<DIR>
+	// <SOLID>,(<FACE>|[<FACE>...]),<ANGLE>,<NeutralPlane>
 	HandleScope scope;
+	
+    try {
+		if (args.Length() < 4) {
+			ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+			return scope.Close(Undefined());
+		}
+		Solid* pSolid = 0;
+		if(!extractArg(args[0],pSolid)) {
+			ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+			return scope.Close(Undefined());
+		}
+	
+		TopTools_ListOfShape faces;
+		if(!extractListOfFaces(args[1],faces)) {
+			ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+			return scope.Close(Undefined());
+		}
+
+		double angle = 10.0;
+		ReadDouble(args[2],angle);
+
+		//  gp_Dir direction;
+		// ReadDir(args[3],&direction);
+
+		gp_Pln neutralPlane;
+		if (!ReadPlane(args[3],neutralPlane)) {
+			// 
+			ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
+			return scope.Close(Undefined());
+		}
+
+
+		BRepOffsetAPI_DraftAngle tool(pSolid->shape());
+	
+		Standard_Boolean flag = Standard_False;
+
+        int counter =0;
+        TopTools_ListIteratorOfListOfShape it(faces);
+        for (; it.More (); it.Next ()) {
+            TopoDS_Face& face = TopoDS::Face(it.Value());
+			
+			gp_Dir direction =neutralPlane.Axis().Direction();
+			tool.Add(face,direction,angle,neutralPlane,flag);
+		}
+
+		TopoDS_Shape shape = tool.Shape();
+
+		Handle<Value> result(Solid::NewInstance(shape));
+
+		Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+
+
+		registerShapes(&tool,pResult,pSolid);
+	    
+		return scope.Close(result); 
+
+	} CATCH_AND_RETHROW("Failed in compound operation");
+	return scope.Close(Undefined());
+
+	
+}
+
+
+static int chamfer(Solid* pNewSolid,Solid* pSolid,const std::vector<Edge*>& edges, const std::vector<double>& distances)
+{
+
+    size_t edges_size = edges.size();
+    size_t distances_size = distances.size();
+
+    try {
+        BRepFilletAPI_MakeChamfer CF(pSolid->shape());
+
+        TopTools_IndexedDataMapOfShapeListOfShape mapEdgeFace;
+        TopExp::MapShapesAndAncestors(pSolid->shape(), TopAbs_EDGE, TopAbs_FACE, mapEdgeFace);
+
+        for (size_t i=0; i<edges.size(); i++) {
+
+
+            const TopoDS_Edge& edge = edges[i]->edge();
+
+            // skip degenerated edge
+            if (BRep_Tool::Degenerated(edge))
+                continue;
+
+            const TopoDS_Face& face = TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
+
+            // skip edge if it is a seam
+            if (BRep_Tool::IsClosed(edge, face))
+                continue;
+
+
+            if (distances_size == 1) {
+                // single distance
+                CF.Add(distances[0], edge, face);
+
+            } else if (distances_size == edges_size) {
+                // distance given for each edge
+                CF.Add(distances[i], edge, face);
+
+            } else {
+                StdFail_NotDone::Raise("size of distances argument not correct");;
+            }
+        }
+
+        CF.Build();
+
+        if (!CF.IsDone())
+            StdFail_NotDone::Raise("Failed to chamfer solid");
+
+        const TopoDS_Shape& tmp = CF.Shape();
+
+        if (tmp.IsNull())
+            StdFail_NotDone::Raise("Chamfer operaton return Null shape");
+
+        pNewSolid->setShape(tmp);
+
+        // possible fix shape
+        if (!pNewSolid->fixShape())
+            StdFail_NotDone::Raise("Shapes not valid");
+
+    }
+    CATCH_AND_RETHROW("Failed to chamfer solid ");
+
+    return 0;
+}
+
+static int fillet(Solid* pNewSolid,Solid* pSolid,const std::vector<Edge*>& edges,const  std::vector<double>& radius)
+{
+    size_t edges_size = edges.size();
+    size_t radius_size = radius.size();
+
+    try {
+        BRepFilletAPI_MakeFillet tool(pSolid->shape());
+
+        TopTools_IndexedDataMapOfShapeListOfShape mapEdgeFace;
+        TopExp::MapShapesAndAncestors(pSolid->shape(), TopAbs_EDGE, TopAbs_FACE, mapEdgeFace);
+
+        for (size_t i=0; i<edges.size(); i++) {
+
+            const TopoDS_Edge& edge = edges[i]->edge();
+
+            // skip degenerated edge
+            if (BRep_Tool::Degenerated(edge))
+                continue;
+
+            const TopoDS_Face& face = TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
+
+            // skip edge if it is a seam
+            if (BRep_Tool::IsClosed(edge, face))
+                continue;
+
+            if (radius_size == 1) {
+                // single radius
+                tool.Add(radius[0], edge);
+            } else if (radius_size == edges_size) {
+                // radius given for each edge
+                tool.Add(radius[i], edge);
+            } else if (radius_size == 2*edges_size) {
+                // variable radius
+                tool.Add(radius[2*i+0], radius[2*i+1], edge);
+            } else {
+                StdFail_NotDone::Raise("radius argument size not valid");;
+            }
+        }
+
+        tool.Build();
+
+        if (!tool.IsDone()) {
+            StdFail_NotDone::Raise("Fillet operation has failed");
+        }
+
+        const TopoDS_Shape& tmp = tool.Shape();
+
+        if (tmp.IsNull())  {
+            StdFail_NotDone::Raise("Fillet operation resulted in Null shape");
+        }
+
+        pNewSolid->setShape(tmp);
+
+        // possible fix shape
+        //xx if (!pNewSolid->fixShape())    {
+        //xx     StdFail_NotDone::Raise("Shapes not valid");
+        //xx }
+		registerShapes(&tool,pNewSolid,pSolid);
+
+    }
+    CATCH_AND_RETHROW("Failed to fillet solid ");
+
+    return 1;
+
+}
+
+
+Handle<v8::Value> ShapeFactory::makeFillet(const v8::Arguments& args)
+{
+
+    HandleScope scope;
+
+	// <SOLID>, <EDGE> | [edges...],  radius | [ radii ]
+
 	Solid* pSolid = 0;
 	if(!extractArg(args[0],pSolid)) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
-        return scope.Close(Undefined());
+		ThrowException(Exception::TypeError(String::New("Wrong arguments for makeFillet")));
+		return scope.Close(Undefined());
 	}
+    std::vector<Edge*> edges;
+    if (!_extractArray<Edge>(args[1],edges) || edges.size() ==0){
+		ThrowException(Exception::TypeError(String::New("invalid arguments makeFillet: no edges provided:  expecting [<EDGE>...],radius")));
+		return args.This(); 
+	}
+
+    std::vector<double> radii;
+    if (args[2]->IsNumber()) {
+        double radius = args[2]->ToNumber()->Value();
+        if (radius < 1E-7 ) {
+            //TODO
+        }
+        radii.push_back(radius);
+    }
+
+	Local<Object>  pNew = pSolid->Clone();
 	
-	TopTools_ListOfShape faces;
-	if(!extractListOfFaces(args[1],faces)) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
-        return scope.Close(Undefined());
-	}
-
-	double angle = 10.0;
-	ReadDouble(args[2],angle);
-
-    gp_Dir direction;
-    ReadDir(args[3],&direction);
-
-	gp_Pln neutralPlane;
-	if (!ReadPlane(args[4],neutralPlane)) {
-		// 
-        ThrowException(Exception::TypeError(String::New("Wrong arguments for makeDraftAngle")));
-        return scope.Close(Undefined());
-	}
-
-
-	BRepOffsetAPI_DraftAngle tool(pSolid->shape());
+	Solid* pNewSolid = node::ObjectWrap::Unwrap<Solid>(pNew);
 	
-	Standard_Boolean flag = Standard_False;
-	tool.Add(pFace->face(),direction,angle,neutralPlane,flag);
+	fillet(pNewSolid,pSolid,edges,radii);
 
 
-    return scope.Close(Undefined()); 
+	return scope.Close(pNew);
+
+}
+Handle<v8::Value> ShapeFactory::makePipe(const Arguments& args)
+{
+	 HandleScope scope;
+	 return scope.Close(Undefined());
 }
 
 

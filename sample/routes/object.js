@@ -3,12 +3,12 @@ var occ  = require('../../lib/occ'),
     shapeFactory = require('../../lib/shapeFactory'),
     jailguard = require('jailguard');
 
+
 var fs = require('fs');
 var fileUtils = require ("file-utils");
 var File = fileUtils.File;
 
-var fastocc = require('../../lib/fastbuilder').fastBuilder;
-
+var fast_occ = require('../../lib/fastbuilder').occ;
 var SecurityManager = fileUtils.SecurityManager;
 
 exports.get = function(req, res) {
@@ -138,8 +138,8 @@ exports.buildCSG1 = function(req,res)
         //xx console.log( "csg" , solidBuilderScript);
 
         var env = {
-            csg: fastocc,
-            occ: fastocc,
+            csg: fast_occ,
+            occ: fast_occ,
             logs: [],
             solids: [],
             print: function() { env.console.log.apply(env.console,arguments); },

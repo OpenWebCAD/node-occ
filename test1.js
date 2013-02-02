@@ -68,7 +68,7 @@ console.log(bbox.nearPt.x);
 function test3()
 {
     solid = occ.makeBox([10,20,30],[20,40,60]);
-    solid.fillet(solid.getEdges(),2);
+    solid = occ.makeFillet(solid,solid.getEdges(),2);
 
 }
 test3();

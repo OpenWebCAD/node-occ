@@ -40,22 +40,26 @@ public:
     } BoolOpType;
 
     int boolean(Solid *tool, BoolOpType op);
-    int chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances);
-    int fillet(const std::vector<Edge*>& edges, const std::vector<double>& distances);
-    static Handle<v8::Value> fillet(const v8::Arguments& args);
-    static Handle<v8::Value> chamfer(const v8::Arguments& args);
+    //xx int chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances);
+    //xx int fillet(const std::vector<Edge*>& edges, const std::vector<double>& distances);
+   
+	// static Handle<v8::Value> fillet(const v8::Arguments& args);
+    // static Handle<v8::Value> chamfer(const v8::Arguments& args);
 
     // default mesh
     static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
     static Handle<v8::Value> createMesh(const v8::Arguments& args); // custom mesh
 
     static Handle<v8::Value> getEdges(const v8::Arguments& args);
+    static Handle<v8::Value> getVertices(const v8::Arguments& args);
     static Handle<v8::Value> getFaces(const v8::Arguments& args);
     static Handle<v8::Value> getShells(const v8::Arguments& args);
     static Handle<v8::Value> getSolids(const v8::Arguments& args);
     static Handle<v8::Value> getOuterShell(const v8::Arguments& args);
     static Handle<v8::Value> getShapeName(const v8::Arguments& args);
 	static Handle<v8::Value> getAdjacentFaces(const v8::Arguments& args);
+	static Handle<v8::Value> getCommonEdges(const v8::Arguments& args);
+	static Handle<v8::Value> getCommonVertices(const v8::Arguments& args);
     // Methods exposed to JavaScripts
     static void Init(Handle<Object> target);
     static Handle<v8::Value> NewInstance(const v8::Arguments& args);

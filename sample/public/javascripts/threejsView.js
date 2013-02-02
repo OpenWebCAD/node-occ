@@ -52,7 +52,6 @@ $(document).ready(function() {
 
     installSpinnerOnAjaxCall();
 
-    restoreUserSession();
 
     container = $("#graphical_view");
     if (container.size() === 0 ) {
@@ -249,6 +248,8 @@ function installACEEditor() {
 
     delay = setTimeout(updatePreview, 2000);
     
+    restoreUserSession();
+
     updatePreview();
 
 }
@@ -483,6 +484,7 @@ function updateAJS() {
 }
 
 
+var lastJQueryStart ;
 
 function installSpinnerOnAjaxCall()
 {

@@ -3,6 +3,8 @@ var should = require("should");
 
 var occ = require("../lib/occ");
 
+var DEG2RAD = Math.PI/180;
+
 // see https://npmjs.org/package/should
 
 describe("testing solid construction",function() {
@@ -329,11 +331,12 @@ describe("testing solid construction",function() {
         var solid;
         before(function(){
             solid = occ.makeBox([10,20,30],[30,40,50]);
+            solid.numFaces.should.equal(6);            
+            solid = occ.makeFillet(solid,solid.getEdges(),2.0);
 
         });
         it("should be possible to round the corner...",function(){
-            solid.numFaces.should.equal(6);
-            solid.fillet(solid.getEdges(),2.0);
+
             //    6 flat surfaces       -> 6*4  edges
             // + 12 rounded corners     -> shared
             // + 8  corners             -> 8*3   edges
@@ -342,6 +345,7 @@ describe("testing solid construction",function() {
             solid.getEdges().length.should.be.equal(6*4+8*3);
 
         });
+      
     });
     describe("makeCylinder (variation 1)",function(){
         var solid;
@@ -598,8 +602,8 @@ describe("testing solid construction",function() {
             thickSolid = occ.makeThickSolid(initialBox,initialBox.faces.top,10);
         });
         it("should have 23 (6 + 4 vertical faces + 4 vertical fillets + 1 horizontal face + 4 horizontal fillets + 4 rounded corners) faces",function(){
-            console.log( Object.keys(thickSolid.getFaces().map(function(el){ return thickSolid.getShapeName(el);})));
-            console.log( Object.keys(thickSolid.faces));
+            console.log( Object.keys(thickSolid.getFaces().map(function(el){ return thickSolid.getShapeName(el);})).join(" "));
+            //xx console.log( Object.keys(thickSolid.faces).join(" "));
             initialBox.numFaces.should.equal(6);
             thickSolid.numFaces.should.equal(23);
         })
@@ -612,10 +616,66 @@ describe("testing solid construction",function() {
             thickSolid = occ.makeThickSolid(initialBox,initialBox.faces.top,-10);
         });
         it("should have 1 (1 top face modified + 5 old + 5 new) faces",function(){
-            console.log( Object.keys(thickSolid.getFaces().map(function(el){ return thickSolid.getShapeName(el);})));
-            console.log( Object.keys(thickSolid.faces));
+            console.log( Object.keys(thickSolid.getFaces().map(function(el){ return thickSolid.getShapeName(el);})).join(" "));
+            //xx console.log( Object.keys(thickSolid.faces).join(" "));
             initialBox.numFaces.should.equal(6);
             thickSolid.numFaces.should.equal(11);
         })
     });
+    describe("finding common edge of 2 faces",function(){
+        var box;
+        before(function(){ 
+             box = occ.makeBox(100,200,300);
+        });
+        it("should find a common edge between 'top' face and 'left' face",function(){
+            var edges = box.getCommonEdges(box.faces.top,box.faces.left);
+            edges.length.should.be.equal(1);
+
+        });
+        it("should not find a common edge between 'top' face and 'bottom' face",function(){
+            var edges = box.getCommonEdges(box.faces.top,box.faces.bottom);
+            edges.length.should.be.equal(0);
+        });        
+    });
+    describe("makeDraftAngle",function(){
+        var box;
+        var boxWithDraftFace;
+        before(function(){
+            box = occ.makeBox(100,200,300);
+            boxWithDraftFace = occ.makeDraftAngle(box,box.faces.right,20*DEG2RAD,box.faces.bottom);          
+        });
+        it("should have 6 faces",function(){
+            boxWithDraftFace.numFaces.should.equal(6);
+        });
+        it("should have a smaller volume",function(){
+            boxWithDraftFace.volume.should.be.lessThan(box.volume);
+            
+        });
+    });
+
+    describe("makeDraftAngle on a box with a rounded corner",function(){
+        var box;
+        var boxWithDraftFace;
+        before(function(){
+            box = occ.makeBox(100,200,300); 
+            var edge =  box.getCommonEdges(box.faces.left,box.faces["front"])[0];
+            console.log("edge = ",edge);
+            box = occ.makeFillet(box,edge,10);
+
+            var faceToDraft = box.faces["mleft:0"];
+            var neutralFace = box.faces["mbottom:0"];
+            console.log(Object.keys(box.faces).join(" "));
+            should.exist(faceToDraft);
+            should.exist(neutralFace);
+            boxWithDraftFace = occ.makeDraftAngle(box,faceToDraft,5*DEG2RAD,neutralFace);          
+
+        });
+        it("should have 7 faces",function(){
+            boxWithDraftFace.numFaces.should.equal(7);
+        });
+        it("should have a smaller volume",function(){
+            boxWithDraftFace.volume.should.be.lessThan(box.volume);
+            
+        });
+    })    
 });

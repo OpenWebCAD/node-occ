@@ -29,16 +29,17 @@ void Solid::Init(Handle<Object> target)
     Base::InitProto(proto);
 
 
-    EXPOSE_METHOD(Solid,fillet);
-    EXPOSE_METHOD(Solid,chamfer);
 
     EXPOSE_METHOD(Solid,getEdges);
+    EXPOSE_METHOD(Solid,getVertices); 
     EXPOSE_METHOD(Solid,getFaces);
     EXPOSE_METHOD(Solid,getOuterShell);
     EXPOSE_METHOD(Solid,getShells);
     EXPOSE_METHOD(Solid,getSolids);
     EXPOSE_METHOD(Solid,getShapeName);
     EXPOSE_METHOD(Solid,getAdjacentFaces);
+    EXPOSE_METHOD(Solid,getCommonEdges);
+	
 
 
     EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
@@ -86,7 +87,7 @@ Handle<v8::Value> Solid::New(const v8::Arguments& args)
     return args.This();
 }
 
-Local<Object>  Solid::Clone() const
+Local<Object> Solid::Clone() const
 {
 	HandleScope scope;
 	Handle<Object> instance = Solid::NewInstance()->ToObject();
@@ -149,21 +150,45 @@ Handle<Value> Solid::getEdges(const v8::Arguments& args)
     }
     Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
-    TopTools_IndexedMapOfShape edgeMap;
+    TopTools_IndexedMapOfShape map;
     // TopExp::MapShapes(pThis->shape(), TopAbs_EDGE, edgeMap);
-    BRepTools::Map3DEdges(pThis->shape(), edgeMap);
+    BRepTools::Map3DEdges(pThis->shape(), map);
 
 
-    int nbEdges =edgeMap.Extent();
-    Local<Array> arr = Array::New(nbEdges);
+    int nbShape =map.Extent();
+    Local<Array> arr = Array::New(nbShape);
 
-    for (int i=0; i<nbEdges; i++)  {
-        Local<Object> obj=  buildWrapper(edgeMap(i+1)); // 1 based !!!
+    for (int i=0; i<nbShape; i++)  {
+        Local<Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
         arr->Set(i,obj);
     }
     return scope.Close(arr);
 }
 
+Handle<v8::Value> Solid::getVertices(const v8::Arguments& args)
+{
+    HandleScope scope;
+    // can work with this
+    Handle<Object> pJhis = args.This();
+    if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+        // create a new object
+        ThrowException(Exception::Error(String::New("invalid object")));
+    }
+    Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+    TopTools_IndexedMapOfShape map;
+    TopExp::MapShapes(pThis->shape(), TopAbs_VERTEX, map);
+
+
+    int nbShape =map.Extent();
+    Local<Array> arr = Array::New(nbShape);
+
+    for (int i=0; i<nbShape; i++)  {
+        Local<Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
+        arr->Set(i,obj);
+    }
+    return scope.Close(arr);
+}
 
 Handle<v8::Value> Solid::getOuterShell(const v8::Arguments& args)
 {
@@ -267,173 +292,12 @@ Handle<Value> Solid::getShells(const v8::Arguments& args)
 }
 
 
-int Solid::chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances)
-{
-
-    size_t edges_size = edges.size();
-    size_t distances_size = distances.size();
-
-    try {
-        BRepFilletAPI_MakeChamfer CF(this->shape());
-
-        TopTools_IndexedDataMapOfShapeListOfShape mapEdgeFace;
-        TopExp::MapShapesAndAncestors(this->shape(), TopAbs_EDGE, TopAbs_FACE, mapEdgeFace);
-
-        for (size_t i=0; i<edges.size(); i++) {
 
 
-            const TopoDS_Edge& edge = edges[i]->edge();
-
-            // skip degenerated edge
-            if (BRep_Tool::Degenerated(edge))
-                continue;
-
-            const TopoDS_Face& face = TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
-
-            // skip edge if it is a seam
-            if (BRep_Tool::IsClosed(edge, face))
-                continue;
-
-
-            if (distances_size == 1) {
-                // single distance
-                CF.Add(distances[0], edge, face);
-
-            } else if (distances_size == edges_size) {
-                // distance given for each edge
-                CF.Add(distances[i], edge, face);
-
-            } else {
-                StdFail_NotDone::Raise("size of distances argument not correct");;
-            }
-        }
-
-        CF.Build();
-
-        if (!CF.IsDone())
-            StdFail_NotDone::Raise("Failed to chamfer solid");
-
-        const TopoDS_Shape& tmp = CF.Shape();
-
-        if (tmp.IsNull())
-            StdFail_NotDone::Raise("Chamfer operaton return Null shape");
-
-        this->setShape(tmp);
-
-        // possible fix shape
-        if (!this->fixShape())
-            StdFail_NotDone::Raise("Shapes not valid");
-
-    }
-    CATCH_AND_RETHROW("Failed to chamfer solid ");
-
-    return 0;
-}
-
-int Solid::fillet(const std::vector<Edge*>& edges,const  std::vector<double>& radius)
-{
-    size_t edges_size = edges.size();
-    size_t radius_size = radius.size();
-
-    try {
-        BRepFilletAPI_MakeFillet fill(this->shape());
-
-        TopTools_IndexedDataMapOfShapeListOfShape mapEdgeFace;
-        TopExp::MapShapesAndAncestors(this->shape(), TopAbs_EDGE, TopAbs_FACE, mapEdgeFace);
-
-        for (size_t i=0; i<edges.size(); i++) {
-
-            const TopoDS_Edge& edge = edges[i]->edge();
-
-            // skip degenerated edge
-            if (BRep_Tool::Degenerated(edge))
-                continue;
-
-            const TopoDS_Face& face = TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
-
-            // skip edge if it is a seam
-            if (BRep_Tool::IsClosed(edge, face))
-                continue;
-
-            if (radius_size == 1) {
-                // single radius
-                fill.Add(radius[0], edge);
-            } else if (radius_size == edges_size) {
-                // radius given for each edge
-                fill.Add(radius[i], edge);
-            } else if (radius_size == 2*edges_size) {
-                // variable radius
-                fill.Add(radius[2*i+0], radius[2*i+1], edge);
-            } else {
-                StdFail_NotDone::Raise("radius argument size not valid");;
-            }
-        }
-
-        fill.Build();
-
-        if (!fill.IsDone()) {
-            StdFail_NotDone::Raise("Filler operation failed");
-        }
-
-        const TopoDS_Shape& tmp = fill.Shape();
-
-        if (tmp.IsNull())  {
-            StdFail_NotDone::Raise("Fillet operation resulted in Null shape");
-        }
-
-        this->setShape(tmp);
-
-        // possible fix shape
-        if (!this->fixShape())    {
-            StdFail_NotDone::Raise("Shapes not valid");
-        }
-
-    }
-    CATCH_AND_RETHROW("Failed to fillet solid ");
-
-    return 1;
-
-}
-
-Handle<v8::Value> Solid::fillet(const v8::Arguments& args)
-{
-    HandleScope scope;
-    // [ <list of edges ], radius ]
-    // [ <list of edges ], radius ]
-    std::vector<Edge*> edges;
-    extractArray<Edge>(args[0],edges);
-    std::vector<double> radii;
-
-    if (args[1]->IsNumber()) {
-        double radius = args[1]->ToNumber()->Value();
-        if (radius < 1E-7 ) {
-            //TODO
-        }
-        radii.push_back(radius);
-    }
-
-    Solid* pThis = node::ObjectWrap::Unwrap<Solid>(args.This());
-
-	try {
-		pThis->fillet(edges,radii);
-	}
-	catch(...){
-
-	}
-
-    // size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
-    return args.This();
-}
-Handle<v8::Value> Solid::chamfer(const v8::Arguments& args)
-{
-    HandleScope scope;
-    // [ <list of edges ], radius ]
-    // [ <list of edges ], radius ]
-
-    // size_t extractArgumentList(const Arguments& args,std::vector<ClassType*>& elements)
-    return Handle<v8::Value>(Undefined());
-}
-
+/**
+ * getAdjacentFace
+ *  returns an array of all faces that are adjacents to the given face
+ */
 Handle<v8::Value> Solid::getAdjacentFaces(const v8::Arguments& args)
 {
     HandleScope scope;
@@ -492,6 +356,85 @@ Handle<v8::Value> Solid::getAdjacentFaces(const v8::Arguments& args)
 
   // return Handle<v8::Value>(Undefined());
 }
+
+
+const char* getCommonEdges_Doc = "Solid.getCommonEdges(<Face>,<Face>);";
+
+Handle<v8::Value> Solid::getCommonEdges(const v8::Arguments& args)
+{
+	// <face1>,<face2>
+	HandleScope scope;
+	Face* pFace1 = 0 ;
+	Face* pFace2 = 0 ;
+
+
+    Handle<Object> pJhis = args.This();
+    if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+        // create a new object
+        ThrowException(Exception::Error(String::New("invalid object")));
+    }
+    Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+	if (args.Length()<2 || !extractArg(args[0],pFace1) || !extractArg(args[1],pFace2) ) {
+		ThrowException(Exception::TypeError(String::New("invalid arguments getCommonEdges : expecting <FACE>,<FACE>")));
+		return Handle<v8::Value>(Undefined());
+	}
+
+    TopTools_IndexedDataMapOfShapeListOfShape map;
+    
+	TopExp::MapShapesAndAncestors(pThis->shape(), TopAbs_EDGE, TopAbs_FACE, map);
+
+	TopTools_MapOfShape edgeList;
+
+    TopExp_Explorer edgeExplorer(pThis->shape(),TopAbs_EDGE);
+	for (; edgeExplorer.More(); edgeExplorer.Next()) {
+
+		TopoDS_Edge edge = TopoDS::Edge(edgeExplorer.Current());
+
+		const TopTools_ListOfShape& list = map.FindFromKey(edge);
+		TopTools_ListIteratorOfListOfShape it(list);
+
+		int nbFound = 0;
+	    for (; it.More(); it.Next()) {
+			if (pFace1->shape() ==  it.Value()) { nbFound++; continue; }
+			if (pFace2->shape() ==  it.Value()) { nbFound++; continue; }
+		}
+		if (nbFound == 2) {
+			// this is the common edge
+			edgeList.Add(edge);
+		}
+
+	}
+
+	Local<Array> arr = Array::New(edgeList.Extent());
+	TopTools_MapIteratorOfMapOfShape it(edgeList);
+	int i=0;
+	for (; it.More(); it.Next()) {
+		const TopoDS_Edge& edge = TopoDS::Edge(it.Key());
+		Local<Object> obj= buildWrapper(edge); // 1 based !!!
+		arr->Set(i++,obj);
+	}
+	return scope.Close(arr);
+}
+
+const char* getCommonVertices_Doc = "Solid.getCommonVertices(<Face>,<Face>);\n"
+							    	 "Solid.getCommonVertices(<Face>,<Face>,<Face>);\n"
+								    "Solid.getCommonVertices(<Edge>,<Edge>);\n";
+
+Handle<v8::Value> Solid::getCommonVertices(const v8::Arguments& args)
+{
+	HandleScope scope;
+	Face* pFace1 = 0 ;
+	Face* pFace2 = 0 ;
+	if (args.Length()<2 || !extractArg(args[0],pFace1) || !extractArg(args[1],pFace2) ) {
+		ThrowException(Exception::TypeError(String::New("invalid arguments getCommonEdges : expecting <FACE>,<FACE>")));
+		return Handle<v8::Value>(Undefined());
+	}	
+	Local<Array> arr = Array::New(0);
+	return scope.Close(arr);
+}
+
+
 
 int Solid::numSolids()
 {
@@ -657,10 +600,11 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
 Handle<v8::Value> Solid::getShapeName(const v8::Arguments& args)
 {
     HandleScope scope;
-    Handle<Object> pJhis = args.This();
+
+	Handle<Object> pJhis = args.This();
     if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
-        // create a new object
         ThrowException(Exception::Error(String::New("invalid object")));
+	    return scope.Close(Undefined());
     }
     Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -668,8 +612,8 @@ Handle<v8::Value> Solid::getShapeName(const v8::Arguments& args)
     if (!pShape.IsEmpty()) {
         Handle<Value> hashCode = pShape->Get(String::NewSymbol("hashCode"));
         Handle<Object> reversedMap = pJhis->Get(String::NewSymbol("_reversedMap"))->ToObject();
-
-        return scope.Close(reversedMap->Get(hashCode));
+		Handle<Value>  value = reversedMap->Get(hashCode);
+        return scope.Close(value);
     }
     return scope.Close(Undefined());
 

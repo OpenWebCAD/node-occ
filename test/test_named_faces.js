@@ -3,6 +3,11 @@ var should = require("should");
 
 var occ = require("../lib/occ");
 
+function dumpSolid(b) {
+    console.log(" faces    = ",b.getFaces().map( function(e){ return b.getShapeName(e);}).join(", "));
+    console.log(" edges    = ",b.getEdges().map( function(e){ return b.getShapeName(e);}).join(", "));
+    console.log(" vertices = ",b.getVertices().map( function(e){ return b.getShapeName(e);}).join(", "));        
+}
 // see https://npmjs.org/package/should
 
 describe("testing face naming on simple box",function() {
@@ -89,6 +94,17 @@ describe("testing face naming on simple box",function() {
         solid.faces.back.centreOfMass.y.should.equal(10);
         solid.faces.back.centreOfMass.z.should.equal(15);
     });
+    it("should have named edges",function(){
+
+        var test = solid.getEdges().map(function(e){return solid.getShapeName(e);});
+        test.sort().join(" ").should.equal("EXY EXZ EXy EXz EYZ EYz ExY ExZ Exy Exz EyZ Eyz");
+    });
+
+    it("should have named vertex",function(){
+        var test = solid.getVertices().map(function(e){return solid.getShapeName(e);});
+        test.sort().join(" ").should.equal("VXYZ VXYz VXyZ VXyz VxYZ VxYz VxyZ Vxyz");
+    });
+
 });
 describe("testing face naming on simple sphere",function() {
     var solid;
@@ -112,6 +128,8 @@ describe("testing face naming on combined boxes",function() {
       box1 = occ.makeBox([0,0,0],[10,10,10]);
       box2 = occ.makeBox([5,5,5],[15,15,15]);
       solid = occ.fuse(box1,box2);
+      dumpSolid(solid);
+      
    });
    it(" should expose 12 named faces", function() {
         Object.keys(solid.faces).length.should.equal(12);
@@ -309,5 +327,27 @@ describe("testing face naming on a box with a top face split by a cross shape le
         solid.faces.should.have.property("m1:"+ name+ ":2");
         solid.faces.should.have.property("m1:"+ name+ ":3");
         solid.faces.should.not.have.property("m1:"+ name+ ":4");
+    });
+});
+
+describe("testing naming with makeFillet operation",function(){
+
+
+
+    var  solid;
+    before(function(){
+        solid = occ.makeBox([10,20,30],[100,200,300]);
+        dumpSolid(solid);
+
+        var edges = solid.getCommonEdges(solid.faces.front,solid.faces.left);
+        assert(edges instanceof Array);
+
+        solid = occ.makeFillet(solid,edges[0],10); 
+        dumpSolid(solid);
+
+    });
+    it("should have ",function(){
+        console.log(Object.keys(solid.faces).join(", "));
+        Object.keys(solid.faces).length.should.equal(solid.numFaces);
     });
 });

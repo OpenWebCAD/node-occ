@@ -48,8 +48,9 @@ void Initialize(Handle<Object> target)
     target->Set(String::NewSymbol("makePrism"),        FunctionTemplate::New(ShapeFactory::makePrism)->GetFunction());
     target->Set(String::NewSymbol("makeThickSolid"),   FunctionTemplate::New(ShapeFactory::makeThickSolid)->GetFunction());
     target->Set(String::NewSymbol("makeDraftAngle"),   FunctionTemplate::New(ShapeFactory::makeDraftAngle)->GetFunction());
+    target->Set(String::NewSymbol("makeFillet"),   FunctionTemplate::New(ShapeFactory::makeFillet)->GetFunction());
+   // target->Set(String::NewSymbol("makeChamfer")  FunctionTemplate::New(ShapeFactory::makeDraftAngle)->GetFunction());
 
-	
 
 
     target->Set(String::NewSymbol("fuse"),        FunctionTemplate::New(ShapeFactory::fuse)->GetFunction());
