@@ -658,12 +658,16 @@ describe("testing solid construction",function() {
         var boxWithDraftFace;
         before(function(){
             box = occ.makeBox(100,200,300); 
-            var edge =  box.getCommonEdges(box.faces.left,box.faces["front"])[0];
-            console.log("edge = ",edge);
-            box = occ.makeFillet(box,edge,10);
+            var edges =  box.getCommonEdges(box.faces.left,box.faces["front"])[0];
+            // console.log("edge = ",edges);
+            box = occ.makeFillet(box,edges,10);
+
+            // note: left , front , top and bottom faces have been modified by the fillet
+            // operation.
 
             var faceToDraft = box.faces["mleft:0"];
             var neutralFace = box.faces["mbottom:0"];
+
             console.log(Object.keys(box.faces).join(" "));
             should.exist(faceToDraft);
             should.exist(neutralFace);

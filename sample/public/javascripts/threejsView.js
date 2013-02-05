@@ -42,9 +42,30 @@ function zoomAll()
 }
 
 
+// prepare graduated background for the 3D view
+//xxvar backgroundTexture = new THREE.ImageUtils.loadTexture( 'images/Graduated_Blue_Background.png' );
+var backgroundTexture = new THREE.ImageUtils.loadTexture( 'images/body_bg.jpg' );
+var bg = new THREE.Mesh(
+  new THREE.PlaneGeometry(2, 2, 0),
+  new THREE.MeshBasicMaterial({map: backgroundTexture})
+);
+
+// The bg plane shouldn't care about the z-buffer.
+bg.material.depthTest = false;
+bg.material.depthWrite = false;
+
+var bgScene = new THREE.Scene();
+var bgCam = new THREE.Camera();
+bgScene.add(bgCam);
+bgScene.add(bg);
+
 
 $(document).ready(function() {
     "use strict";
+
+
+
+
 
     installLayout();
 
@@ -62,10 +83,11 @@ $(document).ready(function() {
     camera.position.z = 100;
 
 
-    renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0x121212, clearAlpha: 1 } );
-    renderer.setClearColorHex(0x121212, 1.0);
-    renderer.clear();
+    renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0x7F2FFF, clearAlpha: 1 } );
+    renderer.setClearColorHex(0x7F2FFF, 1.0);
 
+    renderer.autoClear = false;
+    renderer.clear();
 
     // make sure canvas can get focus;
     // see http://jsfiddle.net/erossignon/bFraK/3/
@@ -158,6 +180,8 @@ function animate() {
 }
 
 function render() {
+    renderer.clear();
+    renderer.render(bgScene, bgCam);
     renderer.render( scene, camera );
 }
 
@@ -307,8 +331,10 @@ function rgb2hex( rgb ) {
     return ( rgb[ 0 ] * 255 << 16 ) + ( rgb[ 1 ] * 255 << 8 ) + rgb[ 2 ] * 255;
 
 }
-function process_single_mesh(rootNode,jsonEntry)
+function process_face_mesh(rootNode,jsonEntry,color)
 {
+   
+
     var jsonFace = jsonEntry.mesh;
    //  $("#ascii_mesh").append("<p>face "+  jsonEntry.name + " vertices :" + jsonFace.vertices.length + ", faces : " + jsonFace.faces.length + " color = " +  jsonEntry.color + " </p>");
 
@@ -320,18 +346,35 @@ function process_single_mesh(rootNode,jsonEntry)
     model = jsonLoader.createModel( jsonFace,
 
         function(geometry,material ){
-            material = new THREE.MeshLambertMaterial({color: rgb2hex(jsonFace.materials[0].colorDiffuse) });
+            material = new THREE.MeshLambertMaterial({color: rgb2hex(color)});
+            // rgb2hex(jsonFace.materials[0].colorDiffuse) });
             var mesh = new THREE.Mesh(geometry,material);
-            console.log("material" ,material );
+            //console.log("material" ,material );
+            //console.log(" vertices =",geometry.vertices);
             rootNode.add(mesh);
 
         },/* texturePath */ undefined);
 
 }
+function process_edge_mesh(rootNode,jsonEdge)
+{
+    var v = jsonEdge.mesh;
+    var geometry = new THREE.Geometry();
+    var i = 0
+    while ( i<v.length) {
+        geometry.vertices.push(new THREE.Vector3(v[i],v[i+1],v[i+2]));        
+        i+=3;
+    }
+    material = new THREE.LineBasicMaterial({color: 0xffffff}); // {color: rgb2hex([0,0,1]) });
+    var polyline = new THREE.Line(geometry,material);
+    //xx console.log(" vertices =",geometry.vertices);
+    rootNode.add(polyline);
+}
 function install_json_mesh(json) {
 
     "use strict";
 
+    var color = [ Math.random(),Math.random(),Math.random()];;
 
     var oldObj = scene.getChildByName("CSG");
     if (oldObj) { scene.remove(oldObj); }
@@ -345,14 +388,23 @@ function install_json_mesh(json) {
     $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + " ms   - size :" + beautified.length + " bytes</p><br/>");
 
 
-    var jsonFaces = json.faces;
-    jsonFaces.forEach(function(faceArray) {
+    // read solids
+    var jsonSolids = json.solids;
+    jsonSolids.forEach(function(solidMesh) {
+
+        color = [ Math.random(),Math.random(),Math.random()];
         // one object
-        faceArray.forEach(function(face){
+        solidMesh.faces.forEach(function(face){
             // one face
-            process_single_mesh(rootNode,face);
+            process_face_mesh(rootNode,face,color);
         });
+        solidMesh.edges.forEach(function(edge){
+            // one face
+            process_edge_mesh(rootNode,edge);
+        });       
     });
+
+
     // log
     json.logs.forEach(function(line){
         var str = "";
@@ -366,8 +418,6 @@ function install_json_mesh(json) {
     COG = shapeCenterOfGravity(rootNode);
     camera.lookAt(COG);
     controls.target.set( COG.x, COG.y, COG.z );
-
-
 }
 
 

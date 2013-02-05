@@ -89,46 +89,60 @@ function getBlockedFunctionConstructor() {
 
 function buildResponse(solids,logs) {
     
-    var response = { faces: [] , logs: [ ]};
+    var response = { solids: [] , logs: [ ]};
 
     solids.forEach(function(solid){
-        response.faces.push(buildFacesMesh(solid));
+        response.solids.push(buildSolidMesh(solid));
     })
     response.logs = logs;
     return response;
 }
 
-function buildFacesMesh(solid) {
+function buildSolidMesh(solid) {
 
-    // make sure object is mesh
+    // make sure object is meshed
     var mesh = solid.mesh;
 
     // produce each faces
     var faces = solid.getFaces();
     var face;
-    var responseObject =[];
+
+    var jsonSolidMesh = { faces: [] , edges: []};
+
+   
     for (var i=0;i<faces.length;i++) {
         face = faces[i];
-
-        var r = Math.floor((Math.random()*250)+1);
-        var g = Math.floor((Math.random()*250)+1);
-        var b = Math.floor((Math.random()*250)+1);
 
         if (! face.hasMesh) {
             continue;
         }
 
-
         var entry =  {
-                name: solid.getShapeName(face),
-                color:(r*255+g)*255+b,
-                mesh: face.mesh.toJSON()
+            name: solid.getShapeName(face),
+            // color:(r*255+g)*255+b,
+            mesh: face.mesh.toJSON()
         };
         entry.mesh.materials[0].colorDiffuse = [ Math.random(),Math.random(),Math.random()];
-        responseObject.push( entry);
+        jsonSolidMesh.faces.push( entry);
     }
+    // produce each edge
 
-    return responseObject;
+    var edges = solid.getEdges();
+    var edge;
+    for (var i=0;i<edges.length;i++) {
+        edge = edges[i];
+        var polygone = edge.polygonize();
+        var pts = Object.keys(polygone).map(function(e) { return polygone[e]; });
+        var entry =  {
+                name: solid.getShapeName(edge),
+                // color:(r*255+g)*255+b,
+                mesh: pts
+        };
+        //entry.mesh.materials[0].colorDiffuse = [ Math.random(),Math.random(),Math.random()];  
+        jsonSolidMesh.edges.push( entry);   
+    }
+          
+    return jsonSolidMesh;
 
 }
 exports.buildCSG1 = function(req,res)

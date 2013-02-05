@@ -20,8 +20,7 @@ public:
 
 
 
-
-    // OCCTesselation *tesselate(double factor, double angle);
+	Handle<Object> polygonize(double factor);
 
     int createLine(Vertex *start, Vertex *end);
     int createArc(Vertex *start, Vertex *end, const gp_Pnt& center);
@@ -55,6 +54,8 @@ public:
     static Handle<v8::Value> createLine(const v8::Arguments& args);
     static Handle<v8::Value> createCircle(const v8::Arguments& args);
     static Handle<v8::Value> createArc3P(const v8::Arguments& args);
+	static Handle<v8::Value> polygonize(const v8::Arguments& args);
+
 
     Handle<Value> startVertex();
     Handle<Value> endVertex();

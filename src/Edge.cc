@@ -1,6 +1,7 @@
 #include "Edge.h"
 
 #include "Util.h"
+#include "mesh.h"
 
 
 bool Edge::isSeam(Base *face)
@@ -284,7 +285,56 @@ void Edge::Init(Handle<Object> target)
     EXPOSE_METHOD(Edge,createLine);
     EXPOSE_METHOD(Edge,createCircle);
     EXPOSE_METHOD(Edge,createArc3P);
-
+	EXPOSE_METHOD(Edge,polygonize);
 
     target->Set(String::NewSymbol("Edge"), constructor->GetFunction());
+}
+
+Handle<Object> Edge::polygonize(double factor)
+{
+
+    const TopoDS_Edge& edge = TopoDS::Edge(this->shape());
+
+
+	std::vector<float> positions;
+                  
+    BRepAdaptor_Curve curve_adaptor(edge);
+    GCPnts_UniformDeflection discretizer;
+    discretizer.Initialize(curve_adaptor, 0.05);
+    positions.reserve(discretizer.NbPoints()*3);
+
+    for (int i = 0; i < discretizer.NbPoints(); i++) {
+        
+		gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
+
+        positions.push_back(static_cast<float>(pt.X()));
+        positions.push_back(static_cast<float>(pt.Y()));
+        positions.push_back(static_cast<float>(pt.Z()));
+    } 
+
+	 Handle<Object> result = Object::New();
+
+	 result->SetIndexedPropertiesToExternalArrayData(const_cast<float*>(&positions[0]), kExternalFloatArray,(int)positions.size());
+
+	 return result;
+}
+
+
+Handle<v8::Value> Edge::polygonize(const v8::Arguments& args)
+{
+    HandleScope scope;
+    // can work with this
+    Handle<Object> pJhis = args.This();
+    if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+        // create a new object
+        ThrowException(Exception::Error(String::New("invalid object")));
+    }
+    Edge* pThis = node::ObjectWrap::Unwrap<Edge>(pJhis);
+
+	double factor = 0.05;
+	if (args.Length()>=1) {
+		ReadDouble(args[0],factor);
+	}
+
+	return scope.Close(pThis->polygonize(factor));
 }
