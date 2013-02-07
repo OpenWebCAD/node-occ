@@ -43,7 +43,7 @@ function zoomAll()
 
 
 // prepare graduated background for the 3D view
-//xxvar backgroundTexture = new THREE.ImageUtils.loadTexture( 'images/Graduated_Blue_Background.png' );
+//xx var backgroundTexture = new THREE.ImageUtils.loadTexture( 'images/Graduated_Blue_Background.png' );
 var backgroundTexture = new THREE.ImageUtils.loadTexture( 'images/body_bg.jpg' );
 var bg = new THREE.Mesh(
   new THREE.PlaneGeometry(2, 2, 0),
@@ -58,6 +58,15 @@ var bgScene = new THREE.Scene();
 var bgCam = new THREE.Camera();
 bgScene.add(bgCam);
 bgScene.add(bg);
+
+function renderbackground()
+{
+    renderer.clear();
+    renderer.render(bgScene, bgCam);
+}
+
+
+
 
 
 $(document).ready(function() {
@@ -147,6 +156,8 @@ $(document).ready(function() {
     var light = new THREE.AmbientLight( 0x222222 );
     scene.add( light );
 
+    scene.add( new THREE.AxisHelper() );
+
     animate();
 
     onWindowResize();
@@ -180,8 +191,7 @@ function animate() {
 }
 
 function render() {
-    renderer.clear();
-    renderer.render(bgScene, bgCam);
+    renderbackground();
     renderer.render( scene, camera );
 }
 
@@ -365,7 +375,7 @@ function process_edge_mesh(rootNode,jsonEdge)
         geometry.vertices.push(new THREE.Vector3(v[i],v[i+1],v[i+2]));        
         i+=3;
     }
-    material = new THREE.LineBasicMaterial({color: 0xffffff}); // {color: rgb2hex([0,0,1]) });
+    var material = new THREE.LineDashedMaterial({ linewidth: 4, color: 0xffffff}); // {color: rgb2hex([0,0,1]) });
     var polyline = new THREE.Line(geometry,material);
     //xx console.log(" vertices =",geometry.vertices);
     rootNode.add(polyline);
