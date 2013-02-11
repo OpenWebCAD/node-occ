@@ -4,8 +4,8 @@
       "target_name": "occ",
       "cflags!"    : [ '-fno-exceptions' ],
       "cflags_cc!" : [ '-fno-exceptions' ],
-      "cflags"     : [ '-Wno-unused-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
-      "cflags_cc"  : [ '-Wno-unused-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
+      "cflags"     : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
+      "cflags_cc"  : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
 	  "msvs_settings": {
 
 		'VCLinkerTool': {					
