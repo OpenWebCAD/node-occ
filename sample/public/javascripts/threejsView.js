@@ -65,23 +65,14 @@ function renderbackground()
     renderer.render(bgScene, bgCam);
 }
 
-
-
-
-
 $(document).ready(function() {
     "use strict";
-
-
-
-
 
     installLayout();
 
     installEditor();
 
     installSpinnerOnAjaxCall();
-
 
     container = $("#graphical_view");
     if (container.size() === 0 ) {

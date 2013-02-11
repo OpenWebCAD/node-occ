@@ -24,3 +24,14 @@ build
 /backup
 /debugHelper
 /sample/public/javascripts/*.bak
+/lib/*.bak
+
+toto.*
+deps/
+/a.html
+/occ_.h
+*.bak
+/t.html
+/t.js
+/*.sublime-project
+/*.sublime-workspace
