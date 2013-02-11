@@ -1,7 +1,7 @@
 #include "Edge.h"
 
 #include "Util.h"
-#include "mesh.h"
+#include "Mesh.h"
 
 
 bool Edge::isSeam(Base *face)

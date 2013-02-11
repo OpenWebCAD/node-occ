@@ -23,6 +23,7 @@ build
 /toto.STEP
 /backup
 /debugHelper
+/sample/node_modules
 /sample/public/javascripts/*.bak
 /lib/*.bak
 
