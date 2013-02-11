@@ -33,6 +33,7 @@ occ.writeSTEP("somefile.step",box)
 
 - creation of basic shapes ( box, cylinder , cone , torus )
 - boolean operation ( fuse , common , cut )
+- features  ( draftAngle)
 - solid properties ( faces, edges, vertices, area , volume )
 - import export ( STEP BREP )
 
@@ -43,7 +44,19 @@ occ.writeSTEP("somefile.step",box)
 ''/sample'' : sample nodejs/express REST API server to build solid , based on threejs
 
 
-## installation prerequisites:
+
+## installing node-occ from npm
+ 
+### on Windows
+  - you need Microsoft Visual Studio 2012
+  - please install OpenCascade oce-0.11  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.11 folder
+  
+### on Linux
+
+
+
+
+## building node-occ :  prerequisites
 
 ### on ubuntu
 
@@ -95,6 +108,7 @@ node app.js
 
 
 ### on windows
+  - please install oce-0.11  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.11 folder
 
 
 ### on Mac

@@ -9,8 +9,9 @@
 
 		'VCLinkerTool': {					
 			'AdditionalLibraryDirectories': [
+			    "/oce-0.11/Win64/lib",
 				#	"/projects/oce-0.11/Win64/lib/",
-					"../deps/Win64/lib",
+				#	"../deps/Win64/lib",
 			],
 			# 'AdditionalOptions': ["/FORCE",],						
 		},	  
@@ -69,7 +70,7 @@
 	  ],
 	  "include_dirs": [  
            "/usr/local/include/oce",
-           "/projects/oce/inc",
+           "/oce-0.11/include/oce",
 	  ],				
 
 	  "libraries": [ 
