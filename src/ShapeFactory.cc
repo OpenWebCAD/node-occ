@@ -7,6 +7,7 @@
 
 
 #include <memory>
+#include <limits>
 
 char m(Primitives_Direction p)
 {
