@@ -28,8 +28,6 @@ void Solid::Init(Handle<Object> target)
 
     Base::InitProto(proto);
 
-
-
     EXPOSE_METHOD(Solid,getEdges);
     EXPOSE_METHOD(Solid,getVertices); 
     EXPOSE_METHOD(Solid,getFaces);
@@ -38,16 +36,15 @@ void Solid::Init(Handle<Object> target)
     EXPOSE_METHOD(Solid,getSolids);
     EXPOSE_METHOD(Solid,getShapeName);
     EXPOSE_METHOD(Solid,getAdjacentFaces);
-    EXPOSE_METHOD(Solid,getCommonEdges);
-	
+    EXPOSE_METHOD(Solid,getCommonEdges);	
 
+    EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,area);
+    EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,volume);
 
-    EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
+	EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
     EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
     EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
 
-    EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,volume);
-    EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,area);
     EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
 
     target->Set(String::NewSymbol("Solid"), constructor->GetFunction());
@@ -431,6 +428,7 @@ Handle<v8::Value> Solid::getCommonVertices(const v8::Arguments& args)
 		return Handle<v8::Value>(Undefined());
 	}	
 	Local<Array> arr = Array::New(0);
+	ThrowException(Exception::TypeError(String::New("Not Implemented ")));
 	return scope.Close(arr);
 }
 

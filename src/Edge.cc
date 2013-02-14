@@ -3,12 +3,13 @@
 #include "Util.h"
 #include "Mesh.h"
 
+#include <assert.h>
 
 bool Edge::isSeam(Base *face)
 {
     if (this->shape().IsNull())
         return false;
-    return BRep_Tool::IsClosed (this->edge(), TopoDS::Face(face->shape())) ? true: false;
+    return BRep_Tool::IsClosed(this->edge(), TopoDS::Face(face->shape())) ? true: false;
 }
 
 bool Edge::isDegenerated()
@@ -296,25 +297,31 @@ Handle<Object> Edge::polygonize(double factor)
     const TopoDS_Edge& edge = TopoDS::Edge(this->shape());
 
 
-	std::vector<float> positions;
                   
     BRepAdaptor_Curve curve_adaptor(edge);
     GCPnts_UniformDeflection discretizer;
     discretizer.Initialize(curve_adaptor, 0.05);
-    positions.reserve(discretizer.NbPoints()*3);
+
+	m_positions.clear();
+    m_positions.reserve(discretizer.NbPoints()*3);
 
     for (int i = 0; i < discretizer.NbPoints(); i++) {
         
 		gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
 
-        positions.push_back(static_cast<float>(pt.X()));
-        positions.push_back(static_cast<float>(pt.Y()));
-        positions.push_back(static_cast<float>(pt.Z()));
+		//xx std::cerr  << "[ " << pt.X() << " " << pt.Y() << " " << pt.Z() << " ] ,";
+        m_positions.push_back(static_cast<float>(pt.X()));
+        m_positions.push_back(static_cast<float>(pt.Y()));
+        m_positions.push_back(static_cast<float>(pt.Z()));
     } 
-
+	 //xx std::cerr << std::endl;
 	 Handle<Object> result = Object::New();
 
-	 result->SetIndexedPropertiesToExternalArrayData(const_cast<float*>(&positions[0]), kExternalFloatArray,(int)positions.size());
+	 int length = (int)m_positions.size();
+	 result->SetIndexedPropertiesToExternalArrayData(m_positions.data(), kExternalFloatArray,length);
+	 result->Set(String::NewSymbol("length"), Int32::New(length), DontDelete);
+     assert(     result->GetIndexedPropertiesExternalArrayDataLength() ==   length);
+     assert(     result->Get(String::NewSymbol("length"))->ToInt32()->Uint32Value() ==   length);
 
 	 return result;
 }

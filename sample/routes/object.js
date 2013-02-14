@@ -11,42 +11,7 @@ var File = fileUtils.File;
 var fast_occ = require('../../lib/fastbuilder').occ;
 var SecurityManager = fileUtils.SecurityManager;
 
-exports.get = function(req, res) {
 
-    var obj = database.findObject(req.params.id);
-
-    res.format({
-        text: function(){
-            res.send('hey : ' + JSON.stringify(obj,null," "));
-        },
-
-        html: function(){
-            res.send('<p>hey</p>'  + JSON.stringify(obj,null," ") + " params = " +  req.params.id + " " +JSON.stringify(req.params) + " query = " +  JSON.stringify(req.query)  );
-        },
-
-        json: function(){
-            res.send(obj);
-        }
-    });
-  // res.send('user ' + req.params.id);
-}
-exports.list = function(req, res) {
-
-
-    res.format({
-        text: function(){
-            res.send('hey : ' + JSON.stringify(database.solidMap,null," "));
-        },
-
-        html: function(){
-            res.send('<p>hey</p>'  + JSON.stringify(database.solidMap,null," "));
-        },
-
-        json: function(){
-            res.send(database.solidMap);
-        }
-    });
-}
 
 
 exports.buildCSG = function(req,res)
@@ -92,59 +57,13 @@ function buildResponse(solids,logs) {
     var response = { solids: [] , logs: [ ]};
 
     solids.forEach(function(solid){
-        response.solids.push(buildSolidMesh(solid));
+        response.solids.push(occ.buildSolidMesh(solid));
     })
     response.logs = logs;
     return response;
 }
 
-function buildSolidMesh(solid) {
 
-    // make sure object is meshed
-    var mesh = solid.mesh;
-
-    // produce each faces
-    var faces = solid.getFaces();
-    var face;
-
-    var jsonSolidMesh = { faces: [] , edges: []};
-
-   
-    for (var i=0;i<faces.length;i++) {
-        face = faces[i];
-
-        if (! face.hasMesh) {
-            continue;
-        }
-
-        var entry =  {
-            name: solid.getShapeName(face),
-            // color:(r*255+g)*255+b,
-            mesh: face.mesh.toJSON()
-        };
-        entry.mesh.materials[0].colorDiffuse = [ Math.random(),Math.random(),Math.random()];
-        jsonSolidMesh.faces.push( entry);
-    }
-    // produce each edge
-
-    var edges = solid.getEdges();
-    var edge;
-    for (var i=0;i<edges.length;i++) {
-        edge = edges[i];
-        var polygone = edge.polygonize();
-        var pts = Object.keys(polygone).map(function(e) { return polygone[e]; });
-        var entry =  {
-                name: solid.getShapeName(edge),
-                // color:(r*255+g)*255+b,
-                mesh: pts
-        };
-        //entry.mesh.materials[0].colorDiffuse = [ Math.random(),Math.random(),Math.random()];  
-        jsonSolidMesh.edges.push( entry);   
-    }
-          
-    return jsonSolidMesh;
-
-}
 exports.buildCSG1 = function(req,res)
 {
     try {
@@ -228,31 +147,6 @@ exports.buildCSG1 = function(req,res)
 
             }
         });
-
-        if (1) {
-
-
-        }else {
-            // execute script in a special vm
-            //xx code ="solid = 'toto';"
-                        var jg = jailguard.create({timeout: 100});
-                        jg.run(code, env, function(err) {
-                            console.log("err = ",err);
-                            console.log("env = ",env);
-
-                            if (!err) {
-
-                                res.send(buildMesh(env.solid));
-
-                            } else {
-                                console.log(" error in jailguard:", err,JSON.stringify(err));
-                                res.send(501,"Error building solid : "+ err.message + err.toString());
-
-                            }
-
-                        });
-        }
-
 
     }
     catch(err) {

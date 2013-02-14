@@ -114,7 +114,7 @@ $(document).ready(function() {
     controls.keys = [ /*A*/65, /*S*/ 83, /*D*/68 ];
 
     controls.addEventListener( 'change', function() {
-
+        render();
     });
 
 
@@ -169,7 +169,8 @@ function onWindowResize( event ) {
     camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
     camera.updateProjectionMatrix();
 
-
+     controls.update(); 
+     render();
 
 }
 
@@ -177,7 +178,7 @@ function animate() {
     "use strict";
     requestAnimationFrame( animate );
     controls.update();
-    render();
+
     updateAJS();
 }
 
@@ -334,11 +335,8 @@ function rgb2hex( rgb ) {
 }
 function process_face_mesh(rootNode,jsonEntry,color)
 {
-   
-
     var jsonFace = jsonEntry.mesh;
-   //  $("#ascii_mesh").append("<p>face "+  jsonEntry.name + " vertices :" + jsonFace.vertices.length + ", faces : " + jsonFace.faces.length + " color = " +  jsonEntry.color + " </p>");
-
+   
     jsonFace.scale = 1.0;
     var jsonLoader = new THREE.JSONLoader();
 
@@ -348,10 +346,7 @@ function process_face_mesh(rootNode,jsonEntry,color)
 
         function(geometry,material ){
             material = new THREE.MeshLambertMaterial({color: rgb2hex(color)});
-            // rgb2hex(jsonFace.materials[0].colorDiffuse) });
             var mesh = new THREE.Mesh(geometry,material);
-            //console.log("material" ,material );
-            //console.log(" vertices =",geometry.vertices);
             rootNode.add(mesh);
 
         },/* texturePath */ undefined);
@@ -366,9 +361,8 @@ function process_edge_mesh(rootNode,jsonEdge)
         geometry.vertices.push(new THREE.Vector3(v[i],v[i+1],v[i+2]));        
         i+=3;
     }
-    var material = new THREE.LineDashedMaterial({ linewidth: 4, color: 0xffffff}); // {color: rgb2hex([0,0,1]) });
+    var material = new THREE.LineDashedMaterial({ linewidth: 4, color: 0xffffff}); 
     var polyline = new THREE.Line(geometry,material);
-    //xx console.log(" vertices =",geometry.vertices);
     rootNode.add(polyline);
 }
 function install_json_mesh(json) {
@@ -419,6 +413,8 @@ function install_json_mesh(json) {
     COG = shapeCenterOfGravity(rootNode);
     camera.lookAt(COG);
     controls.target.set( COG.x, COG.y, COG.z );
+    
+    render();
 }
 
 

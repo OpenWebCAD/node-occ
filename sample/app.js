@@ -38,7 +38,7 @@ app.configure(function(){
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
-   app.use(express.compress());
+  app.use(express.compress());
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
@@ -58,11 +58,6 @@ app.get('/test', function(req,res) {
    res.render("sample",{});
 })
 app.get('/', routes.index);
-app.get('/objects(""|\.json|\.html)', object.list);
-app.get('/object/:id', object.get);
-app.post('/object', object.get);
-app.get('/csg', object.buildCSG);
-app.get('/csg1', object.buildCSG1);
 app.post('/csg', object.buildCSG);
 app.post('/csg1', object.buildCSG1);
 
