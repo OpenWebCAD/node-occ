@@ -43,8 +43,10 @@ function zoomAll()
 
 
 // prepare graduated background for the 3D view
-//xx var backgroundTexture = new THREE.ImageUtils.loadTexture( 'images/Graduated_Blue_Background.png' );
-var backgroundTexture = new THREE.ImageUtils.loadTexture( 'images/body_bg.jpg' );
+var backgroundURL = 'images/body_bg.jpg';
+// backgroundURL =   'images/Graduated_Blue_Background.png' ;
+var backgroundTexture = new THREE.ImageUtils.loadTexture( backgroundURL,null,function onload(){ render(); } );
+
 var bg = new THREE.Mesh(
   new THREE.PlaneGeometry(2, 2, 0),
   new THREE.MeshBasicMaterial({map: backgroundTexture})
@@ -163,14 +165,12 @@ function onWindowResize( event ) {
 
     SCREEN_WIDTH = container.width();
     SCREEN_HEIGHT = container.height();
-
-
     renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
     camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-    camera.updateProjectionMatrix();
 
-     controls.update(); 
-     render();
+    camera.updateProjectionMatrix();
+    controls.update(); 
+    render();
 
 }
 
@@ -181,9 +181,20 @@ function animate() {
 
     updateAJS();
 }
+function renderAxis_work_in_progress()
+{
+    renderer.setSize( 10, 10 );
+    camera.updateProjectionMatrix();
 
+    SCREEN_WIDTH = container.width();
+    SCREEN_HEIGHT = container.height();
+    renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+    camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+}
 function render() {
     renderbackground();
+    //xxrenderAxis();
     renderer.render( scene, camera );
 }
 
@@ -272,7 +283,7 @@ function installACEEditor() {
     });
 
 
-    delay = setTimeout(updatePreview, 2000);
+    //xx delay = setTimeout(updatePreview, 2000);
     
     restoreUserSession();
 
@@ -280,41 +291,15 @@ function installACEEditor() {
 
 }
 
-/*function installCodeMirrorEditor() {
-    editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-            lineNumbers: true,
-            theme: "ambiance",
-            matchBrackets: true,
-            extraKeys: {
-                "Enter": "newlineAndIndentContinueComment" ,
-                "Ctrl-Space": "autocomplete"
-            }});
-    $('.CodeMirror').css({ "float":"top",width:"50%",height:"auto",position:"absolute" , "overflow-x": "auto", "overflow-y": "hidden"});
-
-    CodeMirror.commands.autocomplete = function(cm) {
-            CodeMirror.simpleHint(cm, CodeMirror.javascriptHint);
-    }
-
-    editor.on("change", function() {
-          clearTimeout(delay);
-
-           delay = setTimeout(function() {
-             $("#button").show();
-           }, 2000);
-    });
-
-    delay = setTimeout(updatePreview, 2000);
-}
-*/
 function installEditor() { return installACEEditor(); }
 
 function updatePreview() {
-    send_and_build_up_csg();
-    editor.isModified=false;
-    $("#button").hide();
-    clearTimeout();
+    if (editor.isModified)  {
+        send_and_build_up_csg();
+        editor.isModified=false;
+        $("#button").hide();        
+    }
 }
-
 
 function handle_json_error(request, statusText, errorThrown) {
 
@@ -322,7 +307,6 @@ function handle_json_error(request, statusText, errorThrown) {
     console.log(request);
     lastAjaxDuration = new Date() - lastAjaxStart;
 
-    // var obj = JSON.parse(err.responseText);
     $("#ascii_mesh").text(request.responseText + " duration :  " + lastAjaxDuration + " ms");
 
 
@@ -413,10 +397,8 @@ function install_json_mesh(json) {
     COG = shapeCenterOfGravity(rootNode);
     camera.lookAt(COG);
     controls.target.set( COG.x, COG.y, COG.z );
-    
     render();
 }
-
 
 /**
  * In send_and_build_up_csg_method1 the construction script is passed to the server as a text string
