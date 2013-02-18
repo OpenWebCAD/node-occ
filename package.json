@@ -5,7 +5,9 @@
   "preferGlobal": "true",
   "dependencies": {
       "should": "latest",
-      "colors": "latest"
+      "colors": "latest",
+      "file-utils": "*"
+ 
   },
   "main": "lib/occ",
   "author": "Etienne Rossignon",

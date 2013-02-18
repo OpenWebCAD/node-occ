@@ -1,7 +1,7 @@
 var occ  = require('../../lib/occ'),
     CSGBuilder = require('../../lib/CSGBuilder'),
     shapeFactory = require('../../lib/shapeFactory'),
-    jailguard = require('jailguard');
+    scriptRunner = require('../../lib/scriptrunner');
 
 
 var fs = require('fs');
@@ -9,10 +9,6 @@ var fileUtils = require ("file-utils");
 var File = fileUtils.File;
 
 var fast_occ = require('../../lib/fastbuilder').occ;
-var SecurityManager = fileUtils.SecurityManager;
-
-
-
 
 exports.buildCSG = function(req,res)
 {
@@ -66,93 +62,34 @@ function buildResponse(solids,logs) {
 
 exports.buildCSG1 = function(req,res)
 {
-    try {
-        var  solidBuilderScript = decodeURIComponent(req.body.script);
-        //xx console.log( "csg" , solidBuilderScript);
 
-        var env = {
-            csg: fast_occ,
-            occ: fast_occ,
-            logs: [],
-            solids: [],
-            print: function() { env.console.log.apply(env.console,arguments); },
-            shapeFactory: shapeFactory,
+    var csgFuncScript    = decodeURIComponent(req.body.script);
+    var params       = req.body.params;
+    var id           = req.body.id;
 
-                'console':    { 
-                    log: function() { 
-    			           console.log.apply(console,arguments);
-    			           env.logs.push(arguments);
-			            }  
-                },
-            'eval':        function() { throw "eval is forbidden";        },
-            'require':     function() { throw "require is forbidden";     },
-            'setTimeout':  function() { throw "setTimeout is forbidden";  },
-            'setInterval': function() { throw "setInterval is forbidden"; },
-            'display':    function(obj) {
-                   env.solids.push(obj);
-            },
-            error: null } ;
-       
-
-        var code = solidBuilderScript;
-
-        var settings = {
-            prefix: "foo",
-            suffix: ".bar",
-            directory: "/temp/"
-        };
-
-        File.createTempFile (settings, function (error, file){
-            if (!error) {
-                var filename = file.toString ();
-                console.log (" temporary file =",file.toString ()); //Prints: foo<random number>bar
-                fs.writeFile(filename,code,function(err){
-
-                    try {
-
-                        vm.runInNewContext(code,env,filename);
-
-                        res.send(buildResponse(env.solids,env.logs));
-
-                    }
-                    catch(err) {
-
-                        console.trace("Here I am!");
-
-                        function getLineNumber() {
-
-                            var original = Error.prepareStackTrace;
-
-                            var error = {};
-
-                            Error.captureStackTrace(error, getLineNumber);
-
-                            var lineNumber = error.stack;
-
-                            Error.prepareStackTrace = original;
-
-                            return lineNumber ;
-
-                        }
-
-                        console.log("transaction ended with an error",err.message);
-                        console.log("error string = ", err.toString() );
-                        console.log("error stack  = ", err.stack);
-
-                        res.send(501,"Error building solid : "+ err.message + "    "+ err.stack);
-
-                    }
-                });
-
-
+    var process = new scriptRunner.ScriptRunner({
+        csg: fast_occ,
+        occ: fast_occ,
+        solids: [],
+        display: function( objs) {
+            if (!(objs instanceof occ.Solid)) {
+                objs.forEach(function(o){ process.env.solids.push(o);});
+            } else {
+                process.env.solids.push(objs);
             }
-        });
+        },
+        shapeFactory: shapeFactory,
+    });  
 
-    }
-    catch(err) {
-        console.log(err.message + err.toString());
-        res.send(501,"Error building solid : "+ err.message + "    "+ err.toString());
-        return;
-    }
+    var solidBuilderScript = ""+csgFuncScript+"";
 
-}
+    process.run(solidBuilderScript,
+        function done_callback() {
+            res.send(buildResponse(process.env.solids,process.env.logs));
+            console.log(" All Done");
+        },
+        function error_callback(err) {
+           res.send(501,"Error building solid : "+ err.message + "    "+ err.stack);       
+        }
+    );
+};

@@ -1,5 +1,6 @@
 {
-  "name": "application-name",
+  "name": "node-occ-sample",
+  "description": "node-occ sample web application",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,8 +9,7 @@
   "dependencies": {
     "express": "3.0.4",
     "ejs": "*",
-    "jailguard":"*",
-     "file-utils": "*",
-     "stack-trace": "*"
+    "file-utils": "*",
+    "stack-trace": "*"
   }
 }
