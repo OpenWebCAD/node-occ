@@ -136,3 +136,16 @@ describe("testing fast builder get Common Edge" , function() {
     solid2.numFaces.should.be.equal(7);
   });
 });
+
+
+describe("testing fast-builder with impossible cone" , function () {
+    var solid1 = 0;
+    before(function () {
+        // this cone cannot be built : it has PI/2 for half-angle !         
+    });
+    it("should have no solid",function(){
+        (function() {
+            solid1 = fast_occ.makeCone( [0,0,0] , [0,0,1] , 1.5707963267948966 , 10);   
+        }).should.throw();
+    });
+});

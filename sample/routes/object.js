@@ -34,25 +34,14 @@ exports.buildCSG = function(req,res)
 var vm = require('vm');
 var util = require('util');
 
-function getBlockedFunctionConstructor() {
-    "use strict";
-
-    function FakeFunction(execCode) {
-        var code = "FUNCTION_CONSTRUCTOR_DETECTED";
-        var message = "function constructor with code: " + execCode;
-        error = {code: code, message: message};
-
-        return function() {};
-    }
-
-    return FakeFunction;
-}
 
 function buildResponse(solids,logs) {
     
     var response = { solids: [] , logs: [ ]};
-
+    var counter = 1;
     solids.forEach(function(solid){
+        solid.name = "S" + counter;
+        counter++;
         response.solids.push(occ.buildSolidMesh(solid));
     })
     response.logs = logs;

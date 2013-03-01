@@ -303,6 +303,7 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
 
             if ( R < epsilon || H < epsilon ) {
                 ThrowException(Exception::Error(String::New("invalid value for arguments")));
+                return scope.Close(Undefined());
             }
             try {
 				BRepPrimAPI_MakeCylinder tool(ax2,R,H);
@@ -329,6 +330,7 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
             const double H = sqrt(dx*dx + dy*dy + dz*dz);
             if (H < epsilon ) {
                 ThrowException(Exception::Error(String::New("cannot build a cylinder on two coincident points")));
+                return scope.Close(Undefined());
             }
             gp_Vec aV(dx / H, dy / H, dz / H);
             gp_Ax2 ax2(p1, aV);
@@ -342,6 +344,7 @@ Handle<Value> ShapeFactory::makeCylinder(const Arguments& args)
         }
     } else {
         ThrowException(Exception::Error(String::New("invalid arguments")));
+        return scope.Close(Undefined());
     }
 
     return scope.Close(pJhis);
@@ -422,31 +425,29 @@ Handle<Value> ShapeFactory::makeCone(const Arguments& args)
         CATCH_AND_RETHROW("Failed to create cone ");
 
     } else if (args.Length()==4 && args[0]->IsArray() && args[1]->IsArray() && args[2]->IsNumber() && args[3]->IsNumber()) {
-      // cone with a sharp apex 
-      // apex, direction ,  half_angle, height
-      gp_Pnt apex;
-      ReadPoint(args[0],&apex);
+        // cone with a sharp apex 
+        // apex, direction ,  half_angle, height
+        gp_Pnt apex;
+        ReadPoint(args[0],&apex);
 
-      gp_Dir innerDir;
-      ReadDir(args[1],&innerDir);
+        gp_Dir innerDir;
+        ReadDir(args[1],&innerDir);
 
-      double half_angle_in_radian=atan(1.0); // default : 45° 
-      ReadDouble(args[2],half_angle_in_radian);
+        double half_angle_in_radian=atan(1.0); // default : 45° 
+        ReadDouble(args[2],half_angle_in_radian);
 
-      double height = 100;
-      ReadDouble(args[3],height);
-      // r/h= tan(a);
+        double height = 100;
+        ReadDouble(args[3],height);
+        // r/h= tan(a);
 
-      try {
+        try {
         gp_Ax2 ax2(apex, innerDir);
         BRepPrimAPI_MakeCone tool(ax2,0,height*tan(half_angle_in_radian),height);
         pThis->setShape(tool.Shape());  
         registerOneAxisFaces(pThis,tool.Cone());
-      }
-      CATCH_AND_RETHROW("Failed to create cone ");
-          
-          
-      
+        }
+        CATCH_AND_RETHROW("Failed to create cone with apex, direction , half_angle and height");
+                  
      } else {
         ThrowException(Exception::Error(String::New("invalid arguments (cone)")));
     }
