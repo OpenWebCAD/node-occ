@@ -47,6 +47,7 @@ app.configure(function(){
   app.use(express.session());
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(path.join(__dirname, 'client')));
   app.use(express.static(path.join(__dirname, '../lib'))); // to get CSGTree.js
 });
 

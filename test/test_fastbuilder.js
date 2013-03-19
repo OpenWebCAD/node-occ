@@ -15,6 +15,19 @@ function makeShape() {
     return s3;
 }
 
+function startChronometer() {
+    return process.hrtime();  
+}
+function stopChronometer(time1) {
+    var diff1 = process.hrtime(time1);
+    diff1 = (diff1[0]*1E9+diff1[1]); // in nanoseconds
+    diff1 /= 1000.0;                 // in microseconds
+    diff1 /= 1000.0;                 // in miliseconds
+    diff1 /= 1000.0;                 // in seconds
+    return diff1;
+}
+
+
 
 describe("testing geometry builder",function(){
 
@@ -26,24 +39,23 @@ describe("testing geometry builder",function(){
         fastBuilder.mapQueryCount.should.equal(0);
         fastBuilder.mapHit.should.equal(0);
         
-        var time1 = process.hrtime();
+        var c1 = startChronometer();
         makeShape();
-        var diff1 = process.hrtime(time1);
-        diff1 = diff1[0]*1E9+diff1[1];
+        var diff1 = stopChronometer(c1);
 
         fastBuilder.mapQueryCount.should.equal(5);
         fastBuilder.mapHit.should.equal(0);
 
-        var time2 = process.hrtime();
+        var c2 = startChronometer();
         makeShape();
-        var diff2 = process.hrtime(time2);
-        diff2 = diff2[0]*1E9+diff2[1];
+        var diff2 = stopChronometer(c2);
+
 
         fastBuilder.mapQueryCount.should.equal(10);
         fastBuilder.mapHit.should.equal(5);
 
-        console.log(" time to compute first  box = ", diff1 );
-        console.log(" time to compute second box = ", diff2 );
+        console.log(" time to compute first  box = ", diff1 ," seconds");
+        console.log(" time to compute second box = ", diff2  ," seconds" );
         console.log(" speed up                   = ", Math.round( (diff1-diff2)/diff2*100,2) ,"%" );
 
         diff1.should.be.greaterThan(diff2);
@@ -64,6 +76,8 @@ describe("testing calculateOperationHash",function(){
          calculateOperationHash([10,20,30])[1].should.equal("myFunc([10,20,30])");
     })
 });
+
+
 describe("testing fast builder with array of shape",function(){
 
     before(function(){
@@ -148,4 +162,48 @@ describe("testing fast-builder with impossible cone" , function () {
             solid1 = fast_occ.makeCone( [0,0,0] , [0,0,1] , 1.5707963267948966 , 10);   
         }).should.throw();
     });
+});
+
+describe("testing fast-builder with LEGO brick" , function () {
+
+    it("should produce a LEGO brick",function(){
+        
+
+        function buildBrick() {
+            var factory = require("../lib/shapeFactory.js");
+
+            var brick24 =  factory.makeLegoBrick(fast_occ,2,4,'thick');
+
+            brick24.numFaces.should.be.greaterThan(40);
+
+            // now check with bounding box
+            var bbox = brick24.getBoundingBox();
+
+            var eps = 0.01;
+            bbox.nearPt.x.should.be.within(0-eps,0+eps);
+            bbox.nearPt.y.should.be.within(0-eps,0+eps);
+            bbox.nearPt.z.should.be.within(0-eps,0+eps);
+
+            bbox.farPt.x.should.be.within(16-eps,16+eps);
+            bbox.farPt.y.should.be.within(32-eps,32+eps);
+            bbox.farPt.z.should.be.within(11.2-eps,11.2+eps);                   
+        }
+
+        var c1 = startChronometer();
+        buildBrick();
+        var diff1 = stopChronometer(c1);
+
+        var c2 = startChronometer();
+        buildBrick();
+        var diff2 = stopChronometer(c2);
+
+        console.log(" time to compute first  box = ", diff1 ," seconds" );
+        console.log(" time to compute second box = ", diff2  ," seconds");
+        var speedup = Math.round( (diff1-diff2)/diff2*100,2);
+        console.log(" speed up                   = ", speedup ,"%" );
+
+        diff1.should.be.greaterThan(diff2);
+        speedup.should.be.greaterThan(200); //"%"
+
+    }); 
 });
