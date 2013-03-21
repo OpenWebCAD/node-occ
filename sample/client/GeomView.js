@@ -1,4 +1,6 @@
 // GeomView.js
+// Author: etienne.rossignon@gadz.org
+// released under MIT license 
 
 var assert = assert || function(condition, message) { 
     if (!condition) { 
@@ -157,7 +159,13 @@ function GEOMVIEW(container,width,height)
 
     me.sceneHelpers.add( GEOMTOOL.makeGrid());
 
-    me.selectionBox = new THREE.Mesh( new THREE.CubeGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: true, fog: false } ) );
+    me.selectionBox = new THREE.Mesh( 
+        new THREE.CubeGeometry( 1, 1, 1 ), 
+        new THREE.MeshBasicMaterial( {
+             color: 0xffff00, 
+             wireframe: true, 
+             fog: false 
+        } ) );
     me.selectionBox.matrixAutoUpdate = false;
     me.selectionBox.visible = false;
     me.sceneHelpers.add( me.selectionBox );
@@ -170,49 +178,71 @@ function GEOMVIEW(container,width,height)
     
     me.sceneHelpers.add( me.selectionAxis );
 
-    me.renderbackground = function() {
+    
+
+
+
+
+    var private_bgScene;
+    var private_bgCam;
+    /**
+     *
+     */
+    this.setGraduatedBackgound = function (imageurl) {
+        var me = this ; 
+        private_bgScene = null;
+        private_bgCam   = null;
         // prepare graduated background for the 3D view
         var backgroundTexture = new THREE.ImageUtils.loadTexture( 
-            'images/Graduated_Blue_Background.png',
+            imageurl,
             null,
             function onload(){
-              if (me.render3D) { me.render3D(); }
-        });
-        //var backgroundTexture = new THREE.ImageUtils.loadTexture( 
-        //    'images/body_bg.jpg' );
-        var bg = new THREE.Mesh(
-          new THREE.PlaneGeometry(2, 2, 0),
-          new THREE.MeshBasicMaterial({map: backgroundTexture})
+
+                var bg = new THREE.Mesh(
+                  new THREE.PlaneGeometry(2, 2, 0),
+                  new THREE.MeshBasicMaterial({map: backgroundTexture})
+                );
+
+                // The bg plane shouldn't care about the z-buffer.
+                bg.material.depthTest = false;
+                bg.material.depthWrite = false;
+
+                private_bgScene = new THREE.Scene();
+                private_bgCam = new THREE.Camera();
+                private_bgScene.add(private_bgCam);
+
+                private_bgScene.add(bg);
+
+                if (me.render3D) { me.render3D(); }
+            }, function onError() {
+                if (me.render3D) { me.render3D(); }
+            }
         );
+    };
 
-        // The bg plane shouldn't care about the z-buffer.
-        bg.material.depthTest = false;
-        bg.material.depthWrite = false;
 
-        var bgScene = new THREE.Scene();
-        var bgCam = new THREE.Camera();
-        bgScene.add(bgCam);
-        bgScene.add(bg);
-        return function () {
-            me.renderer.clear();
-            me.renderer.render(bgScene, bgCam);
+    function renderbackground() {
+        me.renderer.clear();    
+        if (private_bgScene && private_bgCam) {
+            me.renderer.render(private_bgScene, private_bgCam);
         }
-    }();
+    }
 
-   
 
     me.render3D = function() {
-        
+
         var me = this;
-        me.renderbackground();
+        renderbackground();
         
         me.sceneHelpers.updateMatrixWorld();
         me.scene.updateMatrixWorld();
 
-            me.renderer.render( me.sceneHelpers, me.camera );
+        me.renderer.render( me.sceneHelpers, me.camera );
         me.renderer.render( me.scene, me.camera );
 
     }
+
+    me.setGraduatedBackgound('images/Graduated_Blue_Background.png');
 
     me.resizeRenderer = function() {
         var me = this;
@@ -446,7 +476,7 @@ GEOMVIEW.prototype.__solidObjectsNode = function(json) {
         me.scene.add(rootNode);
     }
     return rootNode;
-}
+};
 
 
 GEOMVIEW.prototype.selectObject  = function (object) {
@@ -517,7 +547,8 @@ GEOMVIEW.prototype.selectObject  = function (object) {
 GEOMVIEW.prototype.highlightObject = function(obj3D) {
 
     // me.selection =
-}
+};
+
 /*
  *  json = { solids: [ id: "ID" , { faces: [], edges: [] }, ...]}
  *   
@@ -558,7 +589,7 @@ GEOMVIEW.prototype.updateShapeObject = function (json) {
             geometry.vertices.push(new THREE.Vector3(v[i],v[i+1],v[i+2]));        
             i+=3;
         }
-        var material = new THREE.LineDashedMaterial({ linewidth: 4, color: 0xffffff}); 
+        var material = new THREE.LineDashedMaterial({ linewidth: 1, color: 0xffffff}); 
         var polyline = new THREE.Line(geometry,material);
         polyline.properties.OCCType = "edge";
         polyline.properties.OCCName = jsonEdge.name;
@@ -579,8 +610,6 @@ GEOMVIEW.prototype.updateShapeObject = function (json) {
 
     // read solids
     var jsonSolids = json.solids;
-
-
 
     jsonSolids.forEach(function(solidMesh) {
 
@@ -603,17 +632,19 @@ GEOMVIEW.prototype.updateShapeObject = function (json) {
             process_edge_mesh(group,edge);
         });
     });
-}
+};
 
-/*
+/**
  * remove all objects from the graphical view
  */
 GEOMVIEW.prototype.clearAll = function() {
     var me = this;
     rootNode  = me.__solidObjectsNode();
     if (rootNode) { me.scene.remove(rootNode); }
-}
-/*
+};
+
+
+/**
  * point the current camera to the center
  * of the graphical object (zoom factor is not affected)
  */
@@ -625,17 +656,18 @@ GEOMVIEW.prototype.pointCameraTo = function(node) {
     me.controls.target.set( COG.x,COG.y,COG.z );  
 
     me.render3D();
-}
-/*
+};
+
+/**
  * Zoom All
  */
 GEOMVIEW.prototype.zoomAll = function() {
     this.pointCameraTo(this.__solidObjectsNode());
-}
+};
 
-/*
+/**
  *
  */
- GEOMVIEW.prototype.on = function(event_name,callback) {
+GEOMVIEW.prototype.on = function(event_name,callback) {
    // to DO
-}
+};

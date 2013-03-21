@@ -1,21 +1,37 @@
 {
-  "name":  "node-occ",
+  "name": "node-occ",
   "version": "0.0.2",
   "description": "OpenCascade OCE Wrapper for Node js",
   "preferGlobal": "true",
   "dependencies": {
-      "should": "latest",
-      "colors": "latest",
-      "file-utils": "*"
- 
+    "should": "latest",
+    "colors": "latest",
+    "file-utils": "*"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt-contrib-uglify": "*",
+    "grunt-mocha-cli": "~1.0.1",
+    "should": "latest"
   },
   "main": "lib/occ",
   "author": "Etienne Rossignon",
-  "engines": { "node": ">= 0.8.19 " },
-  "keywords": ["3D","CAD","OpenCascade","OCE","Solid Modeler","geometry","BRep"],
-  "repository": {
-     "type": "git",
-     "url": "https://github.com/erossignon/node-occ.git"
+  "engines": {
+    "node": "*"
   },
-  "engines": { "node": "*"}
+  "keywords": [
+    "3D",
+    "CAD",
+    "OpenCascade",
+    "OCE",
+    "Solid Modeler",
+    "geometry",
+    "BRep"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erossignon/node-occ.git"
+  }
 }

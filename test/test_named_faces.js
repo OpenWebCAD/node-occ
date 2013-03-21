@@ -241,7 +241,7 @@ describe("testing face naming on a box fused with a box that have a common face 
         Object.keys(solid.faces).length.should.equal(10);
         solid.getFaces().length.should.equal(10);
         occ.gc();
-        var faces =  solid.getFaces()
+        var faces =  solid.getFaces();
         for (var i in faces ){
             var face = faces[i];
             var bbox = face.getBoundingBox();

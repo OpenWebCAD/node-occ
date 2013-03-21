@@ -63,18 +63,20 @@ describe("testing geometry builder",function(){
     });
 });
 
+
 describe("testing calculateOperationHash",function(){
-    'use strict';
+
+    var fastbuilder = require("../lib/fastbuilder");
     var calculateOperationHash = function() {
-        return require("../lib/fastbuilder").calculateOperationHash("myFunc",arguments);
-    }
+        return fastbuilder.calculateOperationHash("myFunc",arguments);
+    };
 
     before(function(){
 
     });
-    it("",function(){
+    it("should calculate the hash of [10,20,30]",function(){
          calculateOperationHash([10,20,30])[1].should.equal("myFunc([10,20,30])");
-    })
+    });
 });
 
 
@@ -111,7 +113,7 @@ describe("testing fast builder with makeThickSolid" , function() {
     });
     it(" should construct the same object as if using 'occ' ",function(){
         s1.numFaces.should.equal(s2.numFaces);
-    })
+    });
 });
 
 describe("testing fast builder with makeBottle" , function() {
@@ -119,12 +121,10 @@ describe("testing fast builder with makeBottle" , function() {
     var s2;
     before(function(){
        // s1 = fast_occ.makeBottle();
-
-
     });
     it(" should ...",function(){
       //  s1.numFaces.should.be.greaterThan(16);
-    })    
+    });
 });
 
 
@@ -132,8 +132,7 @@ describe("testing fast builder with makeBottle" , function() {
 describe("testing fast builder get Common Edge" , function() {
   var solid1;
   var solid2;
-  function buildFilletOnTopLeftEdge()
-  {    
+  function buildFilletOnTopLeftEdge() {    
      var s1 = fast_occ.makeBox([10,20,30],[110,120,130]);
      var edges = s1.getCommonEdges(s1.faces.front,s1.faces.left);
      s1 = fast_occ.makeFillet(s1,edges,10);
@@ -160,7 +159,7 @@ describe("testing fast-builder with impossible cone" , function () {
     it("should have no solid",function(){
         (function() {
             solid1 = fast_occ.makeCone( [0,0,0] , [0,0,1] , 1.5707963267948966 , 10);   
-        }).should.throw();
+        }).should.throwError();
     });
 });
 

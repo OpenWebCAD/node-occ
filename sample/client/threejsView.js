@@ -151,14 +151,9 @@ function handle_json_error(request, statusText, errorThrown) {
 
 
 
-function install_json_mesh(json) {
+function install_json_mesh(json,size_in_byte) {
 
     "use strict";
-    $("#ascii_mesh").text("");
-
-    var beautified = JSON.stringify(json);
-    $("#ascii_mesh").append(
-            "<p>duration: " + lastAjaxDuration + " ms   - size :" + bytesToSize(beautified.length,3) + "</p><br/>");
 
     view.clearAll();
     view.updateShapeObject(json);
@@ -189,13 +184,17 @@ function send_and_build_up_csg_method2() {
 
     lastAjaxStart = new Date();
 
+    var size_in_byte = 0;
+  
+    $("#ascii_mesh").text("");
+
     $.ajax({
         url: "/csg1" ,
         data: JSON.stringify({ script: encoded_script}),
         type: "POST",
         contentType: "application/json",
         cache: false,
-        dataType:"json",
+        dataType:"text",
         statusCode: {
             404: function() {
                 $("#response").html('Could not contact server.');
@@ -204,11 +203,22 @@ function send_and_build_up_csg_method2() {
                 $("#response").html('A server-side error has occurred.');
             }
         },
-
+        success: function(response) {
+            if(response){       
+                size_in_byte =  response.length ;
+                lastAjaxDuration = new Date() - lastAjaxStart;
+                $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + " ms   - size :" + bytesToSize(size_in_byte,3) + "</p>");
+ 
+            }
+        },
         error: handle_json_error
     }).done( function(json) {
-            lastAjaxDuration = new Date() - lastAjaxStart;
-            install_json_mesh(json);
+            var t1 = new Date();
+            var obj = JSON.parse(json);
+            var t2 = new Date();
+            install_json_mesh(obj);
+            var t3 = new Date();
+             $("#ascii_mesh").append("<p>parsing duration: " + (t2-t1)  + " ms " + " " + (t3-t2)  + " ms </p>");
      });
 }
 

@@ -18,7 +18,7 @@ describe("testing face mesh ",function() {
 
         topFace.hasMesh.should.equal(false);
         // now mesh the solid
-        solid.mesh;
+        var m = solid.mesh;
         topFace.hasMesh.should.equal(true);
 
         // topFace.mesh.toJSON();

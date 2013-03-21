@@ -269,7 +269,7 @@ describe("testing solid construction",function() {
                     missing.push(expected[j]);
                    }
                }
-               missing.should.be.empty;
+               missing.should.have.lengthOf(0);
 
             });
     });
@@ -295,34 +295,34 @@ describe("testing solid construction",function() {
         it("should iterate on 6 faces", function() {
 
             shapeIt = new occ.ShapeIterator(solid,"FACE");
-            shapeIt.more.should.be.true;
+            shapeIt.more.should.be.equal(true);
             assert(shapeIt.current === undefined);
             var counter =0;
             while (shapeIt.more) {
-                shapeIt.more.should.be.true;
+                shapeIt.more.should.be.equal(true);
                 shapeIt.next();
-                shapeIt.current.should.not.be.undefined;
+                should.exists(shapeIt.current);
                 counter+=1;
             }
             counter.should.equal(6);
-            shapeIt.more.should.be.false;
-            shapeIt.current.should.not.be.undefined;
+            shapeIt.more.should.be.equal(false);
+            should.exists(shapeIt.current);
 
         });
         it("should iterate on 24 edges ( 4 on each of the 6 faces", function() {
             shapeIt = new occ.ShapeIterator(solid,"EDGE");
-            shapeIt.more.should.be.true;
+            shapeIt.more.should.be.equal(true);
             assert(shapeIt.current === undefined);
             var counter =0;
             while (shapeIt.more) {
-                shapeIt.more.should.be.true;
+                shapeIt.more.should.be.equal(true);
                 shapeIt.next();
-                shapeIt.current.should.not.be.undefined;
+                should.exists(shapeIt.current);
                 counter+=1;
             }
             counter.should.equal(24);
-            shapeIt.more.should.be.false;
-            shapeIt.current.should.not.be.undefined;
+            shapeIt.more.should.be.equal(false);
+            should.exists(shapeIt.current);
 
         });
 
@@ -520,7 +520,7 @@ describe("testing solid construction",function() {
         it("should raise exception when trying to build a box with illegal arguments", function(){
             (function(){
                 var solid = makebox("illegal");
-            }).should.throw();
+            }).should.throwError();
 
         });
     });
@@ -606,7 +606,7 @@ describe("testing solid construction",function() {
             //xx console.log( Object.keys(thickSolid.faces).join(" "));
             initialBox.numFaces.should.equal(6);
             thickSolid.numFaces.should.equal(23);
-        })
+        });
     });
     describe("makeThickSolid (internal) on box",function(){
         var initialBox;
@@ -620,7 +620,7 @@ describe("testing solid construction",function() {
             //xx console.log( Object.keys(thickSolid.faces).join(" "));
             initialBox.numFaces.should.equal(6);
             thickSolid.numFaces.should.equal(11);
-        })
+        });
     });
     describe("finding common edge of 2 faces",function(){
         var box;
@@ -658,12 +658,12 @@ describe("testing solid construction",function() {
         var boxWithDraftFace;
         before(function(){
             box = occ.makeBox(100,200,300); 
-            var edges =  box.getCommonEdges(box.faces.left,box.faces["front"])[0];
+            var edges =  box.getCommonEdges(box.faces.left,box.faces.front)[0];
             // console.log("edge = ",edges);
             box = occ.makeFillet(box,edges,10);
 
             // note: left , front , top and bottom faces have been modified by the fillet
-            // operation.
+            // operation.;
 
             var faceToDraft = box.faces["mleft:0"];
             var neutralFace = box.faces["mbottom:0"];
@@ -681,5 +681,5 @@ describe("testing solid construction",function() {
             boxWithDraftFace.volume.should.be.lessThan(box.volume);
             
         });
-    })    
+    });
 });
