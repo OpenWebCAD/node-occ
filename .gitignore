@@ -36,3 +36,7 @@ deps/
 /t.js
 /*.sublime-project
 /*.sublime-workspace
+
+/src/*.swp
+
+*.swp

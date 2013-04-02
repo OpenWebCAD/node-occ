@@ -54,13 +54,12 @@ void Solid::Init(Handle<Object> target)
 
 void Solid::InitNew(const v8::Arguments& args)
 {
-	Shape::InitNew(args);
-	REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,area);
-	REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,volume);
-
-    REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
-    REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
-    REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
+  Shape::InitNew(args);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,area);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,volume);
+  REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
+  REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
+  REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
 }
 
 Handle<v8::Value> Solid::New(const v8::Arguments& args)

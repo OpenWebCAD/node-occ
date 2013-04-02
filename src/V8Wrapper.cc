@@ -52,17 +52,18 @@ void Initialize(Handle<Object> target)
    // target->Set(String::NewSymbol("makeChamfer")  FunctionTemplate::New(ShapeFactory::makeDraftAngle)->GetFunction());
 
 
-
     target->Set(String::NewSymbol("fuse"),        FunctionTemplate::New(ShapeFactory::fuse)->GetFunction());
     target->Set(String::NewSymbol("cut"),         FunctionTemplate::New(ShapeFactory::cut)->GetFunction());
     target->Set(String::NewSymbol("common"),      FunctionTemplate::New(ShapeFactory::common)->GetFunction());
     target->Set(String::NewSymbol("compound"),    FunctionTemplate::New(ShapeFactory::compound)->GetFunction());
 
     target->Set(String::NewSymbol("writeSTEP"),   FunctionTemplate::New(writeSTEP)->GetFunction());
+    target->Set(String::NewSymbol("writeBREP"),   FunctionTemplate::New(writeBREP)->GetFunction());
+    target->Set(String::NewSymbol("readSTEP"),   FunctionTemplate::New(readSTEP)->GetFunction());
+    target->Set(String::NewSymbol("readBREP"),   FunctionTemplate::New(readBREP)->GetFunction());
 
     target->Set(String::NewSymbol("oceVersion"),  String::New("0.11"));
     target->Set(String::NewSymbol("gc"),     FunctionTemplate::New(ForceGC)->GetFunction());
-
 
 }
 NODE_MODULE(occ, Initialize)
