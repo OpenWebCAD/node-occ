@@ -58,6 +58,12 @@ THREE.TrackballControls = function ( object, domElement ) {
 	_panStart = new THREE.Vector2(),
 	_panEnd = new THREE.Vector2();
 
+	// for reset
+
+	this.target0 = this.target.clone();
+	this.position0 = this.object.position.clone();
+	this.up0 = this.object.up.clone();
+
 	// events
 
 	var changeEvent = { type: 'change' };
@@ -74,6 +80,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 		this.screen.offsetTop = 0;
 
 		this.radius = ( this.screen.width + this.screen.height ) / 4;
+
 	};
 
 	this.handleEvent = function ( event ) {
@@ -168,23 +175,23 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		} else {
 
-		var factor = 1.0 + ( _zoomEnd.y - _zoomStart.y ) * _this.zoomSpeed;
+			var factor = 1.0 + ( _zoomEnd.y - _zoomStart.y ) * _this.zoomSpeed;
 
-		if ( factor !== 1.0 && factor > 0.0 ) {
+			if ( factor !== 1.0 && factor > 0.0 ) {
 
-			_eye.multiplyScalar( factor );
+				_eye.multiplyScalar( factor );
 
-			if ( _this.staticMoving ) {
+				if ( _this.staticMoving ) {
 
-				_zoomStart.copy( _zoomEnd );
+					_zoomStart.copy( _zoomEnd );
 
-			} else {
+				} else {
 
-				_zoomStart.y += ( _zoomEnd.y - _zoomStart.y ) * this.dynamicDampingFactor;
+					_zoomStart.y += ( _zoomEnd.y - _zoomStart.y ) * this.dynamicDampingFactor;
+
+				}
 
 			}
-
-		}
 
 		}
 
@@ -276,6 +283,25 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	};
 
+	this.reset = function () {
+
+		_state = STATE.NONE;
+		_prevState = STATE.NONE;
+
+		_this.target.copy( _this.target0 );
+		_this.object.position.copy( _this.position0 );
+		_this.object.up.copy( _this.up0 );
+
+		_eye.subVectors( _this.object.position, _this.target );
+
+		_this.object.lookAt( _this.target );
+
+		_this.dispatchEvent( changeEvent );
+
+		lastPosition.copy( _this.object.position );
+
+	};
+
 	// listeners
 
 	function keydown( event ) {
@@ -317,24 +343,26 @@ THREE.TrackballControls = function ( object, domElement ) {
 
     }
 	function keyup( event ) {
-		
+
 		event.preventDefault();
 		event.stopPropagation();
 
-		if ( _this.enabled === false) return;
+		if ( _this.enabled === false ) return;
 
 		_state = _prevState;
-		
+
 		_this.domElement.addEventListener( 'keydown', keydown, false );
 
 	}
 
 	function mousedown( event ) {
-		
 
-		_this.domElement.focus();
 
-		if ( _this.enabled === false) return;
+		if (_this.domElement.focus) {
+       _this.domElement.focus();
+		}
+
+		if ( _this.enabled === false ) return;
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -366,7 +394,9 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	function mousemove( event ) {
 
-		if ( ! _this.enabled ) return;
+		if (  _this.enabled === false) return;
+		event.preventDefault();
+		event.stopPropagation();
 
 		if ( _state === STATE.ROTATE && !_this.noRotate ) {
 
@@ -431,12 +461,14 @@ THREE.TrackballControls = function ( object, domElement ) {
 				_state = STATE.TOUCH_ROTATE;
 				_rotateStart = _rotateEnd = _this.getMouseProjectionOnBall( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
 				break;
+
 			case 2:
 				_state = STATE.TOUCH_ZOOM;
 				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
 				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
 				_touchZoomDistanceEnd = _touchZoomDistanceStart = Math.sqrt( dx * dx + dy * dy );
 				break;
+
 			case 3:
 				_state = STATE.TOUCH_PAN;
 				_panStart = _panEnd = _this.getMouseOnScreen( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
@@ -461,11 +493,13 @@ THREE.TrackballControls = function ( object, domElement ) {
 			case 1:
 				_rotateEnd = _this.getMouseProjectionOnBall( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
 				break;
+
 			case 2:
 				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
 				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
 				_touchZoomDistanceEnd = Math.sqrt( dx * dx + dy * dy )
 				break;
+
 			case 3:
 				_panEnd = _this.getMouseOnScreen( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
 				break;
@@ -475,7 +509,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		}
 
-		}
+	}
 
 	function touchend( event ) {
 
@@ -495,15 +529,17 @@ THREE.TrackballControls = function ( object, domElement ) {
 				_panStart = _panEnd = _this.getMouseOnScreen( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
 				break;
 
-	}
+		}
 
 		_state = STATE.NONE;
 
-}
+	}
 
 	// see http://www.dbp-consulting.com/tutorials/canvas/CanvasKeyEvents.html
-	this.domElement.setAttribute('tabindex','0');
-	this.domElement.focus();
+	// this.domElement.setAttribute('tabindex','0');
+  if ( this.domElement.focus) {
+	   this.domElement.focus();
+  }
 
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
@@ -523,3 +559,5 @@ THREE.TrackballControls = function ( object, domElement ) {
 	this.handleResize();
 
 };
+
+THREE.extend( THREE.TrackballControls.prototype, THREE.EventDispatcher.prototype );

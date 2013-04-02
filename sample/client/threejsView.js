@@ -59,6 +59,10 @@ $(document).ready(function() {
 
     $("#button").click(send_and_build_up_csg);
 
+    $("#zoomAll").click(function() { 
+         view.zoomAll();
+    });
+
 });
 
 function onWindowResize( event ) {
@@ -156,7 +160,10 @@ function install_json_mesh(json,size_in_byte) {
     "use strict";
 
     view.clearAll();
-    view.updateShapeObject(json);
+    view.updateShapeObject(json,function() {
+        view.zoomAll();
+    });
+    
 
     // log
     json.logs.forEach(function(line){
