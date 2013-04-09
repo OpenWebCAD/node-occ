@@ -1,0 +1,3 @@
+[submodule "sample/3rdparties/dropzone"]
+	path = sample/3rdparties/dropzone
+	url = https://github.com/enyo/dropzone.git

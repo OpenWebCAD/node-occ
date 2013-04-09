@@ -560,8 +560,15 @@ GEOMVIEW.prototype.selectObject  = function (object) {
 };
 
 
-GEOMVIEW.prototype.highlightObject = function(obj3D) {
+GEOMVIEW.prototype.getDefaultColor = function () {
 
+   var color = [ Math.random(),Math.random(),Math.random()];
+//   var color = [ 249.0/ 255.0, 195.0/ 255.0, 61.0/ 255.0];
+   return color
+}
+
+GEOMVIEW.prototype.highlightObject = function(obj3D) {
+    // TODO:
     // me.selection =
 };
 
@@ -572,8 +579,13 @@ GEOMVIEW.prototype.highlightObject = function(obj3D) {
  */
 GEOMVIEW.prototype.updateShapeObject = function (json, next) {
 
-    var color = [ Math.random(),Math.random(),Math.random()];
-
+    var me = this;
+ 
+    /**
+     *  Convert a rgb color to hex, 
+     *  each Red Green Blue component of RGB shall be in the range [0,1]
+     *  
+     */
     function rgb2hex( rgb ) {
         return ( rgb[ 0 ] * 255 << 16 ) + ( rgb[ 1 ] * 255 << 8 ) + rgb[ 2 ] * 255;
     }
@@ -629,8 +641,11 @@ GEOMVIEW.prototype.updateShapeObject = function (json, next) {
 
     jsonSolids.forEach(function(solidMesh) {
 
-        color = [ Math.random(),Math.random(),Math.random()];
+        var color = me.getDefaultColor();
 
+        if (solidMesh.color instanceof Array) {
+            color = solidMesh.color.slice(0);
+        }
         var group = new THREE.Object3D();
         node.add(group);
         if (undefined == group.properties ) { 
@@ -639,7 +654,7 @@ GEOMVIEW.prototype.updateShapeObject = function (json, next) {
         group.properties.OCCType =  "Solid";
         group.properties.OCCName  =  solidMesh.name;
         group.properties.OCCID    =  solidMesh.id;
-        group.properties.OCCColor = color.slice(0);
+        group.properties.OCCColor =  color;
 
         // one object
         solidMesh.faces.forEach(function(face){
