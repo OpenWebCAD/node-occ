@@ -3,15 +3,33 @@ var should = require("should");
 
 var occ = require("../lib/occ");
 
+var fs = require("fs");
+
+
+var getTemporaryFilePath = require('gettemporaryfilepath');
+
 
 describe("testing BREP input output ",function(){
 
+  var b1_brep, b2_brep,b3_brep;
+  before(function() {
+    b1_brep = getTemporaryFilePath({ prefix: "b1_", suffix: ".brep"});
+    b2_brep = getTemporaryFilePath({ prefix: "b2_", suffix: ".brep"});
+    b3_brep = getTemporaryFilePath({ prefix: "b3_", suffix: ".brep"});
+
+  });
+  after(function() {
+    fs.unlink(b1_brep);
+    fs.unlink(b2_brep);
+    fs.unlink(b3_brep);
+  });
+
   it("should write a simple shape", function() {
      var box = occ.makeBox([0,0,0],[100,200,300]);
-     occ.writeBREP("/temp/b1.brep",box);
+     occ.writeBREP(b1_brep,box);
      var cyl = occ.makeCylinder([0,0,0],[0,0,10],5);
-     occ.writeBREP("/temp/b2.brep",cyl);
-     occ.writeBREP("/temp/b3.brep",[box,cyl]);
+     occ.writeBREP(b2_brep,cyl);
+     occ.writeBREP(b3_brep,[box,cyl]);
   }); 
 
   describe(" readBREP ",function() {
@@ -28,7 +46,7 @@ describe("testing BREP input output ",function(){
     });
     it("should read the shape back",function(done) {
       
-       occ.readBREP("/temp/b1.brep",function(err, shapes ) {
+       occ.readBREP(b1_brep,function(err, shapes ) {
              
            shapes.length.should.equal(1);
            shapes[0].numFaces.should.equal(6);
@@ -37,7 +55,7 @@ describe("testing BREP input output ",function(){
     });
     it("should read the shape back",function(done) {
 
-       occ.readBREP("/temp/b2.brep",function(err, shapes ) {
+       occ.readBREP(b2_brep,function(err, shapes ) {
            shapes.length.should.equal(1);
            shapes[0].numFaces.should.equal(3);
            done();
@@ -45,7 +63,7 @@ describe("testing BREP input output ",function(){
 
     });
     it("should read the shape back",function(done) {
-       occ.readBREP("/temp/b3.brep",function(err, shapes ) {
+       occ.readBREP(b3_brep,function(err, shapes ) {
            shapes.length.should.equal(2);
            shapes[0].numFaces.should.equal(6);
            shapes[1].numFaces.should.equal(3);
