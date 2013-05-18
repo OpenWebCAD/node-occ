@@ -6,7 +6,9 @@
   "dependencies": {
     "should": "latest",
     "colors": "latest",
-    "file-utils": "*"
+    "file-utils": "*",
+    "temporary": "0.0.5",
+    "gettemporaryfilepath": "0.0.1"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
