@@ -742,6 +742,9 @@ GEOMVIEW.prototype.zoomObject = function (node) {
     var me = this; 
 
     var bbox = GEOMTOOL.boundingBox(node);
+    if (bbox.empty()) {
+        return;
+    }
     var COG =  bbox.center();
     me.pointCameraTo(COG);
 

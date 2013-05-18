@@ -78,6 +78,15 @@ describe("testing solid construction",function() {
             cumulated_face_area.should.be.within(expectedArea -epsilon,expectedArea+epsilon );
         });
     });
+    descri
+    describe("makeBox with invalid arguments",function() {
+
+       it("should raise an exception when invalid arguments are passed to makeBox",function() {
+          (function failing_func() {
+ 	       var solid = occ.makeBox([10,20,30],10,10,10);
+          }).should.throwError();
+       });
+    });
     describe("fuse 2 overlapping boxes", function() {
         var solid1;
         var solid2;

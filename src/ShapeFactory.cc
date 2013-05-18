@@ -67,7 +67,7 @@ Handle<v8::Value> ShapeFactory::makeBox(const v8::Arguments& args)
     //    3 numbers dx,dy,dz
     //    2 points  p1,p2
     //TODO   1 point + 3 numbers dx,dy,dz
-    //TODO    1 object with { x: 1,y: 2,z: 3, dw:
+    //TODO   1 object with { x: 1,y: 2,z: 3, dw:
     HandleScope scope;
     Handle<v8::Value> pJhis = Solid::NewInstance();
     Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
@@ -115,8 +115,8 @@ Handle<v8::Value> ShapeFactory::makeBox(const v8::Arguments& args)
             BRepPrimAPI_MakeBox tool(p1,dx, dy, dz);
             pThis->setShape(tool.Shape());
             registerMakeBoxFaces(pThis,tool);
-
-
+        } else {
+           ThrowException(Exception::Error(String::New("invalid arguments in makeBox")));
         }
     } catch(Standard_Failure&) {
         ThrowException(Exception::Error(String::New("cannot build box")));

@@ -74,8 +74,10 @@ var lastAjaxDuration;
 var delay;
 
 function restoreUserSession() {
-    var script = decodeURIComponent(localStorage.getItem("myscript"));
-    if (script) {
+    var rawData = localStorage.getItem("myscript");
+    if (!rawData) return;
+    var script = decodeURIComponent(rawData);
+    if (script && script!="null") {
         editor.setValue(script);
         editor.gotoLine(1,1,false);
         editor.clearSelection();        
