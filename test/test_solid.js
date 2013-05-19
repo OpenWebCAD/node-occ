@@ -78,7 +78,6 @@ describe("testing solid construction",function() {
             cumulated_face_area.should.be.within(expectedArea -epsilon,expectedArea+epsilon );
         });
     });
-    descri
     describe("makeBox with invalid arguments",function() {
 
        it("should raise an exception when invalid arguments are passed to makeBox",function() {
