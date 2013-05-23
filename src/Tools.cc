@@ -222,7 +222,7 @@ v8::Handle<Value> readSTEP(const v8::Arguments& args)
     try {
         STEPControl_Reader aReader;
         
-        Interface_Static::SetCVal("xstep.cascade.unit","M");
+        Interface_Static::SetCVal("xstep.cascade.unit","mm");
         Interface_Static::SetIVal("read.step.nonmanifold", 1);
         
         if (aReader.ReadFile(filename.c_str()) != IFSelect_RetDone) {
