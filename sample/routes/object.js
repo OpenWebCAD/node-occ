@@ -82,3 +82,22 @@ exports.buildCSG1 = function(req,res)
         }
     );
 };
+
+
+exports.load_cadfile = function(req,res) {
+
+    console.log(" loading ",req.body.filename);
+
+    occ.readSTEP(req.body.filename, function(err,solids) {
+            if (err) {
+                console.log(" readStep has failed");
+                res.send(501,"Error building solid : "+ err.message + "    "+ err.stack);       
+            } else {
+                console.log(" readStep has succeeded");
+                res.send(buildResponse(solids,[]));
+            }
+    });
+
+
+
+};

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" ng-app>
+  <head>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/javascripts/three.js"></script>
+    <script src="/javascripts/TrackballControls.js"></script>
+    <script src="/javascripts/TinyTrackballControls.js"></script> 
+    <script src="/javascripts/jquery-1.8.3.js"></script>
+    <script src="/javascripts/jquery-ui.js"></script>
+    <link rel="stylesheet" href="stylesheets/jquery-ui.css" /> 
+    <link rel="stylesheet" href="/stylesheets/layout-default-latest.css"/>
+	<link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap.min.css">
+	<link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-responsive.min.css">
+    <script src="http://blueimp.github.io/jQuery-File-Upload/js/jquery.fileupload.js"></script>
+    <link rel="stylesheet" href="https://raw.github.com/blueimp/jQuery-File-Upload/master/css/jquery.fileupload-ui.css">
+  </head>
+  <body>
+
+<span class="btn btn-success fileinput-button">
+        <i class="icon-plus icon-white"></i>        
+        <input id="fileupload" type="file" name="upload" multiple="" data-url="/file-upload">
+</span>
+
+<div id="progress" class="progress progress-success progress-striped">
+        <div class="bar"></div>
+</div><br>
+
+      <button id="zoomAll">Zoom All</button>
+      <div style="width:100%;height:100%;position:absolute;top:0;left:0;z-index:-1;">
+      	<div id="graphical_view"  class="graphical_view"  style="top:0;left:0;width:100%;height:100%;background-color:#98fb98"></div>  	
+      </div>
+
+<div id="response"></div>
+  </body>
+    <script src="/GeomView.js"></script>
+    <script>
+
+var view;
+
+function install_json_mesh(json) {
+
+    "use strict";
+
+    view.clearAll();
+    view.updateShapeObject(json,function() {
+        view.zoomAll();
+    });
+    
+    // log
+    json.logs.forEach(function(line){
+        var str = "";
+        for ( var a in line ) {
+            str += line[a];
+        }
+       //  $("#ascii_mesh").append("<p>" + str + "</p>");
+    })
+
+}
+
+
+function handle_json_error(request, statusText, errorThrown) {
+		console.log(" ERRROR : ",statusText,errorThrown);
+}
+
+var lastAjaxDuration , lastAjaxStart;
+
+function load_cadfile(filename) {
+
+     $.ajax({
+        url: "/load_cadfile" ,
+        data: JSON.stringify({ filename: filename }),
+        type: "POST",
+        contentType: "application/json",
+        cache: false,
+        dataType:"text",
+        statusCode: {
+            404: function() {
+                $("#response").html('Could not contact server.');
+            },
+            500: function() {
+                $("#response").html('A server-side error has occurred.');
+            }
+        },
+        success: function(response) {
+            if(response){       
+                size_in_byte =  response.length ;
+                lastAjaxDuration = new Date() - lastAjaxStart;
+               // $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + " ms   - size :" + bytesToSize(size_in_byte,3) + "</p>");
+ 
+            }
+        },
+        error: handle_json_error
+    }).done( function(json) {
+            var t1 = new Date();
+            var obj = JSON.parse(json);
+            var t2 = new Date();
+            install_json_mesh(obj);
+            var t3 = new Date();
+             $("#ascii_mesh").append("<p>parsing duration: " + (t2-t1)  + " ms " + " " + (t3-t2)  + " ms </p>");
+     });
+}
+
+
+
+    $(document).ready(function() {
+		"use strict";
+
+		$("#progress").hide();
+
+		var container = $("#graphical_view");
+
+		if (container.size() === 0 ) {
+    		throw Error("Cannot find graphical view div");
+		}    
+
+		view = new GEOMVIEW(container[0]);
+
+		//$("#button").click(send_and_build_up_csg);
+
+		$("#zoomAll").click(function() { 
+	    	view.zoomAll();
+		});
+
+    	var url = '/file-upload';
+
+    	$('#fileupload').fileupload({
+        	url: url,
+        	dataType: 'json',
+        	fail: function(e,data) {
+        			$('#progress').hide();
+        			alert("cannot upload file");
+        	},
+        	done: function (e, data) {
+            		$.each(data.result.files, function (index, file) {
+                		$('<p/>').text(file.name + " " + file.size  + " bytes").appendTo('#files');
+                		$('#progress').hide();
+		           		// request files	
+        		   		load_cadfile(file.path);
+            		});
+        		},
+        		progressall: function (e, data) {
+            		var progress = parseInt(data.loaded / data.total * 100, 10);
+            		$('#progress').show();
+            		$('#progress .bar').css('width',progress + '%');
+        		}
+    		});
+
+
+		});
+
+    </script>
+</htm>
