@@ -29,6 +29,11 @@ occ.writeSTEP("somefile.step",box)
 ```
 
 
+### video
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=swUPSa2zyrY" target="_blank"><img src="http://img.youtube.com/vi/swUPSa2zyrY/0.jpg" 
+alt="node occ" width="240" height="180" border="10" /></a>
+
+
 ### list of features
 
 - creation of basic shapes ( box, cylinder , cone , torus )
@@ -74,26 +79,22 @@ sudo npm install mocha -g
 ------------------------------------
 # building opencascade from oce
 #installing cmake
-sudo apt-get install cmake cmake-curses-gui
+sudo apt-get install cmake cmake-curses-gui g++ build-essential
 # fetching source code
 git clone https://github.com/tpaviot/oce.git
 # switching to official release 0.11
 cd oce
-git checkout 0.11
+git checkout tags/OCE-0.12
 cd ..
 # creating a build area for oce
 make build_oce
 cd build_oce
-cmake ../oce
-ccmake .
-#    turn on precompiled header compilation
-#    remove X11
+cmake -D  OCE_VISUALISATION:BOOLEAN=FALSE -D OCE_DISABLE_X11:BOOLEAN=TRUE -D OCE_USE_PCH:BOOLEAN=TRUE  ../oce
 
 # building oce
 make -j 4
 
-
-
+cd ..
 git clone https://github.com/erossignon/node-occ.git
 cd node-occ
 npm install

@@ -216,16 +216,19 @@ v8::Handle<Value> readSTEP(const v8::Arguments& args)
       return ThrowException(Exception::TypeError(String::New("expecting a callback function")));
     }
 
+    Local<Object> global = v8::Context::GetCurrent()->Global();
 
 
     try {
         STEPControl_Reader aReader;
         
-        Interface_Static::SetCVal("xstep.cascade.unit","M");
+        Interface_Static::SetCVal("xstep.cascade.unit","mm");
         Interface_Static::SetIVal("read.step.nonmanifold", 1);
         
         if (aReader.ReadFile(filename.c_str()) != IFSelect_RetDone) {
-            StdFail_NotDone::Raise("Failed to read STEP file");
+             Local<Value> argv[] = { Local<Value>(String::New(" cannot read STEP file"))  };
+             Local<Value>  res =  callback->Call(global, 1, argv);
+            return scope.Close(Undefined());
         }
         
         // Root transfers
@@ -236,18 +239,21 @@ v8::Handle<Value> readSTEP(const v8::Arguments& args)
         
         // Collecting resulting entities
         int nbs = aReader.NbShapes();
-        if (nbs == 0) {
-          return scope.Close(Array::New());
-        }
+
         
         std::list<Local<Object> > shapes;
         for (int i=1; i<=nbs; i++) {
             const TopoDS_Shape& aShape = aReader.Shape(i);
             extractShape(aShape, shapes);
         }
-        Local<Array> arr = convert(shapes); 
 
-        return scope.Close(Local<Value>(arr));
+
+        Local<Array> arr = convert(shapes); 
+        Local<Value> err = Integer::New(0);
+        Local<Value> argv[2] = { err, arr };
+        Local<Value>  res =  callback->Call(global, 2, argv);
+
+
 
     } CATCH_AND_RETHROW("Failed to read STEP file ");
     return scope.Close(Undefined());
