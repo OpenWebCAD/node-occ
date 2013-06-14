@@ -6,6 +6,9 @@
       "cflags_cc!" : [ '-fno-exceptions' ],
       "cflags"     : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
       "cflags_cc"  : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
+      'xcode_settings': {
+            'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
+      },
 	  "msvs_settings": {
 
 		'VCLinkerTool': {					
