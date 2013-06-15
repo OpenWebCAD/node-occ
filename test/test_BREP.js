@@ -80,3 +80,12 @@ describe("testing BREP input output ",function(){
     });
   });
 });
+
+function build_large_part()
+{
+  shape_factory = require("./lib/shapeFactory");
+}
+describe("it should write and read a large brep file",function() {
+
+
+});

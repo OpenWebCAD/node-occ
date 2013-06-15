@@ -90,6 +90,8 @@
 
 #include <Interface_Static.hxx>
 
+#include "Message_ProgressIndicator.hxx"
+
 //xx #include <MgtBRep.hxx>
 
 #include <Poly_Triangulation.hxx>
@@ -127,6 +129,9 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
+#include <Transfer_TransientProcess.hxx>
+#include <XSControl_WorkSession.hxx>
+
 
 
 #undef Handle

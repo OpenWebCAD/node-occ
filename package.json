@@ -8,7 +8,8 @@
     "colors": "latest",
     "file-utils": "*",
     "temporary": "0.0.5",
-    "gettemporaryfilepath": "0.0.1"
+    "gettemporaryfilepath": "0.0.1",
+    "progress": "~0.1.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
