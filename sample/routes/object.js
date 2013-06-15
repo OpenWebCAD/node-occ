@@ -86,6 +86,10 @@ exports.buildCSG1 = function(req,res)
 
 exports.load_cadfile = function(req,res) {
 
+
+    function progress(percent) {
+       console.log(" -------------------> ", percent);
+    }
     console.log(" loading ",req.body.filename);
 
     occ.readSTEP(req.body.filename, function(err,solids) {
@@ -96,7 +100,7 @@ exports.load_cadfile = function(req,res) {
                 console.log(" readStep has succeeded");
                 res.send(buildResponse(solids,[]));
             }
-    });
+    },progress);
 
 
 

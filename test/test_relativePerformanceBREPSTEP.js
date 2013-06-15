@@ -1,4 +1,5 @@
 var occ = require('../lib/occ')
+var should = require("should")
 
 var ProgressBar  = require('progress')
 
@@ -16,24 +17,59 @@ function tick(percent)  {
    bar.tick(percent);
 }
 
-  occ.readSTEP('test/kuka.stp',function( err,solids) {
-        var elapsed = new Date - bar.start;
-        console.log("\ndone with " , solids.length , " solids  in ", Math.round(elapsed/100)/10 ," seconds" );
+function performMesh(solids)
+{
+  var bar = new ProgressBar("meshing solids [:bar] :percent elapsed :elapseds ETA :etas", {
+        complete: '=' , 
+        incomplete: '-' ,
+        width: 100 , 
+        total: solids.length 
+  });
+  for ( var i  in solids ) {
+    bar.tick();
+    var solid =  solids[i]
+    solid.numFaces.should.be.greaterThan(1)
+    solid.mesh
+    solid.mesh.numVertices.should.be.greaterThan(3)
+  }
+  console.log("\n");
 
-        var t1 = new Date
+}
+
+  occ.readSTEP('test/kuka.stp',function( err,solids) {
+        var t1,t2,elapsed
+        t1 = bar.start
+        t2 = new Date
+        elapsed = Math.round((t2 -t1)/10)/100
+        console.log("\ndone with " , solids.length , " solids  in ", elapsed ," seconds" );
+ 
+        // make sure we have a mesh, so it can be saved in the BREP file 
+        t1 = new Date
+        performMesh(solids)
+        t2 = new Date
+        elapsed = Math.round((t2 -t1)/10)/100
+        console.log(" meshing solids  in " , elapsed , " seconds")
+
+
+        t1 = new Date
         occ.writeBREP("toto.brep",solids);
- 	var t2 = new Date
-	elapsed = t2 -t1
-        console.log(" writing BREP file in " , Math.round(elapsed/10)/100 , " seconds")
+        t2 = new Date
+        elapsed = Math.round((t2 -t1)/10)/100
+        console.log(" writing BREP file in " , elapsed , " seconds")
 
         t1 = new Date
         occ.readBREP("toto.brep",function(err,solids) {
- 	 	t2  =new Date
-		elapsed = t2 -t1
-        	console.log(" reading BREP file in " , Math.round(elapsed/10)/100 , " seconds")
+        t2  =new Date
+        elapsed = Math.round((t2 -t1)/10)/100
+        console.log(" reading BREP file in " ,elapsed , " seconds")
                 console.log(" nb solids = ", solids.length);
-		done();
-	});
+        t1 = new Date
+        performMesh(solids)
+        t2 = new Date
+        elapsed = Math.round((t2 -t1)/10)/100
+        console.log(" meshing solids  in " , elapsed , " seconds")
+        done();
+  });
   }, tick );
 }
 

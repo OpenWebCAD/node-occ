@@ -75,9 +75,7 @@
 	  ],				
 
 	  "libraries": [ 
-
 		'-lTKAdvTools',
-
 		'-lTKBO',
 		'-lTKBool',
 		'-lTKBRep',
@@ -101,6 +99,7 @@
 		'-lTKSTEP',
 		'-lTKFillet',
 		'-lTKXSBase',
+		'-lTKSTL',
 		],
     }
   ]

@@ -109,7 +109,35 @@ v8::Handle<Value> writeBREP(const v8::Arguments& args)
 	return scope.Close(v8::True());
 }
 
+v8::Handle<Value> writeSTL(const v8::Arguments& args)
+{
+	HandleScope scope;
+	std::string filename;
+	if (!extractFileName(args[0],filename)) {
+		return ThrowException(Exception::TypeError(String::New("expecting a file name")));
+	}
+	std::list<Shape*>  shapes;
+	for (int i=1; i<args.Length(); i++) {
+		extractShapes(args[i],shapes);
+	}
+	if (shapes.size()==0) {
+		return scope.Close(Boolean::New(false));
+	}
+	try {
+		BRep_Builder B;
+		TopoDS_Compound C;
+		B.MakeCompound(C);
+		for (std::list<Shape*>::iterator it = shapes.begin();it != shapes.end();it++) {
+			TopoDS_Shape shape = (*it)->shape();
+			B.Add(C,shape);
+		}
+		StlAPI_Writer writer;
+		writer.ASCIIMode() = Standard_False;
+		writer.Write(C,filename.c_str(),Standard_True);
 
+	} CATCH_AND_RETHROW("Failed to write STL file ");
+	return scope.Close(v8::True());
+}
 
 static int extractSubShape(const TopoDS_Shape& shape, std::list<Local<Object> >& shapes)
 {
@@ -195,8 +223,8 @@ static Local<Array> convert(std::list<Local<Object> > & shapes) {
 	Local<Array> arr = Array::New((int)shapes.size());
 	int i=0;
 	for (std::list<Local<Object> >::iterator it = shapes.begin();it != shapes.end();it++) {
-	arr->Set(i,*it); 
-	i++;	
+		arr->Set(i,*it); 
+		i++;	
 	}
 	return arr;
 }
@@ -227,9 +255,20 @@ struct data_s  {
 	Persistent<Function> progressCallback;
 	std::list<TopoDS_Shape > shapes;
 	int retValue;
+	double percent;
 	double progress;
 };
 
+void dispose(data_s* data)
+{
+	uv_close(reinterpret_cast<uv_handle_t*>(&data->async),0);
+	data->callback.Dispose();
+	if (!data->progressCallback.IsEmpty()) {
+		data->progressCallback.Dispose();
+	}
+	delete data;
+
+}
 
 MyProgressIndicator::MyProgressIndicator(uv_async_t& async)
 :Message_ProgressIndicator(),m_async(async),m_lastValue(0)
@@ -240,7 +279,8 @@ Standard_Boolean MyProgressIndicator::Show(const Standard_Boolean force)
 	data_t* data = (data_t *)this->m_async.data;
 	double value = this->GetPosition();
 	double delta = (value-this->m_lastValue);
-	if ( delta > 0.05) {
+	if ( delta > 0.01) {
+		data->percent  = value;
 		data->progress = int(delta*1000);// this->GetPosition();
 		this->m_lastValue = value;
 		uv_async_send(&m_async);
@@ -270,8 +310,8 @@ void notify_progress(uv_async_t* handle,int status/*unused*/)
 	data_t* data = (data_t *)handle->data;
 	if (!data->progressCallback.IsEmpty()) {
 		// std::cout << " progress received" <<  data->progress << " \n";
-		Local<Value> argv[1] = {Integer::New(data->progress) };
-		Local<Value>  res =  data->progressCallback->Call(Context::GetCurrent()->Global(), 1, argv);
+		Local<Value> argv[2] = { Number::New(data->percent),Integer::New((int)data->progress) };
+		Local<Value>  res =  data->progressCallback->Call(Context::GetCurrent()->Global(), 2, argv);
 	}
 }
 
@@ -301,13 +341,17 @@ void _readStepAsync(uv_work_t *req) {
 		
 		progress->NewScope(5,"reading");
 		if (aReader.ReadFile(filename.c_str()) != IFSelect_RetDone) {
+
 			std::strstream str;
 			str << " cannot read STEP file " << filename << std::ends;
+			std::cerr << "cannot read "<< std::endl;
 			data->message = str.str();
 			// Local<Value> argv[] = { Local<Value>(String::New())  };
 			//  Local<Value>  res =  callback->Call(global, 1, argv);
 			// return scope.Close(Undefined());
 			progress->EndScope();
+			progress->SetValue(105.0);
+			progress->Show();    
 			data->retValue = 1;
 			return;
 		}
@@ -341,6 +385,7 @@ void _readStepAsync(uv_work_t *req) {
 		}
 	}
 	catch(...) {
+		std::cerr << " EXCEPTION" << std::endl;
 		data->message ="caught C++ exception in readStep";
 		data->retValue = 1;
 		return;
@@ -381,22 +426,10 @@ void _readStepAsyncAfter(uv_work_t *req,int status) {
 		Local<Value> argv[2] = {Integer::New(data->retValue), Local<Value>(String::New(data->message.c_str())) };
 		Local<Value>  res =  data->callback->Call(Context::GetCurrent()->Global(), 2, argv);
 	}
-
-	uv_close(reinterpret_cast<uv_handle_t*>(&data->async),0);
-
-	data->callback.Dispose();
-	if (!data->progressCallback.IsEmpty()) {
-		data->progressCallback.Dispose();
-	}
-	delete data;
+	dispose(data);
 }
 
-int uv_queue_work__(uv_loop_t* loop, uv_work_t* req,    uv_work_cb work_cb, uv_after_work_cb after_work_cb)
-{
-	work_cb(req);
-	after_work_cb(req,0); 
-	return 0;
-}
+
 void readStepAsync(const std::string& filename,v8::Local<Function> callback,v8::Local<Function> progressCallback)
 {
 	data_t* data = new data_t;
@@ -408,6 +441,9 @@ void readStepAsync(const std::string& filename,v8::Local<Function> callback,v8::
 	}
 	uv_queue_work(uv_default_loop(), &data->req, _readStepAsync, _readStepAsyncAfter);
 }
+
+
+
 
 v8::Handle<Value> readSTEP(const v8::Arguments& args)
 {
@@ -428,11 +464,70 @@ v8::Handle<Value> readSTEP(const v8::Arguments& args)
 		// return ThrowException(Exception::TypeError(String::New("expecting a callback function")));
 	}
 
-	Local<Object> global = v8::Context::GetCurrent()->Global();
 	readStepAsync(filename,callback,progressCallback);
-
 	return scope.Close(Undefined());
 }
+
+
+void _readBREPAsync(uv_work_t *req)
+{
+
+	data_t* data = (data_t *) req->data;
+	uv_async_init(req->loop,&data->async,notify_progress);
+	data->async.data = data;
+
+	data->retValue = 0;
+	std::string filename = data->filename;
+
+
+	try {
+		occHandle(Message_ProgressIndicator) progress = new MyProgressIndicator(data->async) ;
+		progress->SetScale(1,100,1);
+		progress->Show();    
+
+		// read brep-file
+		TopoDS_Shape shape;
+		BRep_Builder aBuilder;
+		if (!BRepTools::Read(shape, filename.c_str(), aBuilder,progress)) {
+			std::strstream str;
+			str << " cannot read BREP file " << filename << std::ends;
+			std::cerr << str.str() << std::endl;
+			data->message = str.str();
+			data->retValue = 1;
+			progress->SetValue(100.0);
+			progress->Show();
+			return;
+		}
+		data->shapes.push_back(shape);
+		progress->SetValue(100.0);
+		progress->Show();
+	} 
+	catch(...) {
+		data->message ="caught C++ exception in _readBREPAsync";
+		data->retValue = -3;
+		return;
+		
+	}
+}
+
+void _readBREPAsyncAfter(uv_work_t *req,int status) 
+{		
+	_readStepAsyncAfter(req,status);
+}
+
+
+void readBREPAsync(const std::string& filename,v8::Local<Function> callback,v8::Local<Function> progressCallback)
+{
+	data_t* data = new data_t;
+	data->req.data = data;
+	data->filename = filename;
+	data->callback = Persistent<Function>::New(callback);
+	if (!progressCallback.IsEmpty()) {
+		data->progressCallback = Persistent<Function>::New(progressCallback);
+	}
+	uv_queue_work(uv_default_loop(), &data->req, _readBREPAsync, _readBREPAsyncAfter);
+}
+
 
 v8::Handle<Value> readBREP(const v8::Arguments& args)
 {
@@ -445,30 +540,12 @@ v8::Handle<Value> readBREP(const v8::Arguments& args)
 	if (!extractCallback(args[1],callback)) {
 		return ThrowException(Exception::TypeError(String::New("expecting a callback function")));
 	}
-
-	Local<Object> global = v8::Context::GetCurrent()->Global();
-
-	try {
-		// read brep-file
-		TopoDS_Shape shape;
-		BRep_Builder aBuilder;
-		if (!BRepTools::Read(shape, filename.c_str(), aBuilder)) {
-				Local<Value> argv[] = { Local<Value>(String::New(" cannot read BREP file"))  };
-				Local<Value>  res =  callback->Call(global, 1, argv);
-				return scope.Close(Undefined());
-		}
-		std::list<Local<Object> > shapes;
-		extractShape(shape, shapes);
-		Local<Array> arr = convert(shapes); 
-		Local<Value> err = Integer::New(0);
-		Local<Value> argv[2] = { err, arr };
-		Local<Value>  res =  callback->Call(global, 2, argv);
-
-	} CATCH_AND_RETHROW("Failed to read BREP file");
-
-    
+	v8::Local<Function> progressCallback;
+	if (!extractCallback(args[2],progressCallback)) {
+		// return ThrowException(Exception::TypeError(String::New("expecting a callback function")));
+	}
+	readBREPAsync(filename,callback,progressCallback);
 	return scope.Close(Undefined());
-
 }
 
 

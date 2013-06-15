@@ -57,6 +57,7 @@ void Initialize(Handle<Object> target)
     target->Set(String::NewSymbol("common"),      FunctionTemplate::New(ShapeFactory::common)->GetFunction());
     target->Set(String::NewSymbol("compound"),    FunctionTemplate::New(ShapeFactory::compound)->GetFunction());
 
+    target->Set(String::NewSymbol("writeSTL"),   FunctionTemplate::New(writeSTL)->GetFunction());
     target->Set(String::NewSymbol("writeSTEP"),   FunctionTemplate::New(writeSTEP)->GetFunction());
     target->Set(String::NewSymbol("writeBREP"),   FunctionTemplate::New(writeBREP)->GetFunction());
     target->Set(String::NewSymbol("readSTEP"),   FunctionTemplate::New(readSTEP)->GetFunction());

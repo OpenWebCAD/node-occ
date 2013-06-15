@@ -1,5 +1,6 @@
 var assert = require("assert");
 var should = require("should");
+var shape_factory = require("../lib/shapeFactory");
 
 var occ = require("../lib/occ");
 
@@ -83,9 +84,37 @@ describe("testing BREP input output ",function(){
 
 function build_large_part()
 {
-  shape_factory = require("./lib/shapeFactory");
+  var legoPlate = shape_factory.makeLegoBrick(occ,5,5,"thin");
+  var solids = []
+  for (var x= 0; x < 100;x += 50) {
+    for (var y= 0; y < 100;y += 50) {
+     solids.push(legoPlate.translate([x,y,0]));
+    }
+  }
+  occ.writeBREP("legoPlate5x5.brep",solids);
+  occ.writeSTL("legoPlate5x5.stl",solids);
+  
+  var obj = { solids:[]} 
+  var counter = 0;
+  solids.forEach(function(solid) {
+     solid.name = "S" + counter;
+     counter++;
+     obj.solids.push(occ.buildSolidMesh(solid));
+  });
+  fs.writeFile("legoPlate5x5.3js",JSON.stringify(obj,null," "), function(err) { console.log("OK");});
+
 }
 describe("it should write and read a large brep file",function() {
+  this.timeout(15000)
+  it("should read a plate quickly", function(done) {
+      build_large_part();
+      occ.readBREP("legoPlate10x10.brep",function(err,solids) {
+         console.log(" num Faces = " , solids[0].numFaces);
+  	 done();
+	
+      });
+
+  });
 
 
 });
