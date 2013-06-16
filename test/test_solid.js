@@ -82,7 +82,7 @@ describe("testing solid construction",function() {
 
        it("should raise an exception when invalid arguments are passed to makeBox",function() {
           (function failing_func() {
- 	       var solid = occ.makeBox([10,20,30],10,10,10);
+             var solid = occ.makeBox([10,20,30],10,10,10);
           }).should.throwError();
        });
     });

@@ -196,6 +196,11 @@ function send_and_build_up_csg_method2() {
     var size_in_byte = 0;
   
     $("#ascii_mesh").text("");
+ 
+
+    var loaded = 0;
+    var startTime  =0;
+    var endTime = 0;
 
     $.ajax({
         url: "/csg1" ,
@@ -212,11 +217,38 @@ function send_and_build_up_csg_method2() {
                 $("#response").html('A server-side error has occurred.');
             }
         },
-        success: function(response) {
+        xhr: function() {
+           var xhr = new window.XMLHttpRequest();
+
+           // http://www.dave-bond.com/blog/2010/01/JQuery-ajax-progress-HMTL5/
+           // http://www.w3.org/TR/XMLHttpRequest/#the-response-attribute
+           xhr.addEventListener("loadstart",function(evt) {
+             console.log(" load start");
+	     startTime = new Date;
+           },false);
+           xhr.addEventListener("loadend",function(evt) {
+             console.log(" load end");
+             console.log( " loading " , evt.loaded , " in " , (endTime - startTime ) / 1.0 , " milliseconds");
+           },false);
+
+           xhr.addEventListener("progress", function on_progress(evt) {
+                 if (evt.lengthComputable) {
+                   var percentComplete = evt.loaded / evt.total;
+                   console.log(" percent complete : ", percentComplete);
+                 }
+                 console.log(" loaded = " , evt.loaded);
+                 loaded = evt.loaded;
+	   },false);
+          return xhr;
+        },
+        success: function(response,statusText,jqXHR) {
+            endTime = new Date
+            console.log("Success");
             if(response){       
                 size_in_byte =  response.length ;
                 lastAjaxDuration = new Date() - lastAjaxStart;
-                $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + " ms   - size :" + bytesToSize(size_in_byte,3) + "</p>");
+                $("#ascii_mesh").append("<p>duration: " + lastAjaxDuration + " ms   - size :" + bytesToSize(size_in_byte,3) + " loaded " + bytesToSize(loaded) + " </p>");
+                $("#ascii_mesh").append("<p> loading : " + (endTime-startTime) + " ms  </p>");
  
             }
         },

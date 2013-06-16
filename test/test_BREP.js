@@ -40,8 +40,8 @@ describe("testing BREP input output ",function(){
 
   describe(" readBREP ",function() {
     it("should raise an exception with invalide arguments", function() {
-      (function(){ occ.readBREP(); }).should.throw();
-      (function(){ occ.readBREP("filename"); }).should.throw();
+      (function(){ occ.readBREP(); }).should.throwError();
+      (function(){ occ.readBREP("filename"); }).should.throwError();
     });
     it("should call the callback with an error if the file doesn't exist", function(done) {
        occ.readBREP("invalid file name",function(err,shapes) {
@@ -84,34 +84,38 @@ describe("testing BREP input output ",function(){
 
 function build_large_part()
 {
+  var lego_filename = getTemporaryFilePath({ prefix: "legoPlate5x5_2x2", suffix: ""});
+
   var legoPlate = shape_factory.makeLegoBrick(occ,5,5,"thin");
-  var solids = []
+  var solids = [];
   for (var x= 0; x < 100;x += 50) {
     for (var y= 0; y < 100;y += 50) {
      solids.push(legoPlate.translate([x,y,0]));
     }
   }
-  occ.writeBREP("legoPlate5x5.brep",solids);
-  occ.writeSTL("legoPlate5x5.stl",solids);
+  occ.writeBREP(lego_filename+".brep",solids);
+  occ.writeSTL(lego_filename+".stl",solids);
   
-  var obj = { solids:[]} 
+  var obj = { solids:[]};
   var counter = 0;
   solids.forEach(function(solid) {
      solid.name = "S" + counter;
      counter++;
      obj.solids.push(occ.buildSolidMesh(solid));
   });
-  fs.writeFile("legoPlate5x5.3js",JSON.stringify(obj,null," "), function(err) { console.log("OK");});
+  fs.writeFile(lego_filename+".3js",JSON.stringify(obj,null,""), function(err) { console.log("OK");});
 
+
+  return lego_filename;
 }
 describe("it should write and read a large brep file",function() {
-  this.timeout(15000)
+  this.timeout(15000);
   it("should read a plate quickly", function(done) {
-      build_large_part();
-      occ.readBREP("legoPlate10x10.brep",function(err,solids) {
+      var filename = build_large_part();
+      console.log(" lego file ",filename);
+      occ.readBREP(filename+".brep",function(err,solids) {
          console.log(" num Faces = " , solids[0].numFaces);
-  	 done();
-	
+         done();
       });
 
   });

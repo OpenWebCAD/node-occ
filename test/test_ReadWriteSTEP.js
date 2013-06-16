@@ -45,14 +45,14 @@ describe("testing STEP input output ",function(){
            callback_called.should.be.greaterThan(-1);
            done();
        },function callback(message,percent) {
-            callback_called ++
+            callback_called ++ ;
        }); 
   });
 
 
     it("should raise an exception with invalide arguments", function() {
-      (function(){ occ.readSTEP(); }).should.throw();
-      (function(){ occ.readSTEP("filename"); }).should.throw();
+      (function(){ occ.readSTEP(); }).should.throwError();
+      (function(){ occ.readSTEP("filename"); }).should.throwError();
     });
     it("should call the callback with an error if the file doesn't exist", function(done) {
        occ.readSTEP("invalid file name",function(err,shapes) {
