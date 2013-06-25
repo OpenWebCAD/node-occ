@@ -427,7 +427,7 @@ function GEOMVIEW(container,width,height)
             var picked = null;
             if ( intersects.length > 0)   { picked = findSelectedObject(intersects[ 0 ].object); }
             
-            if (picked) {
+            if (picked && picked.properties) {
                 console.log(" clicked on " , picked.properties.OCCType, " name = ", picked.properties.OCCName);
             }
 
@@ -495,7 +495,7 @@ function GEOMVIEW(container,width,height)
 
     function findSelectedObject(pickedObject) {
         var parent = pickedObject.parent;
-        while (parent&& parent.properties.OCCType != "Solid") {
+        while (parent && parent.properties && parent.properties.OCCType != "Solid") {
             parent = parent.parent;
         }
         return parent;
@@ -726,7 +726,7 @@ GEOMVIEW.prototype.zoomAll = function() {
 
 
 GEOMVIEW.prototype.showGrid = function ( flag ) {
-
+   var me = this;
    if ( me.grid.visible != flag ) {
 
        me.grid.visible = flag;
