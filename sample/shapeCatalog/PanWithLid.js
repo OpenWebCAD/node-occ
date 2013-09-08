@@ -52,5 +52,7 @@ lid = lid.translate([0,0,20]);
 
 var pan = makePan(20,40);
 
-return csg.fuse(pan,lid);
+var solid = csg.fuse(pan,lid);
+
+display(solid);
 
