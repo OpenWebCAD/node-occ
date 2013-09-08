@@ -6,7 +6,6 @@
   "dependencies": {
     "should": "latest",
     "colors": "latest",
-    "file-utils": "*",
     "temporary": "0.0.5",
     "gettemporaryfilepath": "0.0.1",
     "progress": "~0.1.0",
