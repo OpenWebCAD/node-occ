@@ -54,8 +54,14 @@ alt="node occ" width="240" height="180" border="10" /></a>
  
 ### on Windows
   - you need Microsoft Visual Studio 2012
-  - please install OpenCascade oce-0.11  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.11 folder
-  
+  - please install OpenCascade oce-0.11  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.12 folder
+
+  ```
+  >SET CL=/Ic:\OCE-0.12\inc
+  >SET LINK=/LIBPATH:c:\OCE-0.12\bin
+  >npm install node-occ
+  ```
+   
 ### on Linux
 
 
