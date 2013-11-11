@@ -54,7 +54,7 @@ alt="node occ" width="240" height="180" border="10" /></a>
  
 ### on Windows
   - you need Microsoft Visual Studio 2012
-  - please install OpenCascade oce-0.11  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.11 folder
+  - please install OpenCascade oce-0.13  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.13 folder
   
 ### on Linux
 
@@ -82,9 +82,9 @@ sudo npm install mocha -g
 sudo apt-get install cmake cmake-curses-gui g++ build-essential
 # fetching source code
 git clone https://github.com/tpaviot/oce.git
-# switching to official release 0.11
+# switching to official release 0.13
 cd oce
-git checkout tags/OCE-0.12
+git checkout tags/OCE-0.13
 cd ..
 # creating a build area for oce
 make build_oce
@@ -109,7 +109,7 @@ node app.js
 
 
 ### on windows
-  - please install oce-0.11  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.11 folder
+  - please install OCE-0.13  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.13 folder
 
 
 ### on Mac
@@ -130,7 +130,7 @@ node app.js
 
 ## MIT License
 
-Copyright © 2012 E. Rossignon
+Copyright © 2012-2013 E. Rossignon
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

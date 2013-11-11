@@ -39,7 +39,7 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 
 #include <BRepCheck_Analyzer.hxx>
-
+#include <BRepClass3d.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>

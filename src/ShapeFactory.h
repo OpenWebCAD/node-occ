@@ -35,7 +35,7 @@ public:
 	static Handle<v8::Value> makeDraftAngle(const v8::Arguments& args);
 	static Handle<v8::Value> makeFillet(const v8::Arguments& args);
 private:
-    static Handle<v8::Value> _boolean(const v8::Arguments& args,BOP_Operation op);
+    static Handle<v8::Value> _boolean(const v8::Arguments& args,BOPAlgo_Operation op);
     static Handle<v8::Value> add(const std::vector<Base*>& shapes);
 
 };
