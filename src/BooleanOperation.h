@@ -15,7 +15,7 @@ public:
     typedef class BooleanOperation _ThisType;
 
     static Persistent<FunctionTemplate> constructor;
-    static Handle<Object> NewInstance(BOP_Operation op);
+    static Handle<Object> NewInstance(BOPAlgo_Operation op);
 
     static Handle<Value> New(const v8::Arguments& args);
     static void Init(Handle<Object> target);

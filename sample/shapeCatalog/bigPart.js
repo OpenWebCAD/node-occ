@@ -6,7 +6,8 @@ function makeSomeShape()
 
 var i, j,k;
 
-var solids = []
+var solids = [] ;
+
 var shape = makeSomeShape();
 for (i=0;i<5;i++){
     for (j=0;j<5;j++){
@@ -17,5 +18,5 @@ for (i=0;i<5;i++){
 }
 
 var ret =  occ.compound(solids);
-ret.mesh
-return ret;
+display(ret);
+

@@ -11,7 +11,7 @@ BooleanOperation::~BooleanOperation()
 Persistent<FunctionTemplate> BooleanOperation::constructor;
 
 
-Handle<Object> BooleanOperation::NewInstance(BOP_Operation op)
+Handle<Object> BooleanOperation::NewInstance(BOPAlgo_Operation op)
 {
     HandleScope scope;
 
@@ -24,14 +24,14 @@ Handle<Object> BooleanOperation::NewInstance(BOP_Operation op)
     return scope.Close(instance);
 }
 
-BOP_Operation ReadOperationType(const Handle<Value>& arg)
+BOPAlgo_Operation ReadOperationType(const Handle<Value>& arg)
 {
-    if (arg->ToString()->Equals(v8::String::NewSymbol("SECTION")))  return BOP_SECTION;
-    if (arg->ToString()->Equals(v8::String::NewSymbol("COMMON")))   return BOP_COMMON;
-    if (arg->ToString()->Equals(v8::String::NewSymbol("FUSE")))     return BOP_FUSE;
-    if (arg->ToString()->Equals(v8::String::NewSymbol("CUT")))      return BOP_CUT;
-    if (arg->ToString()->Equals(v8::String::NewSymbol("CUT21")))    return BOP_CUT21;
-    return BOP_UNKNOWN;
+    if (arg->ToString()->Equals(v8::String::NewSymbol("SECTION")))  return BOPAlgo_SECTION;
+    if (arg->ToString()->Equals(v8::String::NewSymbol("COMMON")))   return BOPAlgo_COMMON;
+    if (arg->ToString()->Equals(v8::String::NewSymbol("FUSE")))     return BOPAlgo_FUSE;
+    if (arg->ToString()->Equals(v8::String::NewSymbol("CUT")))      return BOPAlgo_CUT;
+    if (arg->ToString()->Equals(v8::String::NewSymbol("CUT21")))    return BOPAlgo_CUT21;
+    return BOPAlgo_UNKNOWN;
 }
 
 Handle<Value> BooleanOperation::New(const v8::Arguments& args)
@@ -40,8 +40,8 @@ Handle<Value> BooleanOperation::New(const v8::Arguments& args)
     BooleanOperation* pThis = new BooleanOperation();
     pThis->Wrap(args.This());
 
-    BOP_Operation op = ReadOperationType(args[0]);
-    if (op == BOP_UNKNOWN) {
+    BOPAlgo_Operation op = ReadOperationType(args[0]);
+    if (op == BOPAlgo_UNKNOWN) {
         ThrowException(Exception::TypeError(String::New("bad operation type, must be SECTION COMMON FUSE CUT or CUT21")));
         return scope.Close(Undefined());
     }

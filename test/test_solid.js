@@ -116,6 +116,15 @@ describe("testing solid construction",function() {
         var solid1;
         var solid2;
         before(function() {
+//
+//            +------+
+//      +-----|`.     `.                       +------+
+//      |`.   +  `+-----`+                     |`+--+  `.
+//      |  `+--`  |      |                     | |  |`+--`+
+//      |   |  +  |      |           =>        | +--+ |   |
+//      +   |   ` +------+                     +  `+-`+   |
+//       `. |      |                            `. |      |
+//         `+------+                              `+------+
             solid1 = occ.makeBox([10,20,30],[20,40,60]);
             solid2 = occ.makeBox([15,25,35],[-20,-40,-60]);
             solid1 = occ.cut(solid1,solid2);
@@ -190,6 +199,7 @@ describe("testing solid construction",function() {
         var solid2;
         var splitBoxes;
         before(function() {
+            // cutting a square box in 2 boxes
             solid1 = occ.makeBox([0,0,0],[20,20,20]);
             solid2 = occ.makeBox([-100,-100,10],[100,100,15]);
 
@@ -200,6 +210,7 @@ describe("testing solid construction",function() {
             splitBoxes.shapeType.should.equal("COMPOUND");
         });
         it("should have 12 faces", function() {
+            //console.log( splitBoxes.faces);
             splitBoxes.numFaces.should.equal(12);
             Object.keys(splitBoxes.faces).length.should.equal(12);
         });
@@ -210,11 +221,13 @@ describe("testing solid construction",function() {
             splitBoxes.numShells.should.equal(2);
         });
         it("should have an outer shell with 6 faces", function() {
-            // var solids = splitBoxes.getSolids();
-            //var outerShell1 = solids[0].getOuterShell();
-            //outerShell1.numFaces.should.equal(6);
-            //var outerShell2 = solids[1].getOuterShell();
-            //outerShell2.numFaces.should.equal(6);
+            var solids = splitBoxes.getSolids();
+
+            var outerShell1 = solids[0].getOuterShell();
+            outerShell1.numFaces.should.equal(6);
+
+            var outerShell2 = solids[1].getOuterShell();
+            outerShell2.numFaces.should.equal(6);
 
         });
 

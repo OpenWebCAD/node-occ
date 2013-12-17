@@ -1,16 +1,15 @@
 {
   "name": "node-occ",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "OpenCascade OCE Wrapper for Node js",
   "preferGlobal": "true",
   "dependencies": {
-    "should": "latest",
-    "colors": "latest",
-    "file-utils": "*",
-    "temporary": "0.0.5",
+    "should": "*",
+    "colors": "*",
+    "temporary": "~0.0.5",
     "gettemporaryfilepath": "0.0.1",
     "progress": "~0.1.0",
-    "pace": "0.0.4"
+    "pace": "~0.0.4"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -19,7 +18,7 @@
     "grunt-contrib-uglify": "*",
     "grunt-mocha-cli": "~1.0.1",
     "grunt-docco": "*",
-    "should": "latest"
+    "should": "*"
   },
   "main": "lib/occ",
   "author": "Etienne Rossignon",
@@ -38,5 +37,16 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/erossignon/node-occ.git"
-  }
+  },
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/erossignon/node-occ/issues"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "license": "MIT"
 }
