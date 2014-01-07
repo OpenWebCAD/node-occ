@@ -1,6 +1,6 @@
 #include "Tools.h"
 
-
+#include "IFSelect_ReturnStatus.hxx"
 
 #include "Shape.h"
 #include "Solid.h"
@@ -315,6 +315,7 @@ void notify_progress(uv_async_t* handle,int status/*unused*/)
 	}
 }
 
+//http://free-cad.sourceforge.net/SrcDocu/df/d7b/ImportStep_8cpp_source.html
 void _readStepAsync(uv_work_t *req) {
 
 	MutexLocker _locker(stepOperation_mutex);
@@ -336,8 +337,10 @@ void _readStepAsync(uv_work_t *req) {
         
 		STEPControl_Reader aReader;
         
+  
 		Interface_Static::SetCVal("xstep.cascade.unit","mm");
 		Interface_Static::SetIVal("read.step.nonmanifold", 1);
+    Interface_Static::SetIVal("read.step.product.mode",1);
 		
 		progress->NewScope(5,"reading");
 		if (aReader.ReadFile(filename.c_str()) != IFSelect_RetDone) {
@@ -363,14 +366,23 @@ void _readStepAsync(uv_work_t *req) {
 		progress->Show();        
 		aReader.WS()->MapReader()->SetProgress(progress);
 
+
 		// Root transfers
 		int nbr = aReader.NbRootsForTransfer();
+    
+    Standard_Boolean failsonly = Standard_False;
+    aReader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
+
 		progress->SetRange(0,nbr);
 		int mod = nbr/10+1;
 		for (int n = 1; n<= nbr; n++) {
             
-			aReader.TransferRoot(n);
+			Standard_Boolean ok = aReader.TransferRoot(n);
 			
+      Standard_Integer nbs = aReader.NbShapes();
+      if (!ok || nbs == 0) {
+         continue; // skip empty root
+      }
 			if ((n+1)%mod==0) { progress->Increment(); }
 		}     
 		
@@ -378,14 +390,133 @@ void _readStepAsync(uv_work_t *req) {
 		progress->EndScope();
 		progress->Show(); 
 
+    TopoDS_Shape aResShape;
+    BRep_Builder B;
+    TopoDS_Compound compound;
+    B.MakeCompound(compound);
+
+
+
 		int nbs = aReader.NbShapes();
 		for (int i=1; i<=nbs; i++) {
 			const TopoDS_Shape& aShape = aReader.Shape(i);
+      B.Add(compound, aShape);
+     
 			data->shapes.push_back(aShape);
 		}
+    
+    aResShape = compound;
+      
+    TopTools_IndexedMapOfShape anIndices;
+    TopExp::MapShapes(aResShape, anIndices);
+
+    occHandle(Interface_InterfaceModel) Model = aReader.WS()->Model();
+    occHandle(XSControl_TransferReader) TR = aReader.WS()->TransferReader();
+
+    if (!TR.IsNull()) {
+      occHandle(Transfer_TransientProcess) TP = TR->TransientProcess();
+      occHandle(Standard_Type) tPD     = STANDARD_TYPE(StepBasic_ProductDefinition);
+      occHandle(Standard_Type) tNAUO   = STANDARD_TYPE(StepRepr_NextAssemblyUsageOccurrence);
+      occHandle(Standard_Type) tShape  = STANDARD_TYPE(StepShape_TopologicalRepresentationItem);
+      occHandle(Standard_Type) tGeom   = STANDARD_TYPE(StepGeom_GeometricRepresentationItem);
+ 
+      Standard_Integer nb = Model->NbEntities();
+
+      cout << " nb entities =" << nb << std::endl;
+      for (Standard_Integer ie = 1; ie <= nb; ie++) {
+
+             occHandle(Standard_Transient) enti = Model->Value(ie);
+
+             occHandle(TCollection_HAsciiString) aName;
+
+             if (enti->DynamicType() == tNAUO) {
+                 occHandle(StepRepr_NextAssemblyUsageOccurrence) NAUO = occHandle(StepRepr_NextAssemblyUsageOccurrence)::DownCast(enti);
+                 if (NAUO.IsNull()) continue;
+
+                 Interface_EntityIterator subs = aReader.WS()->Graph().Sharings(NAUO);
+                 for (subs.Start(); subs.More(); subs.Next()) {
+                      occHandle(StepRepr_ProductDefinitionShape) PDS = occHandle(StepRepr_ProductDefinitionShape)::DownCast(subs.Value());
+                      if (PDS.IsNull()) continue;
+                      occHandle(StepBasic_ProductDefinitionRelationship) PDR = PDS->Definition().ProductDefinitionRelationship();
+                      if (PDR.IsNull()) continue;
+                      if (PDR->HasDescription() &&  PDR->Description()->Length() >0 ) {
+                        aName = PDR->Description();
+                      } else if (PDR->Name()->Length() >0) {
+                        aName = PDR->Name();
+                      } else {
+                        aName = PDR->Id();
+                      }
+                }
+                 // find proper label
+                 TCollection_ExtendedString str (aName->String() );
+             } else  if ( enti->IsKind( tShape ) || enti->IsKind(tGeom)) {
+               aName = occHandle(StepRepr_RepresentationItem)::DownCast(enti)->Name();
+             } else if (enti->DynamicType() == tPD)    {
+               occHandle(StepBasic_ProductDefinition) PD = occHandle(StepBasic_ProductDefinition)::DownCast(enti);
+               if (PD.IsNull()) continue;
+               occHandle(StepBasic_Product) Prod = PD->Formation()->OfProduct();
+               aName = Prod->Name();
+             }else {
+               continue;
+             }
+             if ( aName->UsefullLength() < 1 )
+               continue;
+             // skip 'N0NE' name
+             if ( aName->UsefullLength() == 4 &&toupper (aName->Value(1)) == 'N' &&toupper (aName->Value(2)) == 'O' && toupper (aName->Value(3)) == 'N' && toupper (aName->Value(4)) == 'E')   
+               continue; 
+/*             
+             // special check to pass names like "Open CASCADE STEP translator 6.3 1"
+             TCollection_AsciiString aSkipName ("Open CASCADE STEP translator");
+             if (aName->Length() >= aSkipName.Length()) {
+               if (aName->String().SubString(1, aSkipName.Length()).IsEqual(aSkipName))
+                 continue;
+             }
+             
+*/
+             TCollection_ExtendedString aNameExt (aName->ToCString());
+             
+             cout << " name of part =" << aName->ToCString() << std::endl;
+             // find target shape
+             occHandle(Transfer_Binder) binder = TP->Find(enti);
+             if (binder.IsNull()) continue;
+
+             TopoDS_Shape S = TransferBRep::ShapeResult(binder);
+             if (S.IsNull()) continue;
+
+             cout << " name of part = ---------" << std::endl;
+             // as PRODUCT can be included in the main shape
+             // several times, we look here for all iclusions.
+             Standard_Integer isub, nbSubs = anIndices.Extent();
+             for (isub = 1; isub <= nbSubs; isub++) {
+               TopoDS_Shape aSub = anIndices.FindKey(isub);
+               if (aSub.IsPartner(S)) {
+                 
+                 cout << " name of part =" << aName->ToCString() << "  shape " << HashCode(aSub,-1) << " " << aSub.ShapeType() << endl;
+#if 0
+                 // create label and set shape
+                 if (L.IsNull()){
+                   TDF_TagSource aTag;
+                   L = aTag.NewChild(theShapeLabel);
+                   TNaming_Builder tnBuild (L);
+                   //tnBuild.Generated(S);
+                   tnBuild.Generated(aSub);
+                 }
+                 // set a name
+                 TDataStd_Name::Set(L, aNameExt);
+#endif
+               }
+             }
+//           }
+
+         }
+         // END: Store names
+        }
+    //
+    //
+    //
 	}
 	catch(...) {
-		std::cerr << " EXCEPTION" << std::endl;
+		std::cerr << " EXCEPTION in READ STEP" << std::endl;
 		data->message ="caught C++ exception in readStep";
 		data->retValue = 1;
 		return;

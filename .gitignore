@@ -40,3 +40,8 @@ deps/
 /src/*.swp
 
 *.swp
+
+/sample/node_modules
+/sample/client/*.js~
+*.html~
+/sample/views/*.ejs~
