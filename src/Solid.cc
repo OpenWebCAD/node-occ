@@ -202,7 +202,8 @@ Handle<v8::Value> Solid::getOuterShell(const v8::Arguments& args)
   }
   try {
     TopoDS_Solid solid = TopoDS::Solid(pThis->shape());
-    TopoDS_Shell shell = BRepClass3d::OuterShell(solid);
+    // TopoDS_Shell shell = BRepTools::OuterShell(solid);
+    TopoDS_Shell shell = OUTER_SHELL(solid);
     return scope.Close(buildWrapper(shell));
 
   }

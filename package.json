@@ -9,7 +9,8 @@
     "temporary": "~0.0.5",
     "gettemporaryfilepath": "0.0.1",
     "progress": "~0.1.0",
-    "pace": "~0.0.4"
+    "pace": "~0.0.4",
+    "grunt-contrib-concat": "~0.3.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",

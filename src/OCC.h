@@ -1,6 +1,7 @@
 // OpenCASCADE
 #pragma once
 
+#include <Standard_Version.hxx>
 
 #include <Bnd_Box.hxx>
 
@@ -39,7 +40,6 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 
 #include <BRepCheck_Analyzer.hxx>
-#include <BRepClass3d.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
@@ -108,7 +108,7 @@
 
 #include <ShapeSchema.hxx>
 
-#include <StdPrs_ToolShadedShape.hxx>
+// #include <StdPrs_ToolShadedShape.hxx>
 
 #include <Storage_Data.hxx>
 #include <Storage_HSeqOfRoot.hxx>
@@ -145,8 +145,27 @@
 #include <TDF_Label.hxx>
 #include <TDF_ChildIDIterator.hxx>
 #include <TDataStd_Name.hxx>
-#include <TNaming_NamedShape.hxx>
 #include <TNaming_Builder.hxx>
 #include <Interface_Graph.hxx>
+
+// Compatibility 6.5 and above
+#if (OCC_VERSION_MAJOR * 10 + OCC_VERSION_MINOR )  < 66 
+
+// this makes some adjustemnts to make sure node-occ can be
+// build with older version of OCC.
+#include <TNaming_NamedShape.hxx>
+#define BOPAlgo_Operation BOP_Operation
+#define BOPAlgo_SECTION BOP_SECTION
+#define BOPAlgo_COMMON  BOP_COMMON
+#define BOPAlgo_FUSE    BOP_FUSE
+#define BOPAlgo_CUT     BOP_CUT
+#define BOPAlgo_CUT21   BOP_CUT21
+#define BOPAlgo_UNKNOWN BOP_UNKNOWN
+#define OUTER_SHELL(x)  BRepTools::OuterShell(x)
+#else 
+
+#include <BRepClass3d.hxx>
+#define OUTER_SHELL(x)  BRepClass3d::OuterShell(x)
+#endif
 
 #undef Handle
