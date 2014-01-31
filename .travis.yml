@@ -3,6 +3,6 @@ node_js:
   - "0.10"
 before_install:
   sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
-  ls /usr/include/oce
+  grep -i VERSION /usr/include/oce/Standard_Version.hxx
 
 
