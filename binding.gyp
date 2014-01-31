@@ -13,9 +13,7 @@
 
 		'VCLinkerTool': {					
 			'AdditionalLibraryDirectories': [
-			    "/oce-0.11/Win64/lib",
-				#	"/projects/oce-0.11/Win64/lib/",
-				#	"../deps/Win64/lib",
+			    "C:/oce-0.13/Win64/lib",
 			],
 			# 'AdditionalOptions': ["/FORCE",],						
 		},	  
@@ -71,10 +69,11 @@
 
 	  "library_dirs": [
 	     "/usr/local/libs",
+	     "c:/OCE-0.13/Win64/Bin"
 	  ],
 	  "include_dirs": [  
            "/usr/local/include/oce",
-           "/oce-0.11/include/oce",
+	       "c:/OCE-0.13/include/oce",		   
 	  ],				
 
 	  "libraries": [ 
@@ -100,10 +99,15 @@
 		'-lTKTopAlgo',
 		'-lTKIGES',
 		'-lTKSTEP',
+		'-lTKSTEPAttr',
+		'-lTKSTEPBase',
 		'-lTKFillet',
 		'-lTKXSBase',
 		'-lTKSTL',
-		],
+		'-lTKTObj',
+		'-lTKLCAF',
+		'-lTKCAF'
+	],
     }
   ]
 }

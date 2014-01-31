@@ -89,6 +89,7 @@
 
 
 #include <Interface_Static.hxx>
+#include <Interface_InterfaceModel.hxx>
 
 #include "Message_ProgressIndicator.hxx"
 
@@ -131,7 +132,21 @@
 #include <TopoDS_Face.hxx>
 #include <Transfer_TransientProcess.hxx>
 #include <XSControl_WorkSession.hxx>
-
-
+#include <XSControl_TransferReader.hxx>
+#include <StepBasic_ProductDefinition.hxx>
+#include <StepShape_TopologicalRepresentationItem.hxx>
+#include <StepGeom_GeometricRepresentationItem.hxx>
+#include <StepBasic_Product.hxx>
+#include <StepBasic_ProductDefinitionFormation.hxx>
+#include <StepRepr_NextAssemblyUsageOccurrence.hxx>
+#include <StepRepr_ProductDefinitionShape.hxx>
+#include <Interface_EntityIterator.hxx>
+#include <TransferBRep.hxx>
+#include <TDF_Label.hxx>
+#include <TDF_ChildIDIterator.hxx>
+#include <TDataStd_Name.hxx>
+#include <TNaming_NamedShape.hxx>
+#include <TNaming_Builder.hxx>
+#include <Interface_Graph.hxx>
 
 #undef Handle
