@@ -2,7 +2,9 @@ language: node_js
 node_js:
   - "0.10"
 before_install:
-  sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
+  # sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
   grep -i VERSION /usr/include/oce/Standard_Version.hxx
+  cmake --version
+  
 
 
