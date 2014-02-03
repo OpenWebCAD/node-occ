@@ -68,12 +68,10 @@
 	  ],
 
 	  "library_dirs": [
-	     "/usr/libs",
-	     "c:/OCE-0.13/Win64/Bin"
+        "./deps/lib"
 	  ],
 	  "include_dirs": [  
-               "/usr/include/oce",
-	       "c:/OCE-0.13/include/oce",		   
+        "./deps/include/oce"
 	  ],				
 
 	  "libraries": [ 
