@@ -3,16 +3,19 @@ node_js:
   - "0.10"
 before_install:
   # sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
+  # git clone http://github.com/tpaviot/oce.git ;
   grep -i VERSION /usr/include/oce/Standard_Version.hxx ;
   cmake --version ;
-  git clone http://github.com/tpaviot/oce.git ;
+  cat /proc/cpuinfo ;
   cd oce ;
   git checkout tags/OCE-0.13 ;
   cd .. ;
   mkdir build_oce;
   cd build_oce ;
   cmake -D  OCE_VISUALISATION:BOOLEAN=FALSE -D OCE_DISABLE_X11:BOOLEAN=TRUE -D OCE_USE_PCH:BOOLEAN=TRUE  ../oce ;
-  make -j 6
+  make -j 16 ;
+  cd ..
+  
   
   
 
