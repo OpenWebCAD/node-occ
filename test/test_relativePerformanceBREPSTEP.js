@@ -74,8 +74,8 @@ function performMesh(solids)
 
  //    myReadStep("test/kuka.stp");
 describe("testing relative performance of BREP and STEP I/O",function()  {
-  this.timeout(15000);
-  it("should ...",function(done) {
+  this.timeout(40000);
+  xit("should read kuka robot",function(done) {
      myReadStep("test/kuka.stp",done);
   });
 });
