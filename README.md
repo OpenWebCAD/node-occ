@@ -7,6 +7,8 @@ It provides a simple yet powerful javascript api to construct 3D geometry models
 
 This project comes with a set of V8 wrappers around OpenCascade API and a sample web application.
 
+[![Build Status](https://travis-ci.org/erossignon/node-occ.png?branch=master)](https://travis-ci.org/erossignon/node-occ)
+
 
 ### quick example
 
