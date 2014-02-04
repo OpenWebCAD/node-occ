@@ -19,7 +19,8 @@
     "grunt-contrib-uglify": "*",
     "grunt-mocha-cli": "~1.0.1",
     "grunt-docco": "*",
-    "should": "*"
+    "should": "*",
+    "mocha": "*"
   },
   "main": "lib/occ",
   "author": "Etienne Rossignon",
