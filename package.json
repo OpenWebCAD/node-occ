@@ -40,7 +40,8 @@
     "url": "https://github.com/erossignon/node-occ.git"
   },
   "scripts": {
-    "install": "node-gyp rebuild"
+    "install": "node-gyp rebuild",
+    "test": "mocha -R spec"
   },
   "gypfile": true,
   "bugs": {
