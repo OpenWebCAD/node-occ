@@ -5,7 +5,7 @@ before_install:
   # sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
   # git clone http://github.com/tpaviot/oce.git ;
   # cat /proc/cpuinfo ;
-  sh preapare_build.sh
+  sh ./prepare_build.sh
   
   
   
