@@ -103,8 +103,7 @@
 		'-lTKXSBase',
 		'-lTKSTL',
 		'-lTKTObj',
-		'-lTKLCAF',
-		'-lTKCAF'
+		'-lTKLCAF'
 	],
     }
   ]
