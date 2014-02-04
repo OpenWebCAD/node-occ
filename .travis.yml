@@ -5,27 +5,7 @@ before_install:
   # sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
   # git clone http://github.com/tpaviot/oce.git ;
   # cat /proc/cpuinfo ;
-  grep -i VERSION /usr/include/oce/Standard_Version.hxx ;
-  cmake --version ;
-  cd oce ;
-  git checkout tags/OCE-0.13 ;
-  cd .. ;
-  mkdir deps ;
-  mkdir build_oce;
-  cd build_oce ;
-  cmake -D OCE_INSTALL_PREFIX:STRING=`pwd`/../deps -D OCE_DRAW:BOOLEAN=FALSE -D OCE_OCAF:BOOLEAN=FALSE -D  OCE_VISUALISATION:BOOLEAN=FALSE -D OCE_DISABLE_X11:BOOLEAN=TRUE -D OCE_USE_PCH:BOOLEAN=TRUE  ../oce ;
-  make -j 72 TKernel > /dev/null;
-  make -j 72 TKMath > /dev/null;
-  make -j 72 TKG2d > /dev/null;
-  make -j 72 TKGeomBase   > /dev/null;
-  make -j 72 TKG3d > /dev/null;
-  make -j 72 TKPrim > /dev/null;
-  make -j 72 TKBO   > /dev/null;
-  make -j 72 TKBRep   > /dev/null;
-  make -j 72 ;
-  make install > /dev/null  ;
-  cd ..
-  ls -R deps
+  sh preapare_build.sh
   
   
   
