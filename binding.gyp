@@ -68,10 +68,10 @@
 	  ],
 
 	  "library_dirs": [
-        "./deps/lib"
+        "/usr/local/lib"
 	  ],
 	  "include_dirs": [  
-        "./deps/include/oce"
+        "/usr/local/include/oce"
 	  ],				
 
 	  "libraries": [ 
