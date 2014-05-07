@@ -8,6 +8,8 @@ mkdir deps ;
 mkdir build_oce;
 cd build_oce ;
 cmake -D OCE_INSTALL_PREFIX:STRING='/usr/local' -D OCE_DRAW:BOOLEAN=FALSE -D OCE_OCAF:BOOLEAN=FALSE -D  OCE_VISUALISATION:BOOLEAN=FALSE -D OCE_DISABLE_X11:BOOLEAN=TRUE -D OCE_USE_PCH:BOOLEAN=TRUE  ../oce > /dev/null;
+
+
 echo 1;
 make -s -j 72 TKernel > /dev/null;
 echo 2;
