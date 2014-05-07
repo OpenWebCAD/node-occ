@@ -2,7 +2,9 @@ grep -i VERSION /usr/include/oce/Standard_Version.hxx ;
 lscpu ;
 cmake --version ;
 
-set NPROC=`nproc`
+#set NPROC=`nproc`
+NPROC=$(grep "^core id" /proc/cpuinfo | sort -u | wc -l)
+
 echo "Numbrer of processors =" ${NPROC}
 
 cd oce ;
