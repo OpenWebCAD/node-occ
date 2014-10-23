@@ -608,9 +608,9 @@ NAN_METHOD(Solid::getShapeName)
 
   Handle<Object> pShape = args[0]->ToObject();
   if (!pShape.IsEmpty()) {
-    Handle<Value> hashCode = pShape->Get(NanNew("hashCode"));
-    Handle<Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
-    Handle<Value>  value = reversedMap->Get(hashCode);
+    v8::Local<v8::Value> hashCode = pShape->Get(NanNew("hashCode"));
+    v8::Local<v8::Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
+    v8::Local<v8::Value>  value = reversedMap->Get(hashCode);
     NanReturnValue(value);
   }
   NanReturnUndefined();
@@ -619,11 +619,11 @@ NAN_METHOD(Solid::getShapeName)
 
 std::string Solid::_getShapeName(const TopoDS_Shape& shape)
 {
-  v8::Handle<v8::Object>& pJhis = NanObjectWrapHandle(this);
+  v8::Local<v8::Object> pJhis = NanObjectWrapHandle(this);
 
-  v8::Handle<v8::Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
-  v8::Handle<v8::Value> hashCode = NanNew<v8::Integer>(shape.HashCode(std::numeric_limits<int>::max()));
-  v8::Handle<v8::Value> value = reversedMap->Get(hashCode);
+  v8::Local<v8::Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
+  v8::Local<v8::Value> hashCode = NanNew<v8::Integer>(shape.HashCode(std::numeric_limits<int>::max()));
+  v8::Local<v8::Value> value = reversedMap->Get(hashCode);
 
   NanAsciiString s(value);
   std::string res(*s);
@@ -633,11 +633,11 @@ std::string Solid::_getShapeName(const TopoDS_Shape& shape)
 void Solid::_registerNamedShape(const char* name,const TopoDS_Shape& shape)
 {
   if (shape.ShapeType() == TopAbs_FACE)  {
-    Handle<Object> obj = NanObjectWrapHandle(this)->Get(NanNew("faces"))->ToObject();
+    Local<Object> obj = NanObjectWrapHandle(this)->Get(NanNew("faces"))->ToObject();
     obj->Set(NanNew(name),    Face::NewInstance(TopoDS::Face(shape)));
   }
 
-  Handle<Object> reversedMap = NanObjectWrapHandle(this)->Get(NanNew("_reversedMap"))->ToObject();
+  Local<Object> reversedMap = NanObjectWrapHandle(this)->Get(NanNew("_reversedMap"))->ToObject();
   reversedMap->Set(shape.HashCode(std::numeric_limits<int>::max()),NanNew(name));
 }
 

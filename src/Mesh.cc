@@ -313,7 +313,7 @@ void Mesh::updateJavaScriptArray()
 
   assert(sizeof(triangles[0])==sizeof(int)*3);
 
-  Handle<Object> pThis = NanObjectWrapHandle(this);
+  Local<Object> pThis = NanObjectWrapHandle(this);
   UpdateExternalArray(pThis, "vertices"    ,&vertices.data()[0].x   ,vertices.size()*3);
   UpdateExternalArray(pThis, "normals"     ,&normals.data()[0].x    ,normals.size()*3);
   UpdateExternalArray(pThis, "triangles"   ,&triangles.data()[0].i  ,triangles.size()*3);
