@@ -1,0 +1,94 @@
+#include "nan.h"
+
+struct ProgressData {
+public:
+  ProgressData();
+  double m_lastValue;
+  double m_percent;
+  double m_progress;
+};
+
+inline ProgressData::ProgressData()
+:m_lastValue(0)
+,m_percent(0)
+,m_progress(0)
+{}
+
+class AsyncWorkerWithProgress : public NanAsyncWorker {
+
+  NanCallback* _progressCallback;
+  uv_async_t async;
+protected:
+  std::string _filename;
+public:
+  ProgressData m_data;
+
+public:
+  AsyncWorkerWithProgress(NanCallback *callback,NanCallback* progressCallback,std::string*  pfilename)
+    : NanAsyncWorker(callback) , _progressCallback(progressCallback)
+  {
+    _filename = *pfilename; 
+    delete pfilename;
+
+    uv_async_init(uv_default_loop(),&async,AsyncWorkerWithProgress::notify_progress);
+    async.data = this;
+
+  }
+  ~AsyncWorkerWithProgress() {
+
+    if (_progressCallback) {
+      delete _progressCallback;
+    }
+    uv_close((uv_handle_t*) &async, NULL);
+
+  }
+
+
+
+
+  /**
+  * Method wich is called in the context of a working thread
+  */
+  void Execute () =0;
+
+  /**
+  * send a message to the main loop so that a progress callback can be made
+  * in the thread of the main loop.
+  * this is equivalent of asking uv to call notify_progress in the context of the
+  * main loop in the near future.
+  */
+  void send_notify_progress() {
+    uv_async_send(&this->async);
+  };
+
+#if NODE_MODULE_VERSION >= 14 // 12
+static void notify_progress(uv_async_t* handle) 
+#else
+static void notify_progress(uv_async_t* handle,int status/*unused*/) 
+#endif
+  {
+    AsyncWorkerWithProgress *worker = static_cast<AsyncWorkerWithProgress*>(handle->data);
+    worker->notify_progress();
+  }
+
+  /**
+  * 
+  * Note:
+  *    - this method is called in the main loop thread.
+  *    - there is no garanty that this method will be called for each send_notify_progress
+  */
+  void notify_progress() {
+
+    //xx printf("notify_progress %lf %d\n",m_data.percent,m_data.progress);
+
+    if (_progressCallback && !_progressCallback->IsEmpty()) {
+      //xx printf("notify_progress %lf %d\n",m_data.percent,m_data.progress);
+      NanScope();
+      Local<Value> argv[2] = { 
+        NanNew<Number>(this->m_data.m_progress),
+        NanNew<Integer>((int)this->m_data.m_percent)
+      };
+      _progressCallback->Call(2,argv);
+    }  	
+  }
+};

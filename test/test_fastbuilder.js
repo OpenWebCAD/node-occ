@@ -167,12 +167,12 @@ describe("testing fast-builder with LEGO brick" , function () {
 
     it("should produce a LEGO brick",function(){
         
+        var factory = require("../lib/shapeFactory.js");
 
         function buildBrick() {
-            var factory = require("../lib/shapeFactory.js");
 
             var brick24 =  factory.makeLegoBrick(fast_occ,2,4,'thick');
-
+			
             brick24.numFaces.should.be.greaterThan(40);
 
             // now check with bounding box
@@ -202,7 +202,7 @@ describe("testing fast-builder with LEGO brick" , function () {
         console.log(" speed up                   = ", speedup ,"%" );
 
         diff1.should.be.greaterThan(diff2);
-        speedup.should.be.greaterThan(200); //"%"
+        speedup.should.be.greaterThan(100); //"%"
 
     }); 
 });

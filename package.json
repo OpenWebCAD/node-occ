@@ -4,20 +4,21 @@
   "description": "OpenCascade OCE Wrapper for Node js",
   "preferGlobal": "true",
   "dependencies": {
-    "should": "*",
     "colors": "*",
-    "temporary": "~0.0.5",
     "gettemporaryfilepath": "0.0.1",
-    "progress": "~0.1.0",
+    "grunt-contrib-concat": "~0.5.0",
+    "nan": "^1.3.0",
     "pace": "~0.0.4",
-    "grunt-contrib-concat": "~0.3.0"
+    "progress": "~1.1.8",
+    "should": "*",
+    "temporary": "~0.0.8"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.1.1",
-    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-nodeunit": "~0.4.1",
     "grunt-contrib-uglify": "*",
-    "grunt-mocha-cli": "~1.0.1",
+    "grunt-mocha-cli": "~1.10.0",
     "grunt-docco": "*",
     "should": "*",
     "mocha": "*"

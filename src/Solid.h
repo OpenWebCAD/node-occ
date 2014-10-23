@@ -9,7 +9,7 @@ class Solid : public Shape {
 protected:
     Solid() {};
     virtual ~Solid() {
-        m_cacheMesh.Dispose();
+        NanDisposePersistent(m_cacheMesh);
     };
 
 public:
@@ -29,7 +29,7 @@ public:
     double volume();
     double area();
 
-	virtual void InitNew(const v8::Arguments& args);
+	virtual void InitNew(_NAN_METHOD_ARGS);
 
     Handle<Object> createMesh(double factor, double angle, bool qualityNormals = true);
 
@@ -47,27 +47,31 @@ public:
     // static Handle<v8::Value> chamfer(const v8::Arguments& args);
 
     // default mesh
-    static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
-    static Handle<v8::Value> createMesh(const v8::Arguments& args); // custom mesh
+    static NAN_PROPERTY_GETTER(_mesh);
+    
+    static NAN_METHOD(createMesh); // custom mesh
 
-    static Handle<v8::Value> getEdges(const v8::Arguments& args);
-    static Handle<v8::Value> getVertices(const v8::Arguments& args);
-    static Handle<v8::Value> getFaces(const v8::Arguments& args);
-    static Handle<v8::Value> getShells(const v8::Arguments& args);
-    static Handle<v8::Value> getSolids(const v8::Arguments& args);
-    static Handle<v8::Value> getOuterShell(const v8::Arguments& args);
-    static Handle<v8::Value> getShapeName(const v8::Arguments& args);
-	static Handle<v8::Value> getAdjacentFaces(const v8::Arguments& args);
-	static Handle<v8::Value> getCommonEdges(const v8::Arguments& args);
-	static Handle<v8::Value> getCommonVertices(const v8::Arguments& args);
+    static NAN_METHOD(getEdges);
+    static NAN_METHOD(getVertices);
+    static NAN_METHOD(getFaces);
+    static NAN_METHOD(getShells);
+    static NAN_METHOD(getSolids);
+    static NAN_METHOD(getOuterShell);
+    static NAN_METHOD(getShapeName);
+	  static NAN_METHOD(getAdjacentFaces);
+	  static NAN_METHOD(getCommonEdges);
+	  static NAN_METHOD(getCommonVertices);
+
     // Methods exposed to JavaScripts
     static void Init(Handle<Object> target);
-    static Handle<v8::Value> NewInstance(const v8::Arguments& args);
+
+    static NAN_METHOD(New);
+    static NAN_METHOD(NewInstance);
+
     static Handle<Value>     NewInstance(TopoDS_Shape shape);
     static Handle<Value>     NewInstance();
-    static Handle<v8::Value> New(const v8::Arguments& args);
 
-    static Persistent<FunctionTemplate> constructor;
+    static v8::Persistent<v8::FunctionTemplate> _template;
 
 
     void _registerNamedShape(const char* name,const TopoDS_Shape& shape);

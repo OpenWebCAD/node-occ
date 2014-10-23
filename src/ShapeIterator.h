@@ -18,16 +18,17 @@ public:
     bool more();
 
     void reset();
-    static  Handle<v8::Value> reset(const v8::Arguments& args);
+    static  NAN_METHOD(reset);
 
     Handle<Value> next();
-    static  Handle<v8::Value> next(const v8::Arguments& args);
+    static NAN_METHOD(next);
 
     // Methods exposed to JavaScripts
     static void Init(Handle<Object> target);
-    static Handle<v8::Value> NewInstance(const v8::Arguments& args);
-    static Handle<v8::Value> New(const v8::Arguments& args);
 
-    static Persistent<FunctionTemplate> constructor;
+    static NAN_METHOD(NewInstance);
+    static NAN_METHOD(New);
+
+    static v8::Persistent<v8::FunctionTemplate> _template;
 
 };

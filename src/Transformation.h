@@ -12,11 +12,11 @@ public:
     typedef class Transformation _ThisType ;
     Transformation()
     {}
-    static Handle<Value> makeTranslation(const Arguments& args);
-    static Handle<Value> makePlaneMirror(const Arguments& args);
-    static Handle<Value> makeAxisMirror(const Arguments& args);
-    static Handle<Value> makeScale(const Arguments& args);
-    static Handle<Value> makeRotation(const Arguments& args);
+    static NAN_METHOD(makeTranslation);
+    static NAN_METHOD(makePlaneMirror);
+    static NAN_METHOD(makeAxisMirror);
+    static NAN_METHOD(makeScale);
+    static NAN_METHOD(makeRotation);
 
     double scaleFactor() {
         return m_trsf.ScaleFactor();
@@ -35,10 +35,10 @@ public:
 
     // Methods exposed to JavaScripts
     static void Init(Handle<Object> target);
-    static Handle<Value> NewInstance(const Arguments& args);
-    static Handle<Value> New(const Arguments& args);
+    static NAN_METHOD(NewInstance);
+    static NAN_METHOD(New);
 
-    static Persistent<FunctionTemplate> constructor;
+    static v8::Persistent<v8::FunctionTemplate> _template;
 
 private:
     Transformation(const Transformation&);

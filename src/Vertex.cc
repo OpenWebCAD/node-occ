@@ -30,11 +30,11 @@ double Vertex::z()
     return  point().Z();
 }
 
-Persistent<FunctionTemplate> Vertex::constructor;
+Persistent<FunctionTemplate> Vertex::_template;
 
-Handle<Value> Vertex::New(const Arguments& args)
+NAN_METHOD(Vertex::New)
 {
-    HandleScope scope;
+    NanScope();
 
     Vertex* pThis = new Vertex();
     pThis->Wrap(args.This());
@@ -48,37 +48,39 @@ Handle<Value> Vertex::New(const Arguments& args)
         ReadPoint(args[0],&x,&y,&z);
     } else if (args.Length() == 0) {
     } else {
-        ThrowException(Exception::TypeError(String::New("Wrong Arguments")));
+        NanThrowError("Wrong Arguments");
+        NanReturnUndefined();
     }
     gp_Pnt aPnt;
     aPnt = gp_Pnt(x, y, z);
     BRepBuilderAPI_MakeVertex mkVertex(aPnt);
     pThis->setShape(mkVertex.Vertex());
 
-    return args.This();
+    NanReturnValue(args.This());
 }
 
 
 Local<Object>  Vertex::Clone() const
 {
-    HandleScope scope;
     Vertex* obj = new Vertex();
-    Local<Object> instance = constructor->GetFunction()->NewInstance();
+    Local<Object> instance = NanNew(_template)->GetFunction()->NewInstance();
     obj->Wrap(instance);
     obj->setShape(this->shape());
-    return scope.Close(instance);
+    return instance;
 }
 void Vertex::Init(Handle<Object> target)
 {
     // Prepare constructor template
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Vertex::New));
-    constructor->SetClassName(String::NewSymbol("Vertex"));
+      v8::Local<v8::FunctionTemplate>  tpl = NanNew<v8::FunctionTemplate>(Vertex::New);
+      tpl->SetClassName(NanNew("Vertex"));
 
     // object has one internal filed ( the C++ object)
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
 
     // Prototype
-    Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+    Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
 
     Base::InitProto(proto);
 
@@ -86,6 +88,6 @@ void Vertex::Init(Handle<Object> target)
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,y);
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,z);
 
-    target->Set(String::NewSymbol("Vertex"), constructor->GetFunction());
+    target->Set(NanNew("Vertex"), tpl->GetFunction());
 }
 

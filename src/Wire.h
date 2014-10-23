@@ -23,6 +23,6 @@ public:
     }
 
     static void Init(Handle<Object> target);
-    static Handle<Value> New(const Arguments& args);
-    static Persistent<FunctionTemplate> constructor;
+    static NAN_METHOD(New);
+    static v8::Persistent<v8::FunctionTemplate> _template;
 };

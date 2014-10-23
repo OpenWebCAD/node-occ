@@ -10,7 +10,7 @@ var fs = require("fs");
 var getTemporaryFilePath = require('gettemporaryfilepath');
 
 
-describe("testing STEP input output ",function(){
+xdescribe("testing STEP input output ",function(){
 
   var b1_step, b2_step,b3_step;
   before(function() {

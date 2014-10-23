@@ -18,7 +18,7 @@
 			# 'AdditionalOptions': ["/FORCE",],						
 		},	  
 	  },
-		
+
       "sources": [
 			"src/Base.h",
 			"src/Base.cc",
@@ -71,7 +71,8 @@
         "/usr/local/lib"
 	  ],
 	  "include_dirs": [  
-        "/usr/local/include/oce"
+        "/usr/local/include/oce",
+        "<!(node -e \"require('nan')\")"
 	  ],				
 
 	  "libraries": [ 

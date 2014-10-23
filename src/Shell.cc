@@ -60,45 +60,43 @@ double Shell::area()
 //
 
 
-Persistent<FunctionTemplate> Shell::constructor;
+Persistent<FunctionTemplate> Shell::_template;
 
 
-Handle<Value> Shell::New(const Arguments& args)
+NAN_METHOD(Shell::New)
 {
-    HandleScope scope;
-
+    NanScope();
     Shell* obj = new Shell();
     obj->Wrap(args.This());
-
-    return args.This();
+    NanReturnValue(args.This());
 }
 
 Local<Object>  Shell::Clone() const
 {
-    HandleScope scope;
     Shell* obj = new Shell();
-    Local<Object> instance = constructor->GetFunction()->NewInstance();
+    Local<Object> instance = NanNew(_template)->GetFunction()->NewInstance();
     obj->Wrap(instance);
     obj->setShape(this->shape());
-    return scope.Close(instance);
+    return instance;
 }
 
 void Shell::Init(Handle<Object> target)
 {
     // Prepare constructor template
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Shell::New));
-    constructor->SetClassName(String::NewSymbol("Shell"));
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Shell::New);  
+    tpl->SetClassName(NanNew("Shell"));
 
     // object has one internal filed ( the C++ object)
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+    NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
 
     // Prototype
-    Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+    Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
 
     Base::InitProto(proto);
 
     EXPOSE_READ_ONLY_PROPERTY_INTEGER(Shell,numFaces);
     EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Shell,area);
 
-    target->Set(String::NewSymbol("Shell"), constructor->GetFunction());
+    target->Set(NanNew("Shell"), tpl->GetFunction());
 }

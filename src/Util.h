@@ -18,4 +18,4 @@ void ReadPoint(Local<v8::Value> value,gp_Pnt* pt);
 void ReadDir(Local<v8::Value> value,gp_Dir* pt);
 void ReadVector(Local<v8::Value> value,gp_Vec* pt);
 
-void ReadRotationFromArgs(const v8::Arguments& args,gp_Trsf& trans);
+void ReadRotationFromArgs(_NAN_METHOD_ARGS,gp_Trsf& trans);

@@ -49,14 +49,14 @@ void ReadDouble(const Handle<Value>& _v,double& value)
 }
 double ReadDouble(Handle<Object> value,const char* name,double defaultValue)
 {
-    Local<Value> _v = value->ToObject()->Get(String::New(name));
+    Local<Value> _v = value->ToObject()->Get(NanNew(name));
     ReadDouble(_v,defaultValue);
     return defaultValue;
 }
 
 int ReadInt(Handle<Object> value,const char* name,int defaultValue)
 {
-    Local<Value> _v = value->ToObject()->Get(String::New(name));
+    Local<Value> _v = value->ToObject()->Get(NanNew(name));
     return _v->ToInteger()->ToInt32()->Value();
 }
 
@@ -109,7 +109,7 @@ void ReadVector(Local<v8::Value> value,gp_Vec* pt)
     pt->SetCoord(x,y,z);
 }
 
-void ReadRotationFromArgs(const v8::Arguments& args,gp_Trsf& trans)
+void ReadRotationFromArgs(_NAN_METHOD_ARGS,gp_Trsf& trans)
 {
 
     double x=0,y=0,z=0;

@@ -17,11 +17,11 @@
 
 
 
-Handle<Value>  ForceGC(const Arguments& args)
+NAN_METHOD(ForceGC)
 {
-    HandleScope scope;
+    NanScope();
     while(!V8::IdleNotification()) {}
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 
 }
 void Initialize(Handle<Object> target)
@@ -40,31 +40,61 @@ void Initialize(Handle<Object> target)
     Wire::Init(target);
     BooleanOperation::Init(target);
 
-    target->Set(String::NewSymbol("makeBox"),          FunctionTemplate::New(ShapeFactory::makeBox)->GetFunction());
-    target->Set(String::NewSymbol("makeCylinder"),     FunctionTemplate::New(ShapeFactory::makeCylinder)->GetFunction());
-    target->Set(String::NewSymbol("makeCone"),         FunctionTemplate::New(ShapeFactory::makeCone)->GetFunction());
-    target->Set(String::NewSymbol("makeSphere"),       FunctionTemplate::New(ShapeFactory::makeSphere)->GetFunction());
-    target->Set(String::NewSymbol("makeTorus"),        FunctionTemplate::New(ShapeFactory::makeTorus)->GetFunction());
-    target->Set(String::NewSymbol("makePrism"),        FunctionTemplate::New(ShapeFactory::makePrism)->GetFunction());
-    target->Set(String::NewSymbol("makeThickSolid"),   FunctionTemplate::New(ShapeFactory::makeThickSolid)->GetFunction());
-    target->Set(String::NewSymbol("makeDraftAngle"),   FunctionTemplate::New(ShapeFactory::makeDraftAngle)->GetFunction());
-    target->Set(String::NewSymbol("makeFillet"),   FunctionTemplate::New(ShapeFactory::makeFillet)->GetFunction());
-   // target->Set(String::NewSymbol("makeChamfer")  FunctionTemplate::New(ShapeFactory::makeDraftAngle)->GetFunction());
+    NODE_SET_METHOD(target,"makeBox",ShapeFactory::makeBox);
+    NODE_SET_METHOD(target,"makeBox",ShapeFactory::makeBox);
+    NODE_SET_METHOD(target,"makeCylinder",ShapeFactory::makeCylinder);
+    NODE_SET_METHOD(target,"makeCone",ShapeFactory::makeCone);
+    NODE_SET_METHOD(target,"makeSphere",ShapeFactory::makeSphere);
+    NODE_SET_METHOD(target,"makeTorus",ShapeFactory::makeTorus);
+    NODE_SET_METHOD(target,"makePrism",ShapeFactory::makePrism);
+    NODE_SET_METHOD(target,"makeThickSolid",ShapeFactory::makeThickSolid);
+    NODE_SET_METHOD(target,"makeDraftAngle",ShapeFactory::makeDraftAngle);
+    NODE_SET_METHOD(target,"makeFillet",ShapeFactory::makeFillet);
+   // target->Set(NanSymbol("makeChamfer")NanNew<FunctionTemplate>(ShapeFactory::makeDraftAngle);
 
 
-    target->Set(String::NewSymbol("fuse"),        FunctionTemplate::New(ShapeFactory::fuse)->GetFunction());
-    target->Set(String::NewSymbol("cut"),         FunctionTemplate::New(ShapeFactory::cut)->GetFunction());
-    target->Set(String::NewSymbol("common"),      FunctionTemplate::New(ShapeFactory::common)->GetFunction());
-    target->Set(String::NewSymbol("compound"),    FunctionTemplate::New(ShapeFactory::compound)->GetFunction());
+    NODE_SET_METHOD(target,"fuse",ShapeFactory::fuse);
+    NODE_SET_METHOD(target,"cut",ShapeFactory::cut);
+    NODE_SET_METHOD(target,"common",ShapeFactory::common);
+    NODE_SET_METHOD(target,"compound",ShapeFactory::compound);
 
-    target->Set(String::NewSymbol("writeSTL"),   FunctionTemplate::New(writeSTL)->GetFunction());
-    target->Set(String::NewSymbol("writeSTEP"),   FunctionTemplate::New(writeSTEP)->GetFunction());
-    target->Set(String::NewSymbol("writeBREP"),   FunctionTemplate::New(writeBREP)->GetFunction());
-    target->Set(String::NewSymbol("readSTEP"),   FunctionTemplate::New(readSTEP)->GetFunction());
-    target->Set(String::NewSymbol("readBREP"),   FunctionTemplate::New(readBREP)->GetFunction());
+    NODE_SET_METHOD(target,"writeSTL",writeSTL);
+    NODE_SET_METHOD(target,"writeSTEP",writeSTEP);
+    NODE_SET_METHOD(target,"writeBREP",writeBREP);
+    NODE_SET_METHOD(target,"readSTEP",readSTEP);
+    NODE_SET_METHOD(target,"readBREP",readBREP);
 
-    target->Set(String::NewSymbol("oceVersion"),  String::New("0.11"));
-    target->Set(String::NewSymbol("gc"),     FunctionTemplate::New(ForceGC)->GetFunction());
+    //xx NODE_SET_METHOD(target,"oceVersion",NanNew("0.13"));
+    target->Set(NanNew("oceVersion"),  NanNew("0.13"));
+
+    NODE_SET_METHOD(target,"gc",ForceGC);
+#if 0
+    target->Set(NanNew("makeBox"),      NanNew<FunctionTemplate>(ShapeFactory::makeBox)->GetFunction());
+    target->Set(NanNew("makeCylinder"), NanNew<FunctionTemplate>(ShapeFactory::makeCylinder)->GetFunction());
+    target->Set(NanNew("makeCone"),         NanNew<FunctionTemplate>(ShapeFactory::makeCone)->GetFunction());
+    target->Set(NanNew("makeSphere"),       NanNew<FunctionTemplate>(ShapeFactory::makeSphere)->GetFunction());
+    target->Set(NanNew("makeTorus"),        NanNew<FunctionTemplate>(ShapeFactory::makeTorus)->GetFunction());
+    target->Set(NanNew("makePrism"),        NanNew<FunctionTemplate>(ShapeFactory::makePrism)->GetFunction());
+    target->Set(NanNew("makeThickSolid"),   NanNew<FunctionTemplate>(ShapeFactory::makeThickSolid)->GetFunction());
+    target->Set(NanNew("makeDraftAngle"),   NanNew<FunctionTemplate>(ShapeFactory::makeDraftAngle)->GetFunction());
+    target->Set(NanNew("makeFillet"),   NanNew<FunctionTemplate>(ShapeFactory::makeFillet)->GetFunction());
+   // target->Set(NanSymbol("makeChamfer")  NanNew<FunctionTemplate>(ShapeFactory::makeDraftAngle)->GetFunction());
+
+
+    target->Set(NanNew("fuse"),        NanNew<FunctionTemplate>(ShapeFactory::fuse)->GetFunction());
+    target->Set(NanNew("cut"),         NanNew<FunctionTemplate>(ShapeFactory::cut)->GetFunction());
+    target->Set(NanNew("common"),      NanNew<FunctionTemplate>(ShapeFactory::common)->GetFunction());
+    target->Set(NanNew("compound"),    NanNew<FunctionTemplate>(ShapeFactory::compound)->GetFunction());
+
+    target->Set(NanNew("writeSTL"),   NanNew<FunctionTemplate>(writeSTL)->GetFunction());
+    target->Set(NanNew("writeSTEP"),   NanNew<FunctionTemplate>(writeSTEP)->GetFunction());
+    target->Set(NanNew("writeBREP"),   NanNew<FunctionTemplate>(writeBREP)->GetFunction());
+    target->Set(NanNew("readSTEP"),   NanNew<FunctionTemplate>(readSTEP)->GetFunction());
+    target->Set(NanNew("readBREP"),   NanNew<FunctionTemplate>(readBREP)->GetFunction());
+
+    target->Set(NanNew("oceVersion"),  NanNew("0.13"));
+    target->Set(NanNew("gc"),     NanNew<FunctionTemplate>(ForceGC)->GetFunction());
+#endif
 
 }
 NODE_MODULE(occ, Initialize)

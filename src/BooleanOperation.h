@@ -14,9 +14,9 @@ class BooleanOperation : public node::ObjectWrap {
 public:
     typedef class BooleanOperation _ThisType;
 
-    static Persistent<FunctionTemplate> constructor;
-    static Handle<Object> NewInstance(BOPAlgo_Operation op);
+    static v8::Persistent<v8::FunctionTemplate> _template;
+    static v8::Handle<v8::Value> NewInstance(BOPAlgo_Operation op);
 
-    static Handle<Value> New(const v8::Arguments& args);
+    static NAN_METHOD(New);
     static void Init(Handle<Object> target);
 };

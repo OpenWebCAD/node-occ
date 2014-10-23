@@ -12,7 +12,7 @@ using namespace std;
 
 bool operator == (Local<String> str,const char* value)
 {
-    return str->Equals(String::New(value));
+    return str->Equals(NanNew<String>(value));
 }
 
 

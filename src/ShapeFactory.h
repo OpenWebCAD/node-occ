@@ -10,32 +10,32 @@ class Base;
 class ShapeFactory {
 public:
     // vertex
-    static Handle<v8::Value> makeVertex(const v8::Arguments& args);
+    static NAN_METHOD(makeVertex);
     // edges
-    static Handle<v8::Value> makeLine(const v8::Arguments& args);
-    static Handle<v8::Value> makeCircle(const v8::Arguments& args);
-    static Handle<v8::Value> makeArc3Points(const v8::Arguments& args);
+    static NAN_METHOD(makeLine);
+    static NAN_METHOD(makeCircle);
+    static NAN_METHOD(makeArc3Points);
     // wires
     // faces
     // boolean operation
-    static Handle<v8::Value> fuse(const v8::Arguments& args);
-    static Handle<v8::Value> cut(const v8::Arguments& args);
-    static Handle<v8::Value> common(const v8::Arguments& args);
-	static Handle<v8::Value> compound(const v8::Arguments& args);
+    static NAN_METHOD(fuse);
+    static NAN_METHOD(cut);
+    static NAN_METHOD(common);
+	  static NAN_METHOD(compound);
     // primitive constructions
-    static Handle<v8::Value> makeBox(const v8::Arguments& args) ;
-    static Handle<v8::Value> makePrism(const Arguments& arg);
-    static Handle<v8::Value> makeCylinder(const Arguments& arg);
-    static Handle<v8::Value> makeCone(const Arguments& arg);
-    static Handle<v8::Value> makeSphere(const Arguments& arg);
-	static Handle<v8::Value> makeTorus(const Arguments& args);
-	static Handle<v8::Value> makePipe(const Arguments& args);
-	//
-	static Handle<v8::Value> makeThickSolid(const Arguments& args);
-	static Handle<v8::Value> makeDraftAngle(const v8::Arguments& args);
-	static Handle<v8::Value> makeFillet(const v8::Arguments& args);
+    static NAN_METHOD(makeBox);
+    static NAN_METHOD(makePrism);
+    static NAN_METHOD(makeCylinder);
+    static NAN_METHOD(makeCone);
+    static NAN_METHOD(makeSphere);
+	  static NAN_METHOD(makeTorus);
+	  static NAN_METHOD(makePipe);
+	  //
+	  static NAN_METHOD(makeThickSolid);
+	  static NAN_METHOD(makeDraftAngle);
+	  static NAN_METHOD(makeFillet);
 private:
-    static Handle<v8::Value> _boolean(const v8::Arguments& args,BOPAlgo_Operation op);
+    static _NAN_METHOD_RETURN_TYPE _boolean(_NAN_METHOD_ARGS,BOPAlgo_Operation op);
     static Handle<v8::Value> add(const std::vector<Base*>& shapes);
 
 };

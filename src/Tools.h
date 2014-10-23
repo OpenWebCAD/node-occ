@@ -1,7 +1,8 @@
 #include "OCC.h"
 #include "NodeV8.h"
-v8::Handle<Value> writeSTEP(const v8::Arguments& args);
-v8::Handle<Value> readSTEP(const v8::Arguments& args);
-v8::Handle<Value> writeBREP(const v8::Arguments& args);
-v8::Handle<Value> readBREP(const v8::Arguments& args);
-v8::Handle<Value> writeSTL(const v8::Arguments& args);
+
+NAN_METHOD(writeSTEP);
+NAN_METHOD(readSTEP);
+NAN_METHOD(writeBREP);
+NAN_METHOD(readBREP);
+NAN_METHOD(writeSTL);

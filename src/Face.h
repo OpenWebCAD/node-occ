@@ -9,45 +9,48 @@
 class Wire;
 class Face:  public Base {
 
-    TopoDS_Face m_face;
-    Persistent<Object> m_cacheMesh;
-    virtual ~Face() {
-        m_cacheMesh.Dispose();
-    };
+  TopoDS_Face m_face;
+  Persistent<Object> m_cacheMesh;
+  virtual ~Face() {
+    NanDisposePersistent(m_cacheMesh);
+  };
 public:
-    int numWires();
-    double area();
-    bool fixShape();
-    bool isPlanar();
-	bool hasMesh();
-    std::vector<double> inertia();
+  int numWires();
+  double area();
+  bool fixShape();
+  bool isPlanar();
+  bool hasMesh();
+  std::vector<double> inertia();
 
-    const gp_XYZ centreOfMass() const;
+  const gp_XYZ centreOfMass() const;
 
-    TEAROFF_POINT(Face,centreOfMass,Point3Wrap,gp_XYZ);
+  TEAROFF_POINT(Face,centreOfMass,Point3Wrap,gp_XYZ);
 
-    virtual const TopoDS_Shape& shape() const;
-    const  TopoDS_Face& face() const {
-        return m_face;
-    }
-    virtual void setShape(const TopoDS_Shape&);
+  virtual const TopoDS_Shape& shape() const;
+  const  TopoDS_Face& face() const {
+    return m_face;
+  }
+  virtual void setShape(const TopoDS_Shape&);
 
-    bool buildFace(std::vector<Wire*>& wires);
+  bool buildFace(std::vector<Wire*>& wires);
 
-    static Handle<Value> extrude(const Arguments& arg);
+  static NAN_METHOD(extrude);
 
-    virtual Local<Object> Clone() const;
+  virtual Local<Object> Clone() const;
 
-    virtual Base* Unwrap(v8::Local<v8::Object> obj) const {
-       return node::ObjectWrap::Unwrap<Face>(obj);
-    }
-	virtual void InitNew(const v8::Arguments& args);
+  virtual Base* Unwrap(v8::Local<v8::Object> obj) const {
+    return node::ObjectWrap::Unwrap<Face>(obj);
+  }
+  virtual void InitNew(_NAN_METHOD_ARGS);
 
-	static Handle<v8::Value> _mesh(Local<String> property,const AccessorInfo &info);
-	Handle<Object> createMesh(double factor, double angle, bool qualityNormals);
 
-    static void Init(Handle<Object> target);
-    static Handle<Object> NewInstance(const TopoDS_Face& box);
-    static Handle<Value> New(const Arguments& args);
-    static Persistent<FunctionTemplate> constructor;
+  Handle<Object> createMesh(double factor, double angle, bool qualityNormals);
+
+  static void Init(Handle<Object> target);
+  static Handle<Object> NewInstance(const TopoDS_Face& face);
+
+  static NAN_METHOD(New);
+  static NAN_PROPERTY_GETTER(_mesh);
+
+  static v8::Persistent<v8::FunctionTemplate> _template;
 };

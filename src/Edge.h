@@ -53,16 +53,16 @@ public:
         return node::ObjectWrap::Unwrap<Edge>(obj);
     }
 
-    static Handle<v8::Value> createLine(const v8::Arguments& args);
-    static Handle<v8::Value> createCircle(const v8::Arguments& args);
-    static Handle<v8::Value> createArc3P(const v8::Arguments& args);
-	static Handle<v8::Value> polygonize(const v8::Arguments& args);
+    static NAN_METHOD(createLine);
+    static NAN_METHOD(createCircle);
+    static NAN_METHOD(createArc3P);
+	  static NAN_METHOD(polygonize);
 
+    static NAN_METHOD(New);
 
     Handle<Value> startVertex();
     Handle<Value> endVertex();
 
     static void Init(Handle<Object> target);
-    static Handle<Value> New(const Arguments& args);
-    static Persistent<FunctionTemplate> constructor;
+    static v8::Persistent<v8::FunctionTemplate> _template;
 };

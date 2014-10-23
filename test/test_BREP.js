@@ -108,7 +108,7 @@ function build_large_part()
 
   return lego_filename;
 }
-describe("it should write and read a large brep file",function() {
+xdescribe("it should write and read a large brep file",function() {
   this.timeout(15000);
   it("should read a plate quickly", function(done) {
       var filename = build_large_part();

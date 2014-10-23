@@ -13,18 +13,18 @@ Local<Object> buildEmptyWrapper(TopAbs_ShapeEnum type)
     case  TopAbs_COMPOUND:
     case  TopAbs_COMPSOLID:
     case  TopAbs_SOLID:
-        return Solid::constructor->GetFunction()->NewInstance(0,0)->ToObject();
+        return NanNew(Solid::_template)->GetFunction()->NewInstance(0,0)->ToObject();
     case TopAbs_SHELL:
-        return Shell::constructor->GetFunction()->NewInstance(0,0)->ToObject();;
+        return NanNew(Shell::_template)->GetFunction()->NewInstance(0,0)->ToObject();;
         break;
     case TopAbs_FACE:
-        return Face::constructor->GetFunction()->NewInstance(0,0)->ToObject();
+        return NanNew(Face::_template)->GetFunction()->NewInstance(0,0)->ToObject();
     case TopAbs_WIRE:
-        return Wire::constructor->GetFunction()->NewInstance(0,0)->ToObject();
+        return NanNew(Wire::_template)->GetFunction()->NewInstance(0,0)->ToObject();
     case TopAbs_EDGE:
-        return Edge::constructor->GetFunction()->CallAsConstructor(0,0)->ToObject();
+        return NanNew(Edge::_template)->GetFunction()->CallAsConstructor(0,0)->ToObject();
     case TopAbs_VERTEX:
-        return Vertex::constructor->GetFunction()->NewInstance(0,0)->ToObject();
+        return NanNew(Vertex::_template)->GetFunction()->NewInstance(0,0)->ToObject();
     case TopAbs_SHAPE:
         break;
     }
@@ -32,11 +32,11 @@ Local<Object> buildEmptyWrapper(TopAbs_ShapeEnum type)
 }
 Local<Object> buildWrapper(const TopoDS_Shape shape)
 {
-    HandleScope scope;
+    
     Local<Object> obj = Local<Object>(buildEmptyWrapper(shape.ShapeType()));
     Base*  pShape = node::ObjectWrap::Unwrap<Base>(obj);
     pShape->setShape(shape);
-    return scope.Close(obj);
+    return obj;
 }
 
 bool ShapeIterator::more()
@@ -46,31 +46,30 @@ bool ShapeIterator::more()
 
 Handle<Value> ShapeIterator::next()
 {
-    HandleScope scope;
-
     if (ex.More()) {
 
         Local<Object>  obj = buildWrapper(ex.Current());
 
-        this->handle_->Set(String::NewSymbol("current"),obj);
+        NanObjectWrapHandle(this)->Set(NanNew("current"),obj);
 
         ex.Next();
 
-        return scope.Close(obj);
+        return obj;
     } else {
-        return scope.Close(Undefined());
+        return NanUndefined();
     }
 }
 
-Handle<v8::Value> ShapeIterator::next(const v8::Arguments& args)
+NAN_METHOD(ShapeIterator::next)
 {
-    HandleScope scope;
-    if(!ShapeIterator::constructor->HasInstance(args.This())) {
-        ThrowException(Exception::TypeError(String::New("bad arguments")));
-        return scope.Close(Undefined());
+    NanScope();
+    if(!NanHasInstance(ShapeIterator::_template,args.This())) {
+        NanThrowError("bad arguments");
+        NanReturnUndefined();
     }
     ShapeIterator* pThis = ObjectWrap::Unwrap<ShapeIterator>(args.This());
-    return scope.Close(pThis->next());
+    
+    NanReturnValue(pThis->next());
 }
 
 
@@ -78,33 +77,39 @@ void ShapeIterator::reset()
 {
     ex.ReInit();
 }
-Handle<v8::Value> ShapeIterator::reset(const v8::Arguments& args)
+
+
+NAN_METHOD(ShapeIterator::reset)
 {
-    HandleScope scope;
-    if(ShapeIterator::constructor->HasInstance(args.This())) {
-        ThrowException(Exception::TypeError(String::New("bad arguments")));
-        return scope.Close(Undefined());
+    NanScope();
+
+    if(NanHasInstance(ShapeIterator::_template,args.This())) {
+        NanThrowError("bad arguments");
+        NanReturnUndefined();
     }
     ShapeIterator* pThis = ObjectWrap::Unwrap<ShapeIterator>(args.This());
 
     pThis->reset();
 
-    return args.This();
+    NanReturnValue(args.This());
 }
 
-Persistent<FunctionTemplate> ShapeIterator::constructor;
+Persistent<FunctionTemplate> ShapeIterator::_template;
+
 void ShapeIterator::Init(Handle<Object> target)
 {
 
     // Prepare constructor template
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(ShapeIterator::New));
-    constructor->SetClassName(String::NewSymbol("ShapeIterator"));
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(ShapeIterator::New);  
+    tpl->SetClassName(NanNew("ShapeIterator"));
 
     // object has one internal filed ( the C++ object)
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
 
     // Prototype
-    Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+    Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
 
     Base::InitProto(proto);
 
@@ -115,8 +120,7 @@ void ShapeIterator::Init(Handle<Object> target)
     EXPOSE_METHOD(ShapeIterator,reset);
 
 
-
-    target->Set(String::NewSymbol("ShapeIterator"), constructor->GetFunction());
+    target->Set(NanNew("ShapeIterator"), tpl->GetFunction());
 
 }
 
@@ -126,57 +130,59 @@ TopAbs_ShapeEnum getShapeEnum(const Handle<Value> arg)
     if (arg->IsString()) {
 
         Handle<String> str = arg->ToString();
-        if (str->Equals(String::NewSymbol("COMPOUND"))) {
+        if (str->Equals(NanNew("COMPOUND"))) {
             return TopAbs_COMPOUND;
         }
-        if (str->Equals(String::NewSymbol("COMPSOLID"))) {
+        if (str->Equals(NanNew("COMPSOLID"))) {
             return TopAbs_COMPSOLID;
         }
-        if (str->Equals(String::NewSymbol("VERTEX")))   {
+        if (str->Equals(NanNew("VERTEX")))   {
             return TopAbs_VERTEX;
         }
-        if (str->Equals(String::NewSymbol("EDGE")))     {
+        if (str->Equals(NanNew("EDGE")))     {
             return TopAbs_EDGE;
         }
-        if (str->Equals(String::NewSymbol("WIRE")))     {
+        if (str->Equals(NanNew("WIRE")))     {
             return TopAbs_WIRE;
         }
-        if (str->Equals(String::NewSymbol("FACE")))   {
+        if (str->Equals(NanNew("FACE")))   {
             return TopAbs_FACE;
         }
-        if (str->Equals(String::NewSymbol("SHELL")))    {
+        if (str->Equals(NanNew("SHELL")))    {
             return TopAbs_SHELL;
         }
-        if (str->Equals(String::NewSymbol("SOLID")))    {
+        if (str->Equals(NanNew("SOLID")))    {
             return TopAbs_SOLID;
         }
     }
     return TopAbs_SHAPE;
 };
 
-Handle<v8::Value> ShapeIterator::New(const v8::Arguments& args)
+NAN_METHOD(ShapeIterator::New)
 {
-    HandleScope scope;
-    if (!args.IsConstructCall()) {
-        ThrowException(Exception::TypeError(String::New(" use new occ.ShapeIterator() to construct a ShapeIterator")));
-        return scope.Close(Undefined());
-    }
-    if (args.Length() != 2) {
-        ThrowException(Exception::TypeError(String::New(" expecting two arguments : <Shape>,<'VERTEX'|'WIRE'|'SOLID'|'FACE'...>")));
-        return scope.Close(Undefined());
-    }
-    // TODO (check that the object args[0] has the correct type)
+    NanScope();
 
+    if (!args.IsConstructCall()) {
+        NanThrowError(" use new occ.ShapeIterator() to construct a ShapeIterator");
+        NanReturnUndefined();
+    }
+
+    if (args.Length() != 2) {
+        NanThrowError(" expecting two arguments : <Shape>,<'VERTEX'|'WIRE'|'SOLID'|'FACE'...>");
+        NanReturnUndefined();
+    }
+
+    // TODO (check that the object args[0] has the correct type)
     Base* pShape = node::ObjectWrap::Unwrap<Base>(args[0]->ToObject());
 
     TopAbs_ShapeEnum type = getShapeEnum(args[1]);
 
     ShapeIterator* pThis = new ShapeIterator(pShape,type);
 
-    args.This()->Set(String::NewSymbol("current"),Undefined());
+    args.This()->Set(NanNew("current"),NanUndefined());
 
     pThis->Wrap(args.This());
 
-    return args.This();
+    NanReturnValue(args.This());
 }
 

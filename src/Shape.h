@@ -14,8 +14,8 @@ protected:
 
 
 
-// static Handle<Value> ShapeType(const Arguments& args);
-// constructors
+    // static NAN_METHOD(ShapeType);
+   // constructors
 
 public:
     virtual const TopoDS_Shape& shape() const;

@@ -245,7 +245,7 @@ describe("testing face naming on a box fused with a box that have a common face 
         for (var i in faces ){
             var face = faces[i];
             var bbox = face.getBoundingBox();
-            //xx console.log("face i ", solid.getShapeName(face),bbox.toString());
+            console.log("face i ", solid.getShapeName(face),bbox.toString());
         }
     });
 });

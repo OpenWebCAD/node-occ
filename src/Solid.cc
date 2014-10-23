@@ -6,7 +6,7 @@
 #include "BoundingBox.h"
 
 
-Persistent<FunctionTemplate> Solid::constructor;
+Persistent<FunctionTemplate> Solid::_template;
 
 
 
@@ -16,15 +16,16 @@ void Solid::Init(Handle<Object> target)
 {
 
   // Prepare constructor template
-  constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Solid::New));
-  constructor->SetClassName(String::NewSymbol("Solid"));
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Solid::New);  
+  tpl->SetClassName(NanNew("Solid"));
 
   // object has one internal filed ( the C++ object)
-  constructor->InstanceTemplate()->SetInternalFieldCount(1);
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
+  NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
 
   // Prototype
-  Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+  Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   Base::InitProto(proto);
 
@@ -47,12 +48,12 @@ void Solid::Init(Handle<Object> target)
 
   EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
 
-  target->Set(String::NewSymbol("Solid"), constructor->GetFunction());
+  target->Set(NanNew("Solid"), tpl->GetFunction());
 
 }
 
 
-void Solid::InitNew(const v8::Arguments& args)
+void Solid::InitNew(_NAN_METHOD_ARGS)
 {
   Shape::InitNew(args);
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,area);
@@ -62,31 +63,31 @@ void Solid::InitNew(const v8::Arguments& args)
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
 }
 
-Handle<v8::Value> Solid::New(const v8::Arguments& args)
+NAN_METHOD(Solid::New)
 {
-  HandleScope scope;
+  NanScope();
   if (!args.IsConstructCall()) {
-    ThrowException(Exception::TypeError(String::New(" use new occ.Solid() to construct a solid")));
-    return scope.Close(Undefined());
+    NanThrowError(" use new occ.Solid() to construct a solid");
+    NanReturnUndefined();
   }
 
   Solid* pThis = new Solid();
   pThis->Wrap(args.This());
   pThis->InitNew(args);
 
-  args.This()->Set(String::NewSymbol("faces"),          v8::Object::New() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
-  args.This()->Set(String::NewSymbol("_reversedMap"),   v8::Object::New() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
+  args.This()->Set(NanNew("faces"),          NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
+  args.This()->Set(NanNew("_reversedMap"),   NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
 
-  /// args.This()->SetAccessor(String::NewSymbol("_area"),ee< Solid, Number, double, &Solid::area>,0,Number::New(12),DEFAULT,None);
+  /// args.This()->SetAccessor(NanSymbol("_area"),ee< Solid, Number, double, &Solid::area>,0,Number::New(12),DEFAULT,None);
 
   // return scope.Close(args.This());
-  return args.This();
+  NanReturnValue(args.This());
 }
 
 Local<Object> Solid::Clone() const
 {
-  HandleScope scope;
-  Handle<Object> instance = Solid::NewInstance()->ToObject();
+  //xx Local<Object> instance = NanNew(_template)->GetFunction()->NewInstance();
+  Local<Object> instance = Solid::NewInstance()->ToObject();
   Solid* pClone = node::ObjectWrap::Unwrap<Solid>(instance);
 
   pClone->setShape(this->shape());
@@ -107,42 +108,41 @@ Local<Object> Solid::Clone() const
   }
 
 
-  return scope.Close(instance);
+  return instance;
 }
 
 Handle<Value> Solid::NewInstance()
 {
-  HandleScope scope;
-  Local<Object> instance = Solid::constructor->GetFunction()->NewInstance(0,0);
+  Local<Object> instance = NanNew(Solid::_template)->GetFunction()->NewInstance(0,0);
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
-  return scope.Close(instance);
+  return instance;
 }
 
 Handle<Value> Solid::NewInstance(TopoDS_Shape shape)
 {
-  HandleScope scope;
-  Local<Object> instance = Solid::constructor->GetFunction()->NewInstance(0,0);
+  Local<Object> instance = NanNew(Solid::_template)->GetFunction()->NewInstance(0,0);
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
   pThis->setShape(shape);
-  return scope.Close(instance);
+  return instance;
 }
 
-Handle<v8::Value> Solid::NewInstance(const v8::Arguments& args)
+NAN_METHOD(Solid::NewInstance)
 {
+  NanScope();
   TopoDS_Shape shape;
-  return NewInstance(shape);
+  NanReturnValue(NewInstance(shape));
 }
 
 
-Handle<Value> Solid::getEdges(const v8::Arguments& args)
+NAN_METHOD(Solid::getEdges)
 {
 
-  HandleScope scope;
+  NanScope();
   // can work with this
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
     // create a new object
-    ThrowException(Exception::Error(String::New("invalid object")));
+    NanThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -152,23 +152,23 @@ Handle<Value> Solid::getEdges(const v8::Arguments& args)
 
 
   int nbShape =map.Extent();
-  Local<Array> arr = Array::New(nbShape);
+  Local<Array> arr = NanNew<Array>(nbShape);
 
   for (int i=0; i<nbShape; i++)  {
     Local<Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
-Handle<v8::Value> Solid::getVertices(const v8::Arguments& args)
+NAN_METHOD(Solid::getVertices)
 {
-  HandleScope scope;
+  NanScope();
   // can work with this
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
     // create a new object
-    ThrowException(Exception::Error(String::New("invalid object")));
+    NanThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -177,50 +177,50 @@ Handle<v8::Value> Solid::getVertices(const v8::Arguments& args)
 
 
   int nbShape =map.Extent();
-  Local<Array> arr = Array::New(nbShape);
+  Local<Array> arr = NanNew<Array>(nbShape);
 
   for (int i=0; i<nbShape; i++)  {
     Local<Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
-Handle<v8::Value> Solid::getOuterShell(const v8::Arguments& args)
+NAN_METHOD(Solid::getOuterShell)
 {
-  HandleScope scope;
+  NanScope();
   // can work with this
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
     // create a new object
-    ThrowException(Exception::Error(String::New("invalid object")));
+    NanThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
   if (pThis->shape().ShapeType() == TopAbs_COMPOUND) {
-    return scope.Close(Undefined());
+    NanReturnUndefined();
   }
   try {
     TopoDS_Solid solid = TopoDS::Solid(pThis->shape());
     // TopoDS_Shell shell = BRepTools::OuterShell(solid);
     TopoDS_Shell shell = OUTER_SHELL(solid);
-    return scope.Close(buildWrapper(shell));
+    NanReturnValue(buildWrapper(shell));
 
   }
   CATCH_AND_RETHROW("Failed to extract Outer Shell ");
 
-  return scope.Close(Undefined());
+  NanReturnUndefined();
 }
 
-Handle<Value> Solid::getFaces(const v8::Arguments& args)
+NAN_METHOD(Solid::getFaces)
 {
 
-  HandleScope scope;
+  NanScope();
   // can work with this
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
     // create a new object
-    ThrowException(Exception::Error(String::New("invalid object")));
+    NanThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -228,25 +228,25 @@ Handle<Value> Solid::getFaces(const v8::Arguments& args)
   TopExp::MapShapes(pThis->shape(), TopAbs_FACE, shapeMap);
 
   int nbSubShapes =shapeMap.Extent();
-  Local<Array> arr = Array::New(nbSubShapes);
+  Local<Array> arr = NanNew<Array>(nbSubShapes);
 
   for (int i=0; i<nbSubShapes; i++)  {
     Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
 
-Handle<Value> Solid::getSolids(const v8::Arguments& args)
+NAN_METHOD(Solid::getSolids)
 {
 
-  HandleScope scope;
+  NanScope();
   // can work with this
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
     // create a new object
-    ThrowException(Exception::Error(String::New("invalid object")));
+    NanThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -254,24 +254,25 @@ Handle<Value> Solid::getSolids(const v8::Arguments& args)
   TopExp::MapShapes(pThis->shape(), TopAbs_SOLID, shapeMap);
 
   int nbSubShapes =shapeMap.Extent();
-  Local<Array> arr = Array::New(nbSubShapes);
+  Local<Array> arr = NanNew<Array>(nbSubShapes);
 
   for (int i=0; i<nbSubShapes; i++)  {
     Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
-Handle<Value> Solid::getShells(const v8::Arguments& args)
+NAN_METHOD(Solid::getShells)
 {
 
-  HandleScope scope;
+  NanScope();
   // can work with this
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
     // create a new object
-    ThrowException(Exception::Error(String::New("invalid object")));
+    NanThrowError("invalid object");
+    NanReturnUndefined();
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -279,13 +280,13 @@ Handle<Value> Solid::getShells(const v8::Arguments& args)
   TopExp::MapShapes(pThis->shape(), TopAbs_SHELL, shapeMap);
 
   int nbShapes =shapeMap.Extent();
-  Local<Array> arr = Array::New(nbShapes);
+  Local<Array> arr = NanNew<Array>(nbShapes);
 
   for (int i=0; i<nbShapes; i++)  {
     Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
 
@@ -295,14 +296,14 @@ Handle<Value> Solid::getShells(const v8::Arguments& args)
  * getAdjacentFace
  *  returns an array of all faces that are adjacents to the given face
  */
-Handle<v8::Value> Solid::getAdjacentFaces(const v8::Arguments& args)
+NAN_METHOD(Solid::getAdjacentFaces)
 {
-  HandleScope scope;
+  NanScope();
 
   Face* pFace = 0 ;
   if (!extractArg(args[0],pFace)) {
-    ThrowException(Exception::TypeError(String::New("invalid arguments : expecting <FACE>")));
-    return Handle<v8::Value>(Undefined());
+    NanThrowError("invalid arguments : expecting <FACE>");
+    NanReturnUndefined();
   }
   assert(pFace);
 
@@ -337,7 +338,7 @@ Handle<v8::Value> Solid::getAdjacentFaces(const v8::Arguments& args)
   // now build an array with the answer
   int nbFaces = auxmap.Extent();
 
-  Local<Array> arr = Array::New(nbFaces);
+  Local<Array> arr = NanNew<Array>(nbFaces);
 
   TopTools_MapIteratorOfMapOfShape it(auxmap);
   int i=0;
@@ -347,31 +348,32 @@ Handle<v8::Value> Solid::getAdjacentFaces(const v8::Arguments& args)
     arr->Set(i,obj);
     i++;
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
   // return Handle<v8::Value>(Undefined());
 }
 
 
 const char* getCommonEdges_Doc = "Solid.getCommonEdges(<Face>,<Face>);";
 
-Handle<v8::Value> Solid::getCommonEdges(const v8::Arguments& args)
+NAN_METHOD(Solid::getCommonEdges)
 {
   // <face1>,<face2>
-  HandleScope scope;
+  NanScope();
   Face* pFace1 = 0 ;
   Face* pFace2 = 0 ;
 
 
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
     // create a new object
-    ThrowException(Exception::Error(String::New("invalid object")));
+    NanThrowError("invalid object");
+    NanReturnUndefined();
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
   if (args.Length()<2 || !extractArg(args[0],pFace1) || !extractArg(args[1],pFace2) ) {
-    ThrowException(Exception::TypeError(String::New("invalid arguments getCommonEdges : expecting <FACE>,<FACE>")));
-    return Handle<v8::Value>(Undefined());
+    NanThrowError("invalid arguments getCommonEdges : expecting <FACE>,<FACE>");
+    NanReturnUndefined();
   }
 
   TopTools_IndexedDataMapOfShapeListOfShape map;
@@ -400,7 +402,7 @@ Handle<v8::Value> Solid::getCommonEdges(const v8::Arguments& args)
 
   }
 
-  Local<Array> arr = Array::New(edgeList.Extent());
+  Local<Array> arr = NanNew<Array>(edgeList.Extent());
   TopTools_MapIteratorOfMapOfShape it(edgeList);
   int i=0;
   for (; it.More(); it.Next()) {
@@ -408,25 +410,25 @@ Handle<v8::Value> Solid::getCommonEdges(const v8::Arguments& args)
     Local<Object> obj= buildWrapper(edge); // 1 based !!!
     arr->Set(i++,obj);
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
 const char* getCommonVertices_Doc = "Solid.getCommonVertices(<Face>,<Face>);\n"
 "Solid.getCommonVertices(<Face>,<Face>,<Face>);\n"
 "Solid.getCommonVertices(<Edge>,<Edge>);\n";
 
-Handle<v8::Value> Solid::getCommonVertices(const v8::Arguments& args)
+NAN_METHOD(Solid::getCommonVertices)
 {
-  HandleScope scope;
+  NanScope();
   Face* pFace1 = 0 ;
   Face* pFace2 = 0 ;
   if (args.Length()<2 || !extractArg(args[0],pFace1) || !extractArg(args[1],pFace2) ) {
-    ThrowException(Exception::TypeError(String::New("invalid arguments getCommonEdges : expecting <FACE>,<FACE>")));
-    return Handle<v8::Value>(Undefined());
+    NanThrowError("invalid arguments getCommonEdges : expecting <FACE>,<FACE>");
+    NanReturnUndefined();
   }	
   Local<Array> arr = Array::New(0);
-  ThrowException(Exception::TypeError(String::New("Not Implemented ")));
-  return scope.Close(arr);
+  NanThrowError("Not Implemented ");
+  NanReturnValue(arr);
 }
 
 
@@ -508,20 +510,20 @@ double Solid::volume()
 
 
 
-Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
+NAN_PROPERTY_GETTER(Solid::_mesh)
 {
-  HandleScope scope;
-  if (info.This().IsEmpty()) {
-    return scope.Close(Undefined());
+  NanScope();
+  if (args.This().IsEmpty()) {
+    NanReturnUndefined();
   }
-  if (info.This()->InternalFieldCount() == 0 ) {
-    return scope.Close(Undefined());
+  if (args.This()->InternalFieldCount() == 0 ) {
+    NanReturnUndefined();
   }
-  Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
+  Solid* pThis = ObjectWrap::Unwrap<Solid>(args.This());
   if (pThis->m_cacheMesh.IsEmpty()) {
-    pThis->m_cacheMesh = Persistent<Object>::New(pThis->createMesh(0.5,20*3.14159/180.0,true));
+    NanAssignPersistent<v8::Object>(pThis->m_cacheMesh, pThis->createMesh(0.5,20*3.14159/180.0,true));
   }
-  return scope.Close(pThis->m_cacheMesh);
+  NanReturnValue(pThis->m_cacheMesh);
 }
 
 
@@ -539,11 +541,11 @@ Handle<v8::Value> Solid::_mesh(Local<String> property,const AccessorInfo &info)
 //}
 Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNormals)
 {
-  HandleScope scope;
+  NanEscapableScope();
 
   const unsigned argc = 0;
   Handle<v8::Value> argv[1] = {  };
-  Local<Object> theMesh = Mesh::constructor->GetFunction()->NewInstance(argc, argv);
+  Local<Object> theMesh = NanNew(Mesh::_template)->GetFunction()->NewInstance(argc, argv);
 
   Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
 
@@ -588,54 +590,55 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
     }
   } CATCH_AND_RETHROW("Failed to mesh solid ");
   mesh->optimize();
-  return scope.Close(theMesh);
+
+  return NanEscapeScope(theMesh);
 }
 
 
-Handle<v8::Value> Solid::getShapeName(const v8::Arguments& args)
+NAN_METHOD(Solid::getShapeName)
 {
-  HandleScope scope;
+  NanScope();
 
   Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
-    ThrowException(Exception::Error(String::New("invalid object")));
-    return scope.Close(Undefined());
+  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
+    NanThrowError("invalid object");
+    NanReturnUndefined();
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
   Handle<Object> pShape = args[0]->ToObject();
   if (!pShape.IsEmpty()) {
-    Handle<Value> hashCode = pShape->Get(String::NewSymbol("hashCode"));
-    Handle<Object> reversedMap = pJhis->Get(String::NewSymbol("_reversedMap"))->ToObject();
+    Handle<Value> hashCode = pShape->Get(NanNew("hashCode"));
+    Handle<Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
     Handle<Value>  value = reversedMap->Get(hashCode);
-    return scope.Close(value);
+    NanReturnValue(value);
   }
-  return scope.Close(Undefined());
+  NanReturnUndefined();
 
 }
 
 std::string Solid::_getShapeName(const TopoDS_Shape& shape)
 {
-  v8::Handle<v8::Object>& pJhis = this->handle_;
+  v8::Handle<v8::Object>& pJhis = NanObjectWrapHandle(this);
 
-  v8::Handle<v8::Object> reversedMap = pJhis->Get(v8::String::NewSymbol("_reversedMap"))->ToObject();
-  v8::Handle<v8::Value> hashCode = v8::Integer::New(shape.HashCode(std::numeric_limits<int>::max()));
+  v8::Handle<v8::Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
+  v8::Handle<v8::Value> hashCode = NanNew<v8::Integer>(shape.HashCode(std::numeric_limits<int>::max()));
   v8::Handle<v8::Value> value = reversedMap->Get(hashCode);
 
-  v8::String::AsciiValue asciiVal(value);
-
-  return *asciiVal;
+  NanAsciiString s(value);
+  std::string res(*s);
+  return res;
 }
 
 void Solid::_registerNamedShape(const char* name,const TopoDS_Shape& shape)
 {
   if (shape.ShapeType() == TopAbs_FACE)  {
-    Handle<Object> obj = this->handle_->Get(String::NewSymbol("faces"))->ToObject();
-    obj->Set(String::NewSymbol(name),    Face::NewInstance(TopoDS::Face(shape)));
+    Handle<Object> obj = NanObjectWrapHandle(this)->Get(NanNew("faces"))->ToObject();
+    obj->Set(NanNew(name),    Face::NewInstance(TopoDS::Face(shape)));
   }
 
-  Handle<Object> reversedMap = this->handle_->Get(String::NewSymbol("_reversedMap"))->ToObject();
-  reversedMap->Set(shape.HashCode(std::numeric_limits<int>::max()),String::NewSymbol(name));
+  Handle<Object> reversedMap = NanObjectWrapHandle(this)->Get(NanNew("_reversedMap"))->ToObject();
+  reversedMap->Set(shape.HashCode(std::numeric_limits<int>::max()),NanNew(name));
 }
 
 

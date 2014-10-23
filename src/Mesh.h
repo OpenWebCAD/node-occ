@@ -19,7 +19,8 @@ public:
     int extractFaceMesh(const TopoDS_Face& face, bool qualityNormals);
     void optimize();
 
-    static Handle<Value> New(const Arguments& args);
+    static NAN_METHOD(New);
+
     static void Init(Handle<Object> target);
 
 
@@ -34,7 +35,7 @@ private:
 
     void updateJavaScriptArray();
 public:
-    static Persistent<FunctionTemplate> constructor;
+    static v8::Persistent<v8::FunctionTemplate> _template;
     int32_t numTriangles()  {
         return  (int32_t) triangles.size();
     }
