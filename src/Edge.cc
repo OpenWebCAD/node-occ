@@ -312,7 +312,7 @@ Handle<Object> Edge::polygonize(double factor)
 
   int length = (int)m_positions.size();
   result->SetIndexedPropertiesToExternalArrayData(m_positions.data(), kExternalFloatArray,length);
-  result->Set(NanNew("length"), NanNew<v8::Int32>(length), DontDelete);
+  result->Set(NanNew("length"), NanNew<v8::Int32>(length));
   assert(     result->GetIndexedPropertiesExternalArrayDataLength() ==   length);
   assert(     result->Get(NanNew("length"))->ToInt32()->Uint32Value() ==   length);
 

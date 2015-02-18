@@ -75,8 +75,8 @@ NAN_METHOD(Solid::New)
   pThis->Wrap(args.This());
   pThis->InitNew(args);
 
-  args.This()->Set(NanNew("faces"),          NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
-  args.This()->Set(NanNew("_reversedMap"),   NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
+  args.This()->ForceSet(NanNew("faces"),          NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
+  args.This()->ForceSet(NanNew("_reversedMap"),   NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
 
   /// args.This()->SetAccessor(NanSymbol("_area"),ee< Solid, Number, double, &Solid::area>,0,Number::New(12),DEFAULT,None);
 

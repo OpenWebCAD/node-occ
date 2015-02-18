@@ -20,7 +20,7 @@
 NAN_METHOD(ForceGC)
 {
     NanScope();
-    while(!V8::IdleNotification()) {}
+    NanIdleNotification(100);
     NanReturnUndefined();
 
 }

@@ -2,6 +2,9 @@ language: node_js
 node_js:
   - "0.10"
   - "0.11"
+  - "0.12"
+  - "iojs"
+  
 before_install:
   # sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
   # git clone http://github.com/tpaviot/oce.git ;
