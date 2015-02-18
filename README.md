@@ -60,8 +60,9 @@ alt="node occ" width="240" height="180" border="10" /></a>
   
 
   ```
-  >SET CL=/Ic:\OCE-0.13\inc
-  >SET LINK=/LIBPATH:c:\OCE-0.13\bin
+  >SET CL=/Ic:\OCE-0.13\include\oce
+  >SET LINK=/LIBPATH:c:\OCE-0.13\Win32\lib
+  >PATH c:\OCE-0.13\Win32\bin;%PATH%
   >npm install node-occ
   ```
    
@@ -139,7 +140,7 @@ node app.js
 
 ## MIT License
 
-Copyright © 2012-2013 E. Rossignon
+Copyright © 2012-2015 E. Rossignon
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

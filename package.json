@@ -10,8 +10,7 @@
     "nan": "^1.6.2",
     "pace": "~0.0.4",
     "progress": "~1.1.8",
-    "should": "*",
-    "temporary": "~0.0.8"
+        "temporary": "~0.0.8"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
