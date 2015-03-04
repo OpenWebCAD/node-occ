@@ -58,7 +58,6 @@ alt="node occ" width="240" height="180" border="10" /></a>
   - you need Microsoft Visual Studio 2012
   - please install OpenCascade oce-0.13  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.13 folder
   
-
   ```
   >SET CL=/Ic:\OCE-0.13\include\oce
   >SET LINK=/LIBPATH:c:\OCE-0.13\Win32\lib
@@ -71,7 +70,7 @@ alt="node occ" width="240" height="180" border="10" /></a>
 
 
 
-## building node-occ :  prerequisites
+## building node-occ from source :  prerequisites
 
 ### on ubuntu
 
@@ -119,11 +118,7 @@ node app.js
 
 
 ### on windows
-  - please install OCE-0.13  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.13 folder
-
-
-### on Mac
-
+  -  follow the tutorial in the [wiki](https://github.com/erossignon/node-occ/wiki)
 
 ## dependencies:
 
@@ -135,7 +130,6 @@ node app.js
  - OpenCascade : http://www.opencascade.org
  - occmodel    : https://github.com/tenko/occmodel
  - ShapeSmith  : https://github.com/bjnortier/shapesmith
-
 
 
 ## MIT License
