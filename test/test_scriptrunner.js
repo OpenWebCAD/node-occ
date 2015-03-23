@@ -19,7 +19,7 @@ describe("Script Runner",function()
 			},
 			function error_callback(err){ 
 				should.exist(err);
-				err.should.equal("require is forbidden");
+				err.message.should.equal("require is forbidden");
 				done(null); // 
 			}
 		);
@@ -34,7 +34,7 @@ describe("Script Runner",function()
 			},
 			function error_callback(err){ 
 				should.exist(err);
-				err.should.equal("eval is forbidden");
+				err.message.should.equal("eval is forbidden");
 				done(null); // 
 			}
 		);
