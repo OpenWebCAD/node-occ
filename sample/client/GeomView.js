@@ -7,7 +7,7 @@ var assert = assert || function(condition, message) {
     if (!condition) { 
         throw new Error(message);
     }
- }
+ };
 
 var GEOMTOOL = {
 
@@ -113,6 +113,7 @@ function GEOMVIEW(container,width,height)
 
     me.scene = new THREE.Scene();
     me.sceneHelpers = new THREE.Scene();
+
 
     var ratio = width/height;
     me.camera = new THREE.PerspectiveCamera(35,1,1, 100000);
@@ -279,7 +280,7 @@ function GEOMVIEW(container,width,height)
         me.renderer.render( me.sceneHelpers, me.camera );
         me.renderer.render( me.scene, me.camera );
 
-    }
+    };
 
     me.setGraduatedBackgound('images/Graduated_Blue_Background.png');
 
@@ -413,7 +414,7 @@ function GEOMVIEW(container,width,height)
         me.cameraChanged = false;
 */
 
-    }
+    };
 
     SelectObjectManipulator.prototype.onClick = function ( event ) {
 
@@ -443,7 +444,7 @@ function GEOMVIEW(container,width,height)
     var DragObjectManipulator = function()
     {
 
-    }
+    };
     DragObjectManipulator.prototype.onMouseMove = function(event) {
 
         var intersects = buildIntersectPlane(event);
@@ -535,7 +536,7 @@ GEOMVIEW.prototype.selectObject  = function (object) {
 
         me.selected = object;
 
-        hasRotation = true;
+        var hasRotation = true;
 
         var bbox = GEOMTOOL.boundingBox(object);
 
@@ -674,7 +675,7 @@ GEOMVIEW.prototype.updateShapeObject = function (json, next) {
  */
 GEOMVIEW.prototype.clearAll = function() {
     var me = this;
-    rootNode  = me.__solidObjectsNode();
+    var rootNode  = me.__solidObjectsNode();
     if (rootNode) { me.scene.remove(rootNode); }
 };
 
@@ -694,7 +695,8 @@ GEOMVIEW.prototype.pointCameraTo = function(node) {
     if ( node instanceof THREE.Vector3 ) {
       COG = node;
     } else {
-      COG = GEOMTOOL.shapeCenterOfGravity(node);
+        // Refocus camera to the center of the new object
+        var COG = GEOMTOOL.shapeCenterOfGravity(node);
     }
     var v = new THREE.Vector3();
     v.subVectors(COG,me.controls.target);
@@ -722,7 +724,7 @@ GEOMVIEW.prototype.zoomAll = function() {
     }
     
     me.zoomObject(node);
-}
+};
 
 
 GEOMVIEW.prototype.showGrid = function ( flag ) {
