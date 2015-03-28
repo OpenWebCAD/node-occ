@@ -74,7 +74,6 @@ alt="node occ" width="240" height="180" border="10" /></a>
 
 ### on ubuntu
 
-installing node js
 ```bash
 
 # installing nodejs and gyp utility to build extensions
@@ -82,30 +81,13 @@ sudo apt-get install nodejs npm
 sudo npm install node-gyp -g
 sudo npm install mocha -g
 
-#ddd installing prebuild opencascade
-#ddd sudo apt-get install oce-draw
-
-------------------------------------
-# building opencascade from oce
 #installing cmake
 sudo apt-get install cmake cmake-curses-gui g++ build-essential
-# fetching source code
-git clone https://github.com/tpaviot/oce.git
-# switching to official release 0.13
-cd oce
-git checkout tags/OCE-0.13
-cd ..
-# creating a build area for oce
-make build_oce
-cd build_oce
-cmake -D  OCE_VISUALISATION:BOOLEAN=FALSE -D OCE_DISABLE_X11:BOOLEAN=TRUE -D OCE_USE_PCH:BOOLEAN=TRUE  ../oce
 
-# building oce
-make -j 4
-
-cd ..
-git clone https://github.com/erossignon/node-occ.git
+# ------------------------------------
+git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
+sh prepare_build.sh
 npm install
 node-gyp configure
 node-gyp build
