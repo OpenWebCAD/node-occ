@@ -9,7 +9,7 @@ git:
   submodules: false  
 
 before_install:
-  git submodule update --depth 50 --init --recursive
+  - git submodule update --depth 50 --init --recursive
 
 before_install:
   # sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
