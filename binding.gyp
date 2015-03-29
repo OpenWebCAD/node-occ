@@ -4,8 +4,8 @@
       "target_name": "occ",
       "cflags!"    : [ '-fno-exceptions' ],
       "cflags_cc!" : [ '-fno-exceptions' ],
-      "cflags"     : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
-      "cflags_cc"  : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' ],
+      "cflags"     : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' , '-Wno-extra'],
+      "cflags_cc"  : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder',  '-Wno-extra' ],
       'xcode_settings': {
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
       },

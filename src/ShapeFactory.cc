@@ -9,6 +9,14 @@
 #include <memory>
 #include <limits>
 
+#define  Primitives_Direction BRepPrim_Direction
+#define  Primitives_XMin      BRepPrim_XMin
+#define  Primitives_XMax      BRepPrim_XMax
+#define  Primitives_YMin      BRepPrim_YMin
+#define  Primitives_YMax      BRepPrim_YMax
+#define  Primitives_ZMin      BRepPrim_ZMin
+#define  Primitives_ZMax      BRepPrim_ZMax
+
 char m(Primitives_Direction p)
 {
   switch(p) {
@@ -733,7 +741,7 @@ class BRepAlgoAPI_BooleanOperation_Adaptor: public IShapeClassifierTool
     };
     virtual const TopTools_ListOfShape& getModified(const TopoDS_Shape& current) 
     {
-      return m_pTool->Modified2(current);
+      return m_pTool->Modified(current);
     };
     virtual bool getDeleted(const TopoDS_Shape& shape) 
     {
