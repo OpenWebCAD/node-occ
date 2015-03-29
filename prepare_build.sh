@@ -7,9 +7,10 @@ NPROC=$(grep "^core id" /proc/cpuinfo | sort -u | wc -l)
 
 echo "Numbrer of processors =" ${NPROC}
 
-cd oce ;
-git checkout tags/OCE-0.17 ;
-cd .. ;
+git submodule update --depth 50 --init --recursive
+# cd oce ;
+# git checkout tags/OCE-0.17 ;
+# cd .. ;
 mkdir deps ;
 mkdir build_oce;
 cd build_oce ;
