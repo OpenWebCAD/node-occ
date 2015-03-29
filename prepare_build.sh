@@ -7,7 +7,7 @@ NPROC=$(grep "^core id" /proc/cpuinfo | sort -u | wc -l)
 
 echo "Numbrer of processors =" ${NPROC}
 
-git submodule update --depth 50 --init --recursive
+git submodule update --init --recursive
 # cd oce ;
 # git checkout tags/OCE-0.17 ;
 # cd .. ;
@@ -54,9 +54,9 @@ make -s -j ${NPROC} TKSTEP  > /dev/null;
 echo 18 `date +%R:%S`;
 make -s -j ${NPROC} ;
 echo 19 `date +%R:%S`;
-
-sudo make install > /dev/null  ;
+sudo make install | tail -50 ;
 sudo ldconfig ;
 cd ..
+echo "done"
 
 
