@@ -76,7 +76,6 @@
 	  ],				
 
 	  "libraries": [ 
-		'-lTKAdvTools',
 		'-lTKBO',
 		'-lTKBool',
 		'-lTKBRep',
