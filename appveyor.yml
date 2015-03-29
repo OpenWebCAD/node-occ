@@ -1,2 +1,8 @@
 install:
   - cmd: build.bat
+
+platform:
+    - x86
+
+configuration:
+    - Release
