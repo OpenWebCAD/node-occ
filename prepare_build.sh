@@ -1,4 +1,4 @@
-grep -i VERSION /usr/include/oce/Standard_Version.hxx ;
+grep -i VERSION /usr/local/include/oce/Standard_Version.hxx ;
 lscpu ;
 cmake --version ;
 
