@@ -7,11 +7,15 @@ environment:
 
 platform:
     - x86
+    - msvs_toolset: 12
 
 init:
   - git config --global core.autocrlf input
 
     
+os: Visual Studio 2012
+
+
 configuration:
     - Release
 
@@ -20,3 +24,5 @@ test_script:
   - npm test
 
 build: off
+deploy: off
+
