@@ -3,9 +3,10 @@ install:
 environment:
   matrix:
     - nodejs_version: "0.12"
+      msvs_toolset: 12
 platform:
   - x86
-  - msvs_toolset: "12"
+
 init:
   - git config --global core.autocrlf input
 os: "Visual Studio 2012"
