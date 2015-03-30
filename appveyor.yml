@@ -1,15 +1,14 @@
 install:
   - cmd: build.bat
 environment:
-  matrix:
-    - nodejs_version: "0.12"
-      msvs_toolset: 12
+  nodejs_version: "0.12"
+  msvs_toolset: 12
+  VisualStudioVersion: "12"
 platform:
   - x86
 
 init:
   - git config --global core.autocrlf input
-os: "Visual Studio Express 2012 for Windows Desktop"
 configuration:
   - Release
 test_script:
