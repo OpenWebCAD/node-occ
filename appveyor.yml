@@ -1,8 +1,22 @@
 install:
   - cmd: build.bat
 
+environment:
+  matrix:
+      - nodejs_version: "0.12"
+
 platform:
     - x86
 
+init:
+  - git config --global core.autocrlf input
+
+    
 configuration:
     - Release
+
+test_script:
+  - node --version
+  - npm test
+
+build: off
