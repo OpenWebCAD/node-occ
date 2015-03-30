@@ -1,5 +1,13 @@
+init:
+  - git config --global core.autocrlf input
+
+# clone directory
+clone_folder: c:\projects\node-occ
+
 install:
   - cmd: build.bat
+  
+  
 environment:
   nodejs_version: "0.12"
   msvs_toolset: 12
@@ -7,8 +15,6 @@ environment:
 platform:
   - x86
 
-init:
-  - git config --global core.autocrlf input
 configuration:
   - Release
 test_script:

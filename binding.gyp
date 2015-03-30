@@ -13,7 +13,7 @@
 
 		'VCLinkerTool': {					
 			'AdditionalLibraryDirectories': [
-			    "C:/oce-0.13/Win64/lib",
+			    "C:/oce-0.17/Win32/lib",
 			],
 			# 'AdditionalOptions': ["/FORCE",],						
 		},	  
