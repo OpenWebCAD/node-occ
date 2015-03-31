@@ -8,6 +8,11 @@ REM set VisualStudioVersion=11.0
 set GENERATOR=Visual Studio 10 2010
 set VisualStudioVersion=10.0
 '"%VS100COMNTOOLS%\..\..\VC\vcvarsall.bat" x86'
+ECHO PREFIX = "%PREFIX%"
+ECHO CL     = "%CL%"
+ECHO LINK   = "%LINK%"
+ECHO PATH   = "%PATH%"
+EXIT
 
 CALL cmake -DOCE_INSTALL_PREFIX:STRING="%PREFIX%" ^
 -DCMAKE_SUPPRESS_REGENERATION:BOOL=ON  ^
@@ -27,5 +32,7 @@ REM msbuild /m oce.sln
 CALL msbuild /m oce.sln /p:Configuration=Release
 
 CALL msbuild INSTALL.vcxproj /p:Configuration=Release
+ECHO PREFIX = %PREFIX%
+ECHO PREFIX = %GENERATOR%
 cd ..
 CALL npm install
