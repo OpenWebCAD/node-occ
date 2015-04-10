@@ -1,7 +1,8 @@
 CALL git submodule update --init --recursive
+CALL SETENV.BAT
 mkdir build_oce
 cd build_oce
-CALL SETENV.BAT
+
 
 REM set GENERATOR=Visual Studio 11 2012
 REM set VisualStudioVersion=11.0
