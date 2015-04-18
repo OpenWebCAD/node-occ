@@ -351,6 +351,7 @@ void  Base::InitProto(Handle<ObjectTemplate>& proto)
   EXPOSE_METHOD(Base,mirror);
 
   EXPOSE_METHOD(Base,transformed);
+  EXPOSE_METHOD(Base,applyTransform);
   EXPOSE_METHOD(Base,getBoundingBox);
 
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
