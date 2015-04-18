@@ -35,9 +35,10 @@ CALL cmake -DOCE_INSTALL_PREFIX:STRING="%PREFIX%" ^
 
 
 REM msbuild /m oce.sln
-CALL msbuild /m oce.sln /p:Configuration=Release > nul
+CALL msbuild /m oce.sln /p:Configuration=Release /verbosity:quiet /consoleloggerparameters:Summary;ShowTimestamp
 
-CALL msbuild INSTALL.vcxproj /p:Configuration=Release > nul
+
+CALL msbuild /m INSTALL.vcxproj /p:Configuration=Release /verbosity:quiet /consoleloggerparameters:Summary;ShowTimestamp
 ECHO PREFIX = %PREFIX%
 ECHO PREFIX = %GENERATOR%
 cd ..
