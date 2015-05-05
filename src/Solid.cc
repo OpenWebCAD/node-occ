@@ -63,6 +63,7 @@ void Solid::InitNew(_NAN_METHOD_ARGS)
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
 }
 
+
 NAN_METHOD(Solid::New)
 {
   NanScope();
@@ -291,7 +292,6 @@ NAN_METHOD(Solid::getShells)
 
 
 
-
 /**
  * getAdjacentFace
  *  returns an array of all faces that are adjacents to the given face
@@ -413,6 +413,7 @@ NAN_METHOD(Solid::getCommonEdges)
   NanReturnValue(arr);
 }
 
+
 const char* getCommonVertices_Doc = "Solid.getCommonVertices(<Face>,<Face>);\n"
 "Solid.getCommonVertices(<Face>,<Face>,<Face>);\n"
 "Solid.getCommonVertices(<Edge>,<Edge>);\n";
@@ -430,7 +431,6 @@ NAN_METHOD(Solid::getCommonVertices)
   NanThrowError("Not Implemented ");
   NanReturnValue(arr);
 }
-
 
 
 int Solid::numSolids()
@@ -453,6 +453,7 @@ int Solid::numSolids()
     return solids.Extent() + compsolids.Extent();
   }
 }
+
 
 int Solid::numFaces()
 {
@@ -508,8 +509,6 @@ double Solid::volume()
 //}
 
 
-
-
 NAN_PROPERTY_GETTER(Solid::_mesh)
 {
   NanScope();
@@ -523,7 +522,7 @@ NAN_PROPERTY_GETTER(Solid::_mesh)
   if (pThis->m_cacheMesh.IsEmpty()) {
     NanAssignPersistent<v8::Object>(pThis->m_cacheMesh, pThis->createMesh(0.5,20*3.14159/180.0,true));
   }
-  NanReturnValue(pThis->m_cacheMesh);
+  NanReturnValue(NanNew(pThis->m_cacheMesh));
 }
 
 
