@@ -14,6 +14,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  Compiling with Visual Studio 2012 - X86
 ECHO ---------------------------------------------------------------------------
 SET VSVER=2012
+SET PLATFORM=Win32
 CALL "%~dp0"/SETENV.BAT  32
 set GENERATOR=Visual Studio 11 2012
 set VisualStudioVersion=11.0
@@ -25,6 +26,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  Compiling with Visual Studio 2015 - X86
 ECHO ---------------------------------------------------------------------------
 SET VSVER=2015
+SET PLATFORM=Win32
 CALL "%~dp0"/SETENV.BAT  32
 set GENERATOR=Visual Studio 14 2015
 set VisualStudioVersion=14.0
@@ -47,6 +49,7 @@ goto do_cmake
 REM ----------------------------------------------------------------------------
 REM   Compiling with Visual Studio 2013 - x64
 REM ----------------------------------------------------------------------------
+SET PLATFORM=x64
 SET VSVER=2013
 CALL "%~dp0"/SETENV.BAT  64
 set GENERATOR=Visual Studio 12 2013 Win64
@@ -59,6 +62,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  Compiling with Visual Studio 2013 - X86
 ECHO ---------------------------------------------------------------------------
 SET VSVER=2013
+SET PLATFORM=Win32
 CALL "%~dp0"/SETENV.BAT  32
 set GENERATOR=Visual Studio 12 2013
 set VisualStudioVersion=12.0
@@ -94,19 +98,18 @@ CALL cmake -DOCE_INSTALL_PREFIX:STRING="%PREFIX%" ^
 if NOT ERRORLEVEL 0 goto handle_cmake_error
 
 SET VERBOSITY=quiet
-SET VERBOSITY=minimal
+REM SET VERBOSITY=minimal
 
 REM msbuild /m oce.sln
-CALL msbuild /m oce.sln /p:Configuration=Release /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
+CALL msbuild /m oce.sln /p:Configuration=Release /p:Platform=%PLATFORM% /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
 ECHO ERROR LEVEL = %ERRORLEVEL%
 if NOT '%ERRORLEVEL%'=='0' goto handle_msbuild_error
 
-CALL msbuild /m INSTALL.vcxproj /p:Configuration=Release /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
+CALL msbuild /m INSTALL.vcxproj /p:Configuration=Release  /p:Platform=%PLATFORM%  /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
 if NOT ERRORLEVEL 0  goto handle_msbuild_error
 
 SET GYP_MSVS_VERSION=%VSVER%
-REM node-gyp clean configure build --verbose --arch=x64
-node-gyp clean configure build --verbose --arch=ia32
+
 ECHO PREFIX = %PREFIX%
 ECHO PREFIX = %GENERATOR%
 

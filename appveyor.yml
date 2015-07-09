@@ -19,6 +19,7 @@ configuration:
   - Release
 test_script:
   - node --version
+  - npm install mocha -g
   - npm test
 build: off
 deploy: off
