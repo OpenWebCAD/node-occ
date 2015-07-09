@@ -3,7 +3,7 @@ var assert = require("assert");
 var fastBuilder = require("../lib/fastbuilder");
 
 var fast_occ = fastBuilder.occ;
-fastBuilder  = fastBuilder.fastBuilder; 
+fastBuilder  = fastBuilder.fastBuilder;
 
 function makeShape() {
     var e= 20;
@@ -16,7 +16,7 @@ function makeShape() {
 }
 
 function startChronometer() {
-    return process.hrtime();  
+    return process.hrtime();
 }
 function stopChronometer(time1) {
     var diff1 = process.hrtime(time1);
@@ -38,7 +38,7 @@ describe("testing geometry builder",function(){
 
         fastBuilder.mapQueryCount.should.equal(0);
         fastBuilder.mapHit.should.equal(0);
-        
+
         var c1 = startChronometer();
         makeShape();
         var diff1 = stopChronometer(c1);
@@ -132,11 +132,11 @@ describe("testing fast builder with makeBottle" , function() {
 describe("testing fast builder get Common Edge" , function() {
   var solid1;
   var solid2;
-  function buildFilletOnTopLeftEdge() {    
+  function buildFilletOnTopLeftEdge() {
      var s1 = fast_occ.makeBox([10,20,30],[110,120,130]);
      var edges = s1.getCommonEdges(s1.faces.front,s1.faces.left);
      s1 = fast_occ.makeFillet(s1,edges,10);
-     console.log(Object.keys(s1.faces));
+     //xx console.log(Object.keys(s1.faces));
      s1 = fast_occ.makeDraftAngle(s1,s1.faces["mleft:0"],0.1,s1.faces["mbottom:0"]);
      return s1;
   }
@@ -154,11 +154,11 @@ describe("testing fast builder get Common Edge" , function() {
 describe("testing fast-builder with impossible cone" , function () {
     var solid1 = 0;
     before(function () {
-        // this cone cannot be built : it has PI/2 for half-angle !         
+        // this cone cannot be built : it has PI/2 for half-angle !
     });
     it("should have no solid",function(){
         (function() {
-            solid1 = fast_occ.makeCone( [0,0,0] , [0,0,1] , 1.5707963267948966 , 10);   
+            solid1 = fast_occ.makeCone( [0,0,0] , [0,0,1] , 1.5707963267948966 , 10);
         }).should.throwError();
     });
 });
@@ -166,13 +166,13 @@ describe("testing fast-builder with impossible cone" , function () {
 describe("testing fast-builder with LEGO brick" , function () {
 
     it("should produce a LEGO brick",function(){
-        
+
         var factory = require("../lib/shapeFactory.js");
 
         function buildBrick() {
 
             var brick24 =  factory.makeLegoBrick(fast_occ,2,4,'thick');
-			
+
             brick24.numFaces.should.be.greaterThan(40);
 
             // now check with bounding box
@@ -185,7 +185,7 @@ describe("testing fast-builder with LEGO brick" , function () {
 
             bbox.farPt.x.should.be.within(16-eps,16+eps);
             bbox.farPt.y.should.be.within(32-eps,32+eps);
-            bbox.farPt.z.should.be.within(11.2-eps,11.2+eps);                   
+            bbox.farPt.z.should.be.within(11.2-eps,11.2+eps);
         }
 
         var c1 = startChronometer();
@@ -204,5 +204,5 @@ describe("testing fast-builder with LEGO brick" , function () {
         diff1.should.be.greaterThan(diff2);
         speedup.should.be.greaterThan(100); //"%"
 
-    }); 
+    });
 });
