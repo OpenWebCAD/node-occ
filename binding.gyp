@@ -11,12 +11,12 @@
       },
 	  "msvs_settings": {
 
-		'VCLinkerTool': {					
-			'AdditionalLibraryDirectories': [
-			    "C:/oce-0.17/Win32/lib",
-			],
-			# 'AdditionalOptions': ["/FORCE",],						
-		},	  
+		'VCLinkerTool': {
+			#'AdditionalLibraryDirectories': [
+			#    "C:/oce-0.17/%ARCH%/lib",
+			#],
+			# 'AdditionalOptions': ["/FORCE",],
+		},
 	  },
 
       "sources": [
@@ -60,22 +60,22 @@
 			"src/Wire.cc",
 			"src/V8Wrapper.cc",
 			],
-			
+
 	  "defines": [
 		 "OCE_HAVE_IOMANIP",
 		 "OCE_HAVE_IOSTREAM",
-		 "OCE_HAVE_CLIMITS" 
+		 "OCE_HAVE_CLIMITS"
 	  ],
 
 	  "library_dirs": [
         "/usr/local/lib"
 	  ],
-	  "include_dirs": [  
+	  "include_dirs": [
         "/usr/local/include/oce",
         "<!(node -e \"require('nan')\")"
-	  ],				
+	  ],
 
-	  "libraries": [ 
+	  "libraries": [
 		'-lTKBO',
 		'-lTKBool',
 		'-lTKBRep',

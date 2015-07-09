@@ -1,24 +1,82 @@
-ECHO ON
-REM ----------------------------------------------------------
-REM  PREPARE
-REM ----------------------------------------------------------
+ECHO OFF
+pushd "%~dp0"
+
+ECHO ----------------------------------------------------------
+ECHO  PREPARE : git submodule
+ECHO ----------------------------------------------------------
 CALL git submodule update --init --recursive
 
-CALL SETENV.BAT
+goto VS2013_X86
+REM goto VS2015_X86
 
-mkdir build_oce
-cd build_oce
+:VS2012_X86
+ECHO ---------------------------------------------------------------------------
+ECHO  Compiling with Visual Studio 2012 - X86
+ECHO ---------------------------------------------------------------------------
+SET VSVER=2012
+CALL "%~dp0"/SETENV.BAT  32
+set GENERATOR=Visual Studio 11 2012
+set VisualStudioVersion=11.0
+CALL "%VS110COMNTOOLS%\..\..\VC\vcvarsall.bat" x86
+goto do_cmake
 
-REM set GENERATOR=Visual Studio 11 2012
-REM set VisualStudioVersion=11.0
-set GENERATOR=Visual Studio 10 2010
-set VisualStudioVersion=10.0
-'"%VS100COMNTOOLS%\..\..\VC\vcvarsall.bat" x86'
+:VS2015_X86
+ECHO ---------------------------------------------------------------------------
+ECHO  Compiling with Visual Studio 2015 - X86
+ECHO ---------------------------------------------------------------------------
+SET VSVER=2015
+CALL "%~dp0"/SETENV.BAT  32
+set GENERATOR=Visual Studio 14 2015
+set VisualStudioVersion=14.0
+CALL "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" x86
+goto do_cmake
+
+:VS2015_X64
+ECHO ---------------------------------------------------------------------------
+ECHO  Compiling with Visual Studio 2015 - X64
+ECHO ---------------------------------------------------------------------------
+SET VSVER=2015
+CALL "%~dp0"/SETENV.BAT  64
+set GENERATOR=Visual Studio 14 2015 Win64
+set VisualStudioVersion=14.0
+CALL "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" x64
+goto do_cmake
+
+
+:VS2013_X64
+REM ----------------------------------------------------------------------------
+REM   Compiling with Visual Studio 2013 - x64
+REM ----------------------------------------------------------------------------
+SET VSVER=2013
+CALL "%~dp0"/SETENV.BAT  64
+set GENERATOR=Visual Studio 12 2013 Win64
+set VisualStudioVersion=12.0
+CALL "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
+goto do_cmake
+
+:VS2013_X86
+ECHO ---------------------------------------------------------------------------
+ECHO  Compiling with Visual Studio 2013 - X86
+ECHO ---------------------------------------------------------------------------
+SET VSVER=2013
+CALL "%~dp0"/SETENV.BAT  32
+set GENERATOR=Visual Studio 12 2013
+set VisualStudioVersion=12.0
+CALL "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86
+goto do_cmake
+
+:do_cmake
+
+SET BUILD_OCE=build_oce_%VSVER%_%ARCH%
 ECHO PREFIX = "%PREFIX%"
 ECHO CL     = "%CL%"
 ECHO LINK   = "%LINK%"
 ECHO PATH   = "%PATH%"
+ECHO ARCH   = "%ARCH%"
+ECHO BUILD_OCE   = "%BUILD_OCE%"
 
+mkdir %BUILD_OCE%
+cd  %BUILD_OCE%
 CALL cmake -DOCE_INSTALL_PREFIX:STRING="%PREFIX%" ^
 -DCMAKE_SUPPRESS_REGENERATION:BOOL=ON  ^
 -DOCE_MULTITHREADED_BUILD:BOOL=ON ^
@@ -31,27 +89,42 @@ CALL cmake -DOCE_INSTALL_PREFIX:STRING="%PREFIX%" ^
 -DOCE_DISABLE_X11:BOOLEAN=ON ^
 -DOCE_DISABLE_TKSERVICE_FONT:BOOLEAN=ON ^
 -DOCE_USE_PCH:BOOLEAN=ON  ^
--G "%GENERATOR%" ../oce   > nul
+-G "%GENERATOR%" ../oce
 
+if NOT ERRORLEVEL 0 goto handle_cmake_error
+
+SET VERBOSITY=quiet
+SET VERBOSITY=minimal
 
 REM msbuild /m oce.sln
-CALL msbuild /m oce.sln /p:Configuration=Release /verbosity:quiet /consoleloggerparameters:Summary;ShowTimestamp
+CALL msbuild /m oce.sln /p:Configuration=Release /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
+ECHO ERROR LEVEL = %ERRORLEVEL%
+if NOT '%ERRORLEVEL%'=='0' goto handle_msbuild_error
 
+CALL msbuild /m INSTALL.vcxproj /p:Configuration=Release /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
+if NOT ERRORLEVEL 0  goto handle_msbuild_error
 
-CALL msbuild /m INSTALL.vcxproj /p:Configuration=Release /verbosity:quiet /consoleloggerparameters:Summary;ShowTimestamp
+SET GYP_MSVS_VERSION=%VSVER%
+REM node-gyp clean configure build --verbose --arch=x64
+node-gyp clean configure build --verbose --arch=ia32
 ECHO PREFIX = %PREFIX%
 ECHO PREFIX = %GENERATOR%
-cd ..
+
+
+cd /d %~dp0"
 
 REM ----------------------------------------------------------
 REM  BUILD
 REM ----------------------------------------------------------
+
 CALL npm install
+if  NOT '%ERRORLEVEL%'=='0'   goto handle_msbuild_error
 
 REM ----------------------------------------------------------
 REM  TEST
 REM ----------------------------------------------------------
 CALL npm test
+if  NOT '%ERRORLEVEL%'=='0'   goto handle_test_error
 
 REM ----------------------------------------------------------
 REM  PACKAGE
@@ -62,3 +135,14 @@ XCOPY %SRC%\*.dll .\build\Release
 SET PACKAGE=node-occ-package.zip
 7z a %PACKAGE% .\build\Release\*.*
 appveyor PushArtifact %PACKAGE%
+
+goto done
+
+:handle_test_error
+:handle_cmake_error
+:handle_msbuild_error
+ECHO " ############################ ERROR "
+
+:done
+popd
+pushd "%~dp0"
