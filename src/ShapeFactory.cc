@@ -55,7 +55,7 @@ static void registerMakeBoxFaces(Solid* pThis,BRepPrimAPI_MakeBox& tool)
       for (int _p3 = ((_p2>>1)+1)*2; _p3 <=Primitives_ZMax;_p3++) {
         Primitives_Direction p3=(Primitives_Direction)_p3;
         if(wedge.HasVertex(p1,p2,p3)) {
-          char name[4];
+          char name[5];
           name[0]='V';
           name[1]=m(p1);
           name[2]=m(p2);
