@@ -34,11 +34,11 @@ public:
 
 
     // Methods exposed to JavaScripts
-    static void Init(Handle<Object> target);
+    static void Init(v8::Handle<v8::Object> target);
     static NAN_METHOD(NewInstance);
     static NAN_METHOD(New);
 
-    static v8::Persistent<v8::FunctionTemplate> _template;
+    static Nan::Persistent<v8::FunctionTemplate> _template;
 
 private:
     Transformation(const Transformation&);

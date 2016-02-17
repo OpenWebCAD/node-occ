@@ -21,7 +21,7 @@ public:
 
     static NAN_METHOD(New);
 
-    static void Init(Handle<Object> target);
+    static void Init(v8::Handle<v8::Object> target);
 
 
 private:
@@ -35,7 +35,7 @@ private:
 
     void updateJavaScriptArray();
 public:
-    static v8::Persistent<v8::FunctionTemplate> _template;
+    static Nan::Persistent<v8::FunctionTemplate> _template;
     int32_t numTriangles()  {
         return  (int32_t) triangles.size();
     }

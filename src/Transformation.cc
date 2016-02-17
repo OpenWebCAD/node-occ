@@ -2,130 +2,115 @@
 #include "Util.h"
 
 
-
-
 NAN_METHOD(Transformation::makeTranslation)
 {
-  NanScope();
-  Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
-  if( args.Length()!=1) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  Transformation* pThis = Transformation::Unwrap<Transformation>(info.This());
+  if( info.Length()!=1) {
+    return Nan::ThrowError("Wrong arguments");
   }
   double x=0,y=0,z=0;
-  ReadPoint(args[0],&x,&y,&z);
+  ReadPoint(info[0],&x,&y,&z);
 
   pThis->m_trsf.SetTranslation(gp_Vec(x,y,z));
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(Transformation::makePlaneMirror)
 {
-  NanScope();
-  Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
-  if( args.Length()!=2) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  Transformation* pThis = Transformation::Unwrap<Transformation>(info.This());
+  if(info.Length()!=2) {
+    return Nan::ThrowError("Wrong arguments");
   }
 
   double x=0,y=0,z=0;
-  ReadPoint(args[0],&x,&y,&z);
+  ReadPoint(info[0],&x,&y,&z);
 
   double u=0,v=0,w=0;
-  ReadPoint(args[1],&u,&v,&w);
+  ReadPoint(info[1],&u,&v,&w);
 
   Standard_Real D = sqrt (u * u + v * v + w * w);
   if (D <= gp::Resolution()) {
-    NanThrowError("Plane Axis direction is null");
-    NanReturnUndefined();
+    return Nan::ThrowError("Plane Axis direction is null");
   }
 
   pThis->m_trsf.SetMirror(gp_Ax2(gp_Pnt(x, y, z), gp_Dir(u, v, w)));
-
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 
 NAN_METHOD(Transformation::makeAxisMirror)
 {
-  NanScope();
-  Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
-  if( args.Length()!=2) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  Transformation* pThis = Transformation::Unwrap<Transformation>(info.This());
+  if(info.Length()!=2) {
+    return Nan::ThrowError("Wrong arguments");
   }
 
   double x=0,y=0,z=0;
-  ReadPoint(args[0],&x,&y,&z);
+  ReadPoint(info[0],&x,&y,&z);
 
   double u=0,v=0,w=0;
-  ReadPoint(args[1],&u,&v,&w);
+  ReadPoint(info[1],&u,&v,&w);
 
   Standard_Real D = sqrt (u * u + v * v + w * w);
   if (D <= gp::Resolution()) {
-    NanThrowError("Lirror Axis direction is null");
-    NanReturnUndefined();
+    return Nan::ThrowError("Lirror Axis direction is null");
   }
 
   pThis->m_trsf.SetMirror(gp_Ax1(gp_Pnt(x, y, z), gp_Dir(u, v, w)));
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(Transformation::makeScale)
 {
-  NanScope();
-  Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
+  Transformation* pThis = Transformation::Unwrap<Transformation>(info.This());
 
-  if( args.Length()!=2) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  if(info.Length()!=2) {
+    return Nan::ThrowError("Wrong arguments");
   }
 
-  double factor=args[0]->NumberValue();
+  double factor= info[0]->NumberValue();
 
   double x=0,y=0,z=0;
-  ReadPoint(args[1],&x,&y,&z);
+  ReadPoint(info[1],&x,&y,&z);
 
   pThis->m_trsf.SetScale(gp_Pnt(x, y, z), factor);
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 
 
 NAN_METHOD(Transformation::makeRotation)
 {
-  NanScope();
+  Transformation* pThis = Transformation::Unwrap<Transformation>(info.This());
 
-  Transformation* pThis = Transformation::Unwrap<Transformation>(args.This());
-
-  if( args.Length()!=3) {
-    NanThrowError("Wrong arguments in makeRotation");
-    NanReturnUndefined();
+  if(info.Length()!=3) {
+    return Nan::ThrowError("Wrong arguments in makeRotation");
   }
 
-  ReadRotationFromArgs(args, pThis->m_trsf);
+  ReadRotationFromArgs(info, pThis->m_trsf);
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 // Methods exposed to JavaScripts
-v8::Persistent<v8::FunctionTemplate> Transformation::_template;
+Nan::Persistent<v8::FunctionTemplate> Transformation::_template;
 
-void Transformation::Init(Handle<Object> target)
+void Transformation::Init(v8::Handle<v8::Object> target)
 {
-  v8::Local<v8::FunctionTemplate> tpl =  NanNew<v8::FunctionTemplate>(Transformation::New);
+  v8::Local<v8::FunctionTemplate> tpl =  Nan::New<v8::FunctionTemplate>(Transformation::New);
   // Prepare constructor template
-  tpl->SetClassName(NanNew("Transformation"));
+  tpl->SetClassName(Nan::New("Transformation").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NanAssignPersistent<v8::FunctionTemplate>(_template,tpl);
+  //xx NanAssignPersistent<v8::FunctionTemplate>(_template,tpl);
+  _template.Reset(tpl);
 
   // Prototype
-  Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
+  v8::Local<v8::ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   EXPOSE_METHOD(Transformation,makeRotation);
   EXPOSE_METHOD(Transformation,makeTranslation);
@@ -134,30 +119,22 @@ void Transformation::Init(Handle<Object> target)
   EXPOSE_METHOD(Transformation,makeScale);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Transformation,scaleFactor);
 
-  target->Set(NanNew("Transformation"), tpl->GetFunction());
+  target->Set(Nan::New("Transformation").ToLocalChecked(), tpl->GetFunction());
 }
 
 NAN_METHOD(Transformation::New)
 {
-  NanScope();
-
-  if (!args.IsConstructCall()) {
-    NanThrowError(" use new occ.Transformation() to construct a transformation");
-    NanReturnUndefined();
-    // return FromConstructorTemplate(constructor, args);
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.Transformation() to construct a transformation");
   }
 
   Transformation* obj = new Transformation();
-  obj->Wrap(args.This());
-  NanReturnValue(args.This());
+  obj->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(Transformation::NewInstance)
 {
-  NanScope();
-
-  // const unsigned argc = 1;
-  // Handle<Value> argv[argc] = { args[0] };
-  Local<Object> instance = NanNew<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
-  NanReturnValue(instance);
+  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
+  info.GetReturnValue().Set(instance);
 }

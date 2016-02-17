@@ -21,7 +21,19 @@ describe("testing face mesh ",function() {
         var m = solid.mesh;
         topFace.hasMesh.should.equal(true);
 
-        // topFace.mesh.toJSON();
+        m.vertices.length.should.eql(72);
+        m.normals.length.should.eql(72);
+        m.edgeindices.length.should.eql(24);
+        m.triangles.length.should.eql(36);
+
+        console.log(topFace.mesh.toJSON());
+
+        var faceMesh = topFace.mesh;
+        faceMesh.vertices.length.should.eql(3 * 4);
+        faceMesh.normals.length.should.eql(3 * 4);
+        faceMesh.edgeindices.length.should.eql(2 * 4);
+        faceMesh.triangles.length.should.eql(2 * 3);
+
     });
 });
 

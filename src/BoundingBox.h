@@ -12,7 +12,6 @@ class BoundingBox : public node::ObjectWrap {
 public:
     typedef class BoundingBox _ThisType;
 
-
     BoundingBox()
     {}
 
@@ -42,19 +41,19 @@ public:
     }
 
     TEAROFF_POINT(BoundingBox,nearPt,Point3Wrap,gp_XYZ);
-    TEAROFF_POINT(BoundingBox,farPt,Point3Wrap,gp_XYZ);
+    TEAROFF_POINT(BoundingBox,farPt, Point3Wrap,gp_XYZ);
 
     static NAN_METHOD(addPoint);
     static NAN_METHOD(isOut);
 
 
-    static v8::Persistent<v8::FunctionTemplate> _template;
+    static Nan::Persistent<v8::FunctionTemplate> _template;
 
     static v8::Handle<v8::Value> NewInstance(const gp_Pnt& near,const gp_Pnt& far);
     static v8::Handle<v8::Value> NewInstance(const Bnd_Box& box);
 
     static NAN_METHOD(New);
-    static void Init(Handle<Object> target);
+    static void Init(v8::Handle<v8::Object> target);
 
 protected:
 	static void Update(BoundingBox* pThis,_NAN_METHOD_ARGS);

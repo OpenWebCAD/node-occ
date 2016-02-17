@@ -121,26 +121,22 @@ int Edge::createCircle(const gp_Pnt& center, const gp_Dir& normal, double radius
   return 1;
 }
 
-
-Vertex* getOrCreateVertex(Handle<Value> arg)
+Vertex* getOrCreateVertex(v8::Handle<v8::Value> arg)
 {
-  if(arg->IsArray()) {
-
-    Local<Value> objV = NanNew<v8::FunctionTemplate>(Vertex::_template)->GetFunction()->CallAsConstructor(1,&arg);
-    if (!NanHasInstance(Vertex::_template,objV)) {
-      return 0;
-    }
-    Vertex* vertex = node::ObjectWrap::Unwrap<Vertex>(objV->ToObject());
-    return vertex;
-
-  }     else if(arg->IsObject()) {
-
-    Handle<Object> obj = arg->ToObject();
-    if (!NanHasInstance(Vertex::_template,obj)) {
-      return 0;
-    }
-    Vertex* vertex =node::ObjectWrap::Unwrap<Vertex>(obj);
-    return vertex;
+	if (arg->IsArray()) {
+		v8::Local<v8::Value> objV = Nan::New<v8::FunctionTemplate>(Vertex::_template)->GetFunction()->CallAsConstructor(1, &arg);
+		if (!IsInstanceOf<Vertex>(objV)) {
+			return 0;
+		}
+		Vertex* vertex = node::ObjectWrap::Unwrap<Vertex>(objV->ToObject());
+		return vertex;
+	} else if (arg->IsObject()) {
+		v8::Local<v8::Value> obj = arg->ToObject();
+		if (!IsInstanceOf<Vertex>(obj)) {
+			return 0;
+		}
+		Vertex* vertex = node::ObjectWrap::Unwrap<Vertex>(obj->ToObject());
+		return vertex;
   } else {
     return 0;
   }
@@ -148,41 +144,33 @@ Vertex* getOrCreateVertex(Handle<Value> arg)
 
 NAN_METHOD(Edge::createLine)
 {
-  NanScope();
-
-  Local<v8::Value> arg1 = args[0];
-  Local<v8::Value> arg2 = args[1];
-  if (arg1.IsEmpty()|| arg2.IsEmpty()) {
-    NanThrowError("expecting 2 arguments : <vertex|point> , <vertex|point> ");
-    NanReturnUndefined();
-
+  v8::Local<v8::Value> arg1 = info[0];
+  v8::Local<v8::Value> arg2 = info[1];
+  if (arg1.IsEmpty() || arg2.IsEmpty()) {
+	return Nan::ThrowError("expecting 2 arguments : <vertex|point> , <vertex|point> ");
   }
 
-  Vertex* v1 =     getOrCreateVertex(args[0]);
-  Vertex* v2 =     getOrCreateVertex(args[1]);
+  Vertex* v1 =     getOrCreateVertex(info[0]);
+  Vertex* v2 =     getOrCreateVertex(info[1]);
   if (!v1 || !v2) {
-    NanThrowError("expecting 2 arguments : <vertex|point> , <vertex|point> ");
-    NanReturnUndefined();
+	return Nan::ThrowError("expecting 2 arguments : <vertex|point> , <vertex|point> ");
   }
 
-  Edge* pThis = ObjectWrap::Unwrap<Edge>(args.This());
-
+  Edge* pThis = ObjectWrap::Unwrap<Edge>(info.This());
 
   pThis->createLine(v1,v2);
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(Edge::createCircle)
 {
-  NanScope();
 
-  Local<v8::Value> arg1 = args[0];
-  Local<v8::Value> arg2 = args[1];
-  Local<v8::Value> arg3 = args[2];
+  v8::Local<v8::Value> arg1 = info[0];
+  v8::Local<v8::Value> arg2 = info[1];
+  v8::Local<v8::Value> arg3 = info[2];
 
   if (arg1.IsEmpty()|| arg2.IsEmpty() || arg3.IsEmpty()) {
-    NanThrowError("expecting three arguments : <center>,<normal>,<radius>");
-    NanReturnUndefined();
+    return Nan::ThrowError("expecting three arguments : <center>,<normal>,<radius>");
   }
 
   gp_Pnt center;
@@ -191,35 +179,29 @@ NAN_METHOD(Edge::createCircle)
   ReadDir(arg2,&normal);
 
   if (!arg3->IsNumber())  {
-    NanThrowError("expecting a number (radius) as third arguments");
-    NanReturnUndefined();
+    return Nan::ThrowError("expecting a number (radius) as third arguments");
   }
   double radius = arg3->ToNumber()->Value();
   if (radius<1E-9)  {
-    NanThrowError("radius cannot be zero ( or close to zero)");
-    NanReturnUndefined();
+    return Nan::ThrowError("radius cannot be zero ( or close to zero)");
   }
 
-  Edge* pThis = ObjectWrap::Unwrap<Edge>(args.This());
+  Edge* pThis = ObjectWrap::Unwrap<Edge>(info.This());
 
   pThis->createCircle(center,normal,radius);
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 
 }
 
 NAN_METHOD(Edge::createArc3P)
 {
-  NanScope();
-
-
-  Local<v8::Value> arg1 = args[0];
-  Local<v8::Value> arg2 = args[1];
-  Local<v8::Value> arg3 = args[2];
+  v8::Local<v8::Value> arg1 = info[0];
+  v8::Local<v8::Value> arg2 = info[1];
+  v8::Local<v8::Value> arg3 = info[2];
 
   if (arg1.IsEmpty()|| arg2.IsEmpty() || arg3.IsEmpty()) {
-    NanThrowError("expecting three arguments : <center>,<normal>,<radius>");
-    NanReturnUndefined();
+    return Nan::ThrowError("expecting three arguments : <center>,<normal>,<radius>");
   }
 
   Vertex* v1 =     getOrCreateVertex(arg1);
@@ -227,48 +209,45 @@ NAN_METHOD(Edge::createArc3P)
   ReadPoint(arg2,&p2);
   Vertex* v3 =     getOrCreateVertex(arg3);
 
-  Edge* pThis = ObjectWrap::Unwrap<Edge>(args.This());
+  Edge* pThis = ObjectWrap::Unwrap<Edge>(info.This());
 
   pThis->createArc3P(v1,v3,p2);
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 
-Persistent<FunctionTemplate> Edge::_template;
+Nan::Persistent<v8::FunctionTemplate> Edge::_template;
 
 NAN_METHOD(Edge::New)
 {
-  NanScope();
-
   Edge* obj = new Edge();
-  obj->Wrap(args.This());
-  // return scope.Close(args.This());
-  NanReturnValue(args.This());
+  obj->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-Local<Object>  Edge::Clone() const
+v8::Local<v8::Object>  Edge::Clone() const
 {
 
   Edge* obj = new Edge();
-  Local<Object> instance = NanNew(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;
 }
-void Edge::Init(Handle<Object> target)
+void Edge::Init(v8::Handle<v8::Object> target)
 {
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Edge::New);  
-  tpl->SetClassName(NanNew("Edge"));
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Edge::New);  
+  tpl->SetClassName(Nan::New("Edge").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
+  _template.Reset(tpl);
 
   // Prototype
-  Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
+  v8::Local<v8::ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   Base::InitProto(proto);
 
@@ -281,15 +260,13 @@ void Edge::Init(Handle<Object> target)
   EXPOSE_METHOD(Edge,createArc3P);
   EXPOSE_METHOD(Edge,polygonize);
 
-  target->Set(NanNew("Edge"), tpl->GetFunction());
+  target->Set(Nan::New("Edge").ToLocalChecked(), tpl->GetFunction());
 }
 
-Handle<Object> Edge::polygonize(double factor)
+v8::Local<v8::Object> Edge::polygonize(double factor)
 {
 
   const TopoDS_Edge& edge = TopoDS::Edge(this->shape());
-
-
 
   BRepAdaptor_Curve curve_adaptor(edge);
   GCPnts_UniformDeflection discretizer;
@@ -307,34 +284,25 @@ Handle<Object> Edge::polygonize(double factor)
     m_positions.push_back(static_cast<float>(pt.Y()));
     m_positions.push_back(static_cast<float>(pt.Z()));
   } 
-  //xx std::cerr << std::endl;
-  Handle<Object> result = NanNew<Object>();
 
   int length = (int)m_positions.size();
-  result->SetIndexedPropertiesToExternalArrayData(m_positions.data(), kExternalFloatArray,length);
-  result->Set(NanNew("length"), NanNew<v8::Int32>(length));
-  assert(     result->GetIndexedPropertiesExternalArrayDataLength() ==   length);
-  assert(     result->Get(NanNew("length"))->ToInt32()->Uint32Value() ==   length);
+  return makeFloat32Array(m_positions.data(), length);
 
-  return result;
 }
 
 
 NAN_METHOD(Edge::polygonize)
 {
-  NanScope();
-  // can work with this
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
-    // create a new object
-    NanThrowError("invalid object");
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Edge>(pJhis))  {
+    return Nan::ThrowError("invalid object");
   }
   Edge* pThis = node::ObjectWrap::Unwrap<Edge>(pJhis);
 
   double factor = 0.05;
-  if (args.Length()>=1) {
-    ReadDouble(args[0],factor);
+  if (info.Length()>=1) {
+    ReadDouble(info[0],factor);
   }
 
-  NanReturnValue(pThis->polygonize(factor));
+  info.GetReturnValue().Set(pThis->polygonize(factor));
 }

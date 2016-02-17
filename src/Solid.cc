@@ -6,26 +6,22 @@
 #include "BoundingBox.h"
 
 
-Persistent<FunctionTemplate> Solid::_template;
-
-
-
+Nan::Persistent<v8::FunctionTemplate> Solid::_template;
 
 /*static*/
-void Solid::Init(Handle<Object> target)
+void Solid::Init(v8::Handle<v8::Object> target)
 {
-
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Solid::New);  
-  tpl->SetClassName(NanNew("Solid"));
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Solid::New);  
+  tpl->SetClassName(Nan::New("Solid").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
+  _template.Reset(tpl);
 
   // Prototype
-  Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
+  v8::Local<v8::ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   Base::InitProto(proto);
 
@@ -48,14 +44,14 @@ void Solid::Init(Handle<Object> target)
 
   EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
 
-  target->Set(NanNew("Solid"), tpl->GetFunction());
+  target->Set(Nan::New("Solid").ToLocalChecked(), tpl->GetFunction());
 
 }
 
 
-void Solid::InitNew(_NAN_METHOD_ARGS)
+NAN_METHOD(Solid::InitNew)
 {
-  Shape::InitNew(args);
+  Shape::InitNew(info);
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,area);
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Solid,volume);
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
@@ -66,33 +62,29 @@ void Solid::InitNew(_NAN_METHOD_ARGS)
 
 NAN_METHOD(Solid::New)
 {
-  NanScope();
-  if (!args.IsConstructCall()) {
-    NanThrowError(" use new occ.Solid() to construct a solid");
-    NanReturnUndefined();
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.Solid() to construct a solid");
   }
 
   Solid* pThis = new Solid();
-  pThis->Wrap(args.This());
-  pThis->InitNew(args);
+  pThis->Wrap(info.This());
+  pThis->InitNew(info);
 
-  args.This()->ForceSet(NanNew("faces"),          NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
-  args.This()->ForceSet(NanNew("_reversedMap"),   NanNew<v8::Object>() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
+  info.This()->ForceSet(Nan::New("faces").ToLocalChecked(),          Nan::New<v8::Object>() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
+  info.This()->ForceSet(Nan::New("_reversedMap").ToLocalChecked(),   Nan::New<v8::Object>() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
 
   /// args.This()->SetAccessor(NanSymbol("_area"),ee< Solid, Number, double, &Solid::area>,0,Number::New(12),DEFAULT,None);
 
   // return scope.Close(args.This());
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-Local<Object> Solid::Clone() const
+v8::Local<v8::Object> Solid::Clone() const
 {
-  //xx Local<Object> instance = NanNew(_template)->GetFunction()->NewInstance();
-  Local<Object> instance = Solid::NewInstance()->ToObject();
+  v8::Local<v8::Object> instance = Solid::NewInstance()->ToObject();
   Solid* pClone = node::ObjectWrap::Unwrap<Solid>(instance);
 
   pClone->setShape(this->shape());
-
 
   if (!this->shape().IsNull()) {
     TopTools_IndexedMapOfShape shapeMap;
@@ -112,16 +104,16 @@ Local<Object> Solid::Clone() const
   return instance;
 }
 
-Handle<Value> Solid::NewInstance()
+v8::Handle<v8::Value> Solid::NewInstance()
 {
-  Local<Object> instance = NanNew(Solid::_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(0,0);
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
   return instance;
 }
 
-Handle<Value> Solid::NewInstance(TopoDS_Shape shape)
+v8::Handle<v8::Value> Solid::NewInstance(TopoDS_Shape shape)
 {
-  Local<Object> instance = NanNew(Solid::_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(0,0);
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
   pThis->setShape(shape);
   return instance;
@@ -129,21 +121,18 @@ Handle<Value> Solid::NewInstance(TopoDS_Shape shape)
 
 NAN_METHOD(Solid::NewInstance)
 {
-  NanScope();
   TopoDS_Shape shape;
-  NanReturnValue(NewInstance(shape));
+  info.GetReturnValue().Set(NewInstance(shape));
 }
 
 
 NAN_METHOD(Solid::getEdges)
 {
-
-  NanScope();
   // can work with this
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
     // create a new object
-    NanThrowError("invalid object");
+    return Nan::ThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -153,75 +142,68 @@ NAN_METHOD(Solid::getEdges)
 
 
   int nbShape =map.Extent();
-  Local<Array> arr = NanNew<Array>(nbShape);
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbShape);
 
   for (int i=0; i<nbShape; i++)  {
-    Local<Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
+    v8::Local<v8::Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  NanReturnValue(arr);
+  info.GetReturnValue().Set(arr);
 }
 
 NAN_METHOD(Solid::getVertices)
 {
-  NanScope();
   // can work with this
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
     // create a new object
-    NanThrowError("invalid object");
+    return Nan::ThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
   TopTools_IndexedMapOfShape map;
   TopExp::MapShapes(pThis->shape(), TopAbs_VERTEX, map);
 
-
   int nbShape =map.Extent();
-  Local<Array> arr = NanNew<Array>(nbShape);
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbShape);
 
   for (int i=0; i<nbShape; i++)  {
-    Local<Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
+    v8::Local<v8::Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  NanReturnValue(arr);
+  info.GetReturnValue().Set(arr);
 }
 
 NAN_METHOD(Solid::getOuterShell)
 {
-  NanScope();
   // can work with this
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
     // create a new object
-    NanThrowError("invalid object");
+    return Nan::ThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
   if (pThis->shape().ShapeType() == TopAbs_COMPOUND) {
-    NanReturnUndefined();
+    return;
   }
   try {
     TopoDS_Solid solid = TopoDS::Solid(pThis->shape());
     // TopoDS_Shell shell = BRepTools::OuterShell(solid);
     TopoDS_Shell shell = OUTER_SHELL(solid);
-    NanReturnValue(buildWrapper(shell));
-
+    return info.GetReturnValue().Set(buildWrapper(shell));
   }
   CATCH_AND_RETHROW("Failed to extract Outer Shell ");
 
-  NanReturnUndefined();
 }
 
 NAN_METHOD(Solid::getFaces)
 {
-
-  NanScope();
   // can work with this
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
     // create a new object
-    NanThrowError("invalid object");
+    return Nan::ThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -229,25 +211,22 @@ NAN_METHOD(Solid::getFaces)
   TopExp::MapShapes(pThis->shape(), TopAbs_FACE, shapeMap);
 
   int nbSubShapes =shapeMap.Extent();
-  Local<Array> arr = NanNew<Array>(nbSubShapes);
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbSubShapes);
 
   for (int i=0; i<nbSubShapes; i++)  {
-    Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
+    v8::Local<v8::Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  NanReturnValue(arr);
+  info.GetReturnValue().Set(arr);
 }
 
 
 NAN_METHOD(Solid::getSolids)
 {
-
-  NanScope();
   // can work with this
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
-    // create a new object
-    NanThrowError("invalid object");
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
+    return Nan::ThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
@@ -255,39 +234,36 @@ NAN_METHOD(Solid::getSolids)
   TopExp::MapShapes(pThis->shape(), TopAbs_SOLID, shapeMap);
 
   int nbSubShapes =shapeMap.Extent();
-  Local<Array> arr = NanNew<Array>(nbSubShapes);
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbSubShapes);
 
   for (int i=0; i<nbSubShapes; i++)  {
-    Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
+    v8::Local<v8::Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  NanReturnValue(arr);
+  info.GetReturnValue().Set(arr);
 }
 
 NAN_METHOD(Solid::getShells)
 {
-
-  NanScope();
   // can work with this
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
-    // create a new object
-    NanThrowError("invalid object");
-    NanReturnUndefined();
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
+    return Nan::ThrowError("invalid object");
   }
+
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
   TopTools_IndexedMapOfShape shapeMap;
   TopExp::MapShapes(pThis->shape(), TopAbs_SHELL, shapeMap);
 
   int nbShapes =shapeMap.Extent();
-  Local<Array> arr = NanNew<Array>(nbShapes);
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbShapes);
 
   for (int i=0; i<nbShapes; i++)  {
-    Local<Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
+    v8::Local<v8::Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
     arr->Set(i,obj);
   }
-  NanReturnValue(arr);
+  info.GetReturnValue().Set(arr);
 }
 
 
@@ -298,17 +274,15 @@ NAN_METHOD(Solid::getShells)
  */
 NAN_METHOD(Solid::getAdjacentFaces)
 {
-  NanScope();
 
   Face* pFace = 0 ;
-  if (!extractArg(args[0],pFace)) {
-    NanThrowError("invalid arguments : expecting <FACE>");
-    NanReturnUndefined();
+  if (!extractArg(info[0],pFace)) {
+    return Nan::ThrowError("invalid arguments : expecting <FACE>");
   }
   assert(pFace);
 
   // arguments : <face>  , face must belongs to solid
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(args.This());
+  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(info.This());
 
 
   TopTools_IndexedDataMapOfShapeListOfShape map;
@@ -338,18 +312,17 @@ NAN_METHOD(Solid::getAdjacentFaces)
   // now build an array with the answer
   int nbFaces = auxmap.Extent();
 
-  Local<Array> arr = NanNew<Array>(nbFaces);
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbFaces);
 
   TopTools_MapIteratorOfMapOfShape it(auxmap);
   int i=0;
   for (; it.More(); it.Next()) {
     const TopoDS_Shape& shape= it.Key();
-    Local<Object> obj= buildWrapper(shape); // 1 based !!!
+    v8::Local<v8::Object> obj= buildWrapper(shape); // 1 based !!!
     arr->Set(i,obj);
     i++;
   }
-  NanReturnValue(arr);
-  // return Handle<v8::Value>(Undefined());
+  info.GetReturnValue().Set(arr);
 }
 
 
@@ -358,22 +331,18 @@ const char* getCommonEdges_Doc = "Solid.getCommonEdges(<Face>,<Face>);";
 NAN_METHOD(Solid::getCommonEdges)
 {
   // <face1>,<face2>
-  NanScope();
   Face* pFace1 = 0 ;
   Face* pFace2 = 0 ;
 
-
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
     // create a new object
-    NanThrowError("invalid object");
-    NanReturnUndefined();
+    return Nan::ThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
-  if (args.Length()<2 || !extractArg(args[0],pFace1) || !extractArg(args[1],pFace2) ) {
-    NanThrowError("invalid arguments getCommonEdges : expecting <FACE>,<FACE>");
-    NanReturnUndefined();
+  if (info.Length()<2 || !extractArg(info[0],pFace1) || !extractArg(info[1],pFace2) ) {
+    return Nan::ThrowError("invalid arguments getCommonEdges : expecting <FACE>,<FACE>");
   }
 
   TopTools_IndexedDataMapOfShapeListOfShape map;
@@ -402,15 +371,15 @@ NAN_METHOD(Solid::getCommonEdges)
 
   }
 
-  Local<Array> arr = NanNew<Array>(edgeList.Extent());
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(edgeList.Extent());
   TopTools_MapIteratorOfMapOfShape it(edgeList);
   int i=0;
   for (; it.More(); it.Next()) {
     const TopoDS_Edge& edge = TopoDS::Edge(it.Key());
-    Local<Object> obj= buildWrapper(edge); // 1 based !!!
+    v8::Local<v8::Object> obj= buildWrapper(edge); // 1 based !!!
     arr->Set(i++,obj);
   }
-  NanReturnValue(arr);
+  info.GetReturnValue().Set(arr);
 }
 
 
@@ -420,16 +389,14 @@ const char* getCommonVertices_Doc = "Solid.getCommonVertices(<Face>,<Face>);\n"
 
 NAN_METHOD(Solid::getCommonVertices)
 {
-  NanScope();
   Face* pFace1 = 0 ;
   Face* pFace2 = 0 ;
-  if (args.Length()<2 || !extractArg(args[0],pFace1) || !extractArg(args[1],pFace2) ) {
-    NanThrowError("invalid arguments getCommonEdges : expecting <FACE>,<FACE>");
-    NanReturnUndefined();
+  if (info.Length()<2 || !extractArg(info[0],pFace1) || !extractArg(info[1],pFace2) ) {
+    return Nan::ThrowError("invalid arguments getCommonEdges : expecting <FACE>,<FACE>");
   }	
-  Local<Array> arr = Array::New(0);
-  NanThrowError("Not Implemented ");
-  NanReturnValue(arr);
+  v8::Local<v8::Array> arr = v8::Array::New(0);
+  Nan::ThrowError("Not Implemented ");
+  info.GetReturnValue().Set(arr);
 }
 
 
@@ -511,18 +478,17 @@ double Solid::volume()
 
 NAN_PROPERTY_GETTER(Solid::_mesh)
 {
-  NanScope();
-  if (args.This().IsEmpty()) {
-    NanReturnUndefined();
+  if (info.This().IsEmpty()) {
+    return;
   }
-  if (args.This()->InternalFieldCount() == 0 ) {
-    NanReturnUndefined();
+  if (info.This()->InternalFieldCount() == 0 ) {
+	 return;
   }
-  Solid* pThis = ObjectWrap::Unwrap<Solid>(args.This());
+  Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
   if (pThis->m_cacheMesh.IsEmpty()) {
-    NanAssignPersistent<v8::Object>(pThis->m_cacheMesh, pThis->createMesh(0.5,20*3.14159/180.0,true));
+      pThis->m_cacheMesh.Reset(pThis->createMesh(0.5,20*3.14159/180.0,true));
   }
-  NanReturnValue(NanNew(pThis->m_cacheMesh));
+  info.GetReturnValue().Set(Nan::New(pThis->m_cacheMesh));
 }
 
 
@@ -538,13 +504,13 @@ NAN_PROPERTY_GETTER(Solid::_mesh)
 //        BRepMesh().Mesh(shape_, 1.0);
 //    }
 //}
-Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNormals)
+v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qualityNormals)
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
 
   const unsigned argc = 0;
-  Handle<v8::Value> argv[1] = {  };
-  Local<Object> theMesh = NanNew(Mesh::_template)->GetFunction()->NewInstance(argc, argv);
+  v8::Handle<v8::Value> argv[1] = {  };
+  v8::Local<v8::Object> theMesh = Nan::New(Mesh::_template)->GetFunction()->NewInstance(argc, argv);
 
   Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
 
@@ -590,41 +556,36 @@ Handle<Object>  Solid::createMesh(double factor, double angle, bool qualityNorma
   } CATCH_AND_RETHROW("Failed to mesh solid ");
   mesh->optimize();
 
-  return NanEscapeScope(theMesh);
+  return scope.Escape(theMesh);
 }
 
 
 NAN_METHOD(Solid::getShapeName)
 {
-  NanScope();
-
-  Handle<Object> pJhis = args.This();
-  if ( pJhis.IsEmpty() || !NanHasInstance(_template,pJhis))  {
-    NanThrowError("invalid object");
-    NanReturnUndefined();
+  v8::Handle<v8::Object> pJhis = info.This();
+  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
+    return Nan::ThrowError("invalid object");
   }
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
-  Handle<Object> pShape = args[0]->ToObject();
+  v8::Handle<v8::Object> pShape = info[0]->ToObject();
   if (!pShape.IsEmpty()) {
-    v8::Local<v8::Value> hashCode = pShape->Get(NanNew("hashCode"));
-    v8::Local<v8::Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
+    v8::Local<v8::Value> hashCode = pShape->Get(Nan::New("hashCode").ToLocalChecked());
+    v8::Local<v8::Object> reversedMap = pJhis->Get(Nan::New("_reversedMap").ToLocalChecked())->ToObject();
     v8::Local<v8::Value>  value = reversedMap->Get(hashCode);
-    NanReturnValue(value);
+    info.GetReturnValue().Set(value);
   }
-  NanReturnUndefined();
-
 }
 
 std::string Solid::_getShapeName(const TopoDS_Shape& shape)
 {
-  v8::Local<v8::Object> pJhis = NanObjectWrapHandle(this);
+	v8::Local<v8::Object> pJhis = this->handle();// NanObjectWrapHandle(this);
 
-  v8::Local<v8::Object> reversedMap = pJhis->Get(NanNew("_reversedMap"))->ToObject();
-  v8::Local<v8::Value> hashCode = NanNew<v8::Integer>(shape.HashCode(std::numeric_limits<int>::max()));
+  v8::Local<v8::Object> reversedMap = pJhis->Get(Nan::New("_reversedMap").ToLocalChecked())->ToObject();
+  v8::Local<v8::Value> hashCode = Nan::New<v8::Integer>(shape.HashCode(std::numeric_limits<int>::max()));
   v8::Local<v8::Value> value = reversedMap->Get(hashCode);
 
-  NanAsciiString s(value);
+  Nan::Utf8String s(value);
   std::string res(*s);
   return res;
 }
@@ -632,12 +593,12 @@ std::string Solid::_getShapeName(const TopoDS_Shape& shape)
 void Solid::_registerNamedShape(const char* name,const TopoDS_Shape& shape)
 {
   if (shape.ShapeType() == TopAbs_FACE)  {
-    Local<Object> obj = NanObjectWrapHandle(this)->Get(NanNew("faces"))->ToObject();
-    obj->Set(NanNew(name),    Face::NewInstance(TopoDS::Face(shape)));
+    v8::Local<v8::Object> obj = NanObjectWrapHandle(this)->Get(Nan::New("faces").ToLocalChecked())->ToObject();
+    obj->Set(Nan::New(name).ToLocalChecked(),    Face::NewInstance(TopoDS::Face(shape)));
   }
 
-  Local<Object> reversedMap = NanObjectWrapHandle(this)->Get(NanNew("_reversedMap"))->ToObject();
-  reversedMap->Set(shape.HashCode(std::numeric_limits<int>::max()),NanNew(name));
+  v8::Local<v8::Object> reversedMap = NanObjectWrapHandle(this)->Get(Nan::New("_reversedMap").ToLocalChecked())->ToObject();
+  reversedMap->Set(shape.HashCode(std::numeric_limits<int>::max()),Nan::New(name).ToLocalChecked());
 }
 
 

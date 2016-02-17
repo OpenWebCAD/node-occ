@@ -3,13 +3,13 @@
 #include "Util.h"
 #include <limits.h>
 
-v8::Persistent<v8::FunctionTemplate> BoundingBox::_template;
+Nan::Persistent<v8::FunctionTemplate> BoundingBox::_template;
 
 
 v8::Handle<v8::Value> BoundingBox::NewInstance(const Bnd_Box& box)
 {
 
-  Local<Object> instance = NanNew<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
 
   BoundingBox* pThis = ObjectWrap::Unwrap<BoundingBox>(instance);
 
@@ -28,17 +28,17 @@ v8::Handle<v8::Value> BoundingBox::NewInstance(const gp_Pnt& nearPt,const gp_Pnt
 
 void BoundingBox::Update(BoundingBox* pThis,_NAN_METHOD_ARGS)
 {
-  // args could be one or several points
+  // info could be one or several points
   // or a array of point
-  for (int i=0; i<args.Length(); i++) {
-    if (args[i]->IsArray()) {
-      Handle<Array> arr = Handle<Array>::Cast(args[i]);
+  for (int i=0; i<info.Length(); i++) {
+    if (info[i]->IsArray()) {
+      v8::Handle<v8::Array> arr = v8::Handle<v8::Array>::Cast(info[i]);
       if ( arr->Get(0)->IsArray() || arr->Get(0)->IsObject()) {
         // probably an array of point
       } else {
         // a single point
         gp_Pnt point;
-        ReadPoint(args[i],&point);
+        ReadPoint(info[i],&point);
         pThis->m_box.Update(point.X(),point.Y(),point.Z());
       }
     }
@@ -48,28 +48,25 @@ void BoundingBox::Update(BoundingBox* pThis,_NAN_METHOD_ARGS)
 
 NAN_METHOD(BoundingBox::New)
 {
-  NanScope();
-  
   BoundingBox* pThis = new BoundingBox();
-  pThis->Wrap(args.This());
+  pThis->Wrap(info.This());
   
-  BoundingBox::Update(pThis,args);
+  BoundingBox::Update(pThis,info);
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 
 }
 
 NAN_METHOD(BoundingBox::addPoint)
 {
-  NanScope();
 
-  BoundingBox* pThis = ObjectWrap::Unwrap<BoundingBox>(args.This());
-  BoundingBox::Update(pThis,args);
+  BoundingBox* pThis = ObjectWrap::Unwrap<BoundingBox>(info.This());
+  BoundingBox::Update(pThis,info);
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-bool checkCoerceToPoint(const Handle<Value>& v) 
+bool checkCoerceToPoint(const v8::Handle<v8::Value>& v)
 { 
   // TODO ...
   return true;
@@ -77,38 +74,35 @@ bool checkCoerceToPoint(const Handle<Value>& v)
 
 NAN_METHOD(BoundingBox::isOut)
 {
-  NanScope();
 
-  BoundingBox* pThis = ObjectWrap::Unwrap<BoundingBox>(args.This());
+  BoundingBox* pThis = ObjectWrap::Unwrap<BoundingBox>(info.This());
   bool _itOut = false;
 
-  if (args.Length() != 1 || !checkCoerceToPoint(args[0])) {
-
-    NanThrowError(" error expecting a point or a arrya of 3 doubles");
-    NanReturnUndefined();
+  if (info.Length() != 1 || !checkCoerceToPoint(info[0])) {
+    return Nan::ThrowError(" error expecting a point or a arrya of 3 doubles");
   }
   gp_Pnt point;
-  ReadPoint(args[0],&point);
+  ReadPoint(info[0],&point);
 
   bool retVal = pThis->m_box.IsOut(point)?true:false;
 
-  NanReturnValue(NanNew<Boolean>(retVal));
+  info.GetReturnValue().Set(Nan::New<v8::Boolean>(retVal));
 }
 
 
-void BoundingBox::Init(Handle<Object> target)
+void BoundingBox::Init(v8::Handle<v8::Object> target)
 {
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(BoundingBox::New);
-  tpl->SetClassName(NanNew("BoundingBox"));
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(BoundingBox::New);
+  tpl->SetClassName(Nan::New("BoundingBox").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
+  _template.Reset(tpl);
 
   // Prototype
-  Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
+  v8::Local<v8::ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   EXPOSE_METHOD(BoundingBox,addPoint);
   EXPOSE_METHOD(BoundingBox,isOut);
@@ -117,6 +111,5 @@ void BoundingBox::Init(Handle<Object> target)
   EXPOSE_TEAROFF(BoundingBox,farPt);
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(BoundingBox,isVoid);
 
-
-  target->Set(NanNew("BoundingBox"), tpl->GetFunction());
+  target->Set(Nan::New("BoundingBox").ToLocalChecked(), tpl->GetFunction());
 }

@@ -10,9 +10,9 @@ using namespace std;
 
 
 
-bool operator == (Local<String> str,const char* value)
+bool operator == (v8::Local<v8::String> str,const char* value)
 {
-    return str->Equals(NanNew<String>(value));
+    return str->Equals(Nan::New<v8::String>(value).ToLocalChecked());
 }
 
 

@@ -14,9 +14,9 @@ inline ProgressData::ProgressData()
 ,m_progress(0)
 {}
 
-class AsyncWorkerWithProgress : public NanAsyncWorker {
+class AsyncWorkerWithProgress : public Nan::AsyncWorker {
 
-  NanCallback* _progressCallback;
+  Nan::Callback* _progressCallback;
   uv_async_t async;
 protected:
   std::string _filename;
@@ -24,8 +24,8 @@ public:
   ProgressData m_data;
 
 public:
-  AsyncWorkerWithProgress(NanCallback *callback,NanCallback* progressCallback,std::string*  pfilename)
-    : NanAsyncWorker(callback) , _progressCallback(progressCallback)
+  AsyncWorkerWithProgress(Nan::Callback *callback,Nan::Callback* progressCallback,std::string*  pfilename)
+    : Nan::AsyncWorker(callback) , _progressCallback(progressCallback)
   {
     _filename = *pfilename; 
     delete pfilename;
@@ -83,12 +83,12 @@ static void notify_progress(uv_async_t* handle,int status/*unused*/)
 
     if (_progressCallback && !_progressCallback->IsEmpty()) {
       //xx printf("notify_progress %lf %d\n",m_data.percent,m_data.progress);
-      NanScope();
-      Local<Value> argv[2] = { 
-        NanNew<Number>(this->m_data.m_progress),
-        NanNew<Integer>((int)this->m_data.m_percent)
+      Nan::EscapableHandleScope scope;
+      v8::Local<v8::Value> argv[2] = {
+        Nan::New<v8::Number>(this->m_data.m_progress),
+        Nan::New<v8::Integer>((int)this->m_data.m_percent)
       };
       _progressCallback->Call(2,argv);
-    }  	
+    }
   }
 };

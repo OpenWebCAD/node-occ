@@ -7,6 +7,7 @@
 #include <limits>
 #include <assert.h>
 
+#include "Util.h"
 
 // old handle in V8 : see http://create.tpsitulsa.com/wiki/V8/Handles
 
@@ -16,35 +17,34 @@ Mesh::Mesh()
 
 NAN_METHOD(Mesh::New)
 {
-  NanScope();
-
   Mesh* obj = new Mesh();
 
-  args.This()->Set(NanNew("vertices"),   NanNew<v8::Object>());
-  args.This()->Set(NanNew("normals"),    NanNew<v8::Object>());
-  args.This()->Set(NanNew("edgeindices"),NanNew<v8::Object>());
-  args.This()->Set(NanNew("triangles"),  NanNew<v8::Object>());
-  obj->Wrap(args.This());
-  NanReturnValue(args.This());
+  info.This()->Set(Nan::New("vertices").ToLocalChecked(),   Nan::New<v8::Object>());
+  info.This()->Set(Nan::New("normals").ToLocalChecked(),    Nan::New<v8::Object>());
+  info.This()->Set(Nan::New("edgeindices").ToLocalChecked(),Nan::New<v8::Object>());
+  info.This()->Set(Nan::New("triangles").ToLocalChecked(),  Nan::New<v8::Object>());
+
+  obj->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-Persistent<FunctionTemplate> Mesh::_template;
+Nan::Persistent<v8::FunctionTemplate> Mesh::_template;
 
 
 /*static*/
-void Mesh::Init(Handle<Object> target)
+void Mesh::Init(v8::Handle<v8::Object> target)
 {
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Mesh::New);  
-  tpl->SetClassName(NanNew("Mesh"));
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Mesh::New);  
+  tpl->SetClassName(Nan::New("Mesh").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
+  _template.Reset(tpl);
 
   // Prototype
-  Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
+  v8::Local<v8::ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Mesh,numTriangles);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Mesh,numEdges);
@@ -52,8 +52,7 @@ void Mesh::Init(Handle<Object> target)
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Mesh,numNormals);
 
   // other Mesh prototype members are defined in the mesh.js script
-
-  target->Set(NanNew("Mesh"), tpl->GetFunction());
+  target->Set(Nan::New("Mesh").ToLocalChecked(), tpl->GetFunction());
 
 }
 
@@ -270,50 +269,18 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
   return 1;
 }
 
-template <class T> struct _typeMatcher {
-  static ExternalArrayType get() ;
-};
-
-template <> struct _typeMatcher<float> {
-  static ExternalArrayType get() {
-    return kExternalFloatArray ;
-  }
-};
-template <> struct _typeMatcher<int>  {
-  static ExternalArrayType get() {
-    return kExternalIntArray ;
-  }
-};
-template <> struct _typeMatcher<unsigned int> {
-  static ExternalArrayType get() {
-    return kExternalUnsignedIntArray ;
-  }
-};
 
 template<class T>
-void UpdateExternalArray(Handle<Object>& pThis,const char* name,const T* data,size_t _length)
+void UpdateExternalArray(v8::Handle<v8::Object>& pThis, const char* name, const T* data, size_t _length)
 {
-  int length = static_cast<int>(_length);
-
-  Handle<Object> extArray(pThis->Get(NanNew(name))->ToObject());
-  if (extArray.IsEmpty()) {
-    NanThrowError(" error in UpdateExternalArray");
-  }
-  extArray->SetIndexedPropertiesToExternalArrayData(const_cast<T*>(data), _typeMatcher<T>::get(), length);
-  extArray->ForceSet(NanNew("length"), NanNew<Int32>(length));
-//xx  assert(     extArray->GetIndexedPropertiesExternalArrayDataLength() ==   length);
-//xx  assert(     extArray->Get(NanNew("length"))->ToInt32()->Uint32Value() ==   _length);
+  v8::Local<v8::Object> arr = _makeTypedArray(data, (int)_length);
+  pThis->Set(Nan::New(name).ToLocalChecked(), arr);
 }
 
 void Mesh::updateJavaScriptArray()
 {
-
-//xx  Local<ArrayBuffer> h = NanNew<ArrayBuffer>().As(v8::Local<ArrayBuffer>);
-//xx  h->Externalize();
-
   assert(sizeof(triangles[0])==sizeof(int)*3);
-
-  Local<Object> pThis = NanObjectWrapHandle(this);
+  v8::Local<v8::Object> pThis = NanObjectWrapHandle(this);
   UpdateExternalArray(pThis, "vertices"    ,&vertices.data()[0].x   ,vertices.size()*3);
   UpdateExternalArray(pThis, "normals"     ,&normals.data()[0].x    ,normals.size()*3);
   UpdateExternalArray(pThis, "triangles"   ,&triangles.data()[0].i  ,triangles.size()*3);

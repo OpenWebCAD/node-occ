@@ -85,9 +85,7 @@ const char* Base::orientation()
 
 NAN_METHOD(Base::translate)
 {
-  NanScope();
-
-  const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+  const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
 
   try {
 
@@ -95,99 +93,83 @@ NAN_METHOD(Base::translate)
 
     double x=0,y=0,z=0;
 
-    ReadPoint(args[0],&x,&y,&z);
+    ReadPoint(info[0],&x,&y,&z);
     transformation.SetTranslation(gp_Vec(x,y,z));
 
-    Local<Object> copy    = pThis->Clone();
+    v8::Local<v8::Object> copy    = pThis->Clone();
 
     pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
 
-    NanReturnValue(copy);
+    return info.GetReturnValue().Set(copy);
 
   } CATCH_AND_RETHROW("Failed to calculate a translated shape ");
-
-  NanReturnUndefined();
 
 }
 
 NAN_METHOD(Base::rotate)
 {
-  NanScope();
-
-  const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+  const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
 
   try {
 
     gp_Trsf  transformation;
 
-    ReadRotationFromArgs(args,transformation);
+    ReadRotationFromArgs(info,transformation);
 
-    Local<Object> copy    = pThis->Clone();
+    v8::Local<v8::Object> copy    = pThis->Clone();
     pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
 
-    NanReturnValue(copy);
+    return info.GetReturnValue().Set(copy);
 
   } CATCH_AND_RETHROW("Failed to calculate a rotated shape ");
 
-  NanReturnUndefined();
 }
 
 NAN_METHOD(Base::mirror)
 {
-  NanScope();
-
-  const Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
-
+  const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
   // TODO 
-  Local<Object> copy    = pThis->Clone();
-  NanReturnValue(copy);
+  v8::Local<v8::Object> copy    = pThis->Clone();
+  info.GetReturnValue().Set(copy);
 }
 
 NAN_METHOD(Base::applyTransform)
 {
-  NanScope();
 
-  Base* pThis = ObjectWrap::Unwrap<Base>(args.This());
+  Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
 
-  
-  if (args.Length()!=1 && !NanHasInstance(Transformation::_template,args[0])) {
-  //if (args.Length()!=1 && !Transformation::_template->HasInstance(args[0])) {
-    NanThrowError("invalid  tansformation");
-    NanReturnUndefined();
+  if (info.Length()!=1 && !IsInstanceOf<Transformation>(info[0]) ) {
+    return Nan::ThrowError("invalid  transformation");
   }
   try {
 
-    Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
+    Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(info[0]->ToObject());
 
     const gp_Trsf& transformation = pTrans->m_trsf;
     pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
 
-    NanReturnValue(args.This());
+	info.GetReturnValue().Set(info.This());
 
   } CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
 
-  NanReturnUndefined();
 }
 
 
 NAN_METHOD(Base::transformed)
 {
-  NanScope();
+  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
 
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());
-
-  if (args.Length()!=1 && !NanHasInstance(Transformation::_template,args[0])) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  if (info.Length()!=1 && !IsInstanceOf<Transformation>(info[0])) {
+    return Nan::ThrowError("Wrong arguments");
   }
 
 
   try {
-    Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(args[0]->ToObject());
+    Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(info[0]->ToObject());
     const gp_Trsf& trsf =  pTrans->m_trsf;
     gp_Trsf transformation =     trsf;
 
-    Local<Object> copy    = pThis->Clone();
+    v8::Local<v8::Object> copy    = pThis->Clone();
 
     if (!pThis->shape().IsNull()) {
       pThis->Unwrap(copy)->setShape(
@@ -195,10 +177,8 @@ NAN_METHOD(Base::transformed)
         transformation,Standard_True).Shape());
     }
 
-    NanReturnValue(copy);
+	info.GetReturnValue().Set(copy);
   } CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
-
-  NanReturnUndefined();
 
 }
 
@@ -289,27 +269,23 @@ bool Base::fixShape()
 
 NAN_METHOD(Base::fixShape)
 {
-  NanScope();
-  if (args.Length()!=0) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  if (info.Length()!=0) {
+    return Nan::ThrowError("Wrong arguments");
   }
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());
+  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
 
   pThis->fixShape();
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(Base::getBoundingBox)
 {
-  NanScope();
 
-  if (args.Length()!=0) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  if (info.Length()!=0) {
+    return Nan::ThrowError("Wrong arguments");
   }
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());
+  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
 
   try {
 
@@ -318,23 +294,20 @@ NAN_METHOD(Base::getBoundingBox)
     Bnd_Box aBox;
     BRepBndLib::Add(shape, aBox);
     aBox.SetGap(tolerance);
-    NanReturnValue(BoundingBox::NewInstance(aBox));
+	info.GetReturnValue().Set(BoundingBox::NewInstance(aBox));
 
   } CATCH_AND_RETHROW("Failed to compute bounding box ");
 
-  NanReturnUndefined();
 }
 
 NAN_METHOD(Base::clone)
 {
-  NanScope();
 
-  if (args.Length()!=0) {
-    NanThrowError("Wrong arguments");
-    NanReturnUndefined();
+  if (info.Length()!=0) {
+    return Nan::ThrowError("Wrong arguments");
   }
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(args.This());
-  NanReturnValue(pThis->Clone());
+  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
+  info.GetReturnValue().Set(pThis->Clone());
 }
 
 void Base::InitNew(_NAN_METHOD_ARGS)
@@ -343,7 +316,7 @@ void Base::InitNew(_NAN_METHOD_ARGS)
   REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,orientation);
 }
 
-void  Base::InitProto(Handle<ObjectTemplate>& proto)
+void  Base::InitProto(v8::Handle<v8::ObjectTemplate>& proto)
 {
   EXPOSE_METHOD(Base,clone);
   EXPOSE_METHOD(Base,translate);

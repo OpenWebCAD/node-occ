@@ -16,17 +16,19 @@ class Point3Wrap : public node::ObjectWrap {
     return get().Z();
   }
 public:
-  // Methods exposed to JavaScripts
+  // Methods exposed to JavaScript
   static NAN_METHOD(New);
-  static void Init(v8::Handle<v8::Object> target);  
-  static v8::Persistent<v8::FunctionTemplate> _template;
+  static NAN_METHOD(equals);
+  static NAN_METHOD(asArray);
+  static void Init(v8::Handle<v8::Object> target);
+  static Nan::Persistent<v8::FunctionTemplate> _template;
 };
 
 
 
 #define TEAROFF_INIT(ACCESSOR)   m_##ACCESSOR(*this)
 
-template <class _ThisType, class Wrapper,class CLASS,const CLASS (_ThisType::*ACCESSOR)() const>
+template <class _ThisType, class Wrapper, class CLASS, const CLASS(_ThisType::*ACCESSOR)() const>
 class Accessor : public Wrapper {
 
   //    typedef Accessor<_ThisType, Wrapper,CLASS,ACCESSOR> THIS;
@@ -46,21 +48,22 @@ public:
   }
 
   static NAN_PROPERTY_GETTER(getter) {
-    NanScope();
-    if (args.This().IsEmpty()) {
-       NanReturnUndefined();
+    if (info.This().IsEmpty()) {
+      info.GetReturnValue().SetUndefined();
+      return;
     }
-    if (args.This()->InternalFieldCount() == 0 ) {
-       NanReturnUndefined();
+    if (info.This()->InternalFieldCount() == 0) {
+      info.GetReturnValue().SetUndefined();
+      return;
     }
-    _ThisType* pThis = node::ObjectWrap::Unwrap<_ThisType>(args.This());
+    _ThisType* pThis = node::ObjectWrap::Unwrap<_ThisType>(info.This());
 
-    NanReturnValue(NewInstance(*pThis));
+    info.GetReturnValue().Set(NewInstance(*pThis));
 
   }
-  static Handle<Value> NewInstance(_ThisType& parent) {
-   
-    Local<Object> instance = NanNew(Wrapper::_template)->GetFunction()->NewInstance(0,0);
+  static v8::Handle<v8::Value> NewInstance(_ThisType& parent) {
+
+    v8::Local<v8::Object> instance = Nan::New(Wrapper::_template)->GetFunction()->NewInstance(0, 0);
     Accessor* pThis = new Accessor(parent);
     pThis->Wrap(instance);
     return instance;
@@ -75,5 +78,7 @@ public:
 
 
 
-#define EXPOSE_TEAROFF(THISTYPE,ACCESSOR)                           \
-  proto->SetAccessor(NanNew<v8::String>(#ACCESSOR), &t##ACCESSOR::getter,  0,Handle<v8::Value>(),DEFAULT,(PropertyAttribute)(ReadOnly|DontDelete))
+#define EXPOSE_TEAROFF(THISTYPE,ACCESSOR)                                            \
+  Nan::SetAccessor(proto,                                                            \
+			Nan::New<v8::String>(#ACCESSOR).ToLocalChecked(),                        \
+					&t##ACCESSOR::getter,  0,v8::Handle<v8::Value>(),v8::DEFAULT,(v8::PropertyAttribute)(v8::ReadOnly|v8::DontDelete))

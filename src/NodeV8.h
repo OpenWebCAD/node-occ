@@ -20,45 +20,64 @@
 #define   Handle(ClassName)      Handle_##ClassName
 #endif
 #define   occHandle(ClassName)      Handle_##ClassName
-using namespace v8;
+//xx using namespace v8;
+
+
+template<class T> bool IsInstanceOf(v8::Local<v8::Value> obj) {
+	v8::Local<v8::FunctionTemplate> _template = Nan::New(T::_template);
+	return _template->HasInstance(obj);
+
+}
+template<class T> bool IsInstanceOf(v8::Handle<v8::Object> obj) {
+	v8::Local<v8::FunctionTemplate> _template = Nan::New(T::_template);
+	return _template->HasInstance(obj);
+}
+
+
+
+//template<class N,class T> v8::Local<N> c(T e) { return v8::Local<N>(e); }
+template<class T> v8::Local<T> c(v8::Local<T>  e) { return e; }
+inline v8::Local<v8::String> c(Nan::MaybeLocal<v8::String> e) { return e.ToLocalChecked(); }
+
+
 
 template<class T,typename T1,typename T2,T2 (T::*func)() >
 NAN_GETTER(ee)
 {
-    NanScope();
-
-    if (args.This().IsEmpty() ) {
-        NanReturnUndefined();
+    //xx NanScope();
+    if (info.This().IsEmpty() ) {
+        info.GetReturnValue().SetUndefined();
+		return;
     }
 
-    if (args.This()->InternalFieldCount() == 0 ) {
-        NanReturnUndefined();
-    }
+    if (info.This()->InternalFieldCount() == 0 ) {
+		info.GetReturnValue().SetUndefined();
+		return;
+	}
 
-    T* obj = node::ObjectWrap::Unwrap<T>(args.This());
+    T* obj = node::ObjectWrap::Unwrap<T>(info.This());
 
     try {
-    
-      NanReturnValue(NanNew<T1>((obj->*func)()));
+
+		auto val = (obj->*func)();
+		info.GetReturnValue().Set(c(Nan::New<T1>(val)) );
 
     } catch(...) {
-      NanThrowError("exception caught in C++ code");
-      NanReturnUndefined();
-    }
+      return Nan::ThrowError("exception caught in C++ code");
+	}
 }
 
 // proto is an ObjectTemplate
 #define EXPOSE_METHOD(ClassName,staticMethod) \
-  NanSetTemplate(proto,#staticMethod, NanNew<v8::FunctionTemplate>(staticMethod))
+  Nan::SetTemplate(proto,#staticMethod, Nan::New<v8::FunctionTemplate>(staticMethod))
 
 // proto->Set(#staticMethod,v8::FunctionTemplate::New(staticMethod));
 // NODE_SET_PROTOTYPE_METHOD(proto,#staticMethod,staticMethod);
 //FunctionTemplate::New(staticMethod)->GetFunction());
-// proto->Set(NanNew(#staticMethod),FunctionTemplate::New(staticMethod)->GetFunction());
+// proto->Set(Nan::New(#staticMethod),FunctionTemplate::New(staticMethod)->GetFunction());
 
 #define __EXPOSE_READ_ONLY_PROPERTY(element,staticMethod,name) \
-    element->SetAccessor(NanNew(#name), &staticMethod,  0,Handle<v8::Value>(),DEFAULT,ReadOnly)
-
+    Nan::SetAccessor(element,Nan::New(#name).ToLocalChecked(), &staticMethod,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly)
 
 #define EXPOSE_READ_ONLY_PROPERTY(staticMethod,name) \
     __EXPOSE_READ_ONLY_PROPERTY(proto,staticMethod,name)
@@ -77,14 +96,13 @@ NAN_GETTER(ee)
 
 
 #define REXPOSE_READ_ONLY_PROPERTY_DOUBLE(ClassName,name) \
-    __EXPOSE_READ_ONLY_PROPERTY(args.This(),(ee< ClassName, v8::Number, double, &ClassName::name>) , name )
+    __EXPOSE_READ_ONLY_PROPERTY(info.This(),(ee< ClassName, v8::Number, double, &ClassName::name>) , name )
 #define REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(ClassName,name) \
-    __EXPOSE_READ_ONLY_PROPERTY(args.This(),(ee< ClassName, v8::Boolean, bool, &ClassName::name>) , name )
+    __EXPOSE_READ_ONLY_PROPERTY(info.This(),(ee< ClassName, v8::Boolean, bool, &ClassName::name>) , name )
 #define REXPOSE_READ_ONLY_PROPERTY_INTEGER(ClassName,name) \
-    __EXPOSE_READ_ONLY_PROPERTY(args.This(), (ee<ClassName,v8::Integer,int,&ClassName::name>),name)
-
+    __EXPOSE_READ_ONLY_PROPERTY(info.This(), (ee<ClassName,v8::Integer,int,&ClassName::name>),name)
 #define REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(ClassName,name) \
-    __EXPOSE_READ_ONLY_PROPERTY(args.This(), (ee<ClassName,v8::String,const char*,&ClassName::name>),name)
+    __EXPOSE_READ_ONLY_PROPERTY(info.This(), (ee<ClassName,v8::String,const char*,&ClassName::name>),name)
 /**
  *  Extracts a C string from a V8 Utf8Value.
  * <code>
@@ -96,4 +114,8 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
 {
     return *value ? *value : "<string conversion failed>";
 }
+
+// TO DO => SCRAP
+#define _NAN_METHOD_ARGS const Nan::FunctionCallbackInfo<v8::Value>& info
+#define NanObjectWrapHandle(t) (t->handle())
 

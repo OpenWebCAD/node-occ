@@ -9,43 +9,38 @@ BooleanOperation::~BooleanOperation()
   delete m_bop;
 }
 
-v8::Persistent<v8::FunctionTemplate> BooleanOperation::_template;
+Nan::Persistent<v8::FunctionTemplate> BooleanOperation::_template;
 
 
 v8::Handle<v8::Value> BooleanOperation::NewInstance(BOPAlgo_Operation op)
 {
 
-  Local<Object> instance = NanNew<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
   BooleanOperation* pThis = ObjectWrap::Unwrap<BooleanOperation>(instance);
   return instance;
 }
 
-BOPAlgo_Operation ReadOperationType(const Handle<Value>& arg)
+BOPAlgo_Operation ReadOperationType(const v8::Handle<v8::Value>& arg)
 {
-  if (arg->ToString()->Equals(NanNew("SECTION")))  return BOPAlgo_SECTION;
-  if (arg->ToString()->Equals(NanNew("COMMON")))   return BOPAlgo_COMMON;
-  if (arg->ToString()->Equals(NanNew("FUSE")))     return BOPAlgo_FUSE;
-  if (arg->ToString()->Equals(NanNew("CUT")))      return BOPAlgo_CUT;
-  if (arg->ToString()->Equals(NanNew("CUT21")))    return BOPAlgo_CUT21;
+  if (arg->ToString()->Equals(Nan::New("SECTION").ToLocalChecked()))  return BOPAlgo_SECTION;
+  if (arg->ToString()->Equals(Nan::New("COMMON").ToLocalChecked()))   return BOPAlgo_COMMON;
+  if (arg->ToString()->Equals(Nan::New("FUSE").ToLocalChecked()))     return BOPAlgo_FUSE;
+  if (arg->ToString()->Equals(Nan::New("CUT").ToLocalChecked()))      return BOPAlgo_CUT;
+  if (arg->ToString()->Equals(Nan::New("CUT21").ToLocalChecked()))    return BOPAlgo_CUT21;
   return BOPAlgo_UNKNOWN;
 }
 
 NAN_METHOD(BooleanOperation::New)
 {
-  NanScope();
-
   BooleanOperation* pThis = new BooleanOperation();
-  pThis->Wrap(args.This());
+  pThis->Wrap(info.This());
 
-  BOPAlgo_Operation op = ReadOperationType(args[0]);
+  BOPAlgo_Operation op = ReadOperationType(info[0]);
   if (op == BOPAlgo_UNKNOWN) {
-
-    NanThrowError("bad operation type, must be SECTION COMMON FUSE CUT or CUT21");
-    ///NanThrowError("bad operation type, must be SECTION COMMON FUSE CUT or CUT21");
-    NanReturnUndefined();
+    return Nan::ThrowError("bad operation type, must be SECTION COMMON FUSE CUT or CUT21");
   }
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 /*
@@ -69,18 +64,17 @@ Handle<Value> BooleanOperation_getSameShape2(const v8::Arguments& args)
 }
 */
 
-void BooleanOperation::Init(Handle<Object> target)
+void BooleanOperation::Init(v8::Handle<v8::Object> target)
 {
 
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(BooleanOperation::New);
-  tpl->SetClassName(NanNew("BooleanOperation"));
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(BooleanOperation::New);
+  tpl->SetClassName(Nan::New("BooleanOperation").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   
-  NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
-  // constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(BooleanOperation::New));
+  _template.Reset(tpl);
 
 
   // Prototype
@@ -93,5 +87,5 @@ void BooleanOperation::Init(Handle<Object> target)
   //XX    EXPOSE_READ_ONLY_PROPERTY(BooleanOperation,_shape1,shape1);
   //XX    EXPOSE_READ_ONLY_PROPERTY(BooleanOperation,_shape2,shape2);
 
-  target->Set(NanNew("BooleanOperation"), tpl->GetFunction());
+  target->Set(Nan::New("BooleanOperation").ToLocalChecked(), tpl->GetFunction());
 }

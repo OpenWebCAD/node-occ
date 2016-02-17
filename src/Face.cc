@@ -4,6 +4,9 @@
 #include "Util.h"
 #include "Mesh.h"
 
+Face::~Face() {
+	m_cacheMesh.Reset();
+};
 
 const TopoDS_Shape&  Face::shape() const
 {
@@ -76,7 +79,7 @@ bool Face::isPlanar()
   return tool.IsPlanar() ? true : false;
 }
 
-Persistent<FunctionTemplate> Face::_template;
+Nan::Persistent<v8::FunctionTemplate> Face::_template;
 
 bool Face::buildFace(std::vector<Wire*>& wires)
 {
@@ -85,7 +88,7 @@ bool Face::buildFace(std::vector<Wire*>& wires)
   // checling that all wires are closed
   for (size_t i = 0; i < wires.size(); i++) {
     if (!wires[i]->isClosed()) {
-      NanThrowError("Some of the wires are not closed");
+      Nan::ThrowError("Some of the wires are not closed");
       return false;
     }
   }
@@ -119,34 +122,31 @@ bool Face::buildFace(std::vector<Wire*>& wires)
 
 NAN_METHOD(Face::New)
 {
-  NanScope();
-
   Face* obj = new Face();
-  obj->Wrap(args.This());
-  obj->InitNew(args);
+  obj->Wrap(info.This());
+  obj->InitNew(info);
 
   std::vector<Wire*> wires;
-  extractArgumentList(args,wires);
+  extractArgumentList(info,wires);
   obj->buildFace(wires);
 
-  // return scope.Close(args.This());
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 
 }
 
-Local<Object> Face::Clone() const
+v8::Local<v8::Object> Face::Clone() const
 {
   Face* obj = new Face();
-  Local<Object> instance = NanNew(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;
 }
 
-Handle<Object> Face::NewInstance(const TopoDS_Face& face)
+v8::Handle<v8::Object> Face::NewInstance(const TopoDS_Face& face)
 {
   Face* obj = new Face();
-  Local<Object> instance = NanNew(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
   obj->Wrap(instance);
   obj->setShape(face);
   return instance;
@@ -154,27 +154,27 @@ Handle<Object> Face::NewInstance(const TopoDS_Face& face)
 
 NAN_PROPERTY_GETTER(Face::_mesh)
 {
-  NanScope();
-  if (args.This().IsEmpty()) {
-    NanReturnUndefined();
+  // NanScope();
+  if (info.This().IsEmpty()) {
+	return info.GetReturnValue().SetUndefined();
   }
-  if (args.This()->InternalFieldCount() == 0 ) {
-    NanReturnUndefined();
+  if (info.This()->InternalFieldCount() == 0 ) {
+	return info.GetReturnValue().SetUndefined();
   }
-  Face* pThis = ObjectWrap::Unwrap<Face>(args.This());
+
+  Face* pThis = ObjectWrap::Unwrap<Face>(info.This());
   if (pThis->m_cacheMesh.IsEmpty()) {
-    NanAssignPersistent<v8::Object>(pThis->m_cacheMesh,pThis->createMesh(0.5,20*3.14159/180.0,true));
+	  pThis->m_cacheMesh.Reset(pThis->createMesh(0.5, 20 * 3.14159 / 180.0, true));
   }
-  NanReturnValue(NanNew(pThis->m_cacheMesh));
+  info.GetReturnValue().Set(Nan::New(pThis->m_cacheMesh));
 }
 
-Handle<Object> Face::createMesh(double factor, double angle, bool qualityNormals)
+v8::Handle<v8::Object> Face::createMesh(double factor, double angle, bool qualityNormals)
 {
-
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
   const unsigned argc = 0;
-  Handle<v8::Value> argv[1] = {  };
-  Local<Object> theMesh = NanNew(Mesh::_template)->GetFunction()->NewInstance(argc, argv);
+  v8::Handle<v8::Value> argv[1] = {  };
+  v8::Local<v8::Object> theMesh = Nan::New(Mesh::_template)->GetFunction()->NewInstance(argc, argv);
 
   Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
 
@@ -187,14 +187,16 @@ Handle<Object> Face::createMesh(double factor, double angle, bool qualityNormals
 
   } CATCH_AND_RETHROW("Failed to mesh solid ");
   mesh->optimize();
-  return NanEscapeScope(theMesh);
+
+  return scope.Escape(theMesh);
+  //xx return NanEscapeScope(th;eMesh);
 
 }
 
 
 void Face::InitNew(_NAN_METHOD_ARGS)
 {
-  Base::InitNew(args);
+  Base::InitNew(info);
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
 
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Face,numWires);
@@ -202,19 +204,19 @@ void Face::InitNew(_NAN_METHOD_ARGS)
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,isPlanar);
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,hasMesh);
 }
-void Face::Init(Handle<Object> target)
+void Face::Init(v8::Handle<v8::Object> target)
 {
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Face::New);  
-  tpl->SetClassName(NanNew("Face"));
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Face::New);
+  tpl->SetClassName(Nan::New("Face").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NanAssignPersistent<v8::FunctionTemplate>(_template, tpl);
+  _template.Reset(tpl);
 
   // Prototype
-  Local<ObjectTemplate> proto = tpl->PrototypeTemplate();
+  v8::Local<v8::ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   Base::InitProto(proto);
 
@@ -224,6 +226,5 @@ void Face::Init(Handle<Object> target)
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,hasMesh);
   EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
   EXPOSE_TEAROFF(Face,centreOfMass);
-  target->Set(NanNew("Face"), tpl->GetFunction());
+  target->Set(Nan::New("Face").ToLocalChecked(), tpl->GetFunction());
 }
-
