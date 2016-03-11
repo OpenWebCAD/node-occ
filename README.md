@@ -9,7 +9,8 @@ This project comes with a set of V8 wrappers around OpenCascade API and a sample
 
 [![Build Status](https://travis-ci.org/erossignon/node-occ.png?branch=master)](https://travis-ci.org/erossignon/node-occ)
 
-[comment]: # [![Build status](https://ci.appveyor.com/api/projects/status/s5eaux89v2c0wmu4?svg=true)](https://ci.appveyor.com/project/erossignon/node-occ)
+<!-- [![Build status](https://ci.appveyor.com/api/projects/status/s5eaux89v2c0wmu4?svg=true)](https://ci.appveyor.com/project/erossignon/node-occ)
+-->
 
 ### quick example
 
