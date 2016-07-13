@@ -6,18 +6,18 @@
   "dependencies": {
     "colors": "*",
     "gettemporaryfilepath": "0.0.1",
-    "grunt-contrib-concat": "~0.5.1",
-    "nan": "^2.2.0",
+    "grunt-contrib-concat": "~1.0.1",
+    "nan": "^2.4.0",
     "pace": "~0.0.4",
     "progress": "~1.1.8",
     "temporary": "~0.0.8"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-jshint": "~0.12.0",
-    "grunt-contrib-nodeunit": "~0.4.1",
+    "grunt": "~1.0.1",
+    "grunt-contrib-jshint": "~1.0.0",
+    "grunt-contrib-nodeunit": "~1.0.0",
     "grunt-contrib-uglify": "*",
-    "grunt-mocha-cli": "~2.0.0",
+    "grunt-mocha-cli": "~2.1.0",
     "grunt-docco": "*",
     "should": "*",
     "mocha": "*"
