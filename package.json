@@ -1,6 +1,6 @@
 {
   "name": "node-occ",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "OpenCascade OCE Wrapper for Node js",
   "preferGlobal": "true",
   "dependencies": {
@@ -18,9 +18,9 @@
     "grunt-contrib-nodeunit": "~1.0.0",
     "grunt-contrib-uglify": "*",
     "grunt-mocha-cli": "~2.1.0",
-    "grunt-docco": "*",
-    "should": "*",
-    "mocha": "*"
+    "grunt-docco": "~0.4.0",
+    "should": "~9.0.2",
+    "mocha": "~2.5.3"
   },
   "main": "lib/occ",
   "author": "Etienne Rossignon",

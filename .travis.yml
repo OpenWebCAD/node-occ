@@ -17,8 +17,8 @@ addons:
     - g++-4.8
 
 node_js:
-  - "4.3"
-  - "5.6"
+  - "4"
+  - "6"
 
 git:
   submodules: false  
