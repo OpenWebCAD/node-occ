@@ -17,7 +17,7 @@ inline ProgressData::ProgressData()
 class AsyncWorkerWithProgress : public Nan::AsyncWorker {
 
   Nan::Callback* _progressCallback;
-  uv_async_t async;
+  uv_async_t* async;
 protected:
   std::string _filename;
 public:
@@ -27,19 +27,27 @@ public:
   AsyncWorkerWithProgress(Nan::Callback *callback,Nan::Callback* progressCallback,std::string*  pfilename)
     : Nan::AsyncWorker(callback) , _progressCallback(progressCallback)
   {
+    async = new uv_async_t();
     _filename = *pfilename; 
     delete pfilename;
 
-    uv_async_init(uv_default_loop(),&async,AsyncWorkerWithProgress::notify_progress);
-    async.data = this;
+    uv_async_init(uv_default_loop(),async,AsyncWorkerWithProgress::notify_progress);
+    async->data = this;
 
+  }
+ inline static void AsyncClose_(uv_handle_t* handle) {
+    AsyncWorkerWithProgress* worker = static_cast<AsyncWorkerWithProgress*>(handle->data);
+    delete reinterpret_cast<uv_async_t*>(handle);
+    delete worker;
+  }
+  virtual void Destroy() {
+    uv_close(reinterpret_cast<uv_handle_t*>(async), AsyncClose_);
   }
   ~AsyncWorkerWithProgress() {
 
     if (_progressCallback) {
       delete _progressCallback;
     }
-    uv_close((uv_handle_t*) &async, NULL);
 
   }
 
@@ -58,7 +66,7 @@ public:
   * main loop in the near future.
   */
   void send_notify_progress() {
-    uv_async_send(&this->async);
+    uv_async_send(this->async);
   };
 
 #if NODE_MODULE_VERSION >= 14 // 12
