@@ -15,9 +15,10 @@ public:
 // Methods exposed to JavaScripts
 NAN_METHOD(Point3Wrap::New)
 {
-  double x = info[0]->ToNumber()->Value();
-  double y = info[1]->ToNumber()->Value();
-  double z = info[2]->ToNumber()->Value();
+  double x, y, z;
+  ReadDouble(info[0], x);
+  ReadDouble(info[1], y);
+  ReadDouble(info[2], z);
 
   Point3Wrap* obj = new Point3Wrap1(x,y,z);
   obj->Wrap(info.This());
@@ -45,8 +46,12 @@ NAN_METHOD(Point3Wrap::equals)
   else if (info.Length() == 2) {
     gp_Pnt p1;
     ReadPoint(info[0], &p1);
-    double tol = info[1]->ToNumber()->Value();
+    
+    double tol;
+    ReadDouble(info[1], tol);
+
     bool isEqual = gp_Pnt(pThis->get()).IsEqual(p1, tol);
+
     return info.GetReturnValue().Set(isEqual);
   }
   Nan::ThrowError("Invalid");

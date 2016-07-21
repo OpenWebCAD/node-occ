@@ -39,9 +39,9 @@ NAN_METHOD(Vertex::New)
   // return scope.Close(args.This());
   double x = 0, y = 0, z = 0;
   if (info.Length() == 3) {
-    x = info[0]->ToNumber()->Value();
-    y = info[1]->ToNumber()->Value();
-    z = info[2]->ToNumber()->Value();
+    ReadDouble(info[0], x);
+    ReadDouble(info[1], y);
+    ReadDouble(info[2], z);
   }
   else if (info.Length() == 1) {
     ReadPoint(info[0], &x, &y, &z);
@@ -63,7 +63,7 @@ NAN_METHOD(Vertex::New)
 v8::Local<v8::Object>  Vertex::Clone() const
 {
   Vertex* obj = new Vertex();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;

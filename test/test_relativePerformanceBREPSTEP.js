@@ -1,81 +1,119 @@
 var occ = require('../lib/occ');
 var should = require("should");
+var async = require("async");
+var path = require("path");
 
-var ProgressBar  = require('progress');
+var ProgressBar = require('progress');
 
 
-function myReadStep(filname,done) {
+function myReadStep(filename, done) {
 
-  var bar = new ProgressBar("reading file [:bar] :percent elapsed :elapseds ETA :etas", {
-        complete: '=' , 
-        incomplete: '-' ,
-        width: 100 , 
-        total: 1000 
-  });
-var old = 0;
-function tick(percent)  {
-   bar.tick(percent);
-}
+    var bar = new ProgressBar("reading file [:bar] :percent elapsed :elapseds ETA :etas", {
+        complete: '=',
+        incomplete: '-',
+        width: 100,
+        total: 1000
+    });
 
-function performMesh(solids)
-{
-  var bar = new ProgressBar("meshing solids [:bar] :percent elapsed :elapseds ETA :etas", {
-        complete: '=' , 
-        incomplete: '-' ,
-        width: 100 , 
-        total: solids.length 
-  });
-  for ( var i  in solids ) {
-    bar.tick();
-    var solid =  solids[i];
-    solid.numFaces.should.be.greaterThan(1);
-    var mesh = solid.mesh;
-    solid.mesh.numVertices.should.be.greaterThan(3);
-  }
-  console.log("\n");
-}
+    var solids = [];
 
-  occ.readSTEP('test/kuka.stp',function( err,solids) {
-        var t1,t2,elapsed;
-        t1 = bar.start;
-        t2 = new Date();
-        elapsed = Math.round((t2 -t1)/10)/100;
-        console.log("\ndone with " , solids.length , " solids  in ", elapsed ," seconds" );
- 
-        // make sure we have a mesh, so it can be saved in the BREP file 
+    function progressFunc(percent) {
+        bar.tick(percent);
+    }
+
+    function performMesh(solids) {
+        var bar = new ProgressBar("meshing solids [:bar] :percent elapsed :elapseds  ETA :etas", {
+            complete: '=',
+            incomplete: '-',
+            width: 100,
+            total: solids.length
+        });
+        for (var i  in solids) {
+            bar.tick();
+            var solid = solids[i];
+            solid.numFaces.should.be.greaterThan(1);
+
+            solid.name = "solid_" + i;
+            occ.buildSolidMesh(solid);
+            var mesh = solid.mesh;
+            solid.mesh.numVertices.should.be.greaterThan(3);
+        }
+        console.log("\n");
+    }
+
+
+    function chrono(async_func, message, callback) {
+
+        var t1, t2, elapsed;
         t1 = new Date();
+
+        async_func(function (err) {
+
+            t2 = new Date();
+            elapsed = Math.round((t2 - t1) / 10) / 100;
+
+            console.log("\ndone " + message + " in ", elapsed, " seconds");
+            callback(err);
+        });
+    }
+
+
+    function read_original_step_file(callback) {
+
+
+        t1 = new Date();
+        occ.readSTEP(filename, function (err, _solids) {
+            solids = _solids;
+            if (err) {
+                return callback(new Error(" readStep returned error = " + err.message + " while reading " + filename + " _solids =", _solids.length));
+            } else {
+                console.log(" read ", solids.length, " solids");
+            }
+            callback(err);
+        }, progressFunc);
+
+    }
+
+    function perform_mesh_on_solids(callback) {
+
+
+        // make sure we have a mesh, so it can be saved in the BREP file
         performMesh(solids);
-        t2 = new Date();
-        elapsed = Math.round((t2 -t1)/10)/100;
-        console.log(" meshing solids  in " , elapsed , " seconds");
+        callback();
+    }
 
+    function write_solids_to_brep(callback) {
+        occ.writeBREP("toto.brep", solids);
+        callback();
+    }
 
-        t1 = new Date();
-        occ.writeBREP("toto.brep",solids);
-        t2 = new Date();
-        elapsed = Math.round((t2 -t1)/10)/100;
-        console.log(" writing BREP file in " , elapsed , " seconds");
+    function read_brep_file_again(callback) {
+        occ.readBREP("toto.brep", function (err, _solids) {
+            if (!err) {
+                solids = _solids;
+                console.log(" nb solids = ", solids.length);
+            } else {
+            }
+            return callback(err);
+        }, progressFunc);
+    }
 
-        t1 = new Date();
-        occ.readBREP("toto.brep",function(err,solids) {
-        t2  =new Date();
-        elapsed = Math.round((t2 -t1)/10)/100;
-        console.log(" reading BREP file in " ,elapsed , " seconds");
-        console.log(" nb solids = ", solids.length);
-        t1 = new Date();
-        performMesh(solids);
-        t2 = new Date();
-        elapsed = Math.round((t2 -t1)/10)/100;
-        console.log(" meshing solids  in " , elapsed , " seconds");
-        done();
-  });
-  }, tick );
+    async.series([
+
+        chrono.bind(null, read_original_step_file, "read_original_step_file"),
+        chrono.bind(null, perform_mesh_on_solids, "perform_mesh_on_solids"),
+        chrono.bind(null, write_solids_to_brep, "write_solids_to_brep"),
+        chrono.bind(null, read_brep_file_again, "read_brep_file_again"),
+        chrono.bind(null, perform_mesh_on_solids, "perform_mesh_on_solids")
+    ], done);
+
 }
 
- //    myReadStep("test/kuka.stp");
-describe("testing relative performance of BREP and STEP I/O",function()  {
-  this.timeout(40000);
-  xit("should read kuka robot",function(done) {
-     myReadStep("test/kuka.stp",done);
-  });
+//    myReadStep("test/kuka.stp");
+describe("testing relative performance of BREP and STEP I/O", function () {
+    this.timeout(40000);
+    it("should read kuka robot", function (done) {
+        var filename = path.join(__dirname, 'kuka.stp');
+        myReadStep(filename, done);
+    });
 });

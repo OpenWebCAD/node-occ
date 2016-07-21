@@ -47,3 +47,7 @@ deps/
 /sample/views/*.ejs~
 
 build_oce*/
+
+dist
+node-occ-package*
+extrudedFace.step

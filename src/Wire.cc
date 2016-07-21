@@ -117,7 +117,7 @@ NAN_METHOD(Wire::New)
 v8::Local<v8::Object>  Wire::Clone() const
 {
   Wire* obj = new Wire();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;

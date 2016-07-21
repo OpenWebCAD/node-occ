@@ -19,7 +19,7 @@
     "grunt-contrib-uglify": "*",
     "grunt-mocha-cli": "~2.1.0",
     "grunt-docco": "~0.4.0",
-    "should": "~9.0.2",
+    "should": "~10.0.0",
     "mocha": "~2.5.3"
   },
   "main": "lib/occ",

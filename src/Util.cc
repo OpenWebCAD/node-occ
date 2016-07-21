@@ -41,7 +41,8 @@ void ReadPropertyPointFromArray(v8::Handle<v8::Array> arr, double* x, double* y,
 void ReadDouble(const v8::Handle<v8::Value>& _v, double& value)
 {
   if (_v->IsNumber()) {
-    value = _v->ToNumber()->Value();
+    value = extract_double(_v);
+//xx     value = _v->ToNumber()->Value();
   }
 }
 double ReadDouble(v8::Handle<v8::Object> value, const char* name, double defaultValue)
@@ -56,7 +57,7 @@ int ReadInt(v8::Handle<v8::Object> value, const char* name, int defaultValue)
 {
   Nan::EscapableHandleScope scope;
   v8::Local<v8::Value> _v = value->ToObject()->Get(Nan::New(name).ToLocalChecked());
-  return _v->ToInteger()->ToInt32()->Value();
+  return Nan::To<int>(_v).FromMaybe(defaultValue);
 }
 
 void ReadXYZ(v8::Handle<v8::Object> obj, double* x, double* y, double* z)

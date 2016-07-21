@@ -121,17 +121,23 @@ int Edge::createCircle(const gp_Pnt& center, const gp_Dir& normal, double radius
   return 1;
 }
 
+template <class T> T* my_unwrap(v8::MaybeLocal<v8::Value> value) {
+  return node::ObjectWrap::Unwrap<T>(value.ToLocalChecked()->ToObject());
+}
 Vertex* getOrCreateVertex(v8::Handle<v8::Value> arg)
 {
+ 
 	if (arg->IsArray()) {
-		v8::Local<v8::Value> objV = Nan::New<v8::FunctionTemplate>(Vertex::_template)->GetFunction()->CallAsConstructor(1, &arg);
+    v8::MaybeLocal<v8::Value> objV = Nan::New<v8::FunctionTemplate>(Vertex::_template)->GetFunction()->CallAsConstructor(Nan::GetCurrentContext(), 1, &arg);
 		if (!IsInstanceOf<Vertex>(objV)) {
 			return 0;
 		}
-		Vertex* vertex = node::ObjectWrap::Unwrap<Vertex>(objV->ToObject());
+    
+    Vertex* vertex = my_unwrap<Vertex>(objV); 
 		return vertex;
 	} else if (arg->IsObject()) {
-		v8::Local<v8::Value> obj = arg->ToObject();
+		
+    v8::Local<v8::Value> obj = arg->ToObject();
 		if (!IsInstanceOf<Vertex>(obj)) {
 			return 0;
 		}
@@ -181,7 +187,9 @@ NAN_METHOD(Edge::createCircle)
   if (!arg3->IsNumber())  {
     return Nan::ThrowError("expecting a number (radius) as third arguments");
   }
-  double radius = arg3->ToNumber()->Value();
+  double radius;
+  ReadDouble(arg3, radius);
+
   if (radius<1E-9)  {
     return Nan::ThrowError("radius cannot be zero ( or close to zero)");
   }
@@ -230,7 +238,7 @@ v8::Local<v8::Object>  Edge::Clone() const
 {
 
   Edge* obj = new Edge();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;

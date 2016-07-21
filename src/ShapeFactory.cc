@@ -88,9 +88,9 @@ NAN_METHOD(ShapeFactory::makeBox)
 
     if (info.Length() == 3 && info[0]->IsNumber() && info[1]->IsNumber()  && info[2]->IsNumber() ) {
 
-      dx  = info[0]->ToNumber()->Value();
-      dy  = info[1]->ToNumber()->Value();
-      dz  = info[2]->ToNumber()->Value();
+      dx = extract_double(info[0]);
+      dy = extract_double(info[1]);
+      dz = extract_double(info[2]);
 
       BRepPrimAPI_MakeBox  tool(dx, dy, dz);
       pThis->setShape(tool.Shape());
@@ -116,9 +116,9 @@ NAN_METHOD(ShapeFactory::makeBox)
       gp_Pnt p1;
       ReadPoint(info[0],&p1);
 
-      dx  = info[2]->ToNumber()->Value();
-      dy  = info[3]->ToNumber()->Value();
-      dz  = info[4]->ToNumber()->Value();
+      ReadDouble(info[2], dx);
+      ReadDouble(info[3], dy);
+      ReadDouble(info[4], dz);
 
       BRepPrimAPI_MakeBox tool(p1,dx, dy, dz);
       pThis->setShape(tool.Shape());
@@ -222,7 +222,10 @@ NAN_METHOD(ShapeFactory::makeSphere)
 
   gp_Pnt center(0,0,0);
   ReadPoint(info[0],&center);
-  double radius = info[1]->ToNumber()->Value();
+  
+  double radius;
+  ReadDouble(info[1],radius);
+
   if (radius < 1E-7) {
     return Nan::ThrowError("invalid radius");
   }
@@ -284,8 +287,8 @@ NAN_METHOD(ShapeFactory::makeCylinder)
 
     // variation 1   <R:number> <H:number>
     // a vertical cylinder of radius R starting a (0,0,0) ending at (0,0,H)
-    double R  = info[0]->ToNumber()->Value();
-    double H  = info[1]->ToNumber()->Value();
+    double R  = Nan::To<double>(info[0]).FromJust();
+    double H  = Nan::To<double>(info[1]).FromJust();
 
     if ( R < epsilon || H < epsilon ) {
       return  Nan::ThrowError("invalid value for arguments");
@@ -304,8 +307,10 @@ NAN_METHOD(ShapeFactory::makeCylinder)
       gp_Ax2  ax2;
       bool success = ReadAx2(info[0],&ax2); (void)success;
 
-      double R  = info[1]->ToNumber()->Value();
-      double H  = info[2]->ToNumber()->Value();
+      double R;
+      ReadDouble(info[1], R);
+      double H;
+      ReadDouble(info[2], H); 
 
       if ( R < epsilon || H < epsilon ) {
         return Nan::ThrowError("invalid value for arguments");
@@ -326,7 +331,8 @@ NAN_METHOD(ShapeFactory::makeCylinder)
       gp_Pnt p2;
       ReadPoint(info[1],&p2);
 
-      double R  = info[2]->ToNumber()->Value();
+      double R;
+      ReadDouble(info[2], R);
 
       const double dx = p2.X() - p1.X();
       const double dy = p2.Y() - p1.Y();
@@ -365,9 +371,10 @@ NAN_METHOD(ShapeFactory::makeCone)
   // Standard_EXPORT   BRepPrimAPI_MakeCone(const gp_Ax2& Axes,const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
   if (info.Length()==3 && info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber()) {
 
-    double R1 = info[0]->ToNumber()->Value();
-    double R2 = info[1]->ToNumber()->Value();
-    double H  = info[2]->ToNumber()->Value();
+    double R1 = 0, R2 = 0, H = 0;
+    ReadDouble(info[0], R1);
+    ReadDouble(info[1], R2);
+    ReadDouble(info[2], H);
 
     if ( R1 < epsilon || R2 < epsilon || H < epsilon ) {
       return Nan::ThrowError("invalid value for arguments");
@@ -923,8 +930,6 @@ v8::Handle<v8::Value> ShapeFactory::add(const std::vector<Base*>& shapes)
 
     pThis->setShape(compound);
 
-    std::cout << " num solid " << pThis->numSolids() << std::endl;
-
   }
   CATCH_AND_RETHROW("Failed in compound operation");
 
@@ -1296,7 +1301,8 @@ NAN_METHOD(ShapeFactory::makeFillet)
 
   std::vector<double> radii;
   if (info[2]->IsNumber()) {
-    double radius = info[2]->ToNumber()->Value();
+    double radius = 0.0;
+    ReadDouble(info[2], radius);
     if (radius < 1E-7 ) {
       //TODO
     }

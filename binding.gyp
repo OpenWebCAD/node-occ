@@ -1,4 +1,7 @@
 {
+    "variables": {
+     "dbg%": "d"
+    },
   "targets": [
     {
       "target_name": "occ",
@@ -68,6 +71,7 @@
 	  ],
 
 	  "library_dirs": [
+        "/usr/local/lib",
         "/usr/local/lib"
 	  ],
 	  "include_dirs": [

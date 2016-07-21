@@ -23,6 +23,14 @@
 //xx using namespace v8;
 
 
+template<class T> bool IsInstanceOf(v8::MaybeLocal<v8::Value> obj) {
+  if (obj.IsEmpty()) {
+    return false;
+  }
+  v8::Local<v8::FunctionTemplate> _template = Nan::New(T::_template);
+  return _template->HasInstance(obj.ToLocalChecked());
+}
+
 template<class T> bool IsInstanceOf(v8::Local<v8::Value> obj) {
 	v8::Local<v8::FunctionTemplate> _template = Nan::New(T::_template);
 	return _template->HasInstance(obj);

@@ -4,16 +4,22 @@ init:
 # clone directory
 clone_folder: c:\projects\node-occ
 
+clone_depth: 5
+
 install:
   - cmd: build.bat
   
   
 environment:
-  nodejs_version: "4.3"
-  msvs_toolset: 12
-  VisualStudioVersion: "12"
+  nodejs_version: "4.4"
+  nodejs_version: "6.3"
+  msvs_toolset: 14
+  VisualStudioVersion: "14"
+# 14 : Visual Studio 2015 , 12 VisualStudio 2013
 platform:
   - x86
+  - x64
+
 
 configuration:
   - Release

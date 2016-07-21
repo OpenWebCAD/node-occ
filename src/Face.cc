@@ -137,7 +137,7 @@ NAN_METHOD(Face::New)
 v8::Local<v8::Object> Face::Clone() const
 {
   Face* obj = new Face();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;
@@ -146,7 +146,7 @@ v8::Local<v8::Object> Face::Clone() const
 v8::Handle<v8::Object> Face::NewInstance(const TopoDS_Face& face)
 {
   Face* obj = new Face();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
   obj->Wrap(instance);
   obj->setShape(face);
   return instance;
@@ -174,7 +174,7 @@ v8::Handle<v8::Object> Face::createMesh(double factor, double angle, bool qualit
   Nan::EscapableHandleScope scope;
   const unsigned argc = 0;
   v8::Handle<v8::Value> argv[1] = {  };
-  v8::Local<v8::Object> theMesh = Nan::New(Mesh::_template)->GetFunction()->NewInstance(argc, argv);
+  v8::Local<v8::Object> theMesh = Nan::New(Mesh::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),argc, argv).ToLocalChecked();
 
   Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
 

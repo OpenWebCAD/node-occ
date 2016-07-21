@@ -6,8 +6,8 @@ ECHO  PREPARE : git submodule
 ECHO ----------------------------------------------------------
 CALL git submodule update --init --recursive
 
-goto VS2013_X86
-REM goto VS2015_X86
+REM goto VS2013_X86
+goto VS2015_X64
 
 :VS2012_X86
 ECHO ---------------------------------------------------------------------------
@@ -106,6 +106,10 @@ ECHO ERROR LEVEL = %ERRORLEVEL%
 if NOT '%ERRORLEVEL%'=='0' goto handle_msbuild_error
 
 CALL msbuild /m INSTALL.vcxproj /p:Configuration=Release  /p:Platform=%PLATFORM%  /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
+if NOT ERRORLEVEL 0  goto handle_msbuild_error
+
+
+CALL msbuild /m INSTALL.vcxproj /p:Configuration=Debug  /p:Platform=%PLATFORM%  /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
 if NOT ERRORLEVEL 0  goto handle_msbuild_error
 
 SET GYP_MSVS_VERSION=%VSVER%

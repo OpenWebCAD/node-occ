@@ -79,11 +79,10 @@ static void notify_progress(uv_async_t* handle,int status/*unused*/)
   */
   void notify_progress() {
 
+    Nan::HandleScope scope;
     //xx printf("notify_progress %lf %d\n",m_data.percent,m_data.progress);
-
     if (_progressCallback && !_progressCallback->IsEmpty()) {
       //xx printf("notify_progress %lf %d\n",m_data.percent,m_data.progress);
-      Nan::EscapableHandleScope scope;
       v8::Local<v8::Value> argv[2] = {
         Nan::New<v8::Number>(this->m_data.m_progress),
         Nan::New<v8::Integer>((int)this->m_data.m_percent)

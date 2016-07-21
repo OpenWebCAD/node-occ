@@ -135,6 +135,6 @@ NAN_METHOD(Transformation::New)
 
 NAN_METHOD(Transformation::NewInstance)
 {
-  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),0,0).ToLocalChecked();
   info.GetReturnValue().Set(instance);
 }

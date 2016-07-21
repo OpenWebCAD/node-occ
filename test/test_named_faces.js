@@ -346,8 +346,8 @@ describe("testing naming with makeFillet operation",function(){
         dumpSolid(solid);
 
     });
-    it("should have ",function(){
-        console.log(Object.keys(solid.faces).join(", "));
+    it("should have numFaces with expected number of faces", function () {
+        //xx console.log(Object.keys(solid.faces).join(", "));
         Object.keys(solid.faces).length.should.equal(solid.numFaces);
     });
 });

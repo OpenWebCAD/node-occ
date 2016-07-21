@@ -63,7 +63,7 @@ public:
   }
   static v8::Handle<v8::Value> NewInstance(_ThisType& parent) {
 
-    v8::Local<v8::Object> instance = Nan::New(Wrapper::_template)->GetFunction()->NewInstance(0, 0);
+    v8::Local<v8::Object> instance = Nan::New(Wrapper::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),0, 0).ToLocalChecked();
     Accessor* pThis = new Accessor(parent);
     pThis->Wrap(instance);
     return instance;

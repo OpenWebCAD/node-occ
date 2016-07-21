@@ -73,7 +73,7 @@ NAN_METHOD(Shell::New)
 v8::Local<v8::Object>  Shell::Clone() const
 {
   Shell* obj = new Shell();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;

@@ -70,8 +70,8 @@ NAN_METHOD(Solid::New)
   pThis->Wrap(info.This());
   pThis->InitNew(info);
 
-  info.This()->ForceSet(Nan::New("faces").ToLocalChecked(),          Nan::New<v8::Object>() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
-  info.This()->ForceSet(Nan::New("_reversedMap").ToLocalChecked(),   Nan::New<v8::Object>() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
+  info.This()->DefineOwnProperty(Nan::GetCurrentContext(),Nan::New("faces").ToLocalChecked(),          Nan::New<v8::Object>() , (v8::PropertyAttribute)(v8::DontDelete|v8::ReadOnly)) ;
+  info.This()->DefineOwnProperty(Nan::GetCurrentContext(),Nan::New("_reversedMap").ToLocalChecked(),   Nan::New<v8::Object>() , (v8::PropertyAttribute)(v8::DontEnum|v8::DontDelete|v8::ReadOnly));
 
   /// args.This()->SetAccessor(NanSymbol("_area"),ee< Solid, Number, double, &Solid::area>,0,Number::New(12),DEFAULT,None);
 
@@ -106,14 +106,14 @@ v8::Local<v8::Object> Solid::Clone() const
 
 v8::Handle<v8::Value> Solid::NewInstance()
 {
-  v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),0,0).ToLocalChecked();
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
   return instance;
 }
 
 v8::Handle<v8::Value> Solid::NewInstance(TopoDS_Shape shape)
 {
-  v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(), 0, 0).ToLocalChecked();
   Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
   pThis->setShape(shape);
   return instance;
@@ -510,7 +510,7 @@ v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qual
 
   const unsigned argc = 0;
   v8::Handle<v8::Value> argv[1] = {  };
-  v8::Local<v8::Object> theMesh = Nan::New(Mesh::_template)->GetFunction()->NewInstance(argc, argv);
+  v8::Local<v8::Object> theMesh = Nan::New(Mesh::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),argc, argv).ToLocalChecked();
 
   Mesh *mesh =  Mesh::Unwrap<Mesh>(theMesh);
 

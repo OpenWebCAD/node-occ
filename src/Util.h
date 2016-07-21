@@ -2,6 +2,11 @@
 #include "OCC.h"
 #include "NodeV8.h"
 
+
+template <class T> inline double extract_double(const v8::Handle<T>& a) {
+  return Nan::To<double>(a).FromJust();
+}
+
 void ReadDouble(const v8::Handle<v8::Value>& _v,double& value);
 
 int ReadInt(v8::Handle<v8::Object> obj,const char* name,int defaultValue);
@@ -69,8 +74,12 @@ inline v8::Local<v8::Value> makeArrayBuffer(int length) {
 
   v8::Local<v8::Function> constructor = val.As<v8::Function>();
   v8::Local<v8::Value> size = Nan::New<v8::Integer>(length);
-  v8::Local<v8::Value> array_buffer = constructor->NewInstance(1, &size);
-  return array_buffer;
+
+  Nan::MaybeLocal<v8::Value> array_buffer = Nan::CallAsConstructor(constructor, 1, &size);
+
+  Nan::MaybeLocal<v8::Object> o = Nan::To<v8::Object>(array_buffer.ToLocalChecked());
+  //x v8::MaybeLocal<v8::Value> array_buffer = constructor->NewInstance(GetCurrentContext(),1, &size);
+  return array_buffer.ToLocalChecked();
 }
 
 #define IS_FLOAT32ARRAY(value)               (value->IsFloat32Array() && (value.As<v8::Float32Array>()->Length() == 2))
@@ -115,7 +124,7 @@ inline v8::Local<v8::Object> makeTypedArray(ArrayType type, unsigned int length)
 
   const int argc = 1;
   v8::Local<v8::Value> argv[1] = { Nan::New(length) };
-  v8::Local<v8::Object> array = constructor->NewInstance(argc, argv);
+  v8::Local<v8::Object> array = constructor->NewInstance(Nan::GetCurrentContext(),argc, argv).ToLocalChecked();
 
   if (array.IsEmpty() || !array->IsObject()) {
     Nan::ThrowError("Error creating TypedArray");

@@ -15,7 +15,7 @@ Nan::Persistent<v8::FunctionTemplate> BooleanOperation::_template;
 v8::Handle<v8::Value> BooleanOperation::NewInstance(BOPAlgo_Operation op)
 {
 
-  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(0,0);
+  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(), 0, 0).ToLocalChecked();
   BooleanOperation* pThis = ObjectWrap::Unwrap<BooleanOperation>(instance);
   return instance;
 }

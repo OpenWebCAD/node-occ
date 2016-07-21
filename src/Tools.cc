@@ -289,7 +289,7 @@ Standard_Boolean MyProgressIndicator::Show(const Standard_Boolean force)
     this->m_data->m_percent = value;
     this->m_data->m_progress = int(delta * 1000);// this->GetPosition();
     this->m_data->m_lastValue = value;
-    //_worker->send_notify_progress();
+    _worker->send_notify_progress();
 
   }
   return Standard_False;
@@ -312,11 +312,10 @@ public:
 
   }
 
-  void Execute();
-  void HandleOKCallback();
+  virtual void Execute();
+  virtual void HandleOKCallback();
 protected:
-  int retValue;
-  std::string message;
+  int _retValue;
   std::list<TopoDS_Shape > shapes;
 };
 
@@ -324,7 +323,7 @@ protected:
 void StepAsyncReadWorker::HandleOKCallback() {
 
 
-  if (this->retValue == 0) {
+  if (this->_retValue == 0) {
 
     try {
 
@@ -336,27 +335,19 @@ void StepAsyncReadWorker::HandleOKCallback() {
       }
 
       v8::Local<v8::Array> arr = convert(jsshapes);
-      v8::Local<v8::Value> err = Nan::New<v8::Integer>(0);
+
+      v8::Local<v8::Value> err = Nan::Null(); 
       v8::Local<v8::Value> argv[2] = { err, arr };
       callback->Call(2, argv);
 
     }
     catch (...) {
-
-      v8::Local<v8::Value> argv[2] = {
-        Nan::New<v8::Integer>(-3),
-        v8::Local<v8::Value>(Nan::New(" exception in trying to build shapes").ToLocalChecked())
-      };
-      callback->Call(2, argv);
-
+      this->SetErrorMessage(" exception in trying to build shapes");
+      return this->HandleErrorCallback();
     }
   }
-  else {
-    v8::Local<v8::Value> argv[2] = {
-      Nan::New<v8::Integer>(retValue),
-      v8::Local<v8::Value>(Nan::New(message.c_str()).ToLocalChecked())
-    };
-    callback->Call(2, argv);
+  else {  
+    return this->HandleErrorCallback();
   }
 }
 
@@ -365,7 +356,7 @@ void StepAsyncReadWorker::Execute() {
   MutexLocker _locker(stepOperation_mutex);
 
   void* data = request.data;
-  retValue = 0;
+  this->_retValue = 0;
 
   occHandle(Message_ProgressIndicator) progress = new MyProgressIndicator(this);
 
@@ -377,8 +368,8 @@ void StepAsyncReadWorker::Execute() {
     STEPControl_Reader aReader;
 
 
-    Interface_Static::SetCVal("xstep.cascade.unit", "mm");
-    Interface_Static::SetIVal("read.step.nonmanifold", 1);
+    Interface_Static::SetCVal("xstep.cascade.unit",    "mm");
+    Interface_Static::SetIVal("read.step.nonmanifold",  1);
     Interface_Static::SetIVal("read.step.product.mode", 1);
 
     progress->NewScope(5, "reading");
@@ -386,10 +377,8 @@ void StepAsyncReadWorker::Execute() {
     if (aReader.ReadFile(_filename.c_str()) != IFSelect_RetDone) {
 
       std::strstream str;
-      str << " cannot read STEP file " << _filename << std::ends;
-      std::cerr << "cannot read " << std::endl;
-
-      message = str.str();
+      str << " (1) cannot read STEP file " << _filename << std::ends;
+      this->SetErrorMessage(str.str());
 
       // Local<Value> argv[] = { Local<Value>(String::New())  };
       //  Local<Value>  res =  callback->Call(global, 1, argv);
@@ -397,8 +386,7 @@ void StepAsyncReadWorker::Execute() {
       progress->EndScope();
       progress->SetValue(105.0);
       progress->Show();
-
-      retValue = 1;
+      this->_retValue = 1;
       return;
 
     }
@@ -431,8 +419,10 @@ void StepAsyncReadWorker::Execute() {
     }
 
     aReader.WS()->MapReader()->SetProgress(0);
+  
+    progress->SetValue(100);
     progress->EndScope();
-    progress->Show();
+    progress->Show(true);
 
     TopoDS_Shape aResShape;
     BRep_Builder B;
@@ -445,7 +435,6 @@ void StepAsyncReadWorker::Execute() {
     for (int i = 1; i <= nbs; i++) {
       const TopoDS_Shape& aShape = aReader.Shape(i);
       B.Add(compound, aShape);
-
       this->shapes.push_back(aShape);
     }
 
@@ -466,7 +455,7 @@ void StepAsyncReadWorker::Execute() {
 
       Standard_Integer nb = Model->NbEntities();
 
-      cout << " nb entities =" << nb << std::endl;
+//xx      cout << " nb entities =" << nb << std::endl;
 
       for (Standard_Integer ie = 1; ie <= nb; ie++) {
 
@@ -525,7 +514,7 @@ void StepAsyncReadWorker::Execute() {
         */
         TCollection_ExtendedString aNameExt(aName->ToCString());
 
-        cout << " name of part =" << aName->ToCString() << std::endl;
+        //xx    cout << " name of part =" << aName->ToCString() << std::endl;
         // find target shape
         occHandle(Transfer_Binder) binder = TP->Find(enti);
         if (binder.IsNull()) continue;
@@ -533,15 +522,16 @@ void StepAsyncReadWorker::Execute() {
         TopoDS_Shape S = TransferBRep::ShapeResult(binder);
         if (S.IsNull()) continue;
 
-        cout << " name of part = ---------" << std::endl;
+        //xx cout << " name of part = ---------" << std::endl;
+
         // as PRODUCT can be included in the main shape
-        // several times, we look here for all iclusions.
+        // several times, we look here for all inclusions.
         Standard_Integer isub, nbSubs = anIndices.Extent();
         for (isub = 1; isub <= nbSubs; isub++) {
           TopoDS_Shape aSub = anIndices.FindKey(isub);
           if (aSub.IsPartner(S)) {
 
-            cout << " name of part =" << aName->ToCString() << "  shape " << HashCode(aSub, -1) << " " << aSub.ShapeType() << endl;
+            //xx cout << " name of part =" << aName->ToCString() << "  shape " << HashCode(aSub, -1) << " " << aSub.ShapeType() << endl;
 #if 0
             // create label and set shape
             if (L.IsNull()) {
@@ -556,72 +546,19 @@ void StepAsyncReadWorker::Execute() {
 #endif
           }
         }
-        //           }
 
       }
       // END: Store names
     }
-    //
-    //
-    //
   }
   catch (...) {
     std::cerr << " EXCEPTION in READ STEP" << std::endl;
-    message = "caught C++ exception in readStep";
-    retValue = 1;
+    this->SetErrorMessage("2 - caught C++ exception in readStep");
+    this->_retValue = 2;
     return;
-
   }
 
 }
-
-//void _readStepAsyncAfter(uv_work_t *req,int status) {		
-//
-//  //xx TryCatch try_catch;
-//
-//  if (data->retValue == 0 ) { 
-//
-//    try {		
-//
-//      std::list<v8::Local<v8::Object> > shapes;
-//
-//      for (std::list<TopoDS_Shape >::const_iterator it = data->shapes.begin(); it != data->shapes.end() ; it++) {
-//        const TopoDS_Shape& aShape = (*it);
-//        extractShape(aShape, shapes);
-//      }
-//
-//      Local<Array> arr = convert(shapes); 
-//      Local<Value> err = NanNew<Integer>(0);
-//      Local<Value> argv[2] = { err, arr };
-//      Local<Value>  res = NanCallback(data->callback).Call(2, argv);
-//
-//    } catch(...) {
-//
-//      Local<Value> argv[2] = {NanNew<Integer>(-3), Local<Value>(NanNew(" exception in trying to build shapes"))  };
-//      Local<Value>  res =  NanCallback(data->callback).Call(2, argv);
-//
-//    }
-//  } else {
-//    Local<Value> argv[2] = {Integer::New(data->retValue), Local<Value>(NanNew<String>(data->message.c_str())) };
-//    Local<Value>  res =  NanCallback(data->callback).Call(2, argv);
-//  }
-//  dispose(data);
-//}
-
-
-
-
-//void readStepAsyncOld(const std::string& filename,v8::Local<Function> callback,v8::Local<Function> progressCallback)
-//{
-//	data_t* data = new data_t;
-//	data->req.data = data;
-//	data->filename = filename;
-//	data->callback = NanNew<Function>(callback);
-//	if (!progressCallback.IsEmpty()) {
-//		data->progressCallback = NanNew<Function>(progressCallback);
-//	}
-//	uv_queue_work(uv_default_loop(), &data->req, _readStepAsync, _readStepAsyncAfter);
-//}
 
 void readStepAsync(const std::string& filename, v8::Local<v8::Function> _callback, v8::Local<v8::Function> _progressCallback)
 {
@@ -639,10 +576,14 @@ NAN_METHOD(readSTEP)
   if (!extractFileName(info[0], filename)) {
     return Nan::ThrowError("expecting a file name");
   }
+
+
   v8::Local<v8::Function> callback;
   if (!extractCallback(info[1], callback)) {
     return Nan::ThrowError("expecting a callback function");
   }
+
+
   v8::Local<v8::Function> progressCallback;
   if (!extractCallback(info[2], progressCallback)) {
     // OPTIONAL !!!
@@ -672,7 +613,8 @@ public:
 void BRepAsyncReadWorker::Execute()
 {
 
-  this->retValue = 0;
+  this->_retValue = 0;
+
   std::string filename = this->_filename;
 
   try {
@@ -684,11 +626,12 @@ void BRepAsyncReadWorker::Execute()
     TopoDS_Shape shape;
     BRep_Builder aBuilder;
     if (!BRepTools::Read(shape, filename.c_str(), aBuilder, progress)) {
+
       std::strstream str;
-      str << " cannot read BREP file " << filename << std::ends;
-      std::cerr << str.str() << std::endl;
-      this->message = str.str();
-      this->retValue = 1;
+      str << "1- cannot read BREP file : '" << filename << "'" << std::ends;
+      this->SetErrorMessage(str.str());
+      this->_retValue = 1;
+
       progress->SetValue(100.0);
       progress->Show();
       return;
@@ -698,8 +641,8 @@ void BRepAsyncReadWorker::Execute()
     progress->Show();
   }
   catch (...) {
-    this->message = "caught C++ exception in _readBREPAsync";
-    this->retValue = -3;
+    this->SetErrorMessage("2 ( caught C++ exception in _readBREPAsync");
+    this->_retValue = 2;
     return;
   }
 }
@@ -724,8 +667,10 @@ NAN_METHOD(readBREP)
   if (!extractCallback(info[1], callback)) {
     return Nan::ThrowError("expecting a callback function");
   }
+
   v8::Local<v8::Function> progressCallback;
   if (!extractCallback(info[2], progressCallback)) {
+    // OPTIONAL !!!
     // return Nan::ThrowError("expecting a callback function");
   }
   readBREPAsync(filename, callback, progressCallback);
