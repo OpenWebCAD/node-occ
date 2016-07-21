@@ -13,7 +13,7 @@ function makeRepetition(csg,shape,dX,nX,dY,nY) {
         h1 = h1.translate([0,dY,0]);
     }  
     return csg.compound(shapeArray);
-};
+}
 
 function makeLegoBrick(csg,nX,nY,h) {
 

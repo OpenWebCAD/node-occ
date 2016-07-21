@@ -109,8 +109,8 @@ CALL msbuild /m INSTALL.vcxproj /p:Configuration=Release  /p:Platform=%PLATFORM%
 if NOT ERRORLEVEL 0  goto handle_msbuild_error
 
 
-CALL msbuild /m INSTALL.vcxproj /p:Configuration=Debug  /p:Platform=%PLATFORM%  /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
-if NOT ERRORLEVEL 0  goto handle_msbuild_error
+REM CALL msbuild /m INSTALL.vcxproj /p:Configuration=Debug  /p:Platform=%PLATFORM%  /verbosity:%VERBOSITY% /consoleloggerparameters:Summary;ShowTimestamp
+REM if NOT ERRORLEVEL 0  goto handle_msbuild_error
 
 SET GYP_MSVS_VERSION=%VSVER%
 

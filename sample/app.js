@@ -1,84 +1,132 @@
-
 /**
  * Module dependencies.
  */
 
 var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , object = require('./routes/object')
-  , http = require('http')
-  , path = require('path')
-  , occ  = require('../')
-  , CSGBuilder = require('../lib/CSGBuilder');
+// middleware
+    , compress = require("compression")
+    , bodyParser = require("body-parser")
+    , favicon = require("static-favicon")
+    , logger = require("morgan") // logger
+    , methodOverride = require("method-override")
+//xx    , cookieParser = require("cookie-parser")
+    , expressSession = require("express-session")
+//xx    , multipart = require('connect-multiparty')
+    , errorHandler = require("errorhandler")
+    , routes = require('./routes')
+    , user = require('./routes/user')
+    , object = require('./routes/object')
+    , http = require('http')
+    , path = require('path')
+    , fs = require("fs")
+    ;
 
 var app = express();
 
+var port = parseInt(process.env.PORT) || 3000;
+app.set('port', port);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
 
-app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'ejs');
-  app.use(express.compress());
-  app.use(express.favicon());
-  app.use(express.logger('dev'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(express.cookieParser('your secret here'));
-  app.use(express.session());
-  app.use(app.router);
-  app.use(express.static(path.join(__dirname, 'public')));
-  app.use(express.static(path.join(__dirname, 'client')));
-  app.use(express.static(path.join(__dirname, '../lib'))); // to get CSGTree.js
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+
+//xx multi part middleware
+//xx app.use(multipart());
+
+// parse application/json
+//xx app.use(multer);
+
+//xx app.use(methodOverride());
+//xx app.use(compress());
+//xx app.use(favicon);
+app.use(logger("combined"));
+//xx //xx app.use(cookieParser('your secret here'));
+app.use(expressSession({
+    secret: "your secret here",
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'client')));
+app.use(express.static(path.join(__dirname, '../lib'))); // to get CSGTree.js
+
+
+var env = process.env.NODE_ENV || 'development';
+if ('development' == env) {
+    app.use(errorHandler());
+}
+
+
+app.get('/toto', function (req, res) {
+    res.send('Hello World!');
 });
 
-app.configure('development', function(){
-  app.use(express.errorHandler());
+app.get('/test', function (req, res) {
+    res.render("sample", {});
 });
 
-app.get('/test', function(req,res) {
-   res.render("sample",{});
-});
+app.get('/viewer', function (req, res) {
 
-app.get('/viewer', function(req,res) {
-   res.render("viewer",{});
+    console.log(" viewer requested");
+
+    res.render("viewer", {});
 });
 
 app.get('/', routes.index);
 app.post('/csg', object.buildCSG);
 app.post('/csg1', object.buildCSG1);
-app.post('/load_cadfile',object.load_cadfile);
+
+app.post('/load_cadfile', object.load_cadfile);
+
 
 var format = require('util').format;
-app.post('/file-upload',function(req, res,next) {
 
-    var jsonResult = { "files": [ ]};
+var formidable = require("formidable");
 
-    for (var f in req.files ) {
-      jsonResult.files.push(
-      {
-        "name": req.files.upload.name,
-        "size": req.files.upload.size,
-        "path": req.files.upload.path,
-        "url": "http:\/\/example.org\/files\/" + req.files.upload.name,
-        "thumbnail_url": "http:\/\/example.org\/files\/thumbnail\/picture1.jpg",
-        "delete_url": "http:\/\/example.org\/files\/picture1.jpg",
-        "delete_type": "DELETE"
-      });
-    }
+app.post('/file-upload', function (req, res) {
+
+    var form = new formidable.IncomingForm();
+    // specify that we want to allow the user to upload multiple files in a single request
+    form.multiples = true;
+    // store all uploads in the /uploads directory
+    form.uploadDir = path.join(__dirname, "uploads");
 
 
-    console.log("done", format('\nuploaded %s (%d Kb) to %s as %s'
-      , req.files.upload.name
-      , req.files.upload.size / 1024 | 0 
-      , req.files.upload.path
-      , req.body.title));
+    var jsonResult = {files: []};
+    form.on('fileBegin', function (name, file) {
+    });
 
-  res.send(jsonResult);
+    form.on('file', function (name, file) {
+        console.log('Uploaded ' + file.name);
+        jsonResult.files.push({
+            "name": file.name,
+            "size": file.size,
+            "path": path.posix.join("/uploads", path.basename(file.name))
+        });
+
+        fs.rename(file.path, path.join(form.uploadDir, file.name));
+    });
+
+    form.on('error', function (err) {
+        console.log('An error has occurred: \n' + err);
+    });
+
+    form.on('end', function () {
+    });
+
+    form.parse(req, function (err, fields, files) {
+
+        res.send(jsonResult);
+    });
 
 });
 
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
+// http.createServer(app).listen(app.get('port'), function(){
+app.listen(app.get('port'), function () {
+    console.log("Express server listening on port " + app.get('port'));
 });

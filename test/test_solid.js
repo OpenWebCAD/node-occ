@@ -295,16 +295,19 @@ describe("testing solid construction",function() {
             });
     });
     describe("exporting a solid to STEP ", function() {
+
+        var step_filename1 = "toto1.step";
+        var step_filename2 = "toto2.step";
         var solid1,solid2;
         before(function(){
             solid1 = occ.makeBox([10,20,30],[20,30,40]);
             solid1 = occ.makeBox([20,30,50],[110,40,0]);
         });
         it("should export a single solid to STEP", function() {
-            occ.writeSTEP("toto1.step",solid1);
+            occ.writeSTEP(step_filename1, solid1);
         });
         it("should export many solids to STEP", function() {
-            occ.writeSTEP("toto2.step",solid1,solid2);
+            occ.writeSTEP(step_filename2, solid1, solid2);
         });
     });
     describe("testing ShapeIterator on solid", function() {

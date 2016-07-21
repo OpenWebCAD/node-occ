@@ -1,3 +1,4 @@
+"use strict";
 var occ  = require('../../lib/occ'),
     CSGBuilder = require('../../lib/CSGBuilder'),
     shapeFactory = require('../../lib/shapeFactory'),
@@ -5,8 +6,8 @@ var occ  = require('../../lib/occ'),
 
 
 var fs = require('fs');
+var path = require("path");
 var fileUtils = require ("file-utils");
-var File = fileUtils.File;
 
 var fast_occ = require('../../lib/fastbuilder').occ;
 
@@ -43,7 +44,7 @@ function buildResponse(solids,logs) {
         solid.name = "S" + counter;
         counter++;
         response.solids.push(occ.buildSolidMesh(solid));
-    })
+    });
     response.logs = logs;
     return response;
 }
@@ -87,14 +88,17 @@ exports.buildCSG1 = function(req,res)
 exports.load_cadfile = function(req,res) {
 
 
+    var filename = path.join(__dirname, "..", req.body.filename);
+
     function progress(percent) {
        console.log(" -------------------> ", percent);
     }
-    console.log(" loading ",req.body.filename);
 
-    occ.readSTEP(req.body.filename, function(err,solids) {
+    console.log(" loading ", filename);
+
+    occ.readSTEP(filename, function (err, solids) {
             if (err) {
-                console.log(" readStep has failed");
+                console.log(" readStep has failed", err.message);
                 res.send(501,"Error building solid : "+ err.message + "    "+ err.stack);       
             } else {
                 console.log(" readStep has succeeded");

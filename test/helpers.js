@@ -9,17 +9,18 @@ exports.getTemporaryFilePath = _getTemporaryFilePath;
 
 var fs = require("fs");
 
-function remove_file(filename) {
+function remove_file(filename, optional_callback) {
 
     fs.exists(filename, function (exists) {
 
         if (exists) {
             //Show in green
             //xx console.log('File exists. Deleting now ... ' + filename);
-            fs.unlink(filename);
+            fs.unlink(filename, optional_callback);
         } else {
             //Show in red
             console.log("File " + filename + " not found, so not deleting.");
+            optional_callback || optional_callback();
         }
     });
 }

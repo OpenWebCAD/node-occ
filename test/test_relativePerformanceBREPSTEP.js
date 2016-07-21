@@ -4,9 +4,12 @@ var async = require("async");
 var path = require("path");
 
 var ProgressBar = require('progress');
-
+var remove_file = require("./helpers").remove_file;
 
 function myReadStep(filename, done) {
+
+
+    var brep_filename = require("./helpers").getTemporaryFilePath({suffix: ".brep"});
 
     var bar = new ProgressBar("reading file [:bar] :percent elapsed :elapseds ETA :etas", {
         complete: '=',
@@ -83,12 +86,12 @@ function myReadStep(filename, done) {
     }
 
     function write_solids_to_brep(callback) {
-        occ.writeBREP("toto.brep", solids);
+        occ.writeBREP(brep_filename, solids);
         callback();
     }
 
     function read_brep_file_again(callback) {
-        occ.readBREP("toto.brep", function (err, _solids) {
+        occ.readBREP(brep_filename, function (err, _solids) {
             if (!err) {
                 solids = _solids;
                 console.log(" nb solids = ", solids.length);
@@ -104,7 +107,11 @@ function myReadStep(filename, done) {
         chrono.bind(null, perform_mesh_on_solids, "perform_mesh_on_solids"),
         chrono.bind(null, write_solids_to_brep, "write_solids_to_brep"),
         chrono.bind(null, read_brep_file_again, "read_brep_file_again"),
-        chrono.bind(null, perform_mesh_on_solids, "perform_mesh_on_solids")
+        chrono.bind(null, perform_mesh_on_solids, "perform_mesh_on_solids"),
+
+        function (callback) {
+            remove_file(brep_filename, callback);
+        }
     ], done);
 
 }
