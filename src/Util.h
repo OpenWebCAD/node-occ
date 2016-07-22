@@ -76,9 +76,6 @@ inline v8::Local<v8::Value> makeArrayBuffer(int length) {
   v8::Local<v8::Value> size = Nan::New<v8::Integer>(length);
 
   Nan::MaybeLocal<v8::Value> array_buffer = Nan::CallAsConstructor(constructor, 1, &size);
-
-  Nan::MaybeLocal<v8::Object> o = Nan::To<v8::Object>(array_buffer.ToLocalChecked());
-  //x v8::MaybeLocal<v8::Value> array_buffer = constructor->NewInstance(GetCurrentContext(),1, &size);
   return array_buffer.ToLocalChecked();
 }
 

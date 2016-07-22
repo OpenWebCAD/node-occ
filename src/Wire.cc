@@ -79,7 +79,6 @@ NAN_METHOD(Wire::New)
 
   BRepBuilderAPI_MakeWire mkWire;
 
-  Standard_Boolean status = false;
 
   BRepBuilderAPI_WireError err = BRepBuilderAPI_WireDone;
 
