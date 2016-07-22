@@ -16,15 +16,16 @@ environment:
   VisualStudioVersion: "14"
 # 14 : Visual Studio 2015 , 12 VisualStudio 2013
 platform:
-  - x86
   - x64
 
 
 configuration:
   - Release
 test_script:
+  - Install-Product node '6' x64
   - node --version
   - npm install mocha -g
+  - npm install node-gyp
   - npm test
 build: off
 deploy: off
