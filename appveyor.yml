@@ -1,6 +1,5 @@
 init:
   - git config --global core.autocrlf input
-  - Install-Product node '6' x64
 
 # clone directory
 clone_folder: c:\projects\node-occ
@@ -8,6 +7,7 @@ clone_folder: c:\projects\node-occ
 clone_depth: 5
 
 install:
+  - ps: Install-Product node '6' x64
   - cmd: build.bat
   
   
