@@ -4,6 +4,7 @@
   "description": "OpenCascade OCE Wrapper for Node js",
   "preferGlobal": "true",
   "dependencies": {
+    "async": "^2.0.1",
     "colors": "*",
     "gettemporaryfilepath": "0.0.1",
     "nan": "^2.4.0",
