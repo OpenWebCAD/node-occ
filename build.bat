@@ -20,10 +20,10 @@ ECHO NODE-GYP
 @call msbuild
 
 ECHO PREFIX  : %PREFIX%
-IF EXIST %PREFIX% GOTO done_already_build
+REM IF EXIST %PREFIX% GOTO done_already_build
 
-REM goto VS2013_X86
-goto VS2015_X64
+goto VS2013_X64
+REL goto VS2015_X64
 
 :VS2012_X86
 ECHO ---------------------------------------------------------------------------
@@ -140,7 +140,7 @@ REM ----------------------------------------------------------
 ECHO  BUILDING
 REM ----------------------------------------------------------
 
-CALL npm install --msvc_version=2015
+CALL npm install --msvc_version=%VSVER%
 if  NOT '%ERRORLEVEL%'=='0'   goto handle_msbuild_error
 
 REM ----------------------------------------------------------

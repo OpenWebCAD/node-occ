@@ -1,4 +1,3 @@
-os: Visual Studio 2015
 
 init:
   - git config --global core.autocrlf input
@@ -14,14 +13,13 @@ install:
   
 
 cache:
-  - c:\projects\node-occ\oce
-  - c:\projects\node-occ\build_oce_2015_Win64
+  - c:\projects\node-occ\build_oce_2013_Win64
   - c:\OCE-0.17.2
 
 environment:
   nodejs_version: "6.3"
-  msvs_toolset: 14
-  VisualStudioVersion: "14"
+  msvs_toolset: 12
+  VisualStudioVersion: "12"
 # 14 : Visual Studio 2015 , 12 VisualStudio 2013
 platform:
   - x64

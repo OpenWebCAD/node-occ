@@ -16,7 +16,7 @@
 
 		'VCLinkerTool': {
 			#'AdditionalLibraryDirectories': [
-			#    "C:/oce-0.17/%ARCH%/lib",
+			#    "C:/oce-0.17.2/%ARCH%/lib",
 			#],
 			# 'AdditionalOptions': ["/FORCE",],
 		},
