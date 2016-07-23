@@ -65,10 +65,11 @@ describe("testing BREP input output ", function () {
             }).throwError();
         });
 
-        it("ZZ - should call the callback method with an error if used with an invalid arguments", function () {
+        it("ZZ - should call the callback method with an error if used with an invalid arguments", function (done) {
 
             occ.readBREP("||this is a invalid filename||", function (err, shapes) {
-                err.message.should.match(/expecting a filename/);
+                err.message.should.match(/cannot read/);
+                done();
             });
         });
 
@@ -79,6 +80,7 @@ describe("testing BREP input output ", function () {
                 done();
             });
         });
+
         it("should read the shape back", function (done) {
 
             occ.readBREP(b1_brep, function (err, shapes) {
@@ -95,6 +97,7 @@ describe("testing BREP input output ", function () {
                 done(err);
             });
         });
+
         it("should read the shape back", function (done) {
 
             occ.readBREP(b2_brep, function (err, shapes) {

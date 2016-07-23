@@ -72,9 +72,9 @@ describe("testing STEP input output ", function () {
     });
 
     it("should call the callback with an error if the file doesn't exist", function (done) {
+
         occ.readSTEP("invalid file name", function (err, shapes) {
-            //xx console.log(" intercepting error ", err);
-            assert(err !== undefined);
+            err.message.should.match(/invalid file name/);
             done();
         });
     });
