@@ -48,9 +48,13 @@ void BoundingBox::Update(BoundingBox* pThis,_NAN_METHOD_ARGS)
 
 NAN_METHOD(BoundingBox::New)
 {
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.BoundingBox() to construct a BoundingBox");
+  }
+
   BoundingBox* pThis = new BoundingBox();
   pThis->Wrap(info.This());
-  
+
   BoundingBox::Update(pThis,info);
 
   info.GetReturnValue().Set(info.This());

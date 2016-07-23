@@ -37,3 +37,23 @@ describe("testing face mesh ",function() {
     });
 });
 
+describe("testing face#getWire ", function () {
+
+
+    it("#getWire", function () {
+
+        var solid = occ.makeBox([0, 0, 0], [10, 10, 10]);
+        solid.faces.should.have.property("top");
+        var topFace = solid.faces.top;
+        should.exist(topFace);
+
+        var wires = topFace.getWires();
+        wires.length.should.eql(1);
+
+        wires[0].getEdges().length.should.eql(4);
+
+        wires[0].getEdges()[0].getVertices()[0].should.eql(new occ.Vertex({x: 0, y: 10, z: 10}));
+
+
+    });
+});

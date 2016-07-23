@@ -17,6 +17,10 @@ Mesh::Mesh()
 
 NAN_METHOD(Mesh::New)
 {
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.Mesh() to construct a Mesh");
+  }
+
   Mesh* obj = new Mesh();
 
   info.This()->Set(Nan::New("vertices").ToLocalChecked(),   Nan::New<v8::Object>());

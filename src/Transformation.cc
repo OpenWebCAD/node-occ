@@ -128,8 +128,8 @@ NAN_METHOD(Transformation::New)
     return Nan::ThrowError(" use new occ.Transformation() to construct a transformation");
   }
 
-  Transformation* obj = new Transformation();
-  obj->Wrap(info.This());
+  Transformation* pThis = new Transformation();
+  pThis->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
 

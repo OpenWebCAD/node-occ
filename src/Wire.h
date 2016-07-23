@@ -24,5 +24,7 @@ public:
 
     static void Init(v8::Handle<v8::Object> target);
     static NAN_METHOD(New);
+    static NAN_METHOD(getEdges);
+    static NAN_METHOD(getVertices);
     static Nan::Persistent<v8::FunctionTemplate> _template;
 };

@@ -129,13 +129,17 @@ bool Face::buildFace(std::vector<Wire*>& wires)
 
 NAN_METHOD(Face::New)
 {
-  Face* obj = new Face();
-  obj->Wrap(info.This());
-  obj->InitNew(info);
+  if (!info.IsConstructCall()) {
+   return Nan::ThrowError(" use new occ.Face() to construct a Face");
+  }
+
+  Face* pThis = new Face();
+  pThis->Wrap(info.This());
+  pThis->InitNew(info);
 
   std::vector<Wire*> wires;
   extractArgumentList(info,wires);
-  obj->buildFace(wires);
+  pThis->buildFace(wires);
 
   info.GetReturnValue().Set(info.This());
 

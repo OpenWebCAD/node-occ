@@ -65,8 +65,13 @@ Nan::Persistent<v8::FunctionTemplate> Shell::_template;
 
 NAN_METHOD(Shell::New)
 {
-  Shell* obj = new Shell();
-  obj->Wrap(info.This());
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.Shell() to construct a Shell");
+  }
+  Shell* pThis = new Shell();
+  pThis->Wrap(info.This());
+  pThis->InitNew(info);
+
   info.GetReturnValue().Set(info.This());
 }
 

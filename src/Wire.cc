@@ -65,11 +65,12 @@ const char* toString(BRepBuilderAPI_WireError err)
 NAN_METHOD(Wire::New)
 {
   if (!info.IsConstructCall()) {
-    return Nan::ThrowError(" use new occ.Wire() to construct a wire");
+    return Nan::ThrowError(" use new occ.Wire() to construct a Wire");
   }
 
   Wire* pThis = new Wire();
   pThis->Wrap(info.This());
+  pThis->InitNew(info);
 
   if (info.Length() == 0) {
     // this is a empty wire
@@ -139,10 +140,27 @@ void Wire::Init(v8::Handle<v8::Object> target)
 
   Base::InitProto(proto);
 
+  EXPOSE_METHOD(Wire,getEdges);
+  EXPOSE_METHOD(Wire,getVertices);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Wire, numVertices);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Wire, numEdges);
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Wire, isClosed);
 
   target->Set(Nan::New("Wire").ToLocalChecked(), tpl->GetFunction());
 }
+
+NAN_METHOD(Wire::getEdges)
+{
+  Wire* pThis = UNWRAP(Wire);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_EDGE);
+  info.GetReturnValue().Set(arr);
+}
+NAN_METHOD(Wire::getVertices)
+{
+  Wire* pThis = UNWRAP(Wire);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_VERTEX);
+  info.GetReturnValue().Set(arr);
+}
+
+
 

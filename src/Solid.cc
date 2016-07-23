@@ -65,7 +65,7 @@ NAN_METHOD(Solid::InitNew)
 NAN_METHOD(Solid::New)
 {
   if (!info.IsConstructCall()) {
-    return Nan::ThrowError(" use new occ.Solid() to construct a solid");
+    return Nan::ThrowError(" use new occ.Solid() to construct a Solid");
   }
 
   Solid* pThis = new Solid();

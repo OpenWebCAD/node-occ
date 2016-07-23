@@ -32,6 +32,10 @@ BOPAlgo_Operation ReadOperationType(const v8::Handle<v8::Value>& arg)
 
 NAN_METHOD(BooleanOperation::New)
 {
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.BooleanOperation() to construct a BooleanOperation");
+  }
+
   BooleanOperation* pThis = new BooleanOperation();
   pThis->Wrap(info.This());
 

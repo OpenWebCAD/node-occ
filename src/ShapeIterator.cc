@@ -59,13 +59,7 @@ v8::Handle<v8::Value> ShapeIterator::next()
 
 NAN_METHOD(ShapeIterator::next)
 {
-  if (!IsInstanceOf<ShapeIterator>(info.This())) {
-    Nan::ThrowError("bad arguments");
-    info.GetReturnValue().SetUndefined();
-    return;
-  }
-  ShapeIterator* pThis = ObjectWrap::Unwrap<ShapeIterator>(info.This());
-
+  ShapeIterator* pThis = UNWRAP(ShapeIterator);
   info.GetReturnValue().Set(pThis->next());
 }
 
@@ -78,15 +72,8 @@ void ShapeIterator::reset()
 
 NAN_METHOD(ShapeIterator::reset)
 {
-  if (!IsInstanceOf<ShapeIterator>(info.This())) {
-    Nan::ThrowError("bad arguments");
-    info.GetReturnValue().SetUndefined();
-    return;
-  }
-  ShapeIterator* pThis = ObjectWrap::Unwrap<ShapeIterator>(info.This());
-
+  ShapeIterator* pThis = UNWRAP(ShapeIterator);
   pThis->reset();
-
   info.GetReturnValue().Set(info.This());
 }
 

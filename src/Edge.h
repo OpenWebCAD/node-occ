@@ -58,6 +58,9 @@ public:
     static NAN_METHOD(createArc3P);
     static NAN_METHOD(polygonize);
 
+
+    static NAN_METHOD(getVertices);
+
     static NAN_METHOD(New);
 
     v8::Handle<v8::Value> startVertex();

@@ -124,6 +124,7 @@ int Edge::createCircle(const gp_Pnt& center, const gp_Dir& normal, double radius
 template <class T> T* my_unwrap(v8::MaybeLocal<v8::Value> value) {
   return node::ObjectWrap::Unwrap<T>(value.ToLocalChecked()->ToObject());
 }
+
 Vertex* getOrCreateVertex(v8::Handle<v8::Value> arg)
 {
  
@@ -229,8 +230,13 @@ Nan::Persistent<v8::FunctionTemplate> Edge::_template;
 
 NAN_METHOD(Edge::New)
 {
-  Edge* obj = new Edge();
-  obj->Wrap(info.This());
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.Edge() to construct a Edge");
+  }
+  Edge* pThis = new Edge();
+  pThis->Wrap(info.This());
+  pThis->InitNew(info);
+
   info.GetReturnValue().Set(info.This());
 }
 
@@ -245,6 +251,7 @@ v8::Local<v8::Object>  Edge::Clone() const
 }
 void Edge::Init(v8::Handle<v8::Object> target)
 {
+
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Edge::New);  
   tpl->SetClassName(Nan::New("Edge").ToLocalChecked());
@@ -258,6 +265,8 @@ void Edge::Init(v8::Handle<v8::Object> target)
   v8::Local<v8::ObjectTemplate> proto = tpl->PrototypeTemplate();
 
   Base::InitProto(proto);
+
+  EXPOSE_METHOD(Edge,getVertices);
 
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Edge,length);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Edge,numVertices);
@@ -298,14 +307,17 @@ v8::Local<v8::Object> Edge::polygonize(double factor)
 
 }
 
+NAN_METHOD(Edge::getVertices)
+{
+  Edge* pThis = UNWRAP(Edge);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_VERTEX);
+  info.GetReturnValue().Set(arr);
+}
+
 
 NAN_METHOD(Edge::polygonize)
 {
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Edge>(pJhis))  {
-    return Nan::ThrowError("invalid object");
-  }
-  Edge* pThis = node::ObjectWrap::Unwrap<Edge>(pJhis);
+  Edge* pThis = UNWRAP(Edge);
 
   double factor = 0.05;
   if (info.Length()>=1) {
@@ -314,3 +326,5 @@ NAN_METHOD(Edge::polygonize)
 
   info.GetReturnValue().Set(pThis->polygonize(factor));
 }
+
+

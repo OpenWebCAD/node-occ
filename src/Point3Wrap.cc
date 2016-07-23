@@ -15,13 +15,17 @@ public:
 // Methods exposed to JavaScripts
 NAN_METHOD(Point3Wrap::New)
 {
+  if (!info.IsConstructCall()) {
+    return Nan::ThrowError(" use new occ.Point() to construct a Point");
+  }
+
   double x, y, z;
   ReadDouble(info[0], x);
   ReadDouble(info[1], y);
   ReadDouble(info[2], z);
 
-  Point3Wrap* obj = new Point3Wrap1(x,y,z);
-  obj->Wrap(info.This());
+  Point3Wrap* pThis = new Point3Wrap1(x,y,z);
+  pThis->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
 

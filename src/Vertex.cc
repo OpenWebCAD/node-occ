@@ -34,8 +34,14 @@ Nan::Persistent<v8::FunctionTemplate> Vertex::_template;
 
 NAN_METHOD(Vertex::New)
 {
+  if (!info.IsConstructCall()) {
+   return Nan::ThrowError(" use new occ.Vertex() to construct a Vertex");
+  }
+
   Vertex* pThis = new Vertex();
   pThis->Wrap(info.This());
+  pThis->InitNew(info);
+
   // return scope.Close(args.This());
   double x = 0, y = 0, z = 0;
   if (info.Length() == 3) {
@@ -68,6 +74,15 @@ v8::Local<v8::Object>  Vertex::Clone() const
   obj->setShape(this->shape());
   return instance;
 }
+
+void Vertex::InitNew(_NAN_METHOD_ARGS)
+{
+  Base::InitNew(info);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,x);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,y);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,z);
+}
+
 void Vertex::Init(v8::Handle<v8::Object> target)
 {
   // Prepare constructor template
