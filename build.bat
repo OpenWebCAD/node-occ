@@ -10,8 +10,10 @@ CALL git submodule update --init --recursive
 ECHO ------------------------------------------------------------
 ECHO  Tool chain version
 ECHO ------------------------------------------------------------
-CL
+node --version
+npm --version
 node-gyp -v
+cl
 msbuild
 
 ECHO PREFIX  : %PREFIX%
@@ -132,10 +134,10 @@ ECHO PREFIX = %GENERATOR%
 cd /d %~dp0"
 
 REM ----------------------------------------------------------
-REM  BUILD
+ECHO  BUILDING
 REM ----------------------------------------------------------
 
-CALL npm install
+CALL npm install --msvc_version=2015
 if  NOT '%ERRORLEVEL%'=='0'   goto handle_msbuild_error
 
 REM ----------------------------------------------------------
