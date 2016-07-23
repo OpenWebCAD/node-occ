@@ -79,6 +79,7 @@ NAN_METHOD(Wire::New)
 
   BRepBuilderAPI_MakeWire mkWire;
 
+  Standard_Boolean statusIsDone = false;
 
   BRepBuilderAPI_WireError err = BRepBuilderAPI_WireDone;
 
@@ -89,20 +90,20 @@ NAN_METHOD(Wire::New)
       Edge* edge = node::ObjectWrap::Unwrap<Edge>(info[i]->ToObject());
       mkWire.Add(edge->edge());
 
-      status = mkWire.IsDone();
+      statusIsDone = mkWire.IsDone();
       err = mkWire.Error();
     }
     else if (IsInstanceOf<Wire>(info[i]->ToObject())) {
 
       Wire* wire = node::ObjectWrap::Unwrap<Wire>(info[i]->ToObject());
       mkWire.Add(wire->wire());
-      status = mkWire.IsDone();
+      statusIsDone = mkWire.IsDone();
       err = mkWire.Error();
     }
   }
 
   err = mkWire.Error();
-  if (BRepBuilderAPI_WireDone == err) {
+  if (BRepBuilderAPI_WireDone == err || !statusIsDone) {
     pThis->setShape(mkWire.Wire());
   }
   else {

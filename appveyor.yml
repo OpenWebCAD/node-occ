@@ -18,11 +18,12 @@ environment:
 platform:
   - x64
 
+init:
+  - Install-Product node '6' x64
 
 configuration:
   - Release
 test_script:
-  - Install-Product node '6' x64
   - node --version
   - npm install mocha -g
   - npm install node-gyp
