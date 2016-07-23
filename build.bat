@@ -10,11 +10,14 @@ CALL git submodule update --init --recursive
 ECHO ------------------------------------------------------------
 ECHO  Tool chain version
 ECHO ------------------------------------------------------------
-node --version
-npm --version
-node-gyp -v
-cl
-msbuild
+ECHO NODE
+@call node --version
+ECHO NPM
+@call npm --version
+ECHO NODE-GYP
+@call node-gyp --version
+@call cl
+@call msbuild
 
 ECHO PREFIX  : %PREFIX%
 IF EXIST %PREFIX% GOTO done_already_build
