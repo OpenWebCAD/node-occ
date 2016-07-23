@@ -1,5 +1,6 @@
 init:
   - git config --global core.autocrlf input
+  - Install-Product node '6' x64
 
 # clone directory
 clone_folder: c:\projects\node-occ
@@ -18,8 +19,6 @@ environment:
 platform:
   - x64
 
-init:
-  - Install-Product node '6' x64
 
 configuration:
   - Release
