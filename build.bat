@@ -6,6 +6,17 @@ ECHO  PREPARE : git submodule
 ECHO ----------------------------------------------------------
 CALL git submodule update --init --recursive
 
+
+ECHO ------------------------------------------------------------
+ECHO  Tool chain version
+ECHO ------------------------------------------------------------
+CL
+node-gyp -v
+msbuild
+
+ECHO PREFIX  : %PREFIX%
+IF EXIST %PREFIX% GOTO done_already_build
+
 REM goto VS2013_X86
 goto VS2015_X64
 
@@ -149,6 +160,11 @@ goto done
 :handle_cmake_error
 :handle_msbuild_error
 ECHO " ############################ ERROR "
+
+
+:done_already_build
+ECHO %PREFIX% already exists .. skipping build phase
+goto done
 
 :done
 popd

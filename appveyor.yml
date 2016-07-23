@@ -10,7 +10,12 @@ install:
   - ps: Install-Product node '6' x64
   - cmd: build.bat
   
-  
+
+cache:
+  - c:\projects\node-occ\oce
+  - c:\projects\node-occ\build_oce_2015_Win64
+  - c:\OCE-0.17.2
+
 environment:
   nodejs_version: "6.3"
   msvs_toolset: 14
