@@ -28,3 +28,31 @@ public:
 };
 
 
+
+
+#define UNWRAP(CLASS)                                         \
+  0;                                                          \
+  v8::Handle<v8::Object> pJhis = info.This();                 \
+  if ( pJhis.IsEmpty() || !IsInstanceOf<CLASS>(pJhis))  {     \
+    return Nan::ThrowError("invalid object");                 \
+  }                                                           \
+  pThis = node::ObjectWrap::Unwrap<CLASS>(pJhis);
+
+template <class SHAPE>
+inline v8::Local<v8::Array> extract_shapes_as_javascript_array(SHAPE* pThis,TopAbs_ShapeEnum type) {
+
+  TopTools_IndexedMapOfShape anIndices;
+  TopExp::MapShapes(pThis->shape(), type, anIndices);
+
+  int nb =anIndices.Extent();
+  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nb);
+  for (int i=0; i<nb; i++)  {
+    v8::Local<v8::Object> obj=  buildWrapper(anIndices(i+1)); // 1 based !!!
+    arr->Set(i,obj);
+  }
+  return arr;
+}
+
+
+
+

@@ -49,7 +49,8 @@ public:
   static v8::Handle<v8::Object> NewInstance(const TopoDS_Face& face);
 
   static NAN_METHOD(New);
+  static NAN_METHOD(createMesh); // custom mesh
   static NAN_PROPERTY_GETTER(_mesh);
-
+  static NAN_METHOD(getWires);
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };

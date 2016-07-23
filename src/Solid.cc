@@ -34,6 +34,8 @@ void Solid::Init(v8::Handle<v8::Object> target)
   EXPOSE_METHOD(Solid,getShapeName);
   EXPOSE_METHOD(Solid,getAdjacentFaces);
   EXPOSE_METHOD(Solid,getCommonEdges);	
+  EXPOSE_METHOD(Solid,createMesh);
+
 
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,area);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE (Solid,volume);
@@ -128,18 +130,12 @@ NAN_METHOD(Solid::NewInstance)
 
 NAN_METHOD(Solid::getEdges)
 {
-  // can work with this
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    // create a new object
-    return Nan::ThrowError("invalid object");
-  }
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+
+  Solid* pThis = UNWRAP(Solid);
 
   TopTools_IndexedMapOfShape map;
   // TopExp::MapShapes(pThis->shape(), TopAbs_EDGE, edgeMap);
   BRepTools::Map3DEdges(pThis->shape(), map);
-
 
   int nbShape =map.Extent();
   v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbShape);
@@ -153,36 +149,14 @@ NAN_METHOD(Solid::getEdges)
 
 NAN_METHOD(Solid::getVertices)
 {
-  // can work with this
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    // create a new object
-    return Nan::ThrowError("invalid object");
-  }
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-  TopTools_IndexedMapOfShape map;
-  TopExp::MapShapes(pThis->shape(), TopAbs_VERTEX, map);
-
-  int nbShape =map.Extent();
-  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbShape);
-
-  for (int i=0; i<nbShape; i++)  {
-    v8::Local<v8::Object> obj=  buildWrapper(map(i+1)); // 1 based !!!
-    arr->Set(i,obj);
-  }
+  Solid* pThis = UNWRAP(Solid);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_VERTEX);
   info.GetReturnValue().Set(arr);
 }
 
 NAN_METHOD(Solid::getOuterShell)
 {
-  // can work with this
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    // create a new object
-    return Nan::ThrowError("invalid object");
-  }
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+  Solid* pThis = UNWRAP(Solid);
 
   if (pThis->shape().ShapeType() == TopAbs_COMPOUND) {
     return;
@@ -199,73 +173,25 @@ NAN_METHOD(Solid::getOuterShell)
 
 NAN_METHOD(Solid::getFaces)
 {
-  // can work with this
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    // create a new object
-    return Nan::ThrowError("invalid object");
-  }
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(pThis->shape(), TopAbs_FACE, shapeMap);
-
-  int nbSubShapes =shapeMap.Extent();
-  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbSubShapes);
-
-  for (int i=0; i<nbSubShapes; i++)  {
-    v8::Local<v8::Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
-    arr->Set(i,obj);
-  }
+  Solid* pThis = UNWRAP(Solid);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_FACE);
   info.GetReturnValue().Set(arr);
 }
 
 
 NAN_METHOD(Solid::getSolids)
 {
-  // can work with this
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    return Nan::ThrowError("invalid object");
-  }
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(pThis->shape(), TopAbs_SOLID, shapeMap);
-
-  int nbSubShapes =shapeMap.Extent();
-  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbSubShapes);
-
-  for (int i=0; i<nbSubShapes; i++)  {
-    v8::Local<v8::Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
-    arr->Set(i,obj);
-  }
+  Solid* pThis = UNWRAP(Solid);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_SOLID);
   info.GetReturnValue().Set(arr);
 }
 
 NAN_METHOD(Solid::getShells)
 {
-  // can work with this
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    return Nan::ThrowError("invalid object");
-  }
-
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
-
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(pThis->shape(), TopAbs_SHELL, shapeMap);
-
-  int nbShapes =shapeMap.Extent();
-  v8::Local<v8::Array> arr = Nan::New<v8::Array>(nbShapes);
-
-  for (int i=0; i<nbShapes; i++)  {
-    v8::Local<v8::Object> obj=  buildWrapper(shapeMap(i+1)); // 1 based !!!
-    arr->Set(i,obj);
-  }
+  Solid* pThis = UNWRAP(Solid);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_SHELL);
   info.GetReturnValue().Set(arr);
 }
-
 
 
 /**
@@ -274,15 +200,13 @@ NAN_METHOD(Solid::getShells)
  */
 NAN_METHOD(Solid::getAdjacentFaces)
 {
+  Solid* pThis = UNWRAP(Solid);
 
   Face* pFace = 0 ;
   if (!extractArg(info[0],pFace)) {
     return Nan::ThrowError("invalid arguments : expecting <FACE>");
   }
   assert(pFace);
-
-  // arguments : <face>  , face must belongs to solid
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(info.This());
 
 
   TopTools_IndexedDataMapOfShapeListOfShape map;
@@ -330,16 +254,11 @@ const char* getCommonEdges_Doc = "Solid.getCommonEdges(<Face>,<Face>);";
 
 NAN_METHOD(Solid::getCommonEdges)
 {
+  Solid* pThis = UNWRAP(Solid);
+
   // <face1>,<face2>
   Face* pFace1 = 0 ;
   Face* pFace2 = 0 ;
-
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    // create a new object
-    return Nan::ThrowError("invalid object");
-  }
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
 
   if (info.Length()<2 || !extractArg(info[0],pFace1) || !extractArg(info[1],pFace2) ) {
     return Nan::ThrowError("invalid arguments getCommonEdges : expecting <FACE>,<FACE>");
@@ -478,13 +397,7 @@ double Solid::volume()
 
 NAN_PROPERTY_GETTER(Solid::_mesh)
 {
-  if (info.This().IsEmpty()) {
-    return;
-  }
-  if (info.This()->InternalFieldCount() == 0 ) {
-	 return;
-  }
-  Solid* pThis = ObjectWrap::Unwrap<Solid>(info.This());
+  Solid* pThis = UNWRAP(Solid);
   if (pThis->m_cacheMesh.IsEmpty()) {
       pThis->m_cacheMesh.Reset(pThis->createMesh(0.5,20*3.14159/180.0,true));
   }
@@ -562,11 +475,7 @@ v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qual
 
 NAN_METHOD(Solid::getShapeName)
 {
-  v8::Handle<v8::Object> pJhis = info.This();
-  if ( pJhis.IsEmpty() || !IsInstanceOf<Solid>(pJhis))  {
-    return Nan::ThrowError("invalid object");
-  }
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis);
+  Solid* pThis = UNWRAP(Solid);
 
   v8::Handle<v8::Object> pShape = info[0]->ToObject();
   if (!pShape.IsEmpty()) {
@@ -603,3 +512,9 @@ void Solid::_registerNamedShape(const char* name,const TopoDS_Shape& shape)
 
 
 
+NAN_METHOD(Solid::createMesh)
+{
+  Solid* pThis = UNWRAP(Solid);
+  v8::Handle<v8::Object> mesh = pThis->createMesh(0.5,20*3.14159/180.0,true);
+  info.GetReturnValue().Set(mesh);
+}

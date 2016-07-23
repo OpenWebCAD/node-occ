@@ -26,6 +26,13 @@ int Face::numWires()
   return anIndices.Extent();
 }
 
+NAN_METHOD(Face::getWires)
+{
+  Face* pThis = UNWRAP(Face);
+  auto arr = extract_shapes_as_javascript_array(pThis,TopAbs_WIRE);
+  info.GetReturnValue().Set(arr);
+}
+
 bool Face::fixShape()
 {
   return true;
@@ -154,15 +161,8 @@ v8::Handle<v8::Object> Face::NewInstance(const TopoDS_Face& face)
 
 NAN_PROPERTY_GETTER(Face::_mesh)
 {
-  // NanScope();
-  if (info.This().IsEmpty()) {
-	return info.GetReturnValue().SetUndefined();
-  }
-  if (info.This()->InternalFieldCount() == 0 ) {
-	return info.GetReturnValue().SetUndefined();
-  }
+  Face* pThis = UNWRAP(Face)
 
-  Face* pThis = ObjectWrap::Unwrap<Face>(info.This());
   if (pThis->m_cacheMesh.IsEmpty()) {
 	  pThis->m_cacheMesh.Reset(pThis->createMesh(0.5, 20 * 3.14159 / 180.0, true));
   }
@@ -181,16 +181,18 @@ v8::Handle<v8::Object> Face::createMesh(double factor, double angle, bool qualit
   const TopoDS_Shape& shape = this->shape();
 
   try {
+
+    double factor = 0.4;
+    double angle  = 20*3.14159/180.0;
+    BRepMesh_IncrementalMesh MSH(shape,factor,Standard_True,angle,Standard_True);
+
     // this code assume that the triangulation has been created
     // on the parent object
     mesh->extractFaceMesh(this->face(), qualityNormals);
+    mesh->optimize();
 
   } CATCH_AND_RETHROW("Failed to mesh solid ");
-  mesh->optimize();
-
   return scope.Escape(theMesh);
-  //xx return NanEscapeScope(th;eMesh);
-
 }
 
 
@@ -198,12 +200,12 @@ void Face::InitNew(_NAN_METHOD_ARGS)
 {
   Base::InitNew(info);
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
-
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Face,numWires);
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,isPlanar);
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,hasMesh);
 }
+
 void Face::Init(v8::Handle<v8::Object> target)
 {
   // Prepare constructor template
@@ -220,6 +222,8 @@ void Face::Init(v8::Handle<v8::Object> target)
 
   Base::InitProto(proto);
 
+  EXPOSE_METHOD(Face,getWires);
+  EXPOSE_METHOD(Face,createMesh);
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Face,numWires);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Face,area);
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face,isPlanar);
@@ -227,4 +231,11 @@ void Face::Init(v8::Handle<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
   EXPOSE_TEAROFF(Face,centreOfMass);
   target->Set(Nan::New("Face").ToLocalChecked(), tpl->GetFunction());
+}
+
+NAN_METHOD(Face::createMesh)
+{
+  Face* pThis = UNWRAP(Face);
+  v8::Handle<v8::Object> mesh = pThis->createMesh(0.5,20*3.14159/180.0,true);
+  info.GetReturnValue().Set(mesh);
 }
