@@ -127,24 +127,17 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
 #define _NAN_METHOD_ARGS const Nan::FunctionCallbackInfo<v8::Value>& info
 #define NanObjectWrapHandle(t) (t->handle())
 
-// Function signature helper.
-#if defined(_WIN32) || defined(_WIN64)
-#define FUNC_SIG __FUNCSIG__
-#elif defined(__unix__)
-//__PRETTY_FUNCTION__ ?
-#define FUNC_SIG ""
-#endif
 
 #define CHECK_THIS_DEFINED(CLASS)                                      \
   if ( info.This().IsEmpty())  {                                       \
-    return Nan::ThrowError("Internal error: 'this' is not defined in "  ## FUNC_SIG);   \
+    return Nan::ThrowError("Internal error: 'this' is not defined");   \
   }                                                                    \
   if (info.This()->InternalFieldCount() == 0 ) {                       \
      return; \
-     return Nan::ThrowError("Internal error: 'this' is not a wrapped object in "  ## FUNC_SIG);  \
+     return Nan::ThrowError("Internal error: 'this' is not a wrapped object");  \
   }                                                                     \
   if (!ObjectWrap::Unwrap<CLASS>(info.This())) {                        \
-    return Nan::ThrowError("Internal error: 'this' is of wrong type in "  ## FUNC_SIG);  \
+    return Nan::ThrowError("Internal error: 'this' is of wrong type in");  \
   }
 
 #define UNWRAP(CLASS)                                         \
