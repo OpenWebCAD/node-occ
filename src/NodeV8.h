@@ -131,7 +131,8 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
 #if defined(_WIN32) || defined(_WIN64)
 #define FUNC_SIG __FUNCSIG__
 #elif defined(__unix__)
-#define FUNC_SIG __PRETTY_FUNCTION__
+//__PRETTY_FUNCTION__ ?
+#define FUNC_SIG ""
 #endif
 
 #define CHECK_THIS_DEFINED(CLASS)                                      \
