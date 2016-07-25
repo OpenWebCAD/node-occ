@@ -17,6 +17,7 @@ describe("testing transformation object",function(){
             trsf.scaleFactor.should.equal(1.0);
         });    
     });
+
     describe("testing translation [10,20,30]", function() {
         before(function() {
            trsf.makeTranslation([10,20,30]);
@@ -36,13 +37,24 @@ describe("testing transformation object",function(){
         });    
 */
     });
-    describe("testing planeMirror [10,20,30]", function() {
+    describe("testing planeMirror o=[10,20,30] dir=[0,0,1", function () {
 
         before(function(){
+
+            occ.ZDir.should.eql([0, 0, 1]);
+
             trsf.makePlaneMirror([10,20,30],occ.ZDir);
+
         });
+
         it("should have a scale factor of -1.0", function() {
-            trsf.scaleFactor.should.equal(-1.0);
+            trsf.scaleFactor.should.eql(-1);
         });
+
+        it("should flip coord on the Z axis", function () {
+            var v = occ.makeVertex(10, 10, 40);
+            var v2 = v.transformed(trsf);
+            v2.x.should.eql(v.x);
+        })
     });
 });

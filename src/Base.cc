@@ -85,6 +85,8 @@ const char* Base::orientation()
 
 NAN_METHOD(Base::translate)
 {
+
+  CHECK_THIS_DEFINED(Base);
   const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
 
   try {
@@ -92,8 +94,17 @@ NAN_METHOD(Base::translate)
     gp_Trsf transformation;
 
     double x=0,y=0,z=0;
-
-    ReadPoint(info[0],&x,&y,&z);
+  if (info.Length() == 3) {
+    ReadDouble(info[0], x);
+    ReadDouble(info[1], y);
+    ReadDouble(info[2], z);
+  }
+  else if (info.Length() == 1) {
+    ReadPoint(info[0], &x, &y, &z);
+  }
+  else {
+    return Nan::ThrowError("Wrong Arguments");
+  }
     transformation.SetTranslation(gp_Vec(x,y,z));
 
     v8::Local<v8::Object> copy    = pThis->Clone();
@@ -108,6 +119,7 @@ NAN_METHOD(Base::translate)
 
 NAN_METHOD(Base::rotate)
 {
+  CHECK_THIS_DEFINED(Base);
   const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
 
   try {
@@ -127,6 +139,7 @@ NAN_METHOD(Base::rotate)
 
 NAN_METHOD(Base::mirror)
 {
+  CHECK_THIS_DEFINED(Base);
   const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
   // TODO 
   v8::Local<v8::Object> copy    = pThis->Clone();
@@ -136,6 +149,7 @@ NAN_METHOD(Base::mirror)
 NAN_METHOD(Base::applyTransform)
 {
 
+  CHECK_THIS_DEFINED(Base);
   Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
 
   if (info.Length()!=1 && !IsInstanceOf<Transformation>(info[0]) ) {
@@ -157,15 +171,18 @@ NAN_METHOD(Base::applyTransform)
 
 NAN_METHOD(Base::transformed)
 {
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
+  CHECK_THIS_DEFINED(Base);
+  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
 
-  if (info.Length()!=1 && !IsInstanceOf<Transformation>(info[0])) {
+  if (info.Length()!=1) {
     return Nan::ThrowError("Wrong arguments");
   }
-
+  Transformation* pTrans = DynamicCast<Transformation>(info[0]);
+  if (!pTrans) {
+    return Nan::ThrowError("transform expects a Transformation object");
+  }
 
   try {
-    Transformation* pTrans =  node::ObjectWrap::Unwrap<Transformation>(info[0]->ToObject());
     const gp_Trsf& trsf =  pTrans->m_trsf;
     gp_Trsf transformation =     trsf;
 
@@ -245,6 +262,7 @@ NAN_METHOD(Base::transformed)
 //}
 bool Base::fixShape()
 {
+
   if (this->shape().IsNull()) {
     return false;
   }
@@ -269,10 +287,11 @@ bool Base::fixShape()
 
 NAN_METHOD(Base::fixShape)
 {
+  CHECK_THIS_DEFINED(Base);
+  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
   if (info.Length()!=0) {
     return Nan::ThrowError("Wrong arguments");
   }
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
 
   pThis->fixShape();
 
@@ -282,10 +301,11 @@ NAN_METHOD(Base::fixShape)
 NAN_METHOD(Base::getBoundingBox)
 {
 
+  CHECK_THIS_DEFINED(Base);
+  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
   if (info.Length()!=0) {
     return Nan::ThrowError("Wrong arguments");
   }
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
 
   try {
 
@@ -302,11 +322,12 @@ NAN_METHOD(Base::getBoundingBox)
 
 NAN_METHOD(Base::clone)
 {
+  CHECK_THIS_DEFINED(Base);
+  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
 
   if (info.Length()!=0) {
     return Nan::ThrowError("Wrong arguments");
   }
-  Base* pThis = node::ObjectWrap::Unwrap<Base>(info.This());
   info.GetReturnValue().Set(pThis->Clone());
 }
 

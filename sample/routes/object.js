@@ -1,6 +1,5 @@
 "use strict";
 var occ  = require('../../lib/occ'),
-    CSGBuilder = require('../../lib/CSGBuilder'),
     shapeFactory = require('../../lib/shapeFactory'),
     scriptRunner = require('../../lib/scriptrunner');
 
@@ -11,26 +10,6 @@ var fileUtils = require ("file-utils");
 
 var fast_occ = require('../../lib/fastbuilder').occ;
 
-exports.buildCSG = function(req,res)
-{
-    "use strict";
-    var jsonStr = "";
-
-    var csgStr = CSGBuilder.sample_csg_tree;
-    csgStr = req.body;
-
-    try {
-        var solid  = CSGBuilder.build(csgStr);
-        var mesh   = solid.mesh;
-        jsonStr = mesh.toJSON();
-    }
-    catch(err) {
-        res.send(501,"Error building solid : "+ err.message + err.toString());
-        return;
-    }
-    res.send(jsonStr);
-
-};
 
 var vm = require('vm');
 var util = require('util');
@@ -79,7 +58,7 @@ exports.buildCSG1 = function(req,res)
             console.log(" All Done");
         },
         function error_callback(err) {
-           res.send(501,"Error building solid : "+ err.message + "    "+ err.stack);       
+            res.status(501).send("Error building solid : " + err.message + "    " + err.stack);
         }
     );
 };
@@ -99,7 +78,7 @@ exports.load_cadfile = function(req,res) {
     occ.readSTEP(filename, function (err, solids) {
             if (err) {
                 console.log(" readStep has failed", err.message);
-                res.send(501,"Error building solid : "+ err.message + "    "+ err.stack);       
+                res.status(501).send("Error building solid : " + err.message + "    " + err.stack);
             } else {
                 console.log(" readStep has succeeded");
                 res.send(buildResponse(solids,[]));

@@ -7,7 +7,7 @@
 
 const double qNaN = std::numeric_limits<double>::quiet_NaN();
 
-class BoundingBox : public node::ObjectWrap {
+class BoundingBox : public Nan::ObjectWrap {
     Bnd_Box m_box;
 public:
     typedef class BoundingBox _ThisType;
@@ -46,6 +46,8 @@ public:
     static NAN_METHOD(addPoint);
     static NAN_METHOD(isOut);
 
+
+   virtual void InitNew(_NAN_METHOD_ARGS);
 
     static Nan::Persistent<v8::FunctionTemplate> _template;
 

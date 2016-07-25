@@ -3,7 +3,7 @@
 #include "OCC.h"
 
 // expose a point
-class Point3Wrap : public node::ObjectWrap {
+class Point3Wrap : public Nan::ObjectWrap {
   virtual const gp_XYZ get() const = 0;
 
   double x() {
@@ -56,7 +56,7 @@ public:
       info.GetReturnValue().SetUndefined();
       return;
     }
-    _ThisType* pThis = node::ObjectWrap::Unwrap<_ThisType>(info.This());
+    _ThisType* pThis = Nan::ObjectWrap::Unwrap<_ThisType>(info.This());
 
     info.GetReturnValue().Set(NewInstance(*pThis));
 
@@ -82,3 +82,10 @@ public:
   Nan::SetAccessor(proto,                                                            \
 			Nan::New<v8::String>(#ACCESSOR).ToLocalChecked(),                        \
 					&t##ACCESSOR::getter,  0,v8::Handle<v8::Value>(),v8::DEFAULT,(v8::PropertyAttribute)(v8::ReadOnly|v8::DontDelete))
+
+
+#define REXPOSE_TEAROFF(THISTYPE,ACCESSOR)                                            \
+    Nan::SetAccessor(info.This(),                                                 \
+    Nan::New(#ACCESSOR).ToLocalChecked(),                                         \
+     &t##ACCESSOR::getter,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly)
+

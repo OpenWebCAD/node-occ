@@ -5,7 +5,7 @@
 #include "Base.h"
 
 
-class ShapeIterator : public node::ObjectWrap {
+class ShapeIterator : public Nan::ObjectWrap {
 public:
     TopExp_Explorer ex;
     TopAbs_ShapeEnum m_toFind;

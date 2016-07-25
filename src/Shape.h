@@ -27,17 +27,6 @@ public:
 
 };
 
-
-
-
-#define UNWRAP(CLASS)                                         \
-  0;                                                          \
-  v8::Handle<v8::Object> pJhis = info.This();                 \
-  if ( pJhis.IsEmpty() || !IsInstanceOf<CLASS>(pJhis))  {     \
-    return Nan::ThrowError("invalid object");                 \
-  }                                                           \
-  pThis = node::ObjectWrap::Unwrap<CLASS>(pJhis);
-
 template <class SHAPE>
 inline v8::Local<v8::Array> extract_shapes_as_javascript_array(SHAPE* pThis,TopAbs_ShapeEnum type) {
 

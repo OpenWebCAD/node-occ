@@ -56,6 +56,7 @@ NAN_METHOD(BoundingBox::New)
   pThis->Wrap(info.This());
 
   BoundingBox::Update(pThis,info);
+  pThis->InitNew(info);
 
   info.GetReturnValue().Set(info.This());
 
@@ -116,4 +117,11 @@ void BoundingBox::Init(v8::Handle<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(BoundingBox,isVoid);
 
   target->Set(Nan::New("BoundingBox").ToLocalChecked(), tpl->GetFunction());
+}
+
+void BoundingBox::InitNew(_NAN_METHOD_ARGS)
+{
+  //xx Base::InitNew(info);
+  REXPOSE_TEAROFF(BoundingBox,nearPt);
+  REXPOSE_TEAROFF(BoundingBox,farPt);
 }

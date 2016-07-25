@@ -61,6 +61,9 @@ const char* toString(BRepBuilderAPI_WireError err)
 }
 
 
+NAN_METHOD(Wire::NewInstance) { _NewInstance<Wire>(info); }
+
+
 
 NAN_METHOD(Wire::New)
 {
@@ -80,38 +83,36 @@ NAN_METHOD(Wire::New)
 
   BRepBuilderAPI_MakeWire mkWire;
 
-  Standard_Boolean statusIsDone = false;
+  //Xx Standard_Boolean statusIsDone = false;
 
   BRepBuilderAPI_WireError err = BRepBuilderAPI_WireDone;
 
   for (int i = 0; i < info.Length(); i++) {
 
-    if (IsInstanceOf<Edge>(info[i]->ToObject())) {
+    Edge* edge = DynamicCast<Edge>(info[i]);
+    Wire* wire = DynamicCast<Wire>(info[i]);
 
-      Edge* edge = node::ObjectWrap::Unwrap<Edge>(info[i]->ToObject());
+    if (edge) { 
+      // IsInstanceOf<Edge>(info[i]->ToObject())) {
+      //xx Edge* edge = Nan::ObjectWrap::Unwrap<Edge>(info[i]->ToObject());
       mkWire.Add(edge->edge());
 
-      statusIsDone = mkWire.IsDone();
+      //Xx statusIsDone = mkWire.IsDone();
       err = mkWire.Error();
-    }
-    else if (IsInstanceOf<Wire>(info[i]->ToObject())) {
-
-      Wire* wire = node::ObjectWrap::Unwrap<Wire>(info[i]->ToObject());
+    } else if (wire) {
       mkWire.Add(wire->wire());
-      statusIsDone = mkWire.IsDone();
+      //Xx statusIsDone = mkWire.IsDone();
       err = mkWire.Error();
     }
   }
 
   err = mkWire.Error();
-  if (BRepBuilderAPI_WireDone == err || !statusIsDone) {
+  if (BRepBuilderAPI_WireDone == err) {
     pThis->setShape(mkWire.Wire());
-  }
-  else {
+  } else {
     std::string mesg = std::string("Invalid Wire err:=") + toString(mkWire.Error());
     return Nan::ThrowError(mesg.c_str());
   }
-
   info.GetReturnValue().Set(info.This());
 }
 

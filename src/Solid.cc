@@ -84,7 +84,7 @@ NAN_METHOD(Solid::New)
 v8::Local<v8::Object> Solid::Clone() const
 {
   v8::Local<v8::Object> instance = Solid::NewInstance()->ToObject();
-  Solid* pClone = node::ObjectWrap::Unwrap<Solid>(instance);
+  Solid* pClone = Nan::ObjectWrap::Unwrap<Solid>(instance);
 
   pClone->setShape(this->shape());
 
@@ -109,14 +109,14 @@ v8::Local<v8::Object> Solid::Clone() const
 v8::Handle<v8::Value> Solid::NewInstance()
 {
   v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),0,0).ToLocalChecked();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(instance);
   return instance;
 }
 
 v8::Handle<v8::Value> Solid::NewInstance(TopoDS_Shape shape)
 {
   v8::Local<v8::Object> instance = Nan::New(Solid::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(), 0, 0).ToLocalChecked();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(instance);
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(instance);
   pThis->setShape(shape);
   return instance;
 }
@@ -134,7 +134,7 @@ NAN_METHOD(Solid::getEdges)
   Solid* pThis = UNWRAP(Solid);
 
   TopTools_IndexedMapOfShape map;
-  // TopExp::MapShapes(pThis->shape(), TopAbs_EDGE, edgeMap);
+  // TopExp::MapShapes(pThis->shape(), TopAbs_EDGE, map);
   BRepTools::Map3DEdges(pThis->shape(), map);
 
   int nbShape =map.Extent();
@@ -195,7 +195,7 @@ NAN_METHOD(Solid::getShells)
 
 
 /**
- * getAdjacentFace
+ *  getAdjacentFace
  *  returns an array of all faces that are adjacents to the given face
  */
 NAN_METHOD(Solid::getAdjacentFaces)

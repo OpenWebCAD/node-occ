@@ -1,6 +1,6 @@
 {
   "name": "node-occ",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "OpenCascade OCE Wrapper for Node js",
   "preferGlobal": "true",
   "dependencies": {

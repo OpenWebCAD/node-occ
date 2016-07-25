@@ -7,13 +7,10 @@ using namespace std;
 
 void ReadPropertyPointFromArray(v8::Handle<v8::Array> arr, double* x, double* y, double*z)
 {
-  //    Local<Object> obj = value->ToObject();
-  //    Handle<Array> art = Handle<Array>::Cast(obj);
+  double defaultValue =0.0;
   int length = arr->Length();
-  // int length = obj->Get(String::New("length"))->ToObject()->Uint32Value();
-
   if (length >= 1) {
-    *x = arr->Get(0)->NumberValue();
+    *x = Nan::To<double>(arr->Get(0)).FromMaybe(defaultValue);
   }
   if (length >= 2) {
     *y = arr->Get(1)->NumberValue();
@@ -40,53 +37,53 @@ void ReadPropertyPointFromArray(v8::Handle<v8::Array> arr, double* x, double* y,
 
 void ReadDouble(const v8::Handle<v8::Value>& _v, double& value)
 {
+
+  value = 0.0;
   if (_v->IsNumber()) {
     value = extract_double(_v);
-//xx     value = _v->ToNumber()->Value();
   }
 }
-double ReadDouble(v8::Handle<v8::Object> value, const char* name, double defaultValue)
+void ReadDouble(v8::Handle<v8::Object> value, const char* name, double* retValue,double defaultValue)
 {
-  Nan::EscapableHandleScope scope;
-  v8::Local<v8::Value> _v = value->ToObject()->Get(Nan::New(name).ToLocalChecked());
-  ReadDouble(_v, defaultValue);
-  return defaultValue;
+  Nan::HandleScope scope;
+  v8::Local<v8::Value> _v = value->Get(Nan::New(name).ToLocalChecked());
+  *retValue=  Nan::To<double>(_v).FromMaybe(defaultValue);
 }
 
-int ReadInt(v8::Handle<v8::Object> value, const char* name, int defaultValue)
+void ReadInt(v8::Handle<v8::Object> value, const char* name,int* retValue, int defaultValue)
 {
-  Nan::EscapableHandleScope scope;
+  Nan::HandleScope scope;
   v8::Local<v8::Value> _v = value->ToObject()->Get(Nan::New(name).ToLocalChecked());
-  return Nan::To<int>(_v).FromMaybe(defaultValue);
+  *retValue =  Nan::To<int>(_v).FromMaybe(defaultValue);
 }
 
 void ReadXYZ(v8::Handle<v8::Object> obj, double* x, double* y, double* z)
 {
-  *x = ReadDouble(obj, "x", 0.0);
-  *y = ReadDouble(obj, "y", 0.0);
-  *z = ReadDouble(obj, "z", 0.0);
+  ReadDouble(obj, "x", x, 0.0);
+  ReadDouble(obj, "y", y, 0.0);
+  ReadDouble(obj, "z", z, 0.0);
 }
 
 void ReadPoint(v8::Local<v8::Value> value, double* x, double* y, double*z)
 {
+
   if (value->IsArray()) {
     v8::Handle<v8::Array> arr = v8::Handle<v8::Array>::Cast(value);
     ReadPropertyPointFromArray(arr, x, y, z);
-    return;
-  }
-  if (value->IsObject()) {
+  } else if (value->IsObject()) {
     // object must have x,y,z property set
     v8::Handle<v8::Object> obj = v8::Handle<v8::Object>::Cast(value);
     ReadXYZ(obj, x, y, z);
-    return;
+  } else {
+    Nan::ThrowError("Invalid Point or Vector ( must be a [] or a {x:..,y:.., z:...} )");
   }
 }
 
 void ReadUVW(v8::Handle<v8::Object> obj, double* x, double* y, double* z)
 {
-  *x = ReadDouble(obj, "u", 0.0);
-  *y = ReadDouble(obj, "v", 0.0);
-  *z = ReadDouble(obj, "w", 0.0);
+  ReadDouble(obj, "u", x, 0.0);
+  ReadDouble(obj, "v", y, 0.0);
+  ReadDouble(obj, "w", z, 0.0);
 }
 
 
@@ -98,9 +95,12 @@ void ReadPoint(v8::Local<v8::Value> value, gp_Pnt* pt)
 }
 void ReadDir(v8::Local<v8::Value> value, gp_Dir* pt)
 {
-  double x = 0, y = 0, z = 0;
+  double x = 0, y = 0, z = 1.0;
   ReadPoint(value, &x, &y, &z);
-  pt->SetCoord(x, y, z);
+  try {
+    pt->SetCoord(x, y, z);
+  }
+  CATCH_AND_RETHROW("Invalid Direction");
 }
 void ReadVector(v8::Local<v8::Value> value, gp_Vec* pt)
 {

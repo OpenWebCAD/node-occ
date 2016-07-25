@@ -116,14 +116,22 @@ describe("testing fast builder with makeThickSolid" , function() {
     });
 });
 
-describe("testing fast builder with makeBottle" , function() {
-    var s1;
-    var s2;
-    before(function(){
-       // s1 = fast_occ.makeBottle();
+
+var factory = require("../lib/shapeFactory.js");
+describe("testing fast builder with some built-in shapes", function () {
+    var fastbuilder = require("../lib/fastbuilder");
+    it("should  create the  bottle..", function () {
+        var s1 = factory.makeBottle(fastbuilder.occ);
+        s1.numFaces.should.be.greaterThan(16);
     });
-    it(" should ...",function(){
-      //  s1.numFaces.should.be.greaterThan(16);
+});
+
+describe("testing fast builder with some shapes", function () {
+
+    it("should  create the  piston..", function () {
+        var fastbuilder = require("../lib/fastbuilder");
+        var s1 = factory.makePiston(fastbuilder.occ);
+        s1.numFaces.should.be.greaterThan(7);
     });
 });
 
@@ -171,7 +179,9 @@ describe("testing fast-builder with LEGO brick" , function () {
 
         function buildBrick() {
 
-            var brick24 =  factory.makeLegoBrick(fast_occ,2,4,'thick');
+            var nx = 3;
+            var ny = 6;
+            var brick24 = factory.makeLegoBrick(fast_occ, nx, ny, 'thick');
 
             brick24.numFaces.should.be.greaterThan(40);
 
@@ -183,8 +193,8 @@ describe("testing fast-builder with LEGO brick" , function () {
             bbox.nearPt.y.should.be.within(0-eps,0+eps);
             bbox.nearPt.z.should.be.within(0-eps,0+eps);
 
-            bbox.farPt.x.should.be.within(16-eps,16+eps);
-            bbox.farPt.y.should.be.within(32-eps,32+eps);
+            bbox.farPt.x.should.be.within(nx * 8 - eps, nx * 8 + eps);
+            bbox.farPt.y.should.be.within(ny * 8 - eps, ny * 8 + eps);
             bbox.farPt.z.should.be.within(11.2-eps,11.2+eps);
         }
 

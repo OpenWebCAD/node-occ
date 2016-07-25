@@ -3,6 +3,7 @@
 #include "Solid.h"
 #include "Edge.h"
 #include "Face.h"
+#include "Wire.h"
 #include "Util.h"
 
 
@@ -78,7 +79,7 @@ NAN_METHOD(ShapeFactory::makeBox)
   //TODO   1 object with { x: 1,y: 2,z: 3, dw:
   
   v8::Handle<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
 
   double dx = 10;
   double dy = 10;
@@ -142,22 +143,40 @@ static void registerMakeBoxFaces(Solid* pThis,BRepPrimAPI_MakePrism& tool)
   // const TopTools_ListOfShape& list = tool.Generated(S);
 }
 
+NAN_METHOD(ShapeFactory::makeVertex)
+{
+    Vertex::NewInstance(info);
+}
+NAN_METHOD(ShapeFactory::makeWire)
+{
+    Wire::NewInstance(info);
+}
+NAN_METHOD(ShapeFactory::makeFace)
+{
+   Face::NewInstance(info);
+}
+
 NAN_METHOD(ShapeFactory::makePrism)
 {
-  v8::Handle<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
-
   // <FACE> [x,y,z]
   // <FACE> [x,y,z] [x,y,z]
   // OCCBase *shape, OCCStruct3d p1, OCCStruct3d p2)
   Face* pFace = DynamicCast<Face>(info[0]);
+  if (!pFace) {
+    return Nan::ThrowError("invalid arguments : expecting <FACE>,<VECTOR>");
+  }
+
+  v8::Handle<v8::Value> pJhis = Solid::NewInstance();
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+
 
   gp_Vec direction(0,0,10);
   ReadVector(info[1],&direction);
 
-  if (!pFace || direction.IsEqual(gp_Vec(0,0,0),1E-7,1E-8)) {
+  if (direction.IsEqual(gp_Vec(0,0,0),1E-7,1E-8)) {
     return Nan::ThrowError("invalid arguments : expecting <FACE>,<VECTOR>");
   }
+
 
   try {
     const TopoDS_Shape& face = pFace->face();
@@ -217,13 +236,13 @@ static void registerOneAxisFaces(Solid* pThis,BRepPrim_OneAxis& tool)
 NAN_METHOD(ShapeFactory::makeSphere)
 {
   v8::Handle<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
 
 
   gp_Pnt center(0,0,0);
   ReadPoint(info[0],&center);
   
-  double radius;
+  double radius =0.0;
   ReadDouble(info[1],radius);
 
   if (radius < 1E-7) {
@@ -239,40 +258,33 @@ NAN_METHOD(ShapeFactory::makeSphere)
   info.GetReturnValue().Set(pJhis);
 }
 
-bool ReadAx2(const v8::Handle<v8::Value>& value,gp_Ax2* ax2)
+void ReadAx2(const v8::Handle<v8::Value>& value,gp_Ax2* ax2)
 {
-  assert(ax2);
-  try {
+    assert(ax2);
     if (value->IsArray()) {
-      v8::Handle<v8::Array> arr= v8::Handle<v8::Array>::Cast(value);
-      gp_Pnt origin;
-      ReadPoint(arr->Get(0),&origin);
-      if (arr->Length() == 2) {
-        // variation 2 :  gp_Ax2(const gp_Pnt& P,const gp_Dir& V);
-        gp_Dir V;
-        ReadDir(arr->Get(1),&V);
-        *ax2 =  gp_Ax2(origin,V);
-        return true;
-      }
-      if (arr->Length() == 3) {
-        // variation 1 : gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
-        gp_Dir N,Vx;
-        ReadDir(arr->Get(1),&N);
-        ReadDir(arr->Get(2),&Vx);
-        *ax2 =  gp_Ax2(origin,N,Vx);
-        return true;
-      }
+        v8::Handle<v8::Array> arr= v8::Handle<v8::Array>::Cast(value);
+        gp_Pnt origin;
+        ReadPoint(arr->Get(0),&origin);
+        if (arr->Length() == 2) {
+            // variation 2 :  gp_Ax2(const gp_Pnt& P,const gp_Dir& V);
+            gp_Dir V;
+            ReadDir(arr->Get(1),&V);
+            *ax2 =  gp_Ax2(origin,V);
+        }
+        if (arr->Length() == 3) {
+            // variation 1 : gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
+            gp_Dir N,Vx;
+            ReadDir(arr->Get(1),&N);
+            ReadDir(arr->Get(2),&Vx);
+            *ax2 =  gp_Ax2(origin,N,Vx);
+        }
+    } else {
+        Nan::ThrowError("Cannot extract Axis from arrgument value");
     }
-  }
-  CATCH_AND_RETHROW("Failed to extract position");
-  return false;
 }
 
 NAN_METHOD(ShapeFactory::makeCylinder)
 {
-  v8::Handle<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
-
 
   //  gp_Ax2& Axes
   //  gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
@@ -287,16 +299,23 @@ NAN_METHOD(ShapeFactory::makeCylinder)
 
     // variation 1   <R:number> <H:number>
     // a vertical cylinder of radius R starting a (0,0,0) ending at (0,0,H)
-    double R  = Nan::To<double>(info[0]).FromJust();
-    double H  = Nan::To<double>(info[1]).FromJust();
+    double R =   0;
+    ReadDouble(info[0],R);
+
+    double H  = 0;
+    ReadDouble(info[1],H);
 
     if ( R < epsilon || H < epsilon ) {
-      return  Nan::ThrowError("invalid value for arguments");
+      return  Nan::ThrowError("invalid value for arguments makeCylinder(R,H)");
     }
+
+    v8::Handle<v8::Value> pJhis = Solid::NewInstance();
+    Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
     try {
       pThis->setShape(BRepPrimAPI_MakeCylinder(R,H).Shape());
     }
     CATCH_AND_RETHROW("Failed to create cylinder ");
+    info.GetReturnValue().Set(pJhis);
 
   } else if (info.Length()==3) {
 
@@ -305,22 +324,27 @@ NAN_METHOD(ShapeFactory::makeCylinder)
       // variation 2
       //  <[ <Origin[x,yz]>, <VZn[x,yz]>,<VXn[x,yz]>] <R:number> <H:number>
       gp_Ax2  ax2;
-      bool success = ReadAx2(info[0],&ax2); (void)success;
+      ReadAx2(info[0],&ax2);
 
-      double R;
+      double R =0;
       ReadDouble(info[1], R);
-      double H;
+
+      double H =0;
       ReadDouble(info[2], H); 
 
       if ( R < epsilon || H < epsilon ) {
         return Nan::ThrowError("invalid value for arguments");
       }
+
+      v8::Handle<v8::Value> pJhis = Solid::NewInstance();
+      Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
       try {
         BRepPrimAPI_MakeCylinder tool(ax2,R,H);
         pThis->setShape(tool.Shape());
         registerOneAxisFaces(pThis,tool.Cylinder());
       }
       CATCH_AND_RETHROW("Failed to create cylinder ");
+      info.GetReturnValue().Set(pJhis);
 
     } else if (info[0]->IsArray() && info[1]->IsArray() && info[2]->IsNumber()) {
 
@@ -331,7 +355,7 @@ NAN_METHOD(ShapeFactory::makeCylinder)
       gp_Pnt p2;
       ReadPoint(info[1],&p2);
 
-      double R;
+      double R=0;
       ReadDouble(info[2], R);
 
       const double dx = p2.X() - p1.X();
@@ -342,28 +366,32 @@ NAN_METHOD(ShapeFactory::makeCylinder)
       if (H < epsilon ) {
         return Nan::ThrowError("cannot build a cylinder on two coincident points");
       }
+
       gp_Vec aV(dx / H, dy / H, dz / H);
       gp_Ax2 ax2(p1, aV);
+
+      v8::Handle<v8::Value> pJhis = Solid::NewInstance();
+      Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
       try {
         BRepPrimAPI_MakeCylinder tool(ax2,R,H);
         pThis->setShape(tool.Shape());
         registerOneAxisFaces(pThis,tool.Cylinder());
       }
       CATCH_AND_RETHROW("Failed to create cylinder ");
+      info.GetReturnValue().Set(pJhis);
 
     }
   } else {
     return Nan::ThrowError("invalid arguments");
   }
 
-  info.GetReturnValue().Set(pJhis);
 }
 
 NAN_METHOD(ShapeFactory::makeCone)
 {
   
   v8::Handle<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
 
   const double epsilon = 1E-3;
   // Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H);
@@ -465,7 +493,7 @@ NAN_METHOD(ShapeFactory::makeCone)
 NAN_METHOD(ShapeFactory::makeTorus)
 {
   v8::Handle<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
 
   // variation 1
   //  
@@ -872,7 +900,7 @@ static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS,Solid* pSolid1, Solid* p
 
     v8::Handle<v8::Value> result(Solid::NewInstance(shape));
 
-    Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+    Solid* pResult = Nan::ObjectWrap::Unwrap<Solid>(result->ToObject());
 
     registerShapes(pTool.get(),pResult,pSolid1,pSolid2);
 
@@ -917,7 +945,7 @@ v8::Handle<v8::Value> ShapeFactory::add(const std::vector<Base*>& shapes)
   BRep_Builder builder;
 
   v8::Handle<v8::Value> pJhis(Solid::NewInstance());
-  Solid* pThis = node::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
+  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(pJhis->ToObject());
   try {
 
     builder.MakeCompound(compound);
@@ -943,7 +971,7 @@ NAN_METHOD(ShapeFactory::compound)
   for (int i=0; i<info.Length(); i++) {
     v8::Handle<v8::Object> obj = info[i]->ToObject();
     if (IsInstanceOf<Solid>(obj)) {
-      Base* pShape = node::ObjectWrap::Unwrap<Solid>(obj);
+      Base* pShape = Nan::ObjectWrap::Unwrap<Solid>(obj);
       shapes.push_back(pShape);
     } else if (info[i]->IsArray()) {
       v8::Handle<v8::Array> arr = v8::Handle<v8::Array>::Cast(info[i]);
@@ -951,7 +979,7 @@ NAN_METHOD(ShapeFactory::compound)
       for(int j=0;j<length;j++) {
         v8::Handle<v8::Object> obj1 = arr->Get(j)->ToObject();
         if (IsInstanceOf<Solid>(obj1)) {
-          Base* pShape = node::ObjectWrap::Unwrap<Solid>(obj1);
+          Base* pShape = Nan::ObjectWrap::Unwrap<Solid>(obj1);
           shapes.push_back(pShape);
         }
       }
@@ -967,19 +995,19 @@ void ShapeFactory::_boolean(_NAN_METHOD_ARGS,BOPAlgo_Operation op) {
     return Nan::ThrowError("Wrong arguments for boolean operation : expecting two solids");
   }
 
-  Solid* pSolid1 = node::ObjectWrap::Unwrap<Solid>(info[0]->ToObject());
+  Solid* pSolid1 = Nan::ObjectWrap::Unwrap<Solid>(info[0]->ToObject());
 
-  Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(info[1]->ToObject());
+  Solid* pSolid2 = Nan::ObjectWrap::Unwrap<Solid>(info[1]->ToObject());
   /*
      std::vector<Solid*> other_solids;
      for (int i=1; i<info.Length(); i++) {
      if(Solid::constructor->HasInstance(info[i])) {
-     Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(info[i]->ToObject());
+     Solid* pSolid2 = Nan::ObjectWrap::Unwrap<Solid>(info[i]->ToObject());
      other_solids.push_back(pSolid2);
      }
      }
      Handle<Object> compound = ShapeFactory::add(other_solids);
-     Solid* pSolid2 = node::ObjectWrap::Unwrap<Solid>(compound);
+     Solid* pSolid2 = Nan::ObjectWrap::Unwrap<Solid>(compound);
      */
   
   return ShapeFactory_createBoolean(info,pSolid1,pSolid2,op);
@@ -1040,13 +1068,13 @@ NAN_METHOD(ShapeFactory::makeThickSolid)
   try {
 
     if(!extractArg(info[0],pSolid)) {
-      return Nan::ThrowError("Wrong arguments for makeDraftAngle");
+      return Nan::ThrowError("Wrong arguments for makeThickSolid , first argument must be a solid");
     }
 
 
     TopTools_ListOfShape faces;
     if (!extractListOfFaces(info[1],faces)) {
-      return Nan::ThrowError("Wrong arguments for makeThickSolid");
+      return Nan::ThrowError("Wrong arguments for makeThickSolid, second argument must be a list of faces or a single face");
     }
 
     double offset = 0;
@@ -1064,14 +1092,14 @@ NAN_METHOD(ShapeFactory::makeThickSolid)
 
     v8::Handle<v8::Value> result(Solid::NewInstance(shape));
 
-    Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+    Solid* pResult = Nan::ObjectWrap::Unwrap<Solid>(result->ToObject());
 
 
     registerShapes(&tool,pResult,pSolid);
 
-    return info.GetReturnValue().Set(result);
+    info.GetReturnValue().Set(result);
 
-  }CATCH_AND_RETHROW("Failed in compound operation");
+  }CATCH_AND_RETHROW("Failed in makeThickSolid operation");
 }
 
 
@@ -1143,7 +1171,7 @@ NAN_METHOD(ShapeFactory::makeDraftAngle)
 
     v8::Handle<v8::Value> result(Solid::NewInstance(shape));
 
-    Solid* pResult = node::ObjectWrap::Unwrap<Solid>(result->ToObject());
+    Solid* pResult = Nan::ObjectWrap::Unwrap<Solid>(result->ToObject());
 
 
     registerShapes(&tool,pResult,pSolid);
@@ -1311,7 +1339,7 @@ NAN_METHOD(ShapeFactory::makeFillet)
 
   v8::Local<v8::Object>  pNew = pSolid->Clone();
 
-  Solid* pNewSolid = node::ObjectWrap::Unwrap<Solid>(pNew);
+  Solid* pNewSolid = Nan::ObjectWrap::Unwrap<Solid>(pNew);
 
   fillet(pNewSolid,pSolid,edges,radii);
 

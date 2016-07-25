@@ -58,7 +58,7 @@ if ( pJhis.IsEmpty() || !constructor->HasInstance(pJhis))  {
 // create a new object
 ThrowException(Exception::Error(String::New("invalid object")));
 }
-BooleanOperation* pThis = node::ObjectWrap::Unwrap<BooleanOperation>(pJhis);
+BooleanOperation* pThis = Nan::ObjectWrap::Unwrap<BooleanOperation>(pJhis);
 
 
 return scope.Close(arr);

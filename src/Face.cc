@@ -127,6 +127,8 @@ bool Face::buildFace(std::vector<Wire*>& wires)
   return true;
 }
 
+NAN_METHOD(Face::NewInstance) { _NewInstance<Face>(info); }
+
 NAN_METHOD(Face::New)
 {
   if (!info.IsConstructCall()) {

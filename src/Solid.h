@@ -14,7 +14,7 @@ protected:
 
 public:
   virtual v8::Local<v8::Object>  Clone() const;
-  virtual Base* Unwrap(v8::Local<v8::Object> obj) const { return node::ObjectWrap::Unwrap<Solid>(obj); }
+  virtual Base* Unwrap(v8::Local<v8::Object> obj) const { return Nan::ObjectWrap::Unwrap<Solid>(obj); }
 
   Nan::Persistent<v8::Object> m_cacheMesh;
 

@@ -7,7 +7,7 @@
 
 
 
-class Transformation : public node::ObjectWrap {
+class Transformation : public Nan::ObjectWrap {
 public:
     typedef class Transformation _ThisType ;
     Transformation()

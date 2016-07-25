@@ -26,12 +26,17 @@ NAN_METHOD(Point3Wrap::New)
 
   Point3Wrap* pThis = new Point3Wrap1(x,y,z);
   pThis->Wrap(info.This());
+
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Point3Wrap,x);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Point3Wrap,y);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Point3Wrap,z);
+
   info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(Point3Wrap::asArray)
 {
-  Point3Wrap* pThis = node::ObjectWrap::Unwrap<Point3Wrap>(info.This());
+  Point3Wrap* pThis = Nan::ObjectWrap::Unwrap<Point3Wrap>(info.This());
   v8::Local<v8::Array> arr = Nan::New<v8::Array>(3);
   arr->Set(0, Nan::New(pThis->x()));
   arr->Set(1, Nan::New(pThis->y()));
@@ -40,7 +45,8 @@ NAN_METHOD(Point3Wrap::asArray)
 }
 NAN_METHOD(Point3Wrap::equals)
 {
-  Point3Wrap* pThis = node::ObjectWrap::Unwrap<Point3Wrap>(info.This());
+  CHECK_THIS_DEFINED(Point3Wrap);
+  Point3Wrap* pThis = Nan::ObjectWrap::Unwrap<Point3Wrap>(info.This());
   if (info.Length() == 1) {
     gp_Pnt p1;
     ReadPoint(info[0], &p1);

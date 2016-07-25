@@ -13,7 +13,7 @@ struct Triangle3i {
     int j;
     int k;
 };
-class Mesh : public  node::ObjectWrap  {
+class Mesh : public  Nan::ObjectWrap  {
 public:
     Mesh();
     int extractFaceMesh(const TopoDS_Face& face, bool qualityNormals);

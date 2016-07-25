@@ -38,7 +38,7 @@ public:
   virtual v8::Local<v8::Object> Clone() const;
 
   virtual Base* Unwrap(v8::Local<v8::Object> obj) const {
-    return node::ObjectWrap::Unwrap<Face>(obj);
+    return Nan::ObjectWrap::Unwrap<Face>(obj);
   }
   virtual void InitNew(_NAN_METHOD_ARGS);
 
@@ -52,5 +52,8 @@ public:
   static NAN_METHOD(createMesh); // custom mesh
   static NAN_PROPERTY_GETTER(_mesh);
   static NAN_METHOD(getWires);
+
+  static NAN_METHOD(NewInstance);
+
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };

@@ -32,6 +32,9 @@ double Vertex::z()
 
 Nan::Persistent<v8::FunctionTemplate> Vertex::_template;
 
+
+NAN_METHOD(Vertex::NewInstance) { _NewInstance<Vertex>(info); }
+
 NAN_METHOD(Vertex::New)
 {
   if (!info.IsConstructCall()) {

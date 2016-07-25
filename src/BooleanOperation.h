@@ -7,7 +7,7 @@
 
 
 
-class BooleanOperation : public node::ObjectWrap {
+class BooleanOperation : public Nan::ObjectWrap {
     BRepAlgoAPI_BooleanOperation* m_bop;
     BooleanOperation();
     ~BooleanOperation();

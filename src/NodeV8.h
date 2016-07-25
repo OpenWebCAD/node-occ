@@ -63,7 +63,7 @@ NAN_GETTER(ee)
 		return;
 	}
 
-    T* obj = node::ObjectWrap::Unwrap<T>(info.This());
+    T* obj = Nan::ObjectWrap::Unwrap<T>(info.This());
 
     try {
 
@@ -126,4 +126,45 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
 // TO DO => SCRAP
 #define _NAN_METHOD_ARGS const Nan::FunctionCallbackInfo<v8::Value>& info
 #define NanObjectWrapHandle(t) (t->handle())
+
+// Function signature helper.
+#if defined(_WIN32) || defined(_WIN64)
+#define FUNC_SIG __FUNCSIG__
+#elif defined(__unix__)
+#define FUNC_SIG __PRETTY_FUNCTION__
+#endif
+
+#define CHECK_THIS_DEFINED(CLASS)                                      \
+  if ( info.This().IsEmpty())  {                                       \
+    return Nan::ThrowError("Internal error: 'this' is not defined in "  ## FUNC_SIG);   \
+  }                                                                    \
+  if (info.This()->InternalFieldCount() == 0 ) {                       \
+     return; \
+     return Nan::ThrowError("Internal error: 'this' is not a wrapped object in "  ## FUNC_SIG);  \
+  }                                                                     \
+  if (!ObjectWrap::Unwrap<CLASS>(info.This())) {                        \
+    return Nan::ThrowError("Internal error: 'this' is of wrong type in "  ## FUNC_SIG);  \
+  }
+
+#define UNWRAP(CLASS)                                         \
+  0;                                                          \
+  CHECK_THIS_DEFINED(CLASS)                                   \
+  v8::Handle<v8::Object> pJhis = info.This();                 \
+  if ( pJhis.IsEmpty() || !IsInstanceOf<CLASS>(pJhis))  {     \
+    return Nan::ThrowError("invalid object");                 \
+  }                                                           \
+  pThis = Nan::ObjectWrap::Unwrap<CLASS>(pJhis);
+
+
+// catch an open cascade exception and turn it into a Nan Execption
+#define CATCH_AND_RETHROW(message)                              \
+  catch(Standard_Failure& ) {                                   \
+    Handle_Standard_Failure e = Standard_Failure::Caught();     \
+    Standard_CString msg = e->GetMessageString();               \
+    std::cerr << "C++ exception in OCC "<< msg << std::endl;                              \
+    if (msg == NULL || strlen(msg) < 1) {                       \
+      msg = message;                                            \
+    }                                                           \
+     Nan::ThrowError(msg);                                \
+  }                                                             \
 

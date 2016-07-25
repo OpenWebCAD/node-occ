@@ -69,16 +69,49 @@ describe("testing Vertex ",function(){
     });
 
     describe("constructing a  vertex and applying a translation",function(){
-        var vertex;
+        var vertex_org;
         before(function() {
-            vertex = new occ.Vertex([10,20,30]);
-            vertex = vertex.translate([10,20,30]);
+            vertex_org = new occ.Vertex([10, 20, 30]);
         });
+
         it("should be translated",function(){
+            var vertex;
+            vertex = vertex_org.translate([10, 20, 30]);
+
+            vertex_org.x.should.equal(10);
+            vertex_org.y.should.equal(20);
+            vertex_org.z.should.equal(30);
+
             vertex.x.should.equal(20);
             vertex.y.should.equal(40);
             vertex.z.should.equal(60);
        });
+        it("should be translated - second form ", function () {
+            var vertex;
+            vertex = vertex_org.translate(/*[*/10, 20, 30/*]*/);
+
+            vertex_org.x.should.equal(10);
+            vertex_org.y.should.equal(20);
+            vertex_org.z.should.equal(30);
+
+            vertex.x.should.equal(20);
+            vertex.y.should.equal(40);
+            vertex.z.should.equal(60);
+        });
+        it("should be mirrored", function () {
+
+            var trsf = occ.makePlaneMirror([0, 0, 0], [0, 1, 0]);
+
+            var vertex_dest = vertex_org.transformed(trsf);
+            vertex_org.x.should.equal(10);
+            vertex_org.y.should.equal(20);
+            vertex_org.z.should.equal(30);
+
+            vertex_dest.x.should.equal(10);
+            vertex_dest.y.should.equal(-20);
+            vertex_dest.z.should.equal(30);
+
+        })
     });
 
 
@@ -125,12 +158,13 @@ describe("testing Vertex ",function(){
             should(vertex1).containEql({x: 10, y: 20, z: 30});
 
         });
-
         it("should compare 2 vertices with different coordinates", function () {
             var vertex1 = new occ.Vertex(10, 20, 30);
             var vertex2 = new occ.Vertex(110, 220, 330);
             should(vertex1).not.eql(vertex2);
         });
 
-    })
+    });
+
+
 });

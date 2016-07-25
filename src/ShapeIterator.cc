@@ -33,7 +33,7 @@ v8::Local<v8::Object> buildEmptyWrapper(TopAbs_ShapeEnum type)
 v8::Local<v8::Object> buildWrapper(const TopoDS_Shape shape)
 {
   v8::Local<v8::Object> obj = v8::Local<v8::Object>(buildEmptyWrapper(shape.ShapeType()));
-  Base*  pShape = node::ObjectWrap::Unwrap<Base>(obj);
+  Base*  pShape = Nan::ObjectWrap::Unwrap<Base>(obj);
   pShape->setShape(shape);
   return obj;
 }
@@ -150,7 +150,7 @@ NAN_METHOD(ShapeIterator::New)
   }
 
   // TODO (check that the object info[0] has the correct type)
-  Base* pShape = node::ObjectWrap::Unwrap<Base>(info[0]->ToObject());
+  Base* pShape = Nan::ObjectWrap::Unwrap<Base>(info[0]->ToObject());
 
   TopAbs_ShapeEnum type = getShapeEnum(info[1]);
 

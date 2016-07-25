@@ -36,27 +36,11 @@ testCyl();
 
 var shapeFactory = require('./lib/shapeFactory.js');
 
-
-var CSGbuilder =require('./lib/CSGbuilder');
-
 function testCSG1()
 {
     var solid = shapeFactory.makePan(occ);
-
 }
 testCSG1();
-
-function testCSG()
-{
-    var simple_csg = {
-        "box":    { type: "makeBox" , parameters:  [ [-10,-10,-10] , [10,10,10]] },
-        "sphere": { type: "makeSphere" , parameters: [ [0,0,0] , 3 ] },
-        "solid":  { type: "common", parameters: ["box","sphere"]  }
-    };
-    CSGbuilder.build(simple_csg);
-
-}
-testCSG();
 
 
 var bbox = new occ.BoundingBox();

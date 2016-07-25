@@ -77,9 +77,7 @@ app.get('/viewer', function (req, res) {
 });
 
 app.get('/', routes.index);
-app.post('/csg', object.buildCSG);
 app.post('/csg1', object.buildCSG1);
-
 app.post('/load_cadfile', object.load_cadfile);
 
 

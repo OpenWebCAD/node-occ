@@ -15,8 +15,13 @@ public:
     static NAN_METHOD(makeLine);
     static NAN_METHOD(makeCircle);
     static NAN_METHOD(makeArc3Points);
+
     // wires
+    static NAN_METHOD(makeWire);
+
     // faces
+    static NAN_METHOD(makeFace);
+
     // boolean operation
     static NAN_METHOD(fuse);
     static NAN_METHOD(cut);

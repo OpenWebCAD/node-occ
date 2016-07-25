@@ -30,9 +30,9 @@ describe("testing Wire ",function(){
             var v1 = new occ.Vertex(0, 0, 0);
             var v2 = new occ.Vertex(10, 10, 0);
             var v3 = new occ.Vertex(20, 0, 0);
-            edge1 = occ.makeLine(v1, v2);
-            edge2 = occ.makeLine(v2, v3);
-            edge3 = occ.makeLine(v3, v1);
+            edge1 = occ.createLine(v1, v2);
+            edge2 = occ.createLine(v2, v3);
+            edge3 = occ.createLine(v3, v1);
             wire = new occ.Wire(edge1, edge2, edge3);
         });
 

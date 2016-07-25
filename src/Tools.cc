@@ -25,7 +25,7 @@ void extractShapes(v8::Local<v8::Value> value, std::list<Shape*>& shapes)
     // it must be of type
     v8::Handle<v8::Object> obj = value->ToObject();
     if (IsInstanceOf<Solid>(obj)) {
-      shapes.push_back(node::ObjectWrap::Unwrap<Shape>(obj));
+      shapes.push_back(Nan::ObjectWrap::Unwrap<Shape>(obj));
     }
 
   }

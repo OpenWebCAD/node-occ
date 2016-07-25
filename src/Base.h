@@ -5,7 +5,7 @@
 #include "vector"
 
 
-class Base : public node::ObjectWrap {
+class Base : public Nan::ObjectWrap {
 public:
   int hashCode();
   bool isNull();
@@ -41,15 +41,6 @@ public:
 v8::Local<v8::Object> buildEmptyWrapper(TopAbs_ShapeEnum type);
 v8::Local<v8::Object> buildWrapper(const TopoDS_Shape shape);
 
-#define CATCH_AND_RETHROW(message)                              \
-  catch(Standard_Failure& ) {                                   \
-    Handle_Standard_Failure e = Standard_Failure::Caught();     \
-    Standard_CString msg = e->GetMessageString();               \
-    if (msg == NULL || strlen(msg) < 1) {                       \
-      msg = message;                                            \
-    }                                                           \
-     Nan::ThrowError(msg);                                \
-  }                                                             \
 
 template<class ClassType>
 size_t extractArgumentList(_NAN_METHOD_ARGS, std::vector<ClassType*>& elements)
@@ -58,7 +49,7 @@ size_t extractArgumentList(_NAN_METHOD_ARGS, std::vector<ClassType*>& elements)
 
   for (int i = 0; i < info.Length(); i++) {
     if (IsInstanceOf<ClassType>(info[i])) {
-      elements.push_back(node::ObjectWrap::Unwrap<ClassType>(info[i]->ToObject()));
+      elements.push_back(Nan::ObjectWrap::Unwrap<ClassType>(info[i]->ToObject()));
     }
   }
   return elements.size();
@@ -72,7 +63,7 @@ bool extractArg(const v8::Local<v8::Value>& value, ClassType*& pObj)
   if (!value->IsObject()) return false;
 
   if (IsInstanceOf<ClassType>(value->ToObject())) {
-    pObj = node::ObjectWrap::Unwrap<ClassType>(value->ToObject());
+    pObj = Nan::ObjectWrap::Unwrap<ClassType>(value->ToObject());
     return true;
   }
   return false;
@@ -92,7 +83,7 @@ bool _extractArray(const v8::Handle<v8::Value>& value, std::vector<ClassType*>& 
       }
       v8::Handle<v8::Object> obj = arr->Get(i)->ToObject();
       if (IsInstanceOf<ClassType>(obj)) {
-        elements.push_back(node::ObjectWrap::Unwrap<ClassType>(obj));
+        elements.push_back(Nan::ObjectWrap::Unwrap<ClassType>(obj));
       }
     }
   }
@@ -100,7 +91,7 @@ bool _extractArray(const v8::Handle<v8::Value>& value, std::vector<ClassType*>& 
     // a single element
     v8::Handle<v8::Object> obj = value->ToObject();
     if (IsInstanceOf<ClassType>(obj)) {
-      elements.push_back(node::ObjectWrap::Unwrap<ClassType>(obj));
+      elements.push_back(Nan::ObjectWrap::Unwrap<ClassType>(obj));
     }
   }
   return elements.size() >= 1;
@@ -116,7 +107,7 @@ OBJECT* DynamicCast(const v8::Handle<v8::Value>& value)
   if (value.IsEmpty()) return 0;
   if (!value->IsObject()) return 0;
   if (IsInstanceOf<OBJECT>(value->ToObject())) {
-    return node::ObjectWrap::Unwrap<OBJECT>(value->ToObject());
+    return Nan::ObjectWrap::Unwrap<OBJECT>(value->ToObject());
   }
   return 0;
 }
@@ -127,3 +118,19 @@ Base* DynamicCast(const v8::Handle<v8::Value>& value)
   if (obj) return obj;
   return DynamicCast<ObjType2>(value);
 }
+
+template<class T> v8::Local<v8::Function> Constructor() {
+     return Nan::New<v8::FunctionTemplate>(T::_template)->GetFunction();
+}
+template<class T> NAN_METHOD(_NewInstance) {
+    int argc =info.Length();
+    auto  argv = new v8::Local<v8::Value>[argc];// = new v8::Local<v8::Value>[argc];
+    for (int i=0;i<argc;i++) {
+        argv[i] = info[i];
+    }
+    // auto instance = Nan::New<v8::FunctionTemplate>(T::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(), argc, argv);
+    auto instance = Nan::NewInstance(Constructor<T>(),argc,argv);
+    delete [] argv;
+    info.GetReturnValue().Set(instance.ToLocalChecked());
+}
+

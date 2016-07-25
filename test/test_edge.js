@@ -39,8 +39,8 @@ describe("testing Edges ",function(){
         before(function(){
             var v1 = new occ.Vertex(10,20,30);
             var v2 = new occ.Vertex(-30,20,30);
-            edge = new occ.Edge();
-            edge.createLine(v1,v2);
+            edge = occ.createLine(v1, v2);
+            edge.should.be.instanceOf(occ.Edge);
 
         });
         it("should have a length of 40.0 ", function() {
@@ -83,8 +83,7 @@ describe("testing Edges ",function(){
         before(function () {
             var v1 = new occ.Vertex(10, 20, 30);
             var v2 = new occ.Vertex(-30, 20, 30);
-            edge = new occ.Edge();
-            edge.createLine(v1, v2);
+            edge = occ.createLine(v1, v2);
             edge = edge.translate([1, 2, 3]);
         });
         it("should have a length of 40.0 ", function () {
@@ -107,11 +106,9 @@ describe("testing Edges ",function(){
     describe("an Edge constructed as a Circle on the Z+ plan with a radius of 20", function () {
         var edge;
         before(function(){
-
-            edge = new occ.Edge();
-            edge.createCircle([10,10,10],[0,0,1],20);
-
+            edge = occ.createCircle([10, 10, 10], [0, 0, 1], 20);
         });
+
         it("should have a length of 2*PI*20.0 ", function(){
             var epsilon = 1E-2;
             var PI = 3.1415;

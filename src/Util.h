@@ -9,8 +9,8 @@ template <class T> inline double extract_double(const v8::Handle<T>& a) {
 
 void ReadDouble(const v8::Handle<v8::Value>& _v,double& value);
 
-int ReadInt(v8::Handle<v8::Object> obj,const char* name,int defaultValue);
-double ReadDouble(v8::Handle<v8::Object> obj,const char* name,double defaultValue=0.0);
+void ReadInt(v8::Handle<v8::Object> obj,const char* name,int* retValue,int defaultValue);
+void ReadDouble(v8::Handle<v8::Object> obj,const char* name,double* retValue,double defaultValue=0.0);
 
 void ReadPropertyPointFromArray(v8::Handle<v8::Array> value,double* x,double* y, double*z );
 // void ReadPropertyPoint( Handle<Object> value,const char* name,double* x,double* y, double*z );

@@ -352,10 +352,13 @@ describe("testing solid construction",function() {
 
     });
     describe("testing fillet on a box..",function(){
+
         var solid;
+
         before(function(){
             solid = occ.makeBox([10,20,30],[30,40,50]);
-            solid.numFaces.should.equal(6);            
+            solid.numFaces.should.equal(6);
+
             solid = occ.makeFillet(solid,solid.getEdges(),2.0);
 
         });
