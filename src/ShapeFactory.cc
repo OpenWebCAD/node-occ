@@ -872,7 +872,7 @@ static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS,Solid* pSolid1, Solid* p
   const TopoDS_Shape& firstObject= pSolid1->shape();
   const TopoDS_Shape& secondObject= pSolid2->shape();
 
-  std::auto_ptr<BRepAlgoAPI_BooleanOperation> pTool;
+  std::unique_ptr<BRepAlgoAPI_BooleanOperation> pTool;
 
 
 
@@ -881,13 +881,13 @@ static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS,Solid* pSolid1, Solid* p
   try {
     switch (op) {
       case BOPAlgo_FUSE:
-        pTool = std::auto_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Fuse(firstObject, secondObject));
+        pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Fuse(firstObject, secondObject));
         break;
       case BOPAlgo_CUT:
-        pTool = std::auto_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Cut(firstObject, secondObject));
+        pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Cut(firstObject, secondObject));
         break;
       case BOPAlgo_COMMON:
-        pTool = std::auto_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Common(firstObject, secondObject));
+        pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Common(firstObject, secondObject));
         break;
       default:
         Standard_ConstructionError::Raise("unknown operation");

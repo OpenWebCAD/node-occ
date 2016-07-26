@@ -8,7 +8,7 @@ Transformation*  prepare(T& info) {
     info.GetReturnValue().Set(info.This());
   }
   else {
-    auto instance = Nan::NewInstance(Constructor<Transformation>()).ToLocalChecked();
+    v8::Local<v8::Object> instance = Nan::NewInstance(Constructor<Transformation>()).ToLocalChecked();
     pThis = Transformation::Unwrap<Transformation>(instance);
     info.GetReturnValue().Set(instance);
   }

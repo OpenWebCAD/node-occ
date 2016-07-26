@@ -475,7 +475,7 @@ v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qual
 
 NAN_METHOD(Solid::getShapeName)
 {
-  Solid* pThis = UNWRAP(Solid);
+  Solid* pThis = UNWRAP(Solid); pThis;
 
   v8::Handle<v8::Object> pShape = info[0]->ToObject();
   if (!pShape.IsEmpty()) {

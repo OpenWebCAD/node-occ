@@ -53,7 +53,6 @@
 
 #include <ElCLib.hxx>
 
-#include <FSD_BinaryFile.hxx>
 
 #include <Geom_BezierCurve.hxx>
 #include <Geom_Circle.hxx>

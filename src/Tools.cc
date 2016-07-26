@@ -6,7 +6,7 @@
 #include "Solid.h"
 
 #include <list>
-#include <strstream>
+#include <sstream>
 #include "AsyncWorkerWithProgress.h"
 
 //
@@ -376,9 +376,9 @@ void StepAsyncReadWorker::Execute() {
 
     if (aReader.ReadFile(_filename.c_str()) != IFSelect_RetDone) {
 
-      std::strstream str;
+      std::stringstream str;
       str << " (1) cannot read STEP file " << _filename << std::ends;
-      this->SetErrorMessage(str.str());
+      this->SetErrorMessage(str.str().c_str());
 
       // Local<Value> argv[] = { Local<Value>(String::New())  };
       //  Local<Value>  res =  callback->Call(global, 1, argv);
@@ -627,9 +627,9 @@ void BRepAsyncReadWorker::Execute()
     BRep_Builder aBuilder;
     if (!BRepTools::Read(shape, filename.c_str(), aBuilder, progress)) {
 
-      std::strstream str;
+      std::stringstream str;
       str << "1- cannot read BREP file : '" << filename << "'" << std::ends;
-      this->SetErrorMessage(str.str());
+      this->SetErrorMessage(str.str().c_str());
       this->_retValue = 1;
 
       progress->SetValue(100.0);

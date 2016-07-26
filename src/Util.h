@@ -160,3 +160,37 @@ inline v8::Local<v8::Object> _makeTypedArray(const int* data, int length) {
 inline v8::Local<v8::Object> _makeTypedArray(const unsigned int* data, int length) {
   return makeUint32Array(data, length);
 }
+
+
+template <typename OBJECT>
+OBJECT* DynamicCast(const v8::Handle<v8::Value>& value)
+{
+  if (value.IsEmpty()) return 0;
+  if (!value->IsObject()) return 0;
+  if (IsInstanceOf<OBJECT>(value->ToObject())) {
+    return Nan::ObjectWrap::Unwrap<OBJECT>(value->ToObject());
+  }
+  return 0;
+}
+template <typename ObjType1, typename ObjType2>
+ObjType2* DynamicCast(const v8::Handle<v8::Value>& value)
+{
+  ObjType1* obj = DynamicCast<ObjType1>(value);
+  if (obj) return obj;
+  return DynamicCast<ObjType2>(value);
+}
+
+template<class T> v8::Local<v8::Function> Constructor() {
+     return Nan::New<v8::FunctionTemplate>(T::_template)->GetFunction();
+}
+template<class T> NAN_METHOD(_NewInstance) {
+    int argc =info.Length();
+    auto  argv = new v8::Local<v8::Value>[argc];// = new v8::Local<v8::Value>[argc];
+    for (int i=0;i<argc;i++) {
+        argv[i] = info[i];
+    }
+    // auto instance = Nan::New<v8::FunctionTemplate>(T::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(), argc, argv);
+    auto instance = Nan::NewInstance(Constructor<T>(),argc,argv);
+    delete [] argv;
+    info.GetReturnValue().Set(instance.ToLocalChecked());
+}
