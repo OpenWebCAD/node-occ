@@ -42,6 +42,7 @@ void Initialize(v8::Handle<v8::Object> target)
     Nan::SetMethod(target,"makePlaneMirror",  Transformation::makePlaneMirror);
 
     // Vertex
+    Nan::SetMethod(target,"makeVertex",        ShapeFactory::makeVertex);
 
 
     // edges
