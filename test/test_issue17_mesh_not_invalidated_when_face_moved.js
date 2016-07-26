@@ -13,10 +13,10 @@ describe("issue#17 testing that mesh get invalidated ", function () {
         var aPnt2 = [10, 1.0, 0];
         var aPnt3 = [10, 9.0, 0];
         var aPnt4 = [0, 10.0, 0];
-        var segment1 = new occ.createLine(aPnt1, aPnt2);
-        var segment2 = new occ.createLine(aPnt2, aPnt3);
-        var segment3 = new occ.createLine(aPnt3, aPnt4);
-        var segment4 = new occ.createLine(aPnt4, aPnt1);
+        var segment1 = new occ.makeLine(aPnt1, aPnt2);
+        var segment2 = new occ.makeLine(aPnt2, aPnt3);
+        var segment3 = new occ.makeLine(aPnt3, aPnt4);
+        var segment4 = new occ.makeLine(aPnt4, aPnt1);
 
         var wire = new occ.Wire(segment1, segment2, segment3, segment4);
         wire.isClosed.should.equal(true);

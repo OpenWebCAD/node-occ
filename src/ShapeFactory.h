@@ -11,10 +11,10 @@ class ShapeFactory {
 public:
     // vertex
     static NAN_METHOD(makeVertex);
-    // edges
-    static NAN_METHOD(makeLine);
-    static NAN_METHOD(makeCircle);
-    static NAN_METHOD(makeArc3Points);
+    //xx // edges
+    //xx static NAN_METHOD(makeLine);
+    //xx static NAN_METHOD(makeCircle);
+    //xx static NAN_METHOD(makeArc3P);
 
     // wires
     static NAN_METHOD(makeWire);

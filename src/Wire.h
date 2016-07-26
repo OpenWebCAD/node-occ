@@ -28,6 +28,7 @@ public:
     static NAN_METHOD(getVertices);
 
     static NAN_METHOD(NewInstance);
+    virtual void InitNew(_NAN_METHOD_ARGS);
 
     static Nan::Persistent<v8::FunctionTemplate> _template;
 };

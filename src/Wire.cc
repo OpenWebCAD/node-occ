@@ -125,6 +125,14 @@ v8::Local<v8::Object>  Wire::Clone() const
   return instance;
 }
 
+NAN_METHOD(Wire::InitNew)
+{
+  Base::InitNew(info);
+  REXPOSE_READ_ONLY_PROPERTY_INTEGER(Wire, numVertices);
+  REXPOSE_READ_ONLY_PROPERTY_INTEGER(Wire, numEdges);
+  REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Wire, isClosed);
+}
+
 void Wire::Init(v8::Handle<v8::Object> target)
 {
   // Prepare constructor template

@@ -51,6 +51,9 @@ public:
         return Nan::ObjectWrap::Unwrap<Edge>(obj);
     }
 
+    static NAN_PROPERTY_GETTER(getter_firstVertex);
+    static NAN_PROPERTY_GETTER(getter_lastVertex);
+
     // Static Methods
     static NAN_METHOD(static_createLine);
     static NAN_METHOD(static_createCircle);
@@ -61,9 +64,8 @@ public:
     static NAN_METHOD(getVertices);
 
     static NAN_METHOD(New);
-
-    v8::Handle<v8::Value> startVertex();
-    v8::Handle<v8::Value> endVertex();
+    static NAN_METHOD(startVertex);
+    static NAN_METHOD(endVertex);
 
     static void Init(v8::Handle<v8::Object> target);
     static Nan::Persistent<v8::FunctionTemplate> _template;

@@ -41,8 +41,14 @@ void Initialize(v8::Handle<v8::Object> target)
 
     Nan::SetMethod(target,"makePlaneMirror",  Transformation::makePlaneMirror);
 
+    // Vertex
 
-    Nan::SetMethod(target,"makeVertex",  ShapeFactory::makeVertex);
+
+    // edges
+    Nan::SetMethod(target,"makeLine",        Edge::static_createLine);
+    Nan::SetMethod(target,"makeCircle",      Edge::static_createCircle);
+    Nan::SetMethod(target,"makeArc3P",       Edge::static_createArc3P);
+
     //xx Nan::SetMethod(target,"makeEdge",    ShapeFactory::makeEdge);
 
     Nan::SetMethod(target,"makeWire",    ShapeFactory::makeWire);

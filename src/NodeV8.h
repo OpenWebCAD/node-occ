@@ -102,6 +102,9 @@ NAN_GETTER(ee)
 #define EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(ClassName,name) \
     __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,v8::String,const char*,&ClassName::name>),name)
 
+#define EXPOSE_READ_ONLY_PROPERTY_OBJECT(ClassName,name) \
+    __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,v8::Value,v8::Local<v8::Object>,&ClassName::name>),name)
+
 
 #define REXPOSE_READ_ONLY_PROPERTY_DOUBLE(ClassName,name) \
     __EXPOSE_READ_ONLY_PROPERTY(info.This(),(ee< ClassName, v8::Number, double, &ClassName::name>) , name )

@@ -5,6 +5,17 @@
 
 #include <assert.h>
 
+
+#define EXPOSE_POINT_PROPERTY(THISTYPE,ACCESSOR)                                            \
+  Nan::SetAccessor(proto,                                                            \
+			Nan::New<v8::String>(#ACCESSOR).ToLocalChecked(),                        \
+					&THISTYPE::getter_##ACCESSOR,  0,v8::Handle<v8::Value>(),v8::DEFAULT,(v8::PropertyAttribute)(v8::ReadOnly|v8::DontDelete))
+
+#define REXPOSE_POINT_PROPERTY(THISTYPE,ACCESSOR)                                            \
+  Nan::SetAccessor(info.This(),                                                            \
+			Nan::New<v8::String>(#ACCESSOR).ToLocalChecked(),                        \
+					&THISTYPE::getter_##ACCESSOR,  0,v8::Handle<v8::Value>(),v8::DEFAULT,(v8::PropertyAttribute)(v8::ReadOnly|v8::DontDelete))
+
 bool Edge::isSeam(Base *face)
 {
   if (this->shape().IsNull())
@@ -250,6 +261,14 @@ NAN_METHOD(Edge::New)
   pThis->InitNew(info);
 
   info.GetReturnValue().Set(info.This());
+
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Edge,length);
+  REXPOSE_READ_ONLY_PROPERTY_INTEGER(Edge,numVertices);
+  REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Edge,isDegenerated);
+  REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Edge,isClosed);
+  REXPOSE_POINT_PROPERTY(Edge,firstVertex);
+  REXPOSE_POINT_PROPERTY(Edge,lastVertex);
+
 }
 
 
@@ -263,6 +282,52 @@ v8::Local<v8::Object>  Edge::Clone() const
   obj->setShape(this->shape());
   return instance;
 }
+
+NAN_PROPERTY_GETTER(Edge::getter_firstVertex) {
+
+    if (info.This().IsEmpty()) {
+      info.GetReturnValue().SetUndefined();
+      return;
+    }
+
+    if (info.This()->InternalFieldCount() == 0) {
+      info.GetReturnValue().SetUndefined();
+      return;
+    }
+
+    Edge* pThis = Nan::ObjectWrap::Unwrap<Edge>(info.This());
+
+    TopoDS_Vertex shape = TopExp::FirstVertex(pThis->edge()/*,CumOri=false*/) ;
+
+    v8::Local<v8::Object> obj=  buildWrapper(shape);
+    info.GetReturnValue().Set(obj);
+
+}
+NAN_PROPERTY_GETTER(Edge::getter_lastVertex) {
+
+    if (info.This().IsEmpty()) {
+      info.GetReturnValue().SetUndefined();
+      return;
+    }
+
+    if (info.This()->InternalFieldCount() == 0) {
+      info.GetReturnValue().SetUndefined();
+      return;
+    }
+
+    Edge* pThis = Nan::ObjectWrap::Unwrap<Edge>(info.This());
+
+    TopoDS_Vertex shape = TopExp::LastVertex(pThis->edge()/*,CumOri=false*/) ;
+
+    v8::Local<v8::Object> obj=  buildWrapper(shape);
+    info.GetReturnValue().Set(obj);
+
+}
+
+
+
+
+
 void Edge::Init(v8::Handle<v8::Object> target)
 {
 
@@ -287,6 +352,8 @@ void Edge::Init(v8::Handle<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Edge,numVertices);
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Edge,isDegenerated);
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Edge,isClosed);
+  EXPOSE_POINT_PROPERTY(Edge,firstVertex);
+  EXPOSE_POINT_PROPERTY(Edge,lastVertex);
 
 
   EXPOSE_METHOD(Edge,polygonize);
@@ -296,13 +363,13 @@ void Edge::Init(v8::Handle<v8::Object> target)
   //xx EXPOSE_STATIC_METHOD(Edge,createLine);
   //xx EXPOSE_STATIC_METHOD(Edge,createCircle);
   //xx EXPOSE_STATIC_METHOD(Edge,createArc3P);
-  Nan::SetMethod(tpl,"createLine",       Edge::static_createLine);
-  Nan::SetMethod(tpl,"createArc3P",      Edge::static_createArc3P);
-  Nan::SetMethod(tpl,"createCircle",     Edge::static_createCircle);
+  Nan::SetMethod(tpl,"makeLine",       Edge::static_createLine);
+  Nan::SetMethod(tpl,"makeArc3P",      Edge::static_createArc3P);
+  Nan::SetMethod(tpl,"makeCircle",     Edge::static_createCircle);
 
-  Nan::SetMethod(target, "createLine", Edge::static_createLine);
-  Nan::SetMethod(target, "createArc3P", Edge::static_createArc3P);
-  Nan::SetMethod(target, "createCircle", Edge::static_createCircle);
+  Nan::SetMethod(target, "makeLine",     Edge::static_createLine);
+  Nan::SetMethod(target, "makeArc3P",    Edge::static_createArc3P);
+  Nan::SetMethod(target, "makeCircle",   Edge::static_createCircle);
 
 }
 
