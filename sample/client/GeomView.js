@@ -57,7 +57,7 @@ var GEOMTOOL = {
 
         }
         
-        var grid = new THREE.Line( geometry, material, THREE.LinePieces );
+        var grid = new THREE.LineSegments( geometry, material );
 
         return grid;
     },
@@ -123,7 +123,7 @@ function GEOMVIEW(container,width,height)
     me.camera.position.z = 100;
 
     me.renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0x7F2FFF, clearAlpha: 1 } );
-    me.renderer.setClearColorHex(0x7F2FFF, 1.0);
+    me.renderer.setClearColor(new THREE.Color(0x7F2FFF));
 
     me.renderer.autoClear = false;
     me.renderer.clear();
@@ -233,7 +233,7 @@ function GEOMVIEW(container,width,height)
         private_bgScene = null;
         private_bgCam   = null;
         // prepare graduated background for the 3D view
-        var backgroundTexture = new THREE.ImageUtils.loadTexture( 
+        var backgroundTexture = new THREE.TextureLoader(
             imageurl,
             null,
             function onload(){
@@ -349,7 +349,8 @@ function GEOMVIEW(container,width,height)
     function buildIntersectPlane(event) {
 
         var vector = frustumCoord(event);
-        me.projector.unprojectVector( vector, me.camera );
+        vector.unproject(me.camera);
+
         me.ray.set( me.camera.position, vector.sub( me.camera.position ).normalize() );
         return me.ray.intersectObject( me.intersectionPlane );
     }
@@ -357,7 +358,7 @@ function GEOMVIEW(container,width,height)
     function buildIntersectScene(event) {
 
         var vector = frustumCoord(event);
-        me.projector.unprojectVector( vector, me.camera );
+        vector.unproject(me.camera);
         me.ray.set( me.camera.position, vector.sub( me.camera.position ).normalize() );
         return me.ray.intersectObjects( [me.scene],true);
 
@@ -744,13 +745,13 @@ GEOMVIEW.prototype.zoomObject = function (node) {
     var me = this; 
 
     var bbox = GEOMTOOL.boundingBox(node);
-    if (bbox.empty()) {
+    if (bbox.isEmpty()) {
         return;
     }
-    var COG =  bbox.center();
+    var COG =  bbox.getCenter();
     me.pointCameraTo(COG);
 
-    var sphereSize = bbox.size().length() * 0.5;
+    var sphereSize = bbox.getSize().length() * 0.5;
     var distToCenter = sphereSize/Math.sin( Math.PI / 180.0 * me.camera.fov * 0.5);
     // move the camera backward 
     var target = me.controls.target;
