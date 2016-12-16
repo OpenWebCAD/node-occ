@@ -122,8 +122,8 @@ function GEOMVIEW(container,width,height)
     me.camera.name = "Camera";
     me.camera.position.z = 100;
 
-    me.renderer =  new THREE.WebGLRenderer( { antialias: true, clearColor: 0x7F2FFF, clearAlpha: 1 } );
-    me.renderer.setClearColor(new THREE.Color(0x7F2FFF));
+    me.renderer =  new THREE.WebGLRenderer( { alpha: true, antialias: true,clearAlpha: 1 } );
+    me.renderer.setClearColor(new THREE.Color(0x7F2FFF),0);
 
     me.renderer.autoClear = false;
     me.renderer.clear();
@@ -282,7 +282,8 @@ function GEOMVIEW(container,width,height)
 
     };
 
-    me.setGraduatedBackgound('images/Graduated_Blue_Background.png');
+    // now we set the background by css
+   // me.setGraduatedBackgound('images/Graduated_Blue_Background.png');
 
     me.resizeRenderer = function() {
         var me = this;

@@ -52,7 +52,7 @@ app.use(expressSession({
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'client')));
-app.use(express.static(path.join(__dirname, '../lib'))); // to get CSGTree.js
+app.use(express.static(path.join(__dirname, '../../lib'))); // to get CSGTree.js
 
 
 var env = process.env.NODE_ENV || 'development';

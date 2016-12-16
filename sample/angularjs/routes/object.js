@@ -1,14 +1,14 @@
 "use strict";
-var occ  = require('../../lib/occ'),
-    shapeFactory = require('../../lib/shapeFactory'),
-    scriptRunner = require('../../lib/scriptrunner');
+var occ  = require('../../../lib/occ'),
+    shapeFactory = require('../../../lib/shapeFactory'),
+    scriptRunner = require('../../../lib/scriptrunner');
 
 
 var fs = require('fs');
 var path = require("path");
 var fileUtils = require ("file-utils");
 
-var fast_occ = require('../../lib/fastbuilder').occ;
+var fast_occ = require('../../../lib/fastbuilder').occ;
 
 
 var vm = require('vm');
