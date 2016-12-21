@@ -31,15 +31,15 @@ export module Occ {
       console.log("Init scene", this.hostElement);
 
       var width = window.innerWidth - document.getElementById('sidebar-wrapper').clientWidth;
-      var height =  document.getElementById('sidebar-wrapper').clientHeight-document.getElementById('navbar').clientHeight;
+      var height = document.getElementById('sidebar-wrapper').clientHeight - document.getElementById('navbar').clientHeight;
 
-      this.camera = new THREE.PerspectiveCamera(35,width /height, 0.01, 100000);
-      this.camera.aspect = width/ height;
+      this.camera = new THREE.PerspectiveCamera(35, width / height, 0.01, 100000);
+      this.camera.aspect = width / height;
       this.camera.position.z = 100;
 
       this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 
-      this.renderer.setSize(width,height);
+      this.renderer.setSize(width, height);
       this.hostElement.nativeElement.appendChild(this.renderer.domElement);
       this.addGrid(250, 25);
 
@@ -79,8 +79,6 @@ export module Occ {
       this.controls.dynamicDampingFactor = 0.3;
 
       this.controls.addEventListener('change', function () {
-        this.cameraChanged = true;
-      //  this.scene.updateMatrixWorld(true);
         this.renderer.render(this.scene, this.camera);
       });
 
@@ -93,13 +91,13 @@ export module Occ {
       // handle window resize
       window.addEventListener('resize', () => {
 
-        var wrap=document.getElementById('wrapper');
+        var wrap = document.getElementById('wrapper');
         var sidebarHidden = wrap.className == 'active';
 
         var width = sidebarHidden ? window.innerWidth : window.innerWidth - document.getElementById('sidebar-wrapper').clientWidth;
-        var height =  document.getElementById('sidebar-wrapper').clientHeight-document.getElementById('navbar').clientHeight;
+        var height = document.getElementById('sidebar-wrapper').clientHeight - document.getElementById('navbar').clientHeight;
 
-        this.renderer.setSize(width,height);
+        this.renderer.setSize(width, height);
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
       }, false);
@@ -108,8 +106,8 @@ export module Occ {
 
       // render the scene
       onRenderFcts.push(() => {
-          this.renderer.render(this.scene, this.camera);
-          if (this.controls !== null) this.controls.update();
+        this.renderer.render(this.scene, this.camera);
+        if (this.controls !== null) this.controls.update();
       });
 
       // run the rendering loop
@@ -165,19 +163,19 @@ export module Occ {
       this.onSceneChange();
     }
 
-    resizeViewport()
-    {
-      var wrap=document.getElementById('wrapper');
+    resizeViewport() {
+      var wrap = document.getElementById('wrapper');
       var sidebarHidden = wrap.className == 'active';
 
       var width = sidebarHidden ? window.innerWidth - document.getElementById('sidebar-wrapper').clientWidth : window.innerWidth;
-      var height =  document.getElementById('sidebar-wrapper').clientHeight-document.getElementById('navbar').clientHeight;
+      var height = document.getElementById('sidebar-wrapper').clientHeight - document.getElementById('navbar').clientHeight;
 
-      this.renderer.setSize(width,height);
+      this.renderer.setSize(width, height);
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
 
     }
+
     onMouseMove(event: MouseEvent) {
       this.mousex = event.offsetX;
       this.mousey = event.offsetY;
@@ -239,9 +237,9 @@ export module Occ {
       this.camera.position.addVectors(vec, target);
       this.camera.updateProjectionMatrix();
 
-    //  this.scene.updateMatrixWorld(true);//.updateMatrixWorld();
+      //  this.scene.updateMatrixWorld(true);//.updateMatrixWorld();
 
-     this.renderer.render(this.scene, this.camera);
+      this.renderer.render(this.scene, this.camera);
       console.log("fi");
 
     }
@@ -255,8 +253,7 @@ export module Occ {
       return ( rgb[0] * 255 << 16 ) + ( rgb[1] * 255 << 8 ) + rgb[2] * 255;
     }
 
-    new()
-    {
+    new() {
       var rootNode = this.scene.getObjectByName("SOLIDS");
       if (rootNode) {
         this.scene.remove(rootNode);
@@ -336,7 +333,7 @@ export module Occ {
             geometry.vertices.push(new THREE.Vector3(v[i], v[i + 1], v[i + 2]));
             i += 3;
           }
-          var materialLine = new THREE.LineBasicMaterial({ linewidth: 5, color: 0xffffff });
+          var materialLine = new THREE.LineDashedMaterial({ linewidth: 2, color: 0xffffff });
           var polyline = new THREE.Line(geometry, materialLine);
           polyline.properties = {};
           polyline.properties.OCCType = "edge";
@@ -347,7 +344,6 @@ export module Occ {
 
       });
     };
-
 
     clearAll() {
       var rootNode = this.scene.getObjectByName("SOLIDS");
