@@ -1,0 +1,28 @@
+{
+  "name": "node-occ-sample",
+  "description": "node-occ sample web application",
+  "version": "0.0.2",
+  "private": true,
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "compression": "^1.6.2",
+    "connect-multiparty": "^2.0.0",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.1",
+    "ejs": "*",
+    "errorhandler": "^1.4.3",
+    "express": "4.14.0",
+    "express-session": "^1.14.0",
+    "file-utils": "*",
+    "formidable": "^1.0.17",
+    "method-override": "^2.3.6",
+    "morgan": "^1.7.0",
+    "multer": "^1.1.0",
+    "stack-trace": "*",
+    "static-favicon": "^2.0.0-alpha"
+  },
+  "devDependencies": {}
+}
