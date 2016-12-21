@@ -30,12 +30,16 @@ export module Occ {
       this.scene = new THREE.Scene();
       console.log("Init scene", this.hostElement);
 
-      this.camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.01, 100000);
-      this.camera.aspect = window.innerWidth / window.innerHeight;
+      var width = window.innerWidth - document.getElementById('sidebar-wrapper').clientWidth;
+      var height =  document.getElementById('sidebar-wrapper').clientHeight-document.getElementById('navbar').clientHeight;
+
+      this.camera = new THREE.PerspectiveCamera(35,width /height, 0.01, 100000);
+      this.camera.aspect = width/ height;
       this.camera.position.z = 100;
 
       this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+      this.renderer.setSize(width,height);
       this.hostElement.nativeElement.appendChild(this.renderer.domElement);
       this.addGrid(250, 25);
 
@@ -64,7 +68,7 @@ export module Occ {
 
       this.controls = new THREE.TrackballControls(this.camera);
 
-      this.controls.rotateSpeed = 1.0;
+      this.controls.rotateSpeed = 4.0;
       this.controls.zoomSpeed = 1.2;
       this.controls.panSpeed = 0.8;
 
@@ -88,8 +92,15 @@ export module Occ {
 
       // handle window resize
       window.addEventListener('resize', () => {
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+
+        var wrap=document.getElementById('wrapper');
+        var sidebarHidden = wrap.className == 'active';
+
+        var width = sidebarHidden ? window.innerWidth : window.innerWidth - document.getElementById('sidebar-wrapper').clientWidth;
+        var height =  document.getElementById('sidebar-wrapper').clientHeight-document.getElementById('navbar').clientHeight;
+
+        this.renderer.setSize(width,height);
+        this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
       }, false);
 
@@ -97,9 +108,7 @@ export module Occ {
 
       // render the scene
       onRenderFcts.push(() => {
-
           this.renderer.render(this.scene, this.camera);
-
           if (this.controls !== null) this.controls.update();
       });
 
@@ -156,6 +165,19 @@ export module Occ {
       this.onSceneChange();
     }
 
+    resizeViewport()
+    {
+      var wrap=document.getElementById('wrapper');
+      var sidebarHidden = wrap.className == 'active';
+
+      var width = sidebarHidden ? window.innerWidth - document.getElementById('sidebar-wrapper').clientWidth : window.innerWidth;
+      var height =  document.getElementById('sidebar-wrapper').clientHeight-document.getElementById('navbar').clientHeight;
+
+      this.renderer.setSize(width,height);
+      this.camera.aspect = width / height;
+      this.camera.updateProjectionMatrix();
+
+    }
     onMouseMove(event: MouseEvent) {
       this.mousex = event.offsetX;
       this.mousey = event.offsetY;
@@ -314,7 +336,7 @@ export module Occ {
             geometry.vertices.push(new THREE.Vector3(v[i], v[i + 1], v[i + 2]));
             i += 3;
           }
-          var materialLine = new THREE.LineDashedMaterial({ linewidth: 1, color: 0xffffff });
+          var materialLine = new THREE.LineBasicMaterial({ linewidth: 5, color: 0xffffff });
           var polyline = new THREE.Line(geometry, materialLine);
           polyline.properties = {};
           polyline.properties.OCCType = "edge";

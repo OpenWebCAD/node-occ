@@ -23,6 +23,12 @@ export class GeometryServiceService {
   {
    this._doc = new OCC_Document(elem);
   }
+
+  resizeViewport()
+  {
+    this._doc.resizeViewport();
+  }
+
   postScript(script: string) {
 
     var encoded_script = encodeURIComponent(script);

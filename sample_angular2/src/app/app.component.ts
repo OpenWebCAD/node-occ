@@ -23,7 +23,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.editor = ace.edit("editor");
     this.editor.setTheme("ace/theme/twilight");
     this.editor.getSession().setMode("ace/mode/javascript");
-
     this.setEditorSample(1);
 
   }
@@ -48,6 +47,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   toggleSideBar() {
     this.collapse = !this.collapse;
+    this.geometryService.resizeViewport();
   }
 
   cleanScene()

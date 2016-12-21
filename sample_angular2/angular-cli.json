@@ -23,7 +23,6 @@
       ],
       "scripts": [
         "assets/lib/threejs/three.js",
-        "assets/lib/threejs/OrbitControls.js",
         "../node_modules/jquery/dist/jquery.min.js",
         "../node_modules/bootstrap/dist/js/bootstrap.min.js",
         "../node_modules/bootstrap-toggle/js/bootstrap2-toggle.min.js",
