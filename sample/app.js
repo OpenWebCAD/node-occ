@@ -19,14 +19,17 @@ var express = require('express')
     , http = require('http')
     , path = require('path')
     , fs = require("fs")
+    , cors = require('cors')
     ;
 
 var app = express();
+
 
 var port = parseInt(process.env.PORT) || 3000;
 app.set('port', port);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
+
 
 
 // parse application/x-www-form-urlencoded
@@ -60,6 +63,7 @@ if ('development' == env) {
     app.use(errorHandler());
 }
 
+app.use(cors());
 
 app.get('/toto', function (req, res) {
     res.send('Hello World!');

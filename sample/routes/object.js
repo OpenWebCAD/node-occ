@@ -32,6 +32,8 @@ function buildResponse(solids,logs) {
 exports.buildCSG1 = function(req,res)
 {
 
+    console.log("req",req);
+
     var csgFuncScript    = decodeURIComponent(req.body.script);
     var params       = req.body.params;
     var id           = req.body.id;

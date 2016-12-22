@@ -1,0 +1,16 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+  background-color: #8cabc2;
+  margin: 0px;
+  overflow: hidden;
+  background-image: -webkit-gradient(#8cabc2, #becfdc, #c5d5e0);
+  /* Safari 5.1, iOS 5.0-6.1, Chrome 10-25, Android 4.0-4.3 */
+  background-image: -webkit-linear-gradient(#8cabc2, #becfdc, #c5d5e0);
+  /* Firefox 3.6 - 15 */
+  background-image: -moz-linear-gradient(#8cabc2, #becfdc, #c5d5e0);
+  /* Opera 11.1 - 12 */
+  background-image: -o-linear-gradient(#8cabc2, #becfdc, #c5d5e0);
+  /* Opera 15+, Chrome 25+, IE 10+, Firefox 16+, Safari 6.1+, iOS 7+, Android 4.4+ */
+  background-image: linear-gradient(#8cabc2, #becfdc, #c5d5e0);
+
+}

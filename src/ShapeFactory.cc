@@ -75,7 +75,7 @@ NAN_METHOD(ShapeFactory::makeBox)
   // could be :
   //    3 numbers dx,dy,dz
   //    2 points  p1,p2
-  //TODO   1 point + 3 numbers dx,dy,dz
+  //    1 point + 3 numbers dx,dy,dz
   //TODO   1 object with { x: 1,y: 2,z: 3, dw:
   
   v8::Handle<v8::Value> pJhis = Solid::NewInstance();

@@ -11,6 +11,7 @@
     "compression": "^1.6.2",
     "connect-multiparty": "^2.0.0",
     "cookie-parser": "^1.4.3",
+    "cors": "^2.8.1",
     "ejs": "*",
     "errorhandler": "^1.4.3",
     "express": "4.14.0",

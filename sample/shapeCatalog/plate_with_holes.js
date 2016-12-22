@@ -11,4 +11,3 @@ for (var i=0;i<10;i++) {
 
 plate = occ.cut(plate,occ.compound(holes));
 display(plate);
-
