@@ -7,7 +7,7 @@
     "async": "^2.0.1",
     "colors": "*",
     "gettemporaryfilepath": "0.0.1",
-    "nan": "^2.4.0",
+    "nan": "^2.5.0",
     "pace": "~0.0.4",
     "progress": "~1.1.8",
     "temporary": "~0.0.8"
