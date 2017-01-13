@@ -1,4 +1,6 @@
-
+# ---------------------------------------------------------------------------------
+#
+# ---------------------------------------------------------------------------------
 init:
   - git config --global core.autocrlf input
 
@@ -7,10 +9,63 @@ clone_folder: c:\projects\node-occ
 
 clone_depth: 5
 
+matrix:
+    - nodejs_version: "6"
+    - nodejs_version: "7"
+    - electron_version: "1.4.12"
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - nodejs_version: 7
+
+platform:
+  - x86
+  - x64
+
 install:
-  - ps: Install-Product node '6' x64
-  - cmd: build.bat
-  
+- ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:platform;
+- ps: $env:Path += ";$(pwd)\node_modules\.bin";
+- cmd: build.bat
+
+# Check if we're building the latest tag, if so
+# then we publish the binaries if tests pass.
+- ps: >
+    if ($env:appveyor_repo_tag -match "true" -and ("$(git describe --tags --always HEAD)" -eq $env:appveyor_repo_tag_name)) {
+      $env:publish_binary = 1;
+    } else {
+      $env:publish_binary = 0;
+    }
+    true;
+- ps: >
+    if ($env:publish_binary -eq 1) {
+      "We're publishing a binary!" | Write-Host
+    } else {
+      "We're not publishing a binary" | Write-Host
+    }
+    true;
+
+# Setup Electron variables
+- ps: >
+    if ($env:electron_version) {
+      "We're an electron build, setup variables" | Write-Host
+      $env:npm_config_target = $env:electron_version
+      $env:npm_config_disturl = "https://atom.io/download/atom-shell"
+      $env:npm_config_runtime = "electron"
+
+      if ($env:plaftorm -eq "x86") {
+        $env:npm_config_arch = "ia32"
+      } else {
+        $env:npm_config_arch = "x64"
+      }
+
+      "Install electron and electron-mocha" | Write-Host
+
+      npm install -g electron@$env:electron_version
+      npm install electron-mocha
+    }
+    true;
+
 
 cache:
   - c:\projects\node-occ\build_oce_2013_Win64
@@ -21,16 +76,15 @@ environment:
   msvs_toolset: 12
   VisualStudioVersion: "12"
 # 14 : Visual Studio 2015 , 12 VisualStudio 2013
-platform:
-  - x64
 
 
 configuration:
   - Release
+
 test_script:
   - node --version
   - npm install mocha -g
-  - npm install node-gyp
+  - npm install node-pre-gyp node-gyp
   - npm test
 build: off
 deploy: off
