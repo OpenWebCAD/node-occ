@@ -51,3 +51,4 @@ build_oce*/
 dist
 node-occ-package*
 extrudedFace.step
+lib/binding

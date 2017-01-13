@@ -4,29 +4,57 @@
 init:
   - git config --global core.autocrlf input
 
+environment:
+
+  node_pre_gyp_accessKeyId:
+    secure: 6NwB/CPB/FsDOcPZUoJIQQc751Vkj3LYc2oPxGXo/Uw=
+  node_pre_gyp_secretAccessKey:
+    secure: FcV0jIJp3lNZR/6fGNf8xNjZ13s2pkubaYlmtFkplZYfGQgSPguUMS/CqjjRWteD
+
+  # these variables are common to all jobs
+  # -------------- 14 Visual Studio 2015
+  #  msvs_toolset: 14
+  # -------------- 12 VisualStudio 2013
+  msvs_toolset: 12
+  VisualStudioVersion: "12"
+  matrix:
+
+    - electron_version: "1.4.14"
+      nodejs_version: 6
+      platform: x86
+
+    - electron_version: "1.4.14"
+      nodejs_version: 6
+      platform: x64
+
+
+    - nodejs_version: 6
+      platform: x86
+
+    - nodejs_version: 6
+      platform: x64
+
+    - nodejs_version: 7
+      platform: x86
+
+    - nodejs_version: 7
+      platform: x64
+
+
 # clone directory
 clone_folder: c:\projects\node-occ
 
 clone_depth: 5
 
 matrix:
-    - nodejs_version: "6"
-    - nodejs_version: "7"
-    - electron_version: "1.4.12"
-
-matrix:
   fast_finish: true
   allow_failures:
     - nodejs_version: 7
 
-platform:
-  - x86
-  - x64
 
 install:
 - ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:platform;
 - ps: $env:Path += ";$(pwd)\node_modules\.bin";
-- cmd: build.bat
 
 # Check if we're building the latest tag, if so
 # then we publish the binaries if tests pass.
@@ -45,47 +73,40 @@ install:
     }
     true;
 
-# Setup Electron variables
-- ps: >
-    if ($env:electron_version) {
-      "We're an electron build, setup variables" | Write-Host
-      $env:npm_config_target = $env:electron_version
-      $env:npm_config_disturl = "https://atom.io/download/atom-shell"
-      $env:npm_config_runtime = "electron"
 
-      if ($env:plaftorm -eq "x86") {
-        $env:npm_config_arch = "ia32"
-      } else {
-        $env:npm_config_arch = "x64"
-      }
+- cmd: npm install mocha node-pre-gyp-github -g
+- cmd: build_oce.bat %PLATFORM%
+- cmd: build.bat %PLATFORM%
 
-      "Install electron and electron-mocha" | Write-Host
 
-      npm install -g electron@$env:electron_version
-      npm install electron-mocha
-    }
-    true;
-
+build_script:
+- cmd: node --version
+# - npm install --build-from-source --target_arch=%npm_config_arch%
 
 cache:
   - c:\projects\node-occ\build_oce_2013_Win64
-  - c:\OCE-0.17.2
-
-environment:
-  nodejs_version: "6.3"
-  msvs_toolset: 12
-  VisualStudioVersion: "12"
-# 14 : Visual Studio 2015 , 12 VisualStudio 2013
-
+  - c:\projects\node-occ\build_oce_2013_Win32
+  - c:\projects\node-occ\build_oce_2015_Win64
+  - c:\projects\node-occ\build_oce_2015_Win32
+  - c:\OCE-0.18
 
 configuration:
   - Release
 
 test_script:
-  - node --version
-  - npm install mocha -g
-  - npm install node-pre-gyp node-gyp
-  - npm test
-build: off
+  - IF DEFINED electron_version     (electron test_electron)
+  - IF NOT DEFINED electron_version (npm test)
+
+after_test:
+  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp package 2>&1)
+  - # IF %PUBLISH_BINARY% == 1        (node-pre-gyp publish 2>&1)
+  - # IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish --release 2>&1)
+  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish  2>&1)
+  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp clean)
+  - IF %PUBLISH_BINARY% == 1        (npm install --fallback-to-build=false)
+
 deploy: off
+
+build: off
+
 

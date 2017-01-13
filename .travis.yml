@@ -1,13 +1,25 @@
+language: cpp
+
 os:
   - linux
-# not yet  - osx
+  - osx
 
-sudo: required
-
-language: node_js
+# sudo: required
 
 env:
-  - CXX=g++-4.8
+  matrix:
+  - TRAVIS_NODE_VERSION="6"
+  #- TRAVIS_NODE_VERSION="6" ARCH="x86"
+  #- TRAVIS_NODE_VERSION="7"
+  #- TRAVIS_NODE_VERSION="7" ARCH="x86"
+  #- TRAVIS_ELECTRON_VERSION="1.4.14" TRAVIS_NODE_VERSION="6"
+
+matrix:
+  exclude:
+  - os: osx
+    env: TRAVIS_NODE_VERSION="6" ARCH="x86"
+  #- os: osx
+  # env: TRAVIS_NODE_VERSION="7" ARCH="x86"
 
 addons:
   apt:
@@ -16,32 +28,64 @@ addons:
     packages:
     - g++-4.8
 
-node_js:
-  - "4"
-  - "6"
+before_install:
+# reinstall latest nvm
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
+- nvm install $TRAVIS_NODE_VERSION
+- PATH=$PATH:`pwd`/node_modules/.bin
+- BASE_URL=$(node -p "'https://nodejs.org/dist/' + process.version")
+- X86_FILE=$(node -p "'node-' + process.version + '-' + process.platform + '-x86'")
+# download node if testing x86 architecture
+- >
+  if [[ "$ARCH" == "x86" ]]; then
+    wget $BASE_URL/$X86_FILE.tar.gz
+    tar -xf $X86_FILE.tar.gz
+    export PATH=$X86_FILE/bin:$PATH
+    ls $X86_FILE/bin
+    echo " PATH =" $PATH
+  fi;
+  true;
+
+# print versions
+- uname -a
+- file `which node`
+- node --version
+- node -p 'process.platform + "@" + process.arch'
+- npm --version
+
+# use g++ on linux
+- if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
+- $CXX --version
+
+# compile OCE
+- bash ./prepare_build.sh
+# compile Node-OCC
+- bash ./prepare_node.sh
 
 git:
   submodules: false  
 
-before_install:
-  - git submodule update --depth 50 --init --recursive
+install:
+- npm install --build-from-source
 
-before_install:
-  # sudo apt-get install liboce-ocaf-dev liboce-modeling-dev liboce-foundation-dev ; 
-  # git clone http://github.com/tpaviot/oce.git ;
-  # cat /proc/cpuinfo ;
-  sh ./prepare_build.sh
-  
-  
-  
+script:
+- >
+  if [[ -z $TRAVIS_ELECTRON_VERSION ]]; then
+    node ./
+    npm test
+  else
+    electron test_electron
+    electron_mocha test
+  fi;
+  true;
+
+# if publishing, do it
+- if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package; fi;
+- if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp-github publish --release; fi;
+
+# cleanup
+- node-pre-gyp clean
 
 cache:
   directories:
   - build_oce
-
-  
-   
-  
-  
-
-

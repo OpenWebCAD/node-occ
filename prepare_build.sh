@@ -1,21 +1,33 @@
+#!/bin/bash
+##########################################################################################
+#
+#
+##########################################################################################
+
 grep -i VERSION /usr/local/include/oce/Standard_Version.hxx ;
 lscpu ;
 cmake --version ;
 
 #set NPROC=`nproc`
-NPROC=$(grep "^core id" /proc/cpuinfo | sort -u | wc -l)
+# on linux:
+#    NPROC=$(grep "^core id" /proc/cpuinfo | sort -u | wc -l)
+# on MacOS
+#    NPROC=$(sysctl -n hw.ncpu)
+# on both
+NPROC=$(node -p "os.cpus().length")
 
-echo "Numbrer of processors =" ${NPROC}
+echo "Number of processors =" ${NPROC}
 
-git submodule update --init --recursive
+git submodule update --init --recursive --depth 50
 cd oce ;
-git checkout tags/OCE-0.17.2 ;
+git checkout tags/OCE-0.18 ;
 cd .. ;
+
 mkdir deps ;
 mkdir build_oce;
+
 cd build_oce ;
 cmake -D OCE_INSTALL_PREFIX:STRING='/usr/local' -D OCE_DRAW:BOOLEAN=FALSE -D OCE_OCAF:BOOLEAN=FALSE -D  OCE_VISUALISATION:BOOLEAN=FALSE -D OCE_DISABLE_X11:BOOLEAN=TRUE -D OCE_USE_PCH:BOOLEAN=TRUE  ../oce > /dev/null;
-
 
 echo 1 `date +%R:%S`;
 make -s -j ${NPROC}  TKernel > /dev/null;
