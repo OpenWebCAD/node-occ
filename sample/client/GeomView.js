@@ -104,9 +104,9 @@ var GEOMTOOL = {
 
 function GEOMVIEW(container,width,height)
 {
-    
-    width = width || 100;
-    height = height || 100;
+
+    width = width || container.offsetWidth;
+    height = height || container.offsetHeight;
 
     var me = this;
     me.container = container;
@@ -118,6 +118,46 @@ function GEOMVIEW(container,width,height)
     var ratio = width/height;
     me.camera = new THREE.PerspectiveCamera(35,1,1, 100000);
     //me.camera = new THREE.OrthographicCamera(-500,500,-500,500,-500,500);
+    me.camera.toXXXView = function (dirView, up) {
+
+        var target = me.getObjectCenter();
+
+        // preserve existing distance
+        var dist = target.distanceTo(me.camera.position) || 100;
+
+        var eye = new THREE.Vector3(0, 0, 0);
+        eye.copy(dirView);
+        eye.multiplyScalar(dist); // distance
+        eye.addVectors(target, eye);
+
+        console.log("eye", eye);
+        console.log("up", up);
+        console.log("dirView", dirView);
+        me.camera.position.copy(eye);
+        me.camera.up.copy(up);
+
+        // look at is a vector
+        me.camera.lookAt(dirView);
+
+    };
+    me.camera.toTopView = function () {
+        this.toXXXView(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0));
+    };
+    me.camera.toBottomView = function () {
+        this.toXXXView(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0));
+    };
+    me.camera.toFrontView = function () {
+        this.toXXXView(new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, 1));
+    };
+    me.camera.toBackView = function () {
+        this.toXXXView(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1));
+    };
+    me.camera.toLeftView = function () {
+        this.toXXXView(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 1));
+    };
+    me.camera.toRightView = function () {
+        this.toXXXView(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(0, 0, 1));
+    };
 
     me.camera.name = "Camera";
     me.camera.position.z = 100;
@@ -328,9 +368,10 @@ function GEOMVIEW(container,width,height)
           }
         } while( null !== ( element = element.offsetParent ) );
         return offsetTop;
-    }   
-    /** 
-     * converts mouve event into frustumCoordinate
+    }
+
+    /**
+     * converts mouse event into frustumCoordinate
      */
     function frustumCoord(event) {
 
@@ -361,7 +402,12 @@ function GEOMVIEW(container,width,height)
         var vector = frustumCoord(event);
         vector.unproject(me.camera);
         me.ray.set( me.camera.position, vector.sub( me.camera.position ).normalize() );
-        return me.ray.intersectObjects( [me.scene],true);
+        var results = me.ray.intersectObjects([me.scene], true);
+        results = results.filter(function (o) {
+            return findSelectedObject(o.object).visible;
+        });
+        return results;
+
 
     }   
 
@@ -423,7 +469,7 @@ function GEOMVIEW(container,width,height)
         console.log(" onClick ",event);
         var objects = [me.scene];
 
-        if ( event.button == 0 ) {
+        if (event.button === 0) {
 
             var intersects =buildIntersectScene(event);
 
@@ -498,7 +544,7 @@ function GEOMVIEW(container,width,height)
 
     function findSelectedObject(pickedObject) {
         var parent = pickedObject.parent;
-        while (parent && parent.properties && parent.properties.OCCType != "Solid") {
+        while (parent && parent.properties && parent.properties.OCCType !== "Solid") {
             parent = parent.parent;
         }
         return parent;
@@ -515,8 +561,8 @@ function GEOMVIEW(container,width,height)
 GEOMVIEW.prototype.__solidObjectsNode = function(json) {
     var me = this;
     var rootNode = me.scene.getObjectByName("SOLIDS");
-    if (!rootNode) { 
-        var rootNode  = new THREE.Object3D();
+    if (!rootNode) {
+        rootNode = new THREE.Object3D();
         rootNode.name ="SOLIDS";
         me.scene.add(rootNode);
     }
@@ -545,6 +591,7 @@ GEOMVIEW.prototype.selectObject  = function (object) {
         var vertices = me.selectionBox.geometry.vertices;
         GEOMTOOL.setVertices( bbox,vertices);
 
+        me.selectionBox.geometry.computeBoundingSphere();
         me.selectionBox.geometry.verticesNeedUpdate = true;
 
         me.selectionBox.matrixWorld = object.matrixWorld;
@@ -567,14 +614,19 @@ GEOMVIEW.prototype.getDefaultColor = function () {
 
    var color = [ Math.random(),Math.random(),Math.random()];
 //   var color = [ 249.0/ 255.0, 195.0/ 255.0, 61.0/ 255.0];
-   return color
-}
+    return color;
+};
 
 GEOMVIEW.prototype.highlightObject = function(obj3D) {
     // TODO:
     // me.selection =
 };
 
+GEOMVIEW.prototype.getSolidByName = function (objName) {
+    var me = this;
+    var rootNode = me.__solidObjectsNode();
+    return rootNode.getObjectByName(objName);
+};
 /*
  *  json = { solids: [ id: "ID" , { faces: [], edges: [] }, ...]}
  *   
@@ -590,6 +642,7 @@ GEOMVIEW.prototype.updateShapeObject = function (json, next) {
      *  
      */
     function rgb2hex( rgb ) {
+        /* jshint ignore bitwise */
         return ( rgb[ 0 ] * 255 << 16 ) + ( rgb[ 1 ] * 255 << 8 ) + rgb[ 2 ] * 255;
     }
     function process_face_mesh(rootNode,jsonEntry,color){
@@ -599,13 +652,11 @@ GEOMVIEW.prototype.updateShapeObject = function (json, next) {
         jsonFace.scale = 1.0;
         var jsonLoader = new THREE.JSONLoader();
 
-        var model;
-
-        model = jsonLoader.parse( jsonFace,/* texture path */undefined );
+        var model = jsonLoader.parse(jsonFace, /* texturePath */undefined);
         
         var material = new THREE.MeshLambertMaterial({color: rgb2hex(color)});
         var mesh = new THREE.Mesh(model.geometry,material);
-        mesh.properties = {}
+        mesh.properties = mesh.properties || {};
         mesh.properties.OCCType = "face";
         mesh.properties.OCCName = jsonFace.name;
         rootNode.add(mesh);
@@ -614,21 +665,21 @@ GEOMVIEW.prototype.updateShapeObject = function (json, next) {
     function process_edge_mesh(rootNode,jsonEdge) {
         var v = jsonEdge.mesh;
         var geometry = new THREE.Geometry();
-        var i = 0
+        var i = 0;
         while ( i<v.length) {
             geometry.vertices.push(new THREE.Vector3(v[i],v[i+1],v[i+2]));        
             i+=3;
         }
         var material = new THREE.LineDashedMaterial({ linewidth: 1, color: 0xffffff}); 
         var polyline = new THREE.Line(geometry,material);
-        polyline.properties = {}
+        polyline.properties = polyline.properties || {};
         polyline.properties.OCCType = "edge";
         polyline.properties.OCCName = jsonEdge.name;
         rootNode.add(polyline);
     }    
 
     var me = this;
-    rootNode  = me.__solidObjectsNode();
+    var rootNode = me.__solidObjectsNode();
 
     var node = rootNode;
     if (json.name) {
@@ -672,10 +723,17 @@ GEOMVIEW.prototype.updateShapeObject = function (json, next) {
     if (next) next();
 };
 
+
 /**
  * remove all objects from the graphical view
  */
-GEOMVIEW.prototypesolidObjectsNode
+GEOMVIEW.prototype.clearAll = function () {
+    var me = this;
+    var rootNode = me.__solidObjectsNode();
+    if (rootNode) {
+        me.scene.remove(rootNode);
+    }
+};
 
 
 /**
@@ -694,16 +752,17 @@ GEOMVIEW.prototype.pointCameraTo = function(node) {
       COG = node;
     } else {
         // Refocus camera to the center of the new object
-        var COG = GEOMTOOL.shapeCenterOfGravity(node);
+        COG = GEOMTOOL.shapeCenterOfGravity(node);
     }
     var v = new THREE.Vector3();
     v.subVectors(COG,me.controls.target);
     me.camera.position.addVectors(me.camera.position,v);
     
     // retrieve camera orientation
-    
+
+    me.controls.target.set(COG.x, COG.y, COG.z);
     me.camera.lookAt(COG);
-    me.controls.target.set( COG.x,COG.y,COG.z );  
+    me.camera.updateProjectionMatrix();
 
     me.render3D();
 };
@@ -727,21 +786,41 @@ GEOMVIEW.prototype.zoomAll = function() {
 
 GEOMVIEW.prototype.showGrid = function ( flag ) {
    var me = this;
-   if ( me.grid.visible != flag ) {
+    if (me.grid.visible !== flag) {
 
        me.grid.visible = flag;
        me.render3D();
    }
-}
+};
+
+GEOMVIEW.prototype.getObjectBox = function (node) {
+    var me = this;
+    if (!node) {
+        node = me.__solidObjectsNode();
+    }
+    var bbox = GEOMTOOL.boundingBox(node);
+    return bbox;
+};
+
+GEOMVIEW.prototype.getObjectCenter = function (node) {
+    var me = this;
+    var bbox = me.getObjectBox(node);
+    if (bbox.empty()) {
+        return new THREE.Vector3(0, 0, 0);
+    }
+    var COG = bbox.center();
+    return COG;
+};
+
 
 /**
  * Zoom on Object
  */
 GEOMVIEW.prototype.zoomObject = function (node) {
 
-    var me = this; 
+    var me = this;
 
-    var bbox = GEOMTOOL.boundingBox(node);
+    var bbox = me.getObjectBox(node);
     if (bbox.isEmpty()) {
         return;
     }
@@ -759,6 +838,40 @@ GEOMVIEW.prototype.zoomObject = function (node) {
     me.camera.updateProjectionMatrix();
     me.render3D();
 };
+
+/**
+ * Zoom on Object
+ */
+GEOMVIEW.prototype.onChangeView = function (viewName) {
+
+    var me = this;
+    switch (viewName.toUpperCase()) {
+        case "Z+":
+        case "TOP":
+            me.camera.toTopView();
+            break;
+        case "Z-":
+        case "BOTTOM":
+            me.camera.toBottomView();
+            break;
+        case "RIGHT":
+            me.camera.toRightView();
+            break;
+        case "LEFT":
+            me.camera.toLeftView();
+            break;
+        case "FRONT":
+            me.camera.toFrontView();
+            break;
+        case "BACK":
+            me.camera.toBackView();
+            break;
+    }
+    me.camera.updateProjectionMatrix();
+    me.resizeRenderer();
+    me.render3D();
+};
+
 
 /**
  *
