@@ -19,16 +19,6 @@ IF NOT DEFINED PLATFORM (
 )
 ECHO PLATFORM %PLATFORM%
 
-
-ECHO ----------------------------------------------------------
-ECHO  PREPARE : git submodule
-ECHO ----------------------------------------------------------
-CALL git submodule update --init --recursive
-
-ECHO PREFIX  : %PREFIX%
-IF EXIST %PREFIX% GOTO done_already_build
-
-
 IF /I "%PLATFORM%" == "x64" (
     SET VCPLATFORM=x64
     ECHO Compiling for x64
@@ -51,7 +41,6 @@ ECHO ---------------------------------------------------------------------------
 ECHO  Compiling with Visual Studio 2012 - X86
 ECHO ---------------------------------------------------------------------------
 SET VSVER=2012
-REM SET PLATFORM=X86
 CALL "%~dp0"/SETENV.BAT  32
 set GENERATOR=Visual Studio 11 2012
 set VisualStudioVersion=11.0
@@ -63,7 +52,6 @@ ECHO ---------------------------------------------------------------------------
 ECHO  Compiling with Visual Studio 2015 - X86
 ECHO ---------------------------------------------------------------------------
 SET VSVER=2015
-REM SET PLATFORM=X86
 CALL "%~dp0"/SETENV.BAT  32
 set GENERATOR=Visual Studio 14 2015
 set VisualStudioVersion=14.0
@@ -75,7 +63,6 @@ ECHO ---------------------------------------------------------------------------
 ECHO  Compiling with Visual Studio 2015 - X64
 ECHO ---------------------------------------------------------------------------
 SET VSVER=2015
-REM SET PLATFORM=X64
 CALL "%~dp0"/SETENV.BAT  64
 set GENERATOR=Visual Studio 14 2015 Win64
 set VisualStudioVersion=14.0
@@ -88,7 +75,6 @@ REM ----------------------------------------------------------------------------
 REM   Compiling with Visual Studio 2013 - x64
 REM ----------------------------------------------------------------------------
 SET VSVER=2013
-REM SET PLATFORM=x64
 CALL "%~dp0"/SETENV.BAT  64
 set GENERATOR=Visual Studio 12 2013 Win64
 set VisualStudioVersion=12.0
@@ -108,6 +94,16 @@ goto do_cmake
 
 :do_cmake
 
+ECHO PREFIX  : %PREFIX%
+IF EXIST %PREFIX% GOTO done_already_build
+
+
+ECHO ----------------------------------------------------------
+ECHO  PREPARE : git submodule
+ECHO ----------------------------------------------------------
+CALL git submodule update --init --recursive
+
+
 ECHO NODE-PRE-GYP
 @call node-pre-gyp --version
 @call cl
@@ -117,6 +113,7 @@ ECHO NODE-PRE-GYP
 ECHO "----------------------------------------------------------------------"
 ECHO "CMAKE"
 ECHO "----------------------------------------------------------------------"
+
 SET BUILD_OCE=build_oce_%VSVER%_%ARCH%
 ECHO PREFIX      = "%PREFIX%"
 ECHO CL          = "%CL%"
