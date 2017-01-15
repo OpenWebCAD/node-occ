@@ -25,6 +25,6 @@ node-occ-package2
 .gitattributes
 .idea
 *.step
-
+lib/binding
 
 

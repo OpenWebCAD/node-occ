@@ -8,9 +8,8 @@ It provides a simple yet powerful javascript api to construct 3D geometry models
 This project comes with a set of V8 wrappers around OpenCascade API and a sample web application.
 
 [![Build Status](https://travis-ci.org/erossignon/node-occ.png?branch=master)](https://travis-ci.org/erossignon/node-occ)
+[![Build status](https://ci.appveyor.com/api/projects/status/s5eaux89v2c0wmu4?svg=true)](https://ci.appveyor.com/project/erossignon/node-occ)
 
-<!-- [![Build status](https://ci.appveyor.com/api/projects/status/s5eaux89v2c0wmu4?svg=true)](https://ci.appveyor.com/project/erossignon/node-occ)
--->
 
 ### quick example
 
@@ -50,12 +49,18 @@ alt="node occ" width="240" height="180" border="10" /></a>
 
 ### sample web application
 
-''/sample'' : sample nodejs/express REST API server to build solid , based on threejs
-
+[node-occ-sample](https://github.com/erossignon/node-occ-sample): sample nodejs/express REST API server to build solid , based on threejs
 
 
 ## installing node-occ from npm
- 
+
+```
+$npm install node-occ
+```
+
+
+## building node-occ from source :  prerequisites
+
 ### on Windows
   - you need Microsoft Visual Studio 2012
   - please install OpenCascade oce-0.17  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.17 folder
@@ -70,9 +75,6 @@ alt="node occ" width="240" height="180" border="10" /></a>
 ### on Linux
 
 
-
-
-## building node-occ from source :  prerequisites
 
 ### on ubuntu
 
@@ -94,10 +96,6 @@ npm install
 node-gyp configure
 node-gyp build
 mocha
-
-cd sample
-npm install
-node app.js
 ```
 
 
@@ -107,7 +105,6 @@ node app.js
 ## dependencies:
 
  - threejs    : https://github.com/mrdoob/three.js
- - codemirror : https://github.com/marijnh/CodeMirror
 
 ## acknowledgement:
     

@@ -10,12 +10,14 @@ env:
   matrix:
   - TRAVIS_NODE_VERSION="6"
   #- TRAVIS_NODE_VERSION="6" ARCH="x86"
-  #- TRAVIS_NODE_VERSION="7"
+  - TRAVIS_NODE_VERSION="7"
   #- TRAVIS_NODE_VERSION="7" ARCH="x86"
   #- TRAVIS_ELECTRON_VERSION="1.4.14" TRAVIS_NODE_VERSION="6"
 
 matrix:
   exclude:
+  - os: osx
+    env: TRAVIS_NODE_VERSION="6"
   - os: osx
     env: TRAVIS_NODE_VERSION="6" ARCH="x86"
   #- os: osx
