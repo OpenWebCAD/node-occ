@@ -53,7 +53,8 @@ matrix:
 
 
 install:
-- ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:platform;
+#- ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:platform;
+- ps: Install-Product node $env:nodejs_version $env:platform;
 - ps: $env:Path += ";$(pwd)\node_modules\.bin";
 
 # Check if we're building the latest tag, if so

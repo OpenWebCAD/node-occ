@@ -1,12 +1,12 @@
 
-var occ = require('../lib/occ')
+var occ = require('../lib/occ');
 
-var pace = require("pace")(1000)
+var pace = require("pace")(1000);
 
 filename = process.argv[2];
 
 occ.readSTEP(filename,function (err,solids) {
-   pace.op(100000)
+   pace.op(100000);
    if (!err) {
       console.log( " \n\ndone y----> ", solids.length , " solids read");
 

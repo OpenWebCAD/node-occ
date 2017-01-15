@@ -52,3 +52,5 @@ dist
 node-occ-package*
 extrudedFace.step
 lib/binding
+*.tgz
+npm-debug*
