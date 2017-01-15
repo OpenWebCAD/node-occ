@@ -161,7 +161,7 @@ function install_json_mesh(json,size_in_byte) {
 
     "use strict";
 
-    view.clearAll();
+    // view.clearAll();
     view.updateShapeObject(json,function() {
         view.zoomAll();
     });

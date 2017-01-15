@@ -1,5 +1,5 @@
 #include "Mesh.h"
-
+#include <Standard_PrimitiveTypes.hxx>
 #include <set>
 #include <list>
 #include <algorithm>
@@ -178,9 +178,11 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
       for (int i = 0; i < triangulation->NbNodes(); i++) {
         vert = this->vertices[vsize + i];
         gp_Pnt vertex(vert.x, vert.y, vert.z);
-        GeomAPI_ProjectPointOnSurf SrfProp(vertex, surface);
+      // this call is useless and has been replaced by GeomLProp_SLProps call
+      // GeomAPI_ProjectPointOnSurf SrfProp(vertex, surface );
         Standard_Real fU, fV;
-        SrfProp.Parameters(1, fU, fV);
+      // this call is useless and has been replaced by GeomLProp_SLProps call
+      // SrfProp.Parameters(1, fU, fV);
 
         GeomLProp_SLProps faceprop(surface, fU, fV, 2, gp::Resolution());
         normal = faceprop.Normal();

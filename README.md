@@ -89,7 +89,7 @@ sudo apt-get install cmake cmake-curses-gui g++ build-essential
 # ------------------------------------
 git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
-sh prepare_build.sh
+sh prepare_build_occt.sh
 npm install
 node-gyp configure
 node-gyp build

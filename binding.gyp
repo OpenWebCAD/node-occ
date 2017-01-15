@@ -7,8 +7,8 @@
       "target_name": "occ",
       "cflags!"    : [ '-fno-exceptions' ],
       "cflags_cc!" : [ '-fno-exceptions' ],
-      "cflags"     : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' , '-Wno-extra'],
-      "cflags_cc"  : [ '-Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder',  '-Wno-extra' ],
+      "cflags"     : [ '-frtti -Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder' , '-Wno-extra'],
+      "cflags_cc"  : [ '-frtti -Wno-ignored-qualifiers', '-Wno-unused-variable', '-Wno-reorder',  '-Wno-extra' ],
       'xcode_settings': {
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
       },
@@ -75,7 +75,7 @@
         "/usr/local/lib"
 	  ],
 	  "include_dirs": [
-        "/usr/local/include/oce",
+        "/usr/local/include/opencascade",
         "<!(node -e \"require('nan')\")"
 	  ],
 
@@ -96,7 +96,6 @@
 		'-lTKMesh',
 		'-lTKOffset',
 		'-lTKPrim',
-		'-lTKPShape',
 		'-lTKShHealing',
 		'-lTKTopAlgo',
 		'-lTKIGES',

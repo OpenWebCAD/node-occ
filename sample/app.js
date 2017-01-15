@@ -24,7 +24,6 @@ var express = require('express')
 
 var app = express();
 
-
 var port = parseInt(process.env.PORT) || 3000;
 app.set('port', port);
 app.set('views', __dirname + '/views');
@@ -47,11 +46,13 @@ app.use(bodyParser.json());
 //xx app.use(favicon);
 app.use(logger("combined"));
 //xx //xx app.use(cookieParser('your secret here'));
+/*
 app.use(expressSession({
     secret: "your secret here",
     resave: false,
     saveUninitialized: false
 }));
+*/
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'client')));
@@ -129,6 +130,7 @@ app.post('/file-upload', function (req, res) {
 
 
 // http.createServer(app).listen(app.get('port'), function(){
-app.listen(app.get('port'), function () {
+var server=app.listen(app.get('port'), function () {
     console.log("Express server listening on port " + app.get('port'));
 });
+server.timeout = 1000000;
