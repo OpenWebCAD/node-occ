@@ -1,30 +1,28 @@
 "use strict";
-var occ = require("../lib/occ");
-
-console.log("v ", (new occ.Vertex()).toString());
-var should = require("should");
+const occ = require("../lib/occ");
+const should = require("should");
 
 
 describe("issue#17 testing that mesh get invalidated ", function () {
 
 
     function constructFaceWithWire() {
-        var aPnt1 = [0, 0.0, 0];
-        var aPnt2 = [10, 1.0, 0];
-        var aPnt3 = [10, 9.0, 0];
-        var aPnt4 = [0, 10.0, 0];
-        var segment1 = new occ.makeLine(aPnt1, aPnt2);
-        var segment2 = new occ.makeLine(aPnt2, aPnt3);
-        var segment3 = new occ.makeLine(aPnt3, aPnt4);
-        var segment4 = new occ.makeLine(aPnt4, aPnt1);
+        let aPnt1 = [0, 0.0, 0];
+        let aPnt2 = [10, 1.0, 0];
+        let aPnt3 = [10, 9.0, 0];
+        let aPnt4 = [0, 10.0, 0];
+        let segment1 = new occ.makeLine(aPnt1, aPnt2);
+        let segment2 = new occ.makeLine(aPnt2, aPnt3);
+        let segment3 = new occ.makeLine(aPnt3, aPnt4);
+        let segment4 = new occ.makeLine(aPnt4, aPnt1);
 
-        var wire = new occ.Wire(segment1, segment2, segment3, segment4);
+        let wire = new occ.Wire(segment1, segment2, segment3, segment4);
         wire.isClosed.should.equal(true);
         wire.numEdges.should.equal(4);
         wire.numVertices.should.equal(4);
 
         // the vector to extrude the face along.
-        var face = new occ.Face(wire);
+        let face = new occ.Face(wire);
 
         face.getWires().length.should.eql(1);
 
@@ -33,12 +31,12 @@ describe("issue#17 testing that mesh get invalidated ", function () {
     }
 
     it("should translate a face", function (done) {
-        var face = constructFaceWithWire();
+        let face = constructFaceWithWire();
 
-        var vertices_before = face.getWires()[0].getVertices();
+        let vertices_before = face.getWires()[0].getVertices();
 
         face = face.translate([20, 30, 40]);
-        var vertices_after = face.getWires()[0].getVertices();
+        let vertices_after = face.getWires()[0].getVertices();
 
         vertices_after[0].x.should.eql(vertices_before[0].x + 20);
         vertices_after[0].y.should.eql(vertices_before[0].y + 30);
@@ -61,7 +59,7 @@ describe("issue#17 testing that mesh get invalidated ", function () {
 
     it("#17-B should provide a translated mesh when face is translated", function (done) {
 
-        var face = constructFaceWithWire();
+        let face = constructFaceWithWire();
         face.hasMesh.should.equal(false);
 
         // now mesh the faces
@@ -70,11 +68,11 @@ describe("issue#17 testing that mesh get invalidated ", function () {
 
         console.log("face mesh vertices =", face.mesh.vertices.toString());
 
-        var vertices_before = face.mesh.vertices;
+        let vertices_before = face.mesh.vertices;
         face = face.translate([20, 30, 40]);
 
         console.log("face mesh vertices =", face.mesh.vertices.toString());
-        var vertices_after = face.mesh.vertices;
+        let vertices_after = face.mesh.vertices;
 
         vertices_before.toString().should.eql("0,0,0,10,1,0,10,9,0,0,10,0");
         vertices_after.toString().should.eql("20,30,40,30,31,40,30,39,40,20,40,40");

@@ -1,13 +1,13 @@
-var getTemporaryFilePath = require('gettemporaryfilepath');
+const getTemporaryFilePath = require('gettemporaryfilepath');
 
-var _getTemporaryFilePath = function () {
+const _getTemporaryFilePath = function () {
     var tmp = getTemporaryFilePath.apply(null, arguments);
     return tmp.replace(/\\/g, "/");
 };
 exports.getTemporaryFilePath = _getTemporaryFilePath;
 
 
-var fs = require("fs");
+const fs = require("fs");
 
 function remove_file(filename, optional_callback) {
 

@@ -20,6 +20,8 @@ matrix:
     env: TRAVIS_NODE_VERSION="6"
   - os: osx
     env: TRAVIS_NODE_VERSION="6" ARCH="x86"
+  - os: osx
+    env: TRAVIS_NODE_VERSION="7"
   #- os: osx
   # env: TRAVIS_NODE_VERSION="7" ARCH="x86"
 

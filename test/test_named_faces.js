@@ -1,7 +1,7 @@
-var assert = require("assert");
-var should = require("should");
+const assert = require("assert");
+const should = require("should");
 
-var occ = require("../lib/occ");
+const occ = require("../lib/occ");
 
 function dumpSolid(b) {
     console.log(" faces    = ",b.getFaces().map( function(e){ return b.getShapeName(e);}).join(", "));
@@ -12,7 +12,7 @@ function dumpSolid(b) {
 
 describe("testing face naming on simple box",function() {
 
-    var solid;
+    let solid;
     before(function(){
         solid = occ.makeBox([0,0,0],[10,20,30]);
     });
@@ -46,7 +46,7 @@ describe("testing face naming on simple box",function() {
         solid.getShapeName(solid.faces.right).should.equal("right");
     });
     it("should return undefined when shape cannot be found",function(){
-        var solid2 = occ.makeBox(10,20,30);
+        let solid2 = occ.makeBox(10,20,30);
         should.exist(solid.getShapeName(solid.faces.right));
         should.not.exist(solid.getShapeName(solid2.faces.right));
 
@@ -96,18 +96,18 @@ describe("testing face naming on simple box",function() {
     });
     it("should have named edges",function(){
 
-        var test = solid.getEdges().map(function(e){return solid.getShapeName(e);});
+        let test = solid.getEdges().map(function(e){return solid.getShapeName(e);});
         test.sort().join(" ").should.equal("EXY EXZ EXy EXz EYZ EYz ExY ExZ Exy Exz EyZ Eyz");
     });
 
     it("should have named vertex",function(){
-        var test = solid.getVertices().map(function(e){return solid.getShapeName(e);});
+        let test = solid.getVertices().map(function(e){return solid.getShapeName(e);});
         test.sort().join(" ").should.equal("VXYZ VXYz VXyZ VXyz VxYZ VxYz VxyZ Vxyz");
     });
 
 });
 describe("testing face naming on simple sphere",function() {
-    var solid;
+    let solid;
     before(function(){
         solid = occ.makeSphere([0,0,0],30);
     });
@@ -123,7 +123,7 @@ describe("testing face naming on simple sphere",function() {
     });
 });
 describe("testing face naming on combined boxes",function() {
-   var solid,box1,box2;
+   let solid,box1,box2;
    before(function(){
       box1 = occ.makeBox([0,0,0],[10,10,10]);
       box2 = occ.makeBox([5,5,5],[15,15,15]);
@@ -156,7 +156,7 @@ describe("testing face naming on combined boxes",function() {
     });
 });
 describe("testing face naming on a box whose top/right/front corner is carved with a other box",function() {
-    var solid,box1,box2;
+    let solid,box1,box2;
     before(function(){
         box1 = occ.makeBox([0,0,0],[10,10,10]);
         box2 = occ.makeBox([5,5,5],[15,15,15]);
@@ -187,7 +187,7 @@ describe("testing face naming on a box whose top/right/front corner is carved wi
     });
 });
 describe("testing face naming on a box with a split face ('top' face)",function() {
-    var solid,block,cutting_solid;
+    let solid,block,cutting_solid;
     before(function() {
         block = occ.makeBox([0,0,0],[100,100,25]);
         cutting_solid = occ.makeBox([40,-10,10],[60,110,50]);
@@ -213,9 +213,9 @@ describe("testing face naming on a box with a split face ('top' face)",function(
     it("should ... ",function() {});
 });
 describe("testing face naming on a box fused with a box that have a common face , leading to 4 merging faces",function (){
-    var box1;
-    var box2;
-    var solid;
+    let box1;
+    let box2;
+    let solid;
     before(function(){
         //        +------+       +------+
         //        |`.     `.     |\      \
@@ -241,10 +241,10 @@ describe("testing face naming on a box fused with a box that have a common face 
         Object.keys(solid.faces).length.should.equal(10);
         solid.getFaces().length.should.equal(10);
         occ.gc();
-        var faces =  solid.getFaces();
-        for (var i in faces ){
-            var face = faces[i];
-            var bbox = face.getBoundingBox();
+        let faces =  solid.getFaces();
+        for (let i in faces ){
+            let face = faces[i];
+            let bbox = face.getBoundingBox();
             console.log("face i ", solid.getShapeName(face),bbox.toString());
         }
     });
@@ -255,7 +255,7 @@ describe("testing face naming on a box with a top face split twice leading to 4 
     // during the first cut operation.Then  each part will be split in two pieces again
     // during the second cut operation.
     //
-    var solid,block,cutting_solid1,cutting_solid2;
+    let solid,block,cutting_solid1,cutting_solid2;
     before(function() {
         block = occ.makeBox([0,0,0],[100,100,25]);
         cutting_solid1 = occ.makeBox([40,-10,10],[60,110,50]);
@@ -285,7 +285,7 @@ describe("testing face naming on a box with a top face split by a cross shape le
     // in this sample, the top face of the block will be split in 4 pieces
     // during the single cut operation
     //
-    var solid,block,cutting_solid1,cutting_solid2,cutting_solid;
+    let solid,block,cutting_solid1,cutting_solid2,cutting_solid;
     before(function() {
         block = occ.makeBox([0,0,0],[100,100,25]);
         cutting_solid1 = occ.makeBox([40,-10,10],[60,110,50]);
@@ -320,7 +320,7 @@ describe("testing face naming on a box with a top face split by a cross shape le
 
     it("should have 4 (and only 4) faces that have been generated from the top face of the original block",function() {
         // this could be tested using face names
-        var name = block.getShapeName(block.faces.top);
+        let name = block.getShapeName(block.faces.top);
 
         solid.faces.should.have.property("m1:"+ name+ ":0");
         solid.faces.should.have.property("m1:"+ name+ ":1");
@@ -334,12 +334,12 @@ describe("testing naming with makeFillet operation",function(){
 
 
 
-    var  solid;
+    let  solid;
     before(function(){
         solid = occ.makeBox([10,20,30],[100,200,300]);
         dumpSolid(solid);
 
-        var edges = solid.getCommonEdges(solid.faces.front,solid.faces.left);
+        let edges = solid.getCommonEdges(solid.faces.front,solid.faces.left);
         assert(edges instanceof Array);
 
         solid = occ.makeFillet(solid,edges[0],10); 

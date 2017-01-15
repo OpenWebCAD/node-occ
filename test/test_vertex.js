@@ -1,14 +1,14 @@
-var assert = require("assert");
-var should = require("should");
+const assert = require("assert");
+const should = require("should");
 
-var occ = require("../lib/occ");
+const occ = require("../lib/occ");
 
 
 describe("testing Vertex ",function(){
 
 
 	describe("constructing a empty vertex " , function() {
-        var vertex;
+        let vertex;
         before(function () {
             vertex = new occ.Vertex();
         });
@@ -19,7 +19,7 @@ describe("testing Vertex ",function(){
         });
     });
     describe("constructing a  vertex with a {x:..., y..,z: ...}", function () {
-        var vertex;
+        let vertex;
         before(function () {
             vertex = new occ.Vertex({x: 10, y: 20, z: 30});
         });
@@ -30,7 +30,7 @@ describe("testing Vertex ",function(){
         });
     });
     describe("constructing a  vertex with  {x:..., y..,z: ...} (property in random order)", function () {
-        var vertex;
+        let vertex;
         before(function () {
             vertex = new occ.Vertex({a: 10, y: 20, z: 30, x: 10});
         });
@@ -42,7 +42,7 @@ describe("testing Vertex ",function(){
     });
 
     describe("constructing a vertex build by passing x,y,z coordinates to constructor" , function() {
-        var vertex;
+        let vertex;
         before(function() {
             vertex = new occ.Vertex(10,20,30);
         });
@@ -54,7 +54,7 @@ describe("testing Vertex ",function(){
 
     });
     describe("constructing a vertex build by passing [x,y,z] coordinates to constructor" , function() {
-        var vertex;
+        let vertex;
         before(function() {
             vertex = new occ.Vertex([10,20,30]);
         });
@@ -69,13 +69,13 @@ describe("testing Vertex ",function(){
     });
 
     describe("constructing a  vertex and applying a translation",function(){
-        var vertex_org;
+        let vertex_org;
         before(function() {
             vertex_org = new occ.Vertex([10, 20, 30]);
         });
 
         it("should be translated",function(){
-            var vertex;
+            let vertex;
             vertex = vertex_org.translate([10, 20, 30]);
 
             vertex_org.x.should.equal(10);
@@ -87,7 +87,7 @@ describe("testing Vertex ",function(){
             vertex.z.should.equal(60);
        });
         it("should be translated - second form ", function () {
-            var vertex;
+            let vertex;
             vertex = vertex_org.translate(/*[*/10, 20, 30/*]*/);
 
             vertex_org.x.should.equal(10);
@@ -100,9 +100,9 @@ describe("testing Vertex ",function(){
         });
         it("should be mirrored", function () {
 
-            var trsf = occ.makePlaneMirror([0, 0, 0], [0, 1, 0]);
+            let trsf = occ.makePlaneMirror([0, 0, 0], [0, 1, 0]);
 
-            var vertex_dest = vertex_org.transformed(trsf);
+            let vertex_dest = vertex_org.transformed(trsf);
             vertex_org.x.should.equal(10);
             vertex_org.y.should.equal(20);
             vertex_org.z.should.equal(30);
@@ -119,48 +119,48 @@ describe("testing Vertex ",function(){
 
         it("Edge#constructor - should not crash if new is omitted", function () {
             should(function () {
-                var tmp = /* new */ occ.Edge();
+                let tmp = /* new */ occ.Edge();
             }).throwError(" use new occ.Edge() to construct a Edge");
         });
         it("Vertex#constructor - should not crash if new is omitted", function () {
             should(function () {
-                var tmp = /* new */ occ.Vertex(10, 20, 30);
+                let tmp = /* new */ occ.Vertex(10, 20, 30);
             }).throwError(" use new occ.Vertex() to construct a Vertex");
         });
         it("Wire#constructor - should not crash if new is omitted", function () {
             should(function () {
-                var tmp = /* new */ occ.Wire();
+                let tmp = /* new */ occ.Wire();
             }).throwError(" use new occ.Wire() to construct a Wire");
         });
         it("Solid#constructor - should not crash if new is omitted", function () {
             should(function () {
-                var tmp = /* new */ occ.Solid();
+                let tmp = /* new */ occ.Solid();
             }).throwError(" use new occ.Solid() to construct a Solid");
         });
         it("BoundingBox#constructor - should not crash if new is omitted", function () {
             should(function () {
-                var tmp = /* new */ occ.BoundingBox(10, 20, 30);
+                let tmp = /* new */ occ.BoundingBox(10, 20, 30);
             }).throwError(" use new occ.BoundingBox() to construct a BoundingBox");
         });
 
         it("Vertex#constructor should not crash if wrong argument are provided", function () {
-            var tmp = new occ.Vertex({x: 10, y: 20, z: 30});
+            let tmp = new occ.Vertex({x: 10, y: 20, z: 30});
         });
     });
 
 
     describe("should provide a way to compare vertex", function () {
         it("should compare 2 vertices with same coordinates", function () {
-            var vertex1 = new occ.Vertex(10, 20, 30);
-            var vertex2 = new occ.Vertex(10, 20, 30);
+            let vertex1 = new occ.Vertex(10, 20, 30);
+            let vertex2 = new occ.Vertex(10, 20, 30);
             should(vertex1).eql(vertex2);
             console.log("vertex1 ", vertex1);
             should(vertex1).containEql({x: 10, y: 20, z: 30});
 
         });
         it("should compare 2 vertices with different coordinates", function () {
-            var vertex1 = new occ.Vertex(10, 20, 30);
-            var vertex2 = new occ.Vertex(110, 220, 330);
+            let vertex1 = new occ.Vertex(10, 20, 30);
+            let vertex2 = new occ.Vertex(110, 220, 330);
             should(vertex1).not.eql(vertex2);
         });
 

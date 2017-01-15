@@ -1,9 +1,7 @@
-var assert = require("assert");
-
-var fastBuilder = require("../lib/fastbuilder");
-
-var fast_occ = fastBuilder.occ;
-fastBuilder  = fastBuilder.fastBuilder;
+const assert = require("assert");
+const fastBuilder_ = require("../lib/fastbuilder");
+const fast_occ = fastBuilder_.occ;
+const fastBuilder  = fastBuilder_.fastBuilder;
 
 function makeShape() {
     var e= 20;
@@ -94,19 +92,19 @@ describe("testing fast builder with array of shape",function(){
         a.push(makeShape().translate(10,20,30));
         a.push(makeShape().translate(30,20,30));
 
-        var compound = fast_occ.compound(a);
+        let compound = fast_occ.compound(a);
 
     });
 });
 
 describe("testing fast builder with makeThickSolid" , function() {
-    var s1;
-    var s2;
+    let s1;
+    let s2;
     before(function(){
         s1 = fast_occ.makeBox([10,20,30],[110,120,130]);
         s1 = fast_occ.makeThickSolid(s1,s1.faces.top,6);
 
-        var occ = require("../lib/occ");
+        let occ = require("../lib/occ");
         s2  = occ.makeBox([10,20,30],[110,120,130]);
         s2  = occ.makeThickSolid(s2,s2.faces.top,6);
 
@@ -117,11 +115,11 @@ describe("testing fast builder with makeThickSolid" , function() {
 });
 
 
-var factory = require("../lib/shapeFactory.js");
+let factory = require("../lib/shapeFactory.js");
 describe("testing fast builder with some built-in shapes", function () {
-    var fastbuilder = require("../lib/fastbuilder");
+    let fastbuilder = require("../lib/fastbuilder");
     it("should  create the  bottle..", function () {
-        var s1 = factory.makeBottle(fastbuilder.occ);
+        let s1 = factory.makeBottle(fastbuilder.occ);
         s1.numFaces.should.be.greaterThan(16);
     });
 });
@@ -129,8 +127,8 @@ describe("testing fast builder with some built-in shapes", function () {
 describe("testing fast builder with some shapes", function () {
 
     it("should  create the  piston..", function () {
-        var fastbuilder = require("../lib/fastbuilder");
-        var s1 = factory.makePiston(fastbuilder.occ);
+        let fastbuilder = require("../lib/fastbuilder");
+        let s1 = factory.makePiston(fastbuilder.occ);
         s1.numFaces.should.be.greaterThan(7);
     });
 });
@@ -138,11 +136,11 @@ describe("testing fast builder with some shapes", function () {
 
 
 describe("testing fast builder get Common Edge" , function() {
-  var solid1;
-  var solid2;
+  let solid1;
+  let solid2;
   function buildFilletOnTopLeftEdge() {
-     var s1 = fast_occ.makeBox([10,20,30],[110,120,130]);
-     var edges = s1.getCommonEdges(s1.faces.front,s1.faces.left);
+     let s1 = fast_occ.makeBox([10,20,30],[110,120,130]);
+     let edges = s1.getCommonEdges(s1.faces.front,s1.faces.left);
      s1 = fast_occ.makeFillet(s1,edges,10);
      //xx console.log(Object.keys(s1.faces));
      s1 = fast_occ.makeDraftAngle(s1,s1.faces["mleft:0"],0.1,s1.faces["mbottom:0"]);
@@ -160,7 +158,7 @@ describe("testing fast builder get Common Edge" , function() {
 
 
 describe("testing fast-builder with impossible cone" , function () {
-    var solid1 = 0;
+    let solid1 = 0;
     before(function () {
         // this cone cannot be built : it has PI/2 for half-angle !
     });
@@ -175,20 +173,20 @@ describe("testing fast-builder with LEGO brick" , function () {
 
     it("should produce a LEGO brick",function(){
 
-        var factory = require("../lib/shapeFactory.js");
+        let factory = require("../lib/shapeFactory.js");
 
         function buildBrick() {
 
-            var nx = 3;
-            var ny = 6;
-            var brick24 = factory.makeLegoBrick(fast_occ, nx, ny, 'thick');
+            let nx = 3;
+            let ny = 6;
+            let brick24 = factory.makeLegoBrick(fast_occ, nx, ny, 'thick');
 
             brick24.numFaces.should.be.greaterThan(40);
 
             // now check with bounding box
-            var bbox = brick24.getBoundingBox();
+            let bbox = brick24.getBoundingBox();
 
-            var eps = 0.01;
+            let eps = 0.01;
             bbox.nearPt.x.should.be.within(0-eps,0+eps);
             bbox.nearPt.y.should.be.within(0-eps,0+eps);
             bbox.nearPt.z.should.be.within(0-eps,0+eps);
@@ -198,17 +196,17 @@ describe("testing fast-builder with LEGO brick" , function () {
             bbox.farPt.z.should.be.within(11.2-eps,11.2+eps);
         }
 
-        var c1 = startChronometer();
+        let c1 = startChronometer();
         buildBrick();
-        var diff1 = stopChronometer(c1);
+        let diff1 = stopChronometer(c1);
 
-        var c2 = startChronometer();
+        let c2 = startChronometer();
         buildBrick();
-        var diff2 = stopChronometer(c2);
+        let diff2 = stopChronometer(c2);
 
         console.log(" time to compute first  box = ", diff1 ," seconds" );
         console.log(" time to compute second box = ", diff2  ," seconds");
-        var speedup = Math.round( (diff1-diff2)/diff2*100,2);
+        let speedup = Math.round( (diff1-diff2)/diff2*100,2);
         console.log(" speed up                   = ", speedup ,"%" );
 
         diff1.should.be.greaterThan(diff2);

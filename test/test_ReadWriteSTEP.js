@@ -1,33 +1,32 @@
+/*eslint-env node mocha*/
+/*global require*/
 // test_STEP
-var assert = require("assert");
-var should = require("should");
-
-var occ = require("../lib/occ");
-
-var fs = require("fs");
-var async = require("async");
+const assert = require("assert");
+require("should");
+const occ = require("../lib/occ");
 
 
-var getTemporaryFilePath = require("./helpers").getTemporaryFilePath;
-var remove_file = require("./helpers").remove_file;
+
+const getTemporaryFilePath = require("./helpers").getTemporaryFilePath;
+const remove_file = require("./helpers").remove_file;
 
 describe("testing STEP input output ", function () {
 
+    let b1_step, b2_step, b3_step;
 
-    var b1_step, b2_step, b3_step;
     before(function () {
 
         b1_step = getTemporaryFilePath({prefix: "b1_", suffix: ".step"});
         b2_step = getTemporaryFilePath({prefix: "b2_", suffix: ".step"});
         b3_step = getTemporaryFilePath({prefix: "b3_", suffix: ".step"});
 
-        var box = occ.makeBox([0, 0, 0], [100, 200, 300]);
-        var b1 = occ.writeSTEP(b1_step, box);
+        let box = occ.makeBox([0, 0, 0], [100, 200, 300]);
+        let b1 = occ.writeSTEP(b1_step, box);
 
 
-        var cyl = occ.makeCylinder([0, 0, 0], [0, 0, 10], 5);
-        var b2 = occ.writeSTEP(b2_step, cyl);
-        var b3 = occ.writeSTEP(b3_step, [box, cyl]);
+        let cyl = occ.makeCylinder([0, 0, 0], [0, 0, 10], 5);
+        let b2 = occ.writeSTEP(b2_step, cyl);
+        let b3 = occ.writeSTEP(b3_step, [box, cyl]);
 
         b1.should.eql(true);
         b2.should.eql(true);
@@ -40,14 +39,14 @@ describe("testing STEP input output ", function () {
     });
 
     it("should write a simple shape", function (done) {
-        var box = occ.makeBox([0, 0, 0], [100, 200, 300]);
-        var b1 = occ.writeSTEP(b1_step, box);
+        let box = occ.makeBox([0, 0, 0], [100, 200, 300]);
+        let b1 = occ.writeSTEP(b1_step, box);
         done();
     });
 
     it(" readSTEP with callback ", function (done) {
 
-        var callback_called = 0;
+        let callback_called = 0;
         occ.readSTEP(b3_step, function (err, shapes) {
             shapes.length.should.equal(2);
             shapes[0].numFaces.should.equal(6);

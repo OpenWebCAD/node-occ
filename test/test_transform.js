@@ -1,11 +1,11 @@
-var assert = require("assert");
-var should = require("should");
-var occ = require("../lib/occ");
+const assert = require("assert");
+const should = require("should");
+const occ = require("../lib/occ");
 
 
 describe("testing transformation object",function(){
     
-    var trsf;
+    let trsf;
     before(function() {
        trsf=new occ.Transformation();
     });
@@ -52,8 +52,8 @@ describe("testing transformation object",function(){
         });
 
         it("should flip coord on the Z axis", function () {
-            var v = occ.makeVertex(10, 10, 40);
-            var v2 = v.transformed(trsf);
+            let v = occ.makeVertex(10, 10, 40);
+            let v2 = v.transformed(trsf);
             v2.x.should.eql(v.x);
         })
     });

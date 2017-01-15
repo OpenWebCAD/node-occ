@@ -1,7 +1,7 @@
-var assert = require("assert");
-var should = require("should");
+const assert = require("assert");
+const should = require("should");
 
-var occ = require("../lib/occ");
+const occ = require("../lib/occ");
 
 // see https://npmjs.org/package/should
 
@@ -9,16 +9,16 @@ describe("testing face mesh ",function() {
 
     it("should not have a mesh unless the parent solid has been meshed", function(){
 
-        var solid = occ.makeBox([0,0,0],[10,10,10]);
+        let solid = occ.makeBox([0,0,0],[10,10,10]);
         solid.faces.should.have.property("top");
-        var topFace = solid.faces.top;
+        let topFace = solid.faces.top;
         should.exist(topFace);
 
         //xx topFace.area.should.equal(100.0);
 
         topFace.hasMesh.should.equal(false);
         // now mesh the solid
-        var m = solid.mesh;
+        let m = solid.mesh;
         topFace.hasMesh.should.equal(true);
 
         m.vertices.length.should.eql(72);
@@ -28,7 +28,7 @@ describe("testing face mesh ",function() {
 
         console.log(topFace.mesh.toJSON());
 
-        var faceMesh = topFace.mesh;
+        let faceMesh = topFace.mesh;
         faceMesh.vertices.length.should.eql(3 * 4);
         faceMesh.normals.length.should.eql(3 * 4);
         faceMesh.edgeindices.length.should.eql(2 * 4);
@@ -42,12 +42,12 @@ describe("testing face#getWire ", function () {
 
     it("#getWire", function () {
 
-        var solid = occ.makeBox([0, 0, 0], [10, 10, 10]);
+        let solid = occ.makeBox([0, 0, 0], [10, 10, 10]);
         solid.faces.should.have.property("top");
-        var topFace = solid.faces.top;
+        let topFace = solid.faces.top;
         should.exist(topFace);
 
-        var wires = topFace.getWires();
+        let wires = topFace.getWires();
         wires.length.should.eql(1);
 
         wires[0].getEdges().length.should.eql(4);
