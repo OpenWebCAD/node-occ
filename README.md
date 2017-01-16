@@ -82,7 +82,7 @@ $npm install node-occ
 
 # installing nodejs and gyp utility to build extensions
 sudo apt-get install nodejs npm
-sudo npm install node-gyp -g
+sudo npm install node-pre-gyp -g
 sudo npm install mocha -g
 
 #installing cmake
@@ -93,8 +93,8 @@ git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
 sh prepare_build.sh
 npm install
-node-gyp configure
-node-gyp build
+node-pre-gyp configure
+node-pre-gyp build
 mocha
 ```
 
