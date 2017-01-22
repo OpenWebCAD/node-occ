@@ -1,6 +1,6 @@
 {
   "variables": {
-    "dbg%": "d"
+    "dbg%": ""
   },
   "targets": [
     {
