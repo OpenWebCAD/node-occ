@@ -160,7 +160,6 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
     if (triangulation->HasNormals()) {
 
       const TShort_Array1OfShortReal& normals = triangulation->Normals();
-      _ASSERT(normals.Length()*3 == nb_points);
       for (int i = 0; i < nb_points; i++) {
         const Standard_ShortReal& nx = normals( i*3 + 1);
         const Standard_ShortReal& ny = normals( i*3 + 2);
