@@ -9,6 +9,7 @@
 class Wire;
 class Face:  public Base {
 
+  friend class Mesh;
   TopoDS_Face m_face;
   Nan::Persistent<v8::Object> m_cacheMesh;
   virtual ~Face();

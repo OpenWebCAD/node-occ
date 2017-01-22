@@ -148,6 +148,11 @@
 #include <TNaming_Builder.hxx>
 #include <Interface_Graph.hxx>
 
+#include <Poly_Polygon3D.hxx>
+#include <BRep_TEdge.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_PolygonOnTriangulation.hxx>
+
 // Compatibility 6.5 and above
 #if (OCC_VERSION_MAJOR * 10 + OCC_VERSION_MINOR )  < 66 
 

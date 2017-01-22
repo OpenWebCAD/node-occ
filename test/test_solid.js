@@ -261,17 +261,16 @@ describe("testing solid construction",function() {
             before(function(){
                 solid = occ.makeBox([10,20,30],[20,30,40]);
             });
-            it("should have a mesh with 4*6 vertices", function() {
-                solid.mesh.numVertices.should.equal(24);
+            it("should have a mesh with 8 vertices", function () {
+                solid.mesh.numVertices.should.equal(8);
             });
-            it("should have a mesh with (2*3)*4 edges", function() {
-                solid.mesh.numEdges.should.equal(24);
+            it("should have a mesh with  4+4+4=12 edges", function () {
+                solid.mesh.numEdges.should.equal(12);
             });
             it("should have a mesh with 2*6 triangles", function() {
                 solid.mesh.numTriangles.should.equal(12);
             });
         });
-
     });
     describe("Testing  Shape __prototype", function() {
          let solid;

@@ -93,7 +93,7 @@ bool Face::buildFace(std::vector<Wire*>& wires)
   if (wires.size()==0) return false;
 
   // checling that all wires are closed
-  for (size_t i = 0; i < wires.size(); i++) {
+  for (uint32_t i = 0; i < wires.size(); i++) {
     if (!wires[i]->isClosed()) {
       Nan::ThrowError("Some of the wires are not closed");
       return false;
@@ -170,7 +170,7 @@ NAN_PROPERTY_GETTER(Face::_mesh)
   Face* pThis = UNWRAP(Face)
 
   if (pThis->m_cacheMesh.IsEmpty()) {
-	  pThis->m_cacheMesh.Reset(pThis->createMesh(0.5, 20 * 3.14159 / 180.0, true));
+	  pThis->m_cacheMesh.Reset(pThis->createMesh(1,0.5, true));
   }
   info.GetReturnValue().Set(Nan::New(pThis->m_cacheMesh));
 }
@@ -188,9 +188,12 @@ v8::Handle<v8::Object> Face::createMesh(double factor, double angle, bool qualit
 
   try {
 
-    double factor = 0.4;
-    double angle  = 20*3.14159/180.0;
-    BRepMesh_IncrementalMesh MSH(shape,factor,Standard_True,angle,Standard_True);
+    TopLoc_Location loc;
+    occHandle(Poly_Triangulation) triangulation = BRep_Tool::Triangulation(this->face(), loc);
+    if (triangulation.IsNull()) {
+       BRepMesh_IncrementalMesh MSH(shape,factor,Standard_True,angle,Standard_True);
+    }
+
 
     // this code assume that the triangulation has been created
     // on the parent object
@@ -242,6 +245,6 @@ void Face::Init(v8::Handle<v8::Object> target)
 NAN_METHOD(Face::createMesh)
 {
   Face* pThis = UNWRAP(Face);
-  v8::Handle<v8::Object> mesh = pThis->createMesh(0.5,20*3.14159/180.0,true);
+  v8::Handle<v8::Object> mesh = pThis->createMesh(1,0.5,true);
   info.GetReturnValue().Set(mesh);
 }

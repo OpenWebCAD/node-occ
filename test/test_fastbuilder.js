@@ -171,6 +171,8 @@ describe("testing fast-builder with impossible cone" , function () {
 
 describe("testing fast-builder with LEGO brick" , function () {
 
+    this.timeout(10000);
+
     it("should produce a LEGO brick",function(){
 
         let factory = require("../lib/shapeFactory.js");

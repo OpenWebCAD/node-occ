@@ -63,7 +63,7 @@ describe("issue#17 testing that mesh get invalidated ", function () {
         face.hasMesh.should.equal(false);
 
         // now mesh the faces
-        face.mesh
+        face.createMesh(0.1);
         face.hasMesh.should.equal(true);
 
         console.log("face mesh vertices =", face.mesh.vertices.toString());

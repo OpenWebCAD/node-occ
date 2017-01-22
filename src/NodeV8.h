@@ -96,6 +96,9 @@ NAN_GETTER(ee)
 #define EXPOSE_READ_ONLY_PROPERTY_INTEGER(ClassName,name) \
     __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,v8::Integer,int,&ClassName::name>),name)
 
+#define EXPOSE_READ_ONLY_PROPERTY_UINT32(ClassName,name) \
+    __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,v8::Integer,uint32_t,&ClassName::name>),name)
+
 #define EXPOSE_READ_ONLY_PROPERTY_DOUBLE(ClassName,name) \
     __EXPOSE_READ_ONLY_PROPERTY(proto, (ee<ClassName,v8::Number,double,&ClassName::name>),name)
 
