@@ -31,6 +31,7 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
+    - cmake-2.8.12
 
 before_install:
 # reinstall latest nvm
@@ -62,8 +63,6 @@ before_install:
 - $CXX --version
 
 # compile OCE
-- apt-get update
-- apt-get install cmake-2.8.12
 - bash ./prepare_build_occt.sh
 # compile Node-OCC
 - bash ./prepare_node.sh
