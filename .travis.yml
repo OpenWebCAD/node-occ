@@ -5,7 +5,7 @@ os:
   - osx
 dist: trusty
 
-# sudo: required
+sudo: required
 
 env:
   matrix:
@@ -95,4 +95,4 @@ script:
 
 cache:
   directories:
-  - build_oce
+  - occt
