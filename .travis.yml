@@ -62,7 +62,7 @@ before_install:
 - $CXX --version
 
 # compile OCE
-- bash ./prepare_build.sh
+- bash ./prepare_build_occt.sh
 # compile Node-OCC
 - bash ./prepare_node.sh
 
