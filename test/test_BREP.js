@@ -10,7 +10,7 @@ const remove_file = require("./helpers").remove_file;
 
 
 describe("testing BREP input output ", function () {
-
+    "use strict";
     let b1_brep, b2_brep, b3_brep;
     let b1_volume = 0;
     let b1_area = 0;
@@ -122,6 +122,7 @@ describe("testing BREP input output ", function () {
 
 function build_large_part() {
 
+    "use strict";
     let lego_filename = getTemporaryFilePath({prefix: "legoPlate3x2_2x2", suffix: ""});
 
     let legoPlate = shape_factory.makeLegoBrick(occ, 3, 2, "thin");
@@ -153,6 +154,7 @@ function build_large_part() {
 
 describe("it should write and read a large brep file", function () {
 
+    "use strict";
     this.timeout(15000);
 
     let filename = build_large_part();

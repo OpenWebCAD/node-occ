@@ -1,3 +1,4 @@
+"use strict";
 const assert = require("assert");
 const fastBuilder_ = require("../lib/fastbuilder");
 const fast_occ = fastBuilder_.occ;

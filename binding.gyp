@@ -12,14 +12,14 @@
         "-fno-exceptions"
       ],
       "cflags": [
-	"-frtti",
+        "-frtti",
         "-Wno-ignored-qualifiers",
         "-Wno-unused-variable",
         "-Wno-reorder",
         "-Wno-extra"
       ],
       "cflags_cc": [
-	"-frtti",
+        "-frtti",
         "-Wno-ignored-qualifiers",
         "-Wno-unused-variable",
         "-Wno-reorder",
@@ -79,15 +79,9 @@
       "library_dirs": [
         "/usr/local/lib",
         "/usr/local/lib"
-<<<<<<< HEAD
-	  ],
-	  "include_dirs": [
-        "/usr/local/include/opencascade",
-=======
       ],
       "include_dirs": [
         "/usr/local/include/oce",
->>>>>>> origin/master
         "<!(node -e \"require('nan')\")"
       ],
       "libraries": [
@@ -107,7 +101,6 @@
         "-lTKMesh<(dbg)",
         "-lTKOffset<(dbg)",
         "-lTKPrim<(dbg)",
-        "-lTKPShape<(dbg)",
         "-lTKShHealing<(dbg)",
         "-lTKTopAlgo<(dbg)",
         "-lTKIGES<(dbg)",
@@ -143,92 +136,6 @@
         "<(module_name)"
       ],
       "conditions": [[
-        "OS=='linux'",
-        {
-          "variables": {
-             "bin_folder": "./build_oce/Unix/x86_64-Release-64"
-          },
-          "copies": [
-            {
-              "files": [
-                "<(bin_folder)/libTKBO.so.11.0.0",
-                "<(bin_folder)/libTKBool.so.11.0.0",
-                "<(bin_folder)/libTKBRep.so.11.0.0",
-                "<(bin_folder)/libTKernel.so.11.0.0",
-                "<(bin_folder)/libTKFillet.so.11.0.0",
-                "<(bin_folder)/libTKG2d.so.11.0.0",
-                "<(bin_folder)/libTKG3d.so.11.0.0",
-                "<(bin_folder)/libTKGeomAlgo.so.11.0.0",
-                "<(bin_folder)/libTKGeomBase.so.11.0.0",
-                "<(bin_folder)/libTKMath.so.11.0.0",
-                "<(bin_folder)/libTKMesh.so.11.0.0",
-                "<(bin_folder)/libTKOffset.so.11.0.0",
-                "<(bin_folder)/libTKPrim.so.11.0.0",
-                "<(bin_folder)/libTKShHealing.so.11.0.0",
-                "<(bin_folder)/libTKSTEP.so.11.0.0",
-                "<(bin_folder)/libTKSTEP209.so.11.0.0",
-                "<(bin_folder)/libTKSTEPAttr.so.11.0.0",
-                "<(bin_folder)/libTKSTEPBase.so.11.0.0",
-                "<(bin_folder)/libTKSTL.so.11.0.0",
-                "<(bin_folder)/libTKTopAlgo.so.11.0.0",
-                "<(bin_folder)/libTKXSBase.so.11.0.0",
-
-<<<<<<< HEAD
-	  "libraries": [
-		'-lTKBO',
-		'-lTKBool',
-		'-lTKBRep',
-		'-lTKernel',
-		'-lTKFeat',
-		'-lTKFillet',
-		'-lTKG2d',
-		'-lTKG3d',
-		'-lTKGeomAlgo',
-		'-lTKGeomBase',
-		'-lTKIGES',
-		'-lTKernel',
-		'-lTKMath',
-		'-lTKMesh',
-		'-lTKOffset',
-		'-lTKPrim',
-		'-lTKShHealing',
-		'-lTKTopAlgo',
-		'-lTKIGES',
-		'-lTKSTEP',
-		'-lTKSTEPAttr',
-		'-lTKSTEPBase',
-		'-lTKFillet',
-		'-lTKXSBase',
-		'-lTKSTL',
-		'-lTKTObj',
-		'-lTKLCAF'
-	],
-=======
-                "<(bin_folder)/libTKBO.so.11",
-                "<(bin_folder)/libTKBool.so.11",
-                "<(bin_folder)/libTKBRep.so.11",
-                "<(bin_folder)/libTKernel.so.11",
-                "<(bin_folder)/libTKFillet.so.11",
-                "<(bin_folder)/libTKG2d.so.11",
-                "<(bin_folder)/libTKG3d.so.11",
-                "<(bin_folder)/libTKGeomAlgo.so.11",
-                "<(bin_folder)/libTKGeomBase.so.11",
-                "<(bin_folder)/libTKMath.so.11",
-                "<(bin_folder)/libTKMesh.so.11",
-                "<(bin_folder)/libTKOffset.so.11",
-                "<(bin_folder)/libTKPrim.so.11",
-                "<(bin_folder)/libTKShHealing.so.11",
-                "<(bin_folder)/libTKSTEP.so.11",
-                "<(bin_folder)/libTKSTEP209.so.11",
-                "<(bin_folder)/libTKSTEPAttr.so.11",
-                "<(bin_folder)/libTKSTEPBase.so.11",
-                "<(bin_folder)/libTKSTL.so.11",
-                "<(bin_folder)/libTKTopAlgo.so.11",
-                "<(bin_folder)/libTKXSBase.so.11",
-              ],
-              "destination": "<(module_path)"
-          }]
-        }],[
         "OS=='win'",
         {
           "variables": {
@@ -317,7 +224,6 @@
           ]
         }
       ]]
->>>>>>> origin/master
     }
   ]
 }

@@ -1,5 +1,5 @@
 #include "Mesh.h"
-#include <Standard_PrimitiveTypes.hxx>
+
 #include <set>
 #include <list>
 #include <algorithm>
@@ -295,47 +295,6 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
       tri.k = translationTable[(uint32_t)(n3 - 1)];
       this->_triangles_normals.push_back(tri);
 
-<<<<<<< HEAD
-      Handle_Geom_Surface surface = BRep_Tool::Surface(face);
-      gp_Vec normal;
-      for (int i = 0; i < triangulation->NbNodes(); i++) {
-        vert = this->vertices[vsize + i];
-        gp_Pnt vertex(vert.x, vert.y, vert.z);
-      // this call is useless and has been replaced by GeomLProp_SLProps call
-      // GeomAPI_ProjectPointOnSurf SrfProp(vertex, surface );
-        Standard_Real fU, fV;
-      // this call is useless and has been replaced by GeomLProp_SLProps call
-      // SrfProp.Parameters(1, fU, fV);
-
-        GeomLProp_SLProps faceprop(surface, fU, fV, 2, gp::Resolution());
-        normal = faceprop.Normal();
-
-        if (normal.SquareMagnitude() > 1.0e-10)
-          normal.Normalize();
-
-        if (reversed) {
-          norm.x = (float)-normal.X();
-          norm.y = (float)-normal.Y();
-          norm.z = (float)-normal.Z();
-        } else {
-          norm.x = (float)normal.X();
-          norm.y = (float)normal.Y();
-          norm.z = (float)normal.Z();
-        }
-        this->normals[vsize + i] = norm;
-      }
-    } else {
-      // Normalize vertex normals
-      for (int i = 0; i < triangulation->NbNodes(); i++) {
-        gp_Vec normal = normals[i];
-        if (normal.SquareMagnitude() > 1.0e-10)
-          normal.Normalize();
-
-        norm.x = (float)normal.X();
-        norm.y = (float)normal.Y();
-        norm.z = (float)normal.Z();
-        this->normals[vsize + i] = norm;
-      }
     }
     else {
       tri.i = this->push_normal(local_normals[n1 - 1]);

@@ -1,3 +1,4 @@
+"use strict";
 /*eslint-env node mocha*/
 /*global require*/
 // test_STEP

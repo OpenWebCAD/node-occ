@@ -1,4 +1,4 @@
-
+"use strict";
 const occ = require("../lib/occ");
 const should = require("should");
 
