@@ -22,7 +22,7 @@ cd build;
 cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/usr/local/ -DUSE_VTK:BOOL=OFF ;
 
 echo 1 `date +%R:%S`;
-sudo make -j ${NPROC} install 
-sudo ldconfig ;
+echo "CPU COUNT " ${NPROC}
+make -j ${NPROC} install 
 cd ..
 echo "done"
