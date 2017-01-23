@@ -33,6 +33,7 @@ addons:
     packages:
     - g++-4.8
     - libxi-dev
+    - ccache
 
 before_install:
 # reinstall latest nvm
