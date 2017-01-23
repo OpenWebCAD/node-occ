@@ -62,6 +62,8 @@ before_install:
 - $CXX --version
 
 # compile OCE
+- apt-get update
+- apt-get install cmake-2.8.12
 - bash ./prepare_build_occt.sh
 # compile Node-OCC
 - bash ./prepare_node.sh
