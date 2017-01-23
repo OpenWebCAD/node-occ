@@ -1,13 +1,12 @@
-var assert = require("assert");
-
-var occ = require("../lib/occ");
-var shapeFactory = require('../lib/shapeFactory');
+const assert = require("assert");
+const occ = require("../lib/occ");
+const shapeFactory = require('../lib/shapeFactory');
 
 
 
 describe("testing bounding box",function(){
     describe("an empty BoundingBox", function() {
-        var bbox;
+        let bbox;
         before(function() {
              bbox = new occ.BoundingBox();
         });
@@ -16,7 +15,7 @@ describe("testing bounding box",function(){
         });
     });
     describe("an  BoundingBox built with a single point in constructor", function() {
-        var bbox;
+        let bbox;
         before(function() {
             bbox = new occ.BoundingBox([10,20,30]);
         });
@@ -35,7 +34,7 @@ describe("testing bounding box",function(){
         });
     });
     describe("adding a single point to an empty bounding box", function(){
-        var bbox;
+        let bbox;
         before(function() {
             bbox = new occ.BoundingBox();
             bbox.addPoint([10,20,30]);
@@ -56,12 +55,12 @@ describe("testing bounding box",function(){
     });
     describe("checking calling isOut on a empty box",function() {
         it("should return isOut = true for any point ",function(){
-            var bbox= new occ.BoundingBox();
+            let bbox= new occ.BoundingBox();
             bbox.isOut([10,20,30]).should.equal(true);
         });
     });
     describe("checking calling isOut this box [-10,-10,-10],[5,5,5]",function() {
-        var bbox= new occ.BoundingBox([-10,-10,-10],[5,5,5]);
+        let bbox= new occ.BoundingBox([-10,-10,-10],[5,5,5]);
         it("should return isOut = true for [10,20,30] ",function(){
             bbox.isOut([10,20,30]).should.equal(true);
         });

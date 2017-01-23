@@ -400,6 +400,7 @@ NAN_METHOD(ShapeFactory::makeCone)
   if (info.Length()==3 && info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber()) {
 
     double R1 = 0, R2 = 0, H = 0;
+
     ReadDouble(info[0], R1);
     ReadDouble(info[1], R2);
     ReadDouble(info[2], H);

@@ -28,6 +28,7 @@ public:
 
   double volume();
   double area();
+  bool hasMesh();
 
   virtual void InitNew(_NAN_METHOD_ARGS);
 

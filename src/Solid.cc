@@ -45,6 +45,7 @@ void Solid::Init(v8::Handle<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
 
   EXPOSE_READ_ONLY_PROPERTY(_mesh,mesh);
+  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Solid,hasMesh);
 
   target->Set(Nan::New("Solid").ToLocalChecked(), tpl->GetFunction());
 
@@ -59,6 +60,7 @@ NAN_METHOD(Solid::InitNew)
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numFaces);
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numSolids);
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Solid,numShells);
+  REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Solid,hasMesh);
 }
 
 
@@ -210,6 +212,7 @@ NAN_METHOD(Solid::getAdjacentFaces)
 
 
   TopTools_IndexedDataMapOfShapeListOfShape map;
+  TopExp::MapShapesAndAncestors(pThis->shape(),TopAbs_EDGE,TopAbs_FACE,map);
   TopExp::MapShapesAndAncestors(pThis->shape(),TopAbs_EDGE,TopAbs_FACE,map);
 
   TopTools_MapOfShape auxmap;
@@ -369,6 +372,10 @@ double Solid::volume()
   return prop.Mass();
 }
 
+bool Solid::hasMesh() {
+    return !m_cacheMesh.IsEmpty();
+}
+
 //DVec Solid::inertia() {
 //    DVec ret;
 //    GProp_GProps prop;
@@ -399,7 +406,7 @@ NAN_PROPERTY_GETTER(Solid::_mesh)
 {
   Solid* pThis = UNWRAP(Solid);
   if (pThis->m_cacheMesh.IsEmpty()) {
-      pThis->m_cacheMesh.Reset(pThis->createMesh(0.5,20*3.14159/180.0,true));
+      pThis->m_cacheMesh.Reset(pThis->createMesh(1,0.5,true));
   }
   info.GetReturnValue().Set(Nan::New(pThis->m_cacheMesh));
 }
@@ -417,8 +424,9 @@ NAN_PROPERTY_GETTER(Solid::_mesh)
 //        BRepMesh().Mesh(shape_, 1.0);
 //    }
 //}
-v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qualityNormals)
+v8::Handle<v8::Object> Solid::createMesh(double factor, double angle, bool qualityNormals)
 {
+
   Nan::EscapableHandleScope scope;
 
   const unsigned argc = 0;
@@ -430,23 +438,12 @@ v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qual
   const TopoDS_Shape& shape = this->shape();
 
   try {
-    BRepMesh_IncrementalMesh MSH(shape,factor,Standard_True,angle,Standard_True);
 
-    /*
-       Bnd_Box aBox;
-       BRepBndLib::Add(shape, aBox);
-
-       Standard_Real aXmin, aYmin, aZmin;
-       Standard_Real aXmax, aYmax, aZmax;
-       aBox.Get(aXmin, aYmin, aZmin, aXmax, aYmax, aZmax);
-
-       Standard_Real maxd = fabs(aXmax - aXmin);
-       maxd = std::max(maxd, fabs(aYmax - aYmin));
-       maxd = std::max(maxd, fabs(aZmax - aZmin));
-
-       BRepMesh_FastDiscret MSH(factor*maxd, angle, aBox, Standard_True, Standard_True,Standard_True, Standard_True);
-       MSH.Perform(shape);
-       */
+    if (angle == 0.0) {
+       BRepMesh_IncrementalMesh m1(shape,factor,Standard_True);
+    } else {
+       BRepMesh_IncrementalMesh m2(shape,factor,Standard_True,angle, Standard_True);
+    }
 
     if (shape.ShapeType() == TopAbs_COMPSOLID || shape.ShapeType() == TopAbs_COMPOUND) {
       TopExp_Explorer exSolid, exFace;
@@ -467,6 +464,7 @@ v8::Handle<v8::Object>  Solid::createMesh(double factor, double angle, bool qual
       }
     }
   } CATCH_AND_RETHROW("Failed to mesh solid ");
+
   mesh->optimize();
 
   return scope.Escape(theMesh);
@@ -515,6 +513,24 @@ void Solid::_registerNamedShape(const char* name,const TopoDS_Shape& shape)
 NAN_METHOD(Solid::createMesh)
 {
   Solid* pThis = UNWRAP(Solid);
-  v8::Handle<v8::Object> mesh = pThis->createMesh(0.5,20*3.14159/180.0,true);
+
+  double factor = 0.5;
+  double angle = 0.0;
+  if (info.Length()>=1 && info[0]->IsNumber()) {
+     ReadDouble(info[0], factor);
+  }
+  if (info.Length()>=2 && info[1]->IsNumber()) {
+     ReadDouble(info[1], angle);
+     //xx angle = angle*3.14159/180.0;
+  }
+   if (info.Length()>=3) {
+    return Nan::ThrowError("invalid arguments ( factor|double, angle|degree)");
+   }
+  v8::Handle<v8::Object> mesh = pThis->createMesh(factor,angle,true);
+
+  if (pThis->m_cacheMesh.IsEmpty()) {
+      pThis->m_cacheMesh.Reset(mesh);
+  }
+
   info.GetReturnValue().Set(mesh);
 }

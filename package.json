@@ -1,30 +1,40 @@
 {
   "name": "node-occ",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "description": "OpenCascade OCE Wrapper for Node js",
   "preferGlobal": "true",
   "dependencies": {
-    "async": "^2.0.1",
+    "async": "^2.1.4",
     "colors": "*",
     "gettemporaryfilepath": "0.0.1",
     "nan": "^2.5.0",
     "pace": "~0.0.4",
     "progress": "~1.1.8",
-    "temporary": "~0.0.8"
+    "temporary": "~0.0.8",
+    "node-pre-gyp": "0.6.x",
+    "should": "~11.1.2"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-concat": "0.5.1",
-    "grunt-contrib-jshint": "~0.12.0",
-    "grunt-contrib-nodeunit": "~0.4.1",
-    "grunt-contrib-uglify": "0.5.1",
-    "grunt-mocha-cli": "~2.1.0",
-    "grunt-docco": "~0.4.0",
-    "should": "~10.0.0",
-    "mocha": "~2.5.3"
+    "aws-sdk": "2.x",
+    "electron-rebuild": "^1.5.6",
+    "grunt": "~1.0.1",
+    "grunt-contrib-concat": "1.0.1",
+    "grunt-contrib-jshint": "~1.1.0",
+    "grunt-contrib-nodeunit": "~1.0.0",
+    "grunt-contrib-uglify": "2.0.0",
+    "grunt-docco": "~0.5.0",
+    "grunt-mocha-cli": "~3.0.0",
+    "mocha": "~3.2.0",
+    "eslint": "^3.12.2",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-require-path-exists": "^1.1.5",
+    "eslint-plugin-standard": "^2.0.1"
   },
-  "main": "lib/occ",
-  "author": "Etienne Rossignon",
+  "main": "index",
+  "author": {
+    "name": "Etienne Rossignon"
+  },
   "engines": {
     "node": "*"
   },
@@ -42,8 +52,16 @@
     "url": "https://github.com/erossignon/node-occ.git"
   },
   "scripts": {
-    "install": "node-gyp rebuild",
-    "test": "mocha -R spec"
+    "install": "node-pre-gyp install --fallback-to-build",
+    "test": "mocha -R spec",
+    "lint": "eslint lib test bin"
+  },
+  "binary": {
+    "module_name": "occ",
+    "module_path": "./lib/binding/",
+    "host-aws": "https://nodeocc.s3-us-west-1.amazonaws.com",
+    "host": "https://github.com/erossignon/node-occ/releases/download/",
+    "remote_path": "{version}"
   },
   "gypfile": true,
   "bugs": {

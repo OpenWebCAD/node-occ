@@ -27,13 +27,14 @@ void ReadRotationFromArgs(_NAN_METHOD_ARGS,gp_Trsf& trans);
 
 
 enum ArrayType {
-  A_Byte, A_Int16, A_UInt16, A_Int32, A_UInt32, A_Float32, A_Float64
+  A_SByte, A_UInt8, A_Int16, A_UInt16, A_Int32, A_UInt32, A_Float32, A_Float64
 };
 
 inline const char* ArrayTypeToString(ArrayType type) {
   const char* name = 0;
   switch (type) {
-  case A_Byte:    name = "Uint8Array";   break;
+  case A_SByte:    name = "Uint8Array";   break;
+  case A_UInt8:    name = "Uint8Array";   break;
   case A_Int16:   name = "Int16Array";   break;
   case A_UInt16:  name = "Uint16Array";  break;
   case A_Int32:   name = "Int32Array";   break;
@@ -48,11 +49,12 @@ inline const char* ArrayTypeToString(ArrayType type) {
 inline int ArrayTypeSize(ArrayType type) {
 
   switch (type) {
-  case A_Byte:    return 1;  break;
-  case A_Int16:   return 2;  break;
-  case A_UInt16:  return 2;  break;
-  case A_Int32:   return 4;   break;
-  case A_UInt32:  return 4;  break;
+  case A_SByte:   return 1; break;
+  case A_UInt8:   return 1;   break;
+  case A_Int16:   return 2; break;
+  case A_UInt16:  return 2; break;
+  case A_Int32:   return 4; break;
+  case A_UInt32:  return 4; break;
   case A_Float32: return 4; break;
   case A_Float64: return 8; break;
   default:
@@ -99,7 +101,19 @@ inline v8::Local<v8::Value> makeArrayBuffer(int length) {
 #define GET_UINT32ARRAY_ARRAY_LENGTH(value) (value.As<v8::Uint32Array>()->Length())
 
 
-inline v8::Local<v8::Object> makeTypedArray(ArrayType type, unsigned int length) {
+#define IS_UINT16ARRAY(value)               (value->IsUint16Array() && (value.As<v8::Uint16Array>()->Length() == 2))
+#define GET_UINT16ARRAY_DATA(value)         (unsigned short*)(static_cast<char*>(value.As<v8::Uint16Array>()->Buffer()->GetContents().Data()) + value.As<v8::Uint16Array>()->ByteOffset())
+#define IS_UINT16ARRAY_ARRAY(value)         (value->IsUint32Array() && ((value.As<v8::Uint16Array>()->Length() % 2) == 0))
+#define GET_UINT16ARRAY_ARRAY_DATA(value)   GET_UINT16ARRAY_DATA(value)
+#define GET_UINT16ARRAY_ARRAY_LENGTH(value) (value.As<v8::Uint16Array>()->Length())
+
+#define IS_UINT8ARRAY(value)               (value->IsUint8Array() && (value.As<v8::Uint8Array>()->Length() == 2))
+#define GET_UINT8ARRAY_DATA(value)         (unsigned char*)(static_cast<char*>(value.As<v8::Uint8Array>()->Buffer()->GetContents().Data()) + value.As<v8::Uint8Array>()->ByteOffset())
+#define IS_UINT8ARRAY_ARRAY(value)         (value->IsUint8Array() && ((value.As<v8::Uint8Array>()->Length() % 2) == 0))
+#define GET_UINT8ARRAY_ARRAY_DATA(value)   GET_UINT8ARRAY_DATA(value)
+#define GET_UINT8ARRAY_ARRAY_LENGTH(value) (value.As<v8::Uint8Array>()->Length())
+
+inline v8::Local<v8::Object> makeTypedArray(ArrayType type, uint32_t length) {
 
   v8::Local<v8::Value> val;
   v8::Local<v8::Function> constructor;
@@ -131,24 +145,37 @@ inline v8::Local<v8::Object> makeTypedArray(ArrayType type, unsigned int length)
 }
 
 
-inline v8::Local<v8::Object> makeFloat32Array(const float* data, int length) {
+inline v8::Local<v8::Object> makeFloat32Array(const float* data, uint32_t length) {
   v8::Local<v8::Object> array = makeTypedArray(A_Float32, length);
   float* dest = GET_FLOAT32ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
   return array;
 }
-inline v8::Local<v8::Object> makeInt32Array(const int* data, int length) {
+inline v8::Local<v8::Object> makeInt32Array(const int* data, uint32_t length) {
   v8::Local<v8::Object> array = makeTypedArray(A_Int32, length);
   int* dest = GET_INT32ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
   return array;
 }
-inline v8::Local<v8::Object> makeUint32Array(const unsigned int* data, int length) {
+inline v8::Local<v8::Object> makeUint32Array(const unsigned int* data, uint32_t length) {
   v8::Local<v8::Object> array = makeTypedArray(A_UInt32, length);
   unsigned int* dest = GET_UINT32ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
   return array;
 }
+inline v8::Local<v8::Object> makeUint16Array(const unsigned short* data, uint32_t length) {
+  v8::Local<v8::Object> array = makeTypedArray(A_UInt16, length);
+  unsigned short* dest = GET_UINT16ARRAY_ARRAY_DATA(array);
+  memcpy(dest, data, length * sizeof(data[0]));
+  return array;
+}
+inline v8::Local<v8::Object> makeUint8Array(const unsigned char* data, uint32_t length) {
+  v8::Local<v8::Object> array = makeTypedArray(A_UInt8, length);
+  unsigned char* dest = GET_UINT8ARRAY_ARRAY_DATA(array);
+  memcpy(dest, data, length * sizeof(data[0]));
+  return array;
+}
+
 
 
 inline v8::Local<v8::Object> _makeTypedArray(const float* data, int length) {

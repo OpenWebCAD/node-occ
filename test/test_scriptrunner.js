@@ -1,9 +1,9 @@
-var should = require('should');
-var sr = require('../lib/scriptrunner');
+const should = require('should');
+const sr = require('../lib/scriptrunner');
 describe("Script Runner",function()
 {
-	var runner;
-	var myEnv = { foo: "bar" };
+    let runner;
+	let myEnv = { foo: "bar" };
 	
 	before(function() {
 		runner = new sr.ScriptRunner(myEnv);
@@ -11,7 +11,7 @@ describe("Script Runner",function()
 	
 	it("should not be possible load external module with require",function(done){
 		
-		runner.run(                    "var fs= require('fs');",
+		runner.run(                    "let fs= require('fs');",
 
 			function(){
 				should.fail("done callback");

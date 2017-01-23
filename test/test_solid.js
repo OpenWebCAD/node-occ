@@ -1,9 +1,9 @@
-var assert = require("assert");
-var should = require("should");
+const assert = require("assert");
+const should = require("should");
 
-var occ = require("../lib/occ");
+const occ = require("../lib/occ");
 
-var DEG2RAD = Math.PI/180;
+const DEG2RAD = Math.PI/180;
 
 // see https://npmjs.org/package/should
 
@@ -11,7 +11,7 @@ describe("testing solid construction",function() {
 
 
     describe("empty solid", function() {
-        var solid;
+        let solid;
         before(function() {
             solid = new occ.Solid();        
         });
@@ -30,7 +30,7 @@ describe("testing solid construction",function() {
         });
     });
     describe("makeBox with 2 points", function() {
-        var solid;
+        let solid;
         before(function() {
             solid = occ.makeBox([10,20,30],[20,40,60]);
         });
@@ -60,21 +60,21 @@ describe("testing solid construction",function() {
         });
 
         it("should have ~ 2*((20-10)*(40-20)+(20-10)*(60-30)+(40-20)*(60-30)) as a area", function() {
-            var expectedArea = 2*((20-10)*(40-20)+(20-10)*(60-30)+(40-20)*(60-30));
-            var eps = 0.001;
+            let expectedArea = 2*((20-10)*(40-20)+(20-10)*(60-30)+(40-20)*(60-30));
+            let eps = 0.001;
             solid.area.should.be.within( expectedArea - eps, expectedArea+eps );
         });
 
         it("should have the sum(face area) ===  area of solid ",function() {
 
-            var epsilon = 1E-3;
+            let epsilon = 1E-3;
 
-            var shapeIt = new occ.ShapeIterator(solid,"FACE");
-            var cumulated_face_area = 0;
+            let shapeIt = new occ.ShapeIterator(solid,"FACE");
+            let cumulated_face_area = 0;
             while(shapeIt.more) {
                 cumulated_face_area += shapeIt.next().area;
             }
-            var expectedArea = solid.area;
+            let expectedArea = solid.area;
             cumulated_face_area.should.be.within(expectedArea -epsilon,expectedArea+epsilon );
         });
     });
@@ -82,13 +82,13 @@ describe("testing solid construction",function() {
 
        it("should raise an exception when invalid arguments are passed to makeBox",function() {
           (function failing_func() {
-             var solid = occ.makeBox([10,20,30],10,10,10);
+             let solid = occ.makeBox([10,20,30],10,10,10);
           }).should.throwError();
        });
     });
     describe("fuse 2 overlapping boxes", function() {
-        var solid1;
-        var solid2;
+        let solid1;
+        let solid2;
         before(function() {
             solid1 = occ.makeBox([10,20,30],[20,40,60]);
             solid2 = occ.makeBox([15,25,35],[-20,-40,-60]);
@@ -113,8 +113,8 @@ describe("testing solid construction",function() {
         });
     });
     describe("cut a corner of a box", function() {
-        var solid1;
-        var solid2;
+        let solid1;
+        let solid2;
         before(function() {
 //
 //            +------+
@@ -146,8 +146,8 @@ describe("testing solid construction",function() {
 
     });
     describe("Hollow  box  ( 1 solid with 2 shells )", function() {
-        var solid1;
-        var solid2;
+        let solid1;
+        let solid2;
         before(function() {
             solid1 = occ.makeBox([0,0,0],[20,20,20]);
             solid2 = occ.makeBox([10,10,10],[15,15,15]);
@@ -170,23 +170,23 @@ describe("testing solid construction",function() {
             solid1.numShells.should.equal(2);
         });
         it("should have an outer shell with 6 faces", function() {
-            var outerShell = solid1.getOuterShell();
+            let outerShell = solid1.getOuterShell();
             outerShell.numFaces.should.equal(6);
         });
         it("should have an outer shell with 6 faces", function() {
-            var outerShell = solid1.getOuterShell();
+            let outerShell = solid1.getOuterShell();
             outerShell.orientation.should.equal("FORWARD");
         });
         it("should expose 2 shells (getOuterShell)",function(){
 
-            var shells = solid1.getShells();
+            let shells = solid1.getShells();
 
-            var outerShell = solid1.getOuterShell();
+            let outerShell = solid1.getOuterShell();
             assert(outerShell !== undefined );
 
             shells.length.should.equal(2);
-            for (var i in shells) {
-                var shell = shells[i];
+            for (let i in shells) {
+                let shell = shells[i];
                 if (outerShell.hashCode!==shell.hashCode) {
                     shell.orientation.should.equal("FORWARD");
                 }
@@ -195,9 +195,9 @@ describe("testing solid construction",function() {
     });
     describe("split boxes", function() {
 
-        var solid1;
-        var solid2;
-        var splitBoxes;
+        let solid1;
+        let solid2;
+        let splitBoxes;
         before(function() {
             // cutting a square box in 2 boxes
             solid1 = occ.makeBox([0,0,0],[20,20,20]);
@@ -221,12 +221,12 @@ describe("testing solid construction",function() {
             splitBoxes.numShells.should.equal(2);
         });
         it("should have an outer shell with 6 faces", function() {
-            var solids = splitBoxes.getSolids();
+            let solids = splitBoxes.getSolids();
 
-            var outerShell1 = solids[0].getOuterShell();
+            let outerShell1 = solids[0].getOuterShell();
             outerShell1.numFaces.should.equal(6);
 
-            var outerShell2 = solids[1].getOuterShell();
+            let outerShell2 = solids[1].getOuterShell();
             outerShell2.numFaces.should.equal(6);
 
         });
@@ -234,12 +234,12 @@ describe("testing solid construction",function() {
     });
 
     describe("creating a compound",function(){
-        var compound;
+        let compound;
         before(function(){
-            var solids = [];
-            var solid1 = occ.makeBox(10,20,30);
-            for (var i=0;i<10;i++) {
-                var s = solid1.rotate([0,0,0],[0,0,1],i*15);
+            let solids = [];
+            let solid1 = occ.makeBox(10,20,30);
+            for (let i=0;i<10;i++) {
+                let s = solid1.rotate([0,0,0],[0,0,1],i*15);
                 s.numFaces.should.equal(6);
                 solids.push(s);
             }
@@ -257,34 +257,33 @@ describe("testing solid construction",function() {
 
     describe("Meshing a simple solid", function() {
         describe("Meshing a box", function() {
-            var solid;
+            let solid;
             before(function(){
                 solid = occ.makeBox([10,20,30],[20,30,40]);
             });
-            it("should have a mesh with 4*6 vertices", function() {
-                solid.mesh.numVertices.should.equal(24);
+            it("should have a mesh with 8 vertices", function () {
+                solid.mesh.numVertices.should.equal(8);
             });
-            it("should have a mesh with (2*3)*4 edges", function() {
-                solid.mesh.numEdges.should.equal(24);
+            it("should have a mesh with  4+4+4=12 edges", function () {
+                solid.mesh.numEdges.should.equal(12);
             });
             it("should have a mesh with 2*6 triangles", function() {
                 solid.mesh.numTriangles.should.equal(12);
             });
         });
-
     });
     describe("Testing  Shape __prototype", function() {
-         var solid;
+         let solid;
             before(function(){
                 solid = occ.makeBox([10,20,30],[20,30,40]);
             });
             it("should expose the expected properties ", function() {
-               var expected = ["shapeType","numFaces","isNull","isValid"];
-               var actual = [];
-               for ( var j in occ.Solid.prototype) {
+               let expected = ["shapeType","numFaces","isNull","isValid"];
+               let actual = [];
+               for ( let j in occ.Solid.prototype) {
                   actual.push(j.toString());
                }
-               var missing = [];
+               let missing = [];
                for (j in expected) {
                    if (actual.indexOf(expected[j]) == -1) {
                     missing.push(expected[j]);
@@ -296,9 +295,9 @@ describe("testing solid construction",function() {
     });
     describe("exporting a solid to STEP ", function() {
 
-        var step_filename1 = "toto1.step";
-        var step_filename2 = "toto2.step";
-        var solid1,solid2;
+        let step_filename1 = "toto1.step";
+        let step_filename2 = "toto2.step";
+        let solid1,solid2;
         before(function(){
             solid1 = occ.makeBox([10,20,30],[20,30,40]);
             solid1 = occ.makeBox([20,30,50],[110,40,0]);
@@ -311,8 +310,8 @@ describe("testing solid construction",function() {
         });
     });
     describe("testing ShapeIterator on solid", function() {
-        var solid;
-        var shapeIt;
+        let solid;
+        let shapeIt;
         before(function() {
             solid = occ.makeBox([10,20,30],[20,40,60]);
         });
@@ -321,7 +320,7 @@ describe("testing solid construction",function() {
             shapeIt = new occ.ShapeIterator(solid,"FACE");
             shapeIt.more.should.be.equal(true);
             assert(shapeIt.current === undefined);
-            var counter =0;
+            let counter =0;
             while (shapeIt.more) {
                 shapeIt.more.should.be.equal(true);
                 shapeIt.next();
@@ -337,7 +336,7 @@ describe("testing solid construction",function() {
             shapeIt = new occ.ShapeIterator(solid,"EDGE");
             shapeIt.more.should.be.equal(true);
             assert(shapeIt.current === undefined);
-            var counter =0;
+            let counter =0;
             while (shapeIt.more) {
                 shapeIt.more.should.be.equal(true);
                 shapeIt.next();
@@ -353,7 +352,7 @@ describe("testing solid construction",function() {
     });
     describe("testing fillet on a box..",function(){
 
-        var solid;
+        let solid;
 
         before(function(){
             solid = occ.makeBox([10,20,30],[30,40,50]);
@@ -375,10 +374,10 @@ describe("testing solid construction",function() {
       
     });
     describe("makeCylinder (variation 1)",function(){
-        var solid;
+        let solid;
         before(function(){
-            var radius = 50;
-            var height = 100;
+            let radius = 50;
+            let height = 100;
             solid = occ.makeCylinder(radius,height);
         });
         it("should have 3 faces", function() {
@@ -387,11 +386,11 @@ describe("testing solid construction",function() {
     });
 
     describe("makeCylinder (variation 2)",function(){
-        var solid;
+        let solid;
         before(function(){
-            var position = [ [0,0,1] , [0,1,0] ];
-            var radius = 50;
-            var height = 100;
+            let position = [ [0,0,1] , [0,1,0] ];
+            let radius = 50;
+            let height = 100;
             solid = occ.makeCylinder(position ,radius,height);
         });
         it("should have 3 faces", function() {
@@ -399,12 +398,12 @@ describe("testing solid construction",function() {
         });
     });
     describe("makeCylinder (variation 3 : with 2 points and a radius)",function(){
-        var solid;
-        var bbox;
+        let solid;
+        let bbox;
         before(function(){
-            var startPoint = [-100,20,40];
-            var endPoint   = [ 100,20,40];
-            var radius = 20;
+            let startPoint = [-100,20,40];
+            let endPoint   = [ 100,20,40];
+            let radius = 20;
             solid = occ.makeCylinder(startPoint ,endPoint,radius);
             bbox = solid.getBoundingBox();
 
@@ -421,11 +420,11 @@ describe("testing solid construction",function() {
         });
     });
     describe("makeCone - variation 1",function(){
-        var solid;
+        let solid;
         before(function(){
-            var radius1 = 50;
-            var radius2 = 70;
-            var height =  30;
+            let radius1 = 50;
+            let radius2 = 70;
+            let height =  30;
             solid = occ.makeCone(radius1,radius2,height);
         });
         it("should have 3 faces", function() {
@@ -433,11 +432,11 @@ describe("testing solid construction",function() {
         });
     });
     describe("makeCone - variation 2 ( point,R1, point, R2 )",function(){
-        var solid;
-        var radius1 = 50;
-        var radius2 = 70;
+        let solid;
+        let radius1 = 50;
+        let radius2 = 70;
         before(function(){
-            var height =  30;
+            let height =  30;
             solid = occ.makeCone([0,0,0],radius1,[0,0,height],radius2);
         });
         it("should have 3 faces", function() {
@@ -447,22 +446,22 @@ describe("testing solid construction",function() {
             should.exist(solid.faces.bottom);
         });
         it("top face should have a area of radius**2*pi", function() {
-            var expectedArea = radius2*radius2*Math.PI;
-            var eps = 1.0;
+            let expectedArea = radius2*radius2*Math.PI;
+            let eps = 1.0;
             solid.faces.top.area.should.be.within(expectedArea-eps,expectedArea+eps);
         });
         it("bottom face should have a area of radius**2*pi", function() {
-            var expectedArea = radius1*radius1*Math.PI;
-            var eps = 1.0;
+            let expectedArea = radius1*radius1*Math.PI;
+            let eps = 1.0;
             solid.faces.bottom.area.should.be.within(expectedArea-eps,expectedArea+eps);
         });
     });
     describe("makeCone - variation 3 ( axpex,dir, half_angle, height )",function(){
-        var solid;
-        var radius = 50;
-        var height =  30;
+        let solid;
+        let radius = 50;
+        let height =  30;
         before(function(){
-            var angle  = Math.atan(radius/height);
+            let angle  = Math.atan(radius/height);
             solid = occ.makeCone([0,0,0],[0,0,1],angle,height);
         });
         it("should have 2 faces", function() {
@@ -472,42 +471,42 @@ describe("testing solid construction",function() {
             should.not.exist(solid.faces.bottom);
         });
         it("top face should have a area of radius**2*pi", function() {
-            var expectedArea = radius*radius*Math.PI;
-            var eps = 1.0;
+            let expectedArea = radius*radius*Math.PI;
+            let eps = 1.0;
             solid.faces.top.area.should.be.within(expectedArea-eps,expectedArea+eps);
         });
     
     });
     
     describe("makeSphere",function(){
-        var solid;
-        var radius = 10;
-        var epsilon = radius* 1E-1;
+        let solid;
+        let radius = 10;
+        let epsilon = radius* 1E-1;
         before(function(){
-            var center = [10,20,30];
+            let center = [10,20,30];
             solid = occ.makeSphere(center,radius);
         });
         it("should have 1 face and one egde", function() {
             solid.numFaces.should.equal(1);
             solid.getEdges().length.should.equal(1);
-            var edges = solid.getEdges();
-            for ( var edge in edges) {
+            let edges = solid.getEdges();
+            for ( let edge in edges) {
                 // todo : do some investigation
             }
         });
         it("should have a area of 4*Pi*R",function() {
-            var expected_area = 4*3.14159265*radius*radius;
+            let expected_area = 4*3.14159265*radius*radius;
             solid.area.should.be.within( expected_area-epsilon,expected_area+epsilon);
         });
         it("should have a volume of 4/3*Pi*R*2", function() {
 
-            var expected_volume = 4.0/3.0*3.14159265*radius*radius*radius;
+            let expected_volume = 4.0/3.0*3.14159265*radius*radius*radius;
             solid.volume.should.be.within( expected_volume-epsilon,expected_volume+epsilon);
 
         });
     });
     describe("makeTorus", function() {
-       var solid;
+       let solid;
        before(function() {
           solid = occ.makeTorus([0,0,0],[0,0,1],100,10);  
        });
@@ -519,15 +518,15 @@ describe("testing solid construction",function() {
        
     });
     describe("rotate apply on a solid", function() {
-        var solid;
+        let solid;
         before(function() {
             solid = occ.makeBox([10,10,0],[20,20,10]);
 
         });
         it("should expose a rotated box",function(){
 
-            var epsilon = 0.1;
-            var bbox = solid.getBoundingBox();
+            let epsilon = 0.1;
+            let bbox = solid.getBoundingBox();
             bbox.farPt.x.should.be.lessThan(20.0+epsilon);
             bbox.farPt.y.should.be.lessThan(20.0+epsilon);
             bbox.nearPt.x.should.be.greaterThan(10.0-epsilon);
@@ -546,84 +545,84 @@ describe("testing solid construction",function() {
     describe(" making a illegal solid ( with bad arguments) shall raise exception", function(){
         it("should raise exception when trying to build a box with illegal arguments", function(){
             (function(){
-                var solid = makebox("illegal");
+                let solid = makebox("illegal");
             }).should.throwError();
 
         });
     });
     describe("test adjacent faces",function(){
-        var solid ;
+        let solid ;
         before(function(){
             solid = occ.makeBox([0,0,0],[100,100,100]);
         }); 
         it("should have back/front/left/right faces adjacent to face 'top'",function(){
-           var adjFaces = solid.getAdjacentFaces(solid.faces.top);
+           let adjFaces = solid.getAdjacentFaces(solid.faces.top);
 
            adjFaces.length.should.equal(4);
 
-           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+           let names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
 
            names.join("/").should.equal("back/front/left/right");
 
         });
         it("should have back/front/left/right faces adjacent to face 'bottom'",function(){
            
-           var adjFaces = solid.getAdjacentFaces(solid.faces.bottom);
+           let adjFaces = solid.getAdjacentFaces(solid.faces.bottom);
 
            adjFaces.length.should.equal(4);
 
-           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+           let names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
 
            names.join("/").should.equal("back/front/left/right");
         });
 
         it("should have bottom/left/right/top faces adjacent to face 'back'",function(){
            
-           var adjFaces = solid.getAdjacentFaces(solid.faces.back);
+           let adjFaces = solid.getAdjacentFaces(solid.faces.back);
 
            adjFaces.length.should.equal(4);
 
-           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+           let names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
 
            names.join("/").should.equal("bottom/left/right/top");
         });
 
         it("should have bottom/left/right/top faces adjacent to face 'front'",function(){
            
-           var adjFaces = solid.getAdjacentFaces(solid.faces.front);
+           let adjFaces = solid.getAdjacentFaces(solid.faces.front);
 
            adjFaces.length.should.equal(4);
 
-           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+           let names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
 
            names.join("/").should.equal("bottom/left/right/top");
         });
         it("should have back/bottom/front/top faces adjacent to face 'left'",function(){
            
-           var adjFaces = solid.getAdjacentFaces(solid.faces.left);
+           let adjFaces = solid.getAdjacentFaces(solid.faces.left);
 
            adjFaces.length.should.equal(4);
 
-           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+           let names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
 
            names.join("/").should.equal("back/bottom/front/top");
         });
 
         it("should have back/bottom/front/top faces adjacent to face 'right'",function(){
            
-           var adjFaces = solid.getAdjacentFaces(solid.faces.right);
+           let adjFaces = solid.getAdjacentFaces(solid.faces.right);
 
            adjFaces.length.should.equal(4);
 
-           var names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
+           let names = adjFaces.map(function(f){return solid.getShapeName(f); }).sort();
 
            names.join("/").should.equal("back/bottom/front/top");
         });
     });
 
     describe("makeThickSolid (external ) on box",function(){
-        var initialBox;
-        var thickSolid;
+        let initialBox;
+        let thickSolid;
         before(function(){
             initialBox = occ.makeBox(100,200,300);
             thickSolid = occ.makeThickSolid(initialBox,initialBox.faces.top,10);
@@ -636,8 +635,8 @@ describe("testing solid construction",function() {
         });
     });
     describe("makeThickSolid (internal) on box",function(){
-        var initialBox;
-        var thickSolid;
+        let initialBox;
+        let thickSolid;
         before(function(){
             initialBox = occ.makeBox(100,200,300);
             thickSolid = occ.makeThickSolid(initialBox,initialBox.faces.top,-10);
@@ -650,23 +649,23 @@ describe("testing solid construction",function() {
         });
     });
     describe("finding common edge of 2 faces",function(){
-        var box;
+        let box;
         before(function(){ 
              box = occ.makeBox(100,200,300);
         });
         it("should find a common edge between 'top' face and 'left' face",function(){
-            var edges = box.getCommonEdges(box.faces.top,box.faces.left);
+            let edges = box.getCommonEdges(box.faces.top,box.faces.left);
             edges.length.should.be.equal(1);
 
         });
         it("should not find a common edge between 'top' face and 'bottom' face",function(){
-            var edges = box.getCommonEdges(box.faces.top,box.faces.bottom);
+            let edges = box.getCommonEdges(box.faces.top,box.faces.bottom);
             edges.length.should.be.equal(0);
         });        
     });
     describe("makeDraftAngle",function(){
-        var box;
-        var boxWithDraftFace;
+        let box;
+        let boxWithDraftFace;
         before(function(){
             box = occ.makeBox(100,200,300);
             boxWithDraftFace = occ.makeDraftAngle(box,box.faces.right,20*DEG2RAD,box.faces.bottom);          
@@ -681,19 +680,19 @@ describe("testing solid construction",function() {
     });
 
     describe("makeDraftAngle on a box with a rounded corner",function(){
-        var box;
-        var boxWithDraftFace;
+        let box;
+        let boxWithDraftFace;
         before(function(){
             box = occ.makeBox(100,200,300); 
-            var edges =  box.getCommonEdges(box.faces.left,box.faces.front)[0];
+            let edges =  box.getCommonEdges(box.faces.left,box.faces.front)[0];
             // console.log("edge = ",edges);
             box = occ.makeFillet(box,edges,10);
 
             // note: left , front , top and bottom faces have been modified by the fillet
             // operation.;
 
-            var faceToDraft = box.faces["mleft:0"];
-            var neutralFace = box.faces["mbottom:0"];
+            let faceToDraft = box.faces["mleft:0"];
+            let neutralFace = box.faces["mbottom:0"];
 
             console.log(Object.keys(box.faces).join(" "));
             should.exist(faceToDraft);

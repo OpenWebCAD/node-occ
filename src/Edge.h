@@ -6,8 +6,8 @@
 class Edge : public Base {
 
 public:
-    TopoDS_Edge m_edge;
-  std::vector<float> m_positions;
+   TopoDS_Edge m_edge;
+   std::vector<float> m_positions;
 
     Edge() {
         ;

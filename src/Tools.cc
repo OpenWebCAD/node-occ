@@ -140,7 +140,6 @@ NAN_METHOD(writeSTL)
     StlAPI_Writer writer;
     writer.ASCIIMode() = Standard_False;
     writer.Write(C, filename.c_str());
-//    writer.Write(C, filename.c_str(), Standard_True);
 
   } CATCH_AND_RETHROW("Failed to write STL file ");
   info.GetReturnValue().Set(Nan::New<v8::Boolean>(true));

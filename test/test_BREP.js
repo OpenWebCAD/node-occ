@@ -1,21 +1,19 @@
-var assert = require("assert");
-var should = require("should");
-var shape_factory = require("../lib/shapeFactory");
-
-var occ = require("../lib/occ");
-
-var fs = require("fs");
+const assert = require("assert");
+const should = require("should");
+const shape_factory = require("../lib/shapeFactory");
+const occ = require("../lib/occ");
+const fs = require("fs");
 
 
-var getTemporaryFilePath = require("./helpers").getTemporaryFilePath;
-var remove_file = require("./helpers").remove_file;
+const getTemporaryFilePath = require("./helpers").getTemporaryFilePath;
+const remove_file = require("./helpers").remove_file;
 
 
 describe("testing BREP input output ", function () {
 
-    var b1_brep, b2_brep, b3_brep;
-    var b1_volume = 0;
-    var b1_area = 0;
+    let b1_brep, b2_brep, b3_brep;
+    let b1_volume = 0;
+    let b1_area = 0;
     before(function () {
 
         b1_brep = getTemporaryFilePath({prefix: "b1_", suffix: ".brep"});
@@ -34,15 +32,15 @@ describe("testing BREP input output ", function () {
 
     function create_shapes() {
 
-        var box = occ.makeBox([0, 0, 0], [100, 200, 300]);
-        var b1_result = occ.writeBREP(b1_brep, box);
+        let box = occ.makeBox([0, 0, 0], [100, 200, 300]);
+        let b1_result = occ.writeBREP(b1_brep, box);
         b1_volume = box.volume;
         b1_area = box.area;
 
-        var cyl = occ.makeCylinder([0, 0, 0], [0, 0, 10], 5);
-        var b2_result = occ.writeBREP(b2_brep, cyl);
+        let cyl = occ.makeCylinder([0, 0, 0], [0, 0, 10], 5);
+        let b2_result = occ.writeBREP(b2_brep, cyl);
 
-        var b3_result = occ.writeBREP(b3_brep, [box, cyl]);
+        let b3_result = occ.writeBREP(b3_brep, [box, cyl]);
 
         b1_result.should.eql(true);
         b2_result.should.eql(true);
@@ -124,12 +122,12 @@ describe("testing BREP input output ", function () {
 
 function build_large_part() {
 
-    var lego_filename = getTemporaryFilePath({prefix: "legoPlate3x2_2x2", suffix: ""});
+    let lego_filename = getTemporaryFilePath({prefix: "legoPlate3x2_2x2", suffix: ""});
 
-    var legoPlate = shape_factory.makeLegoBrick(occ, 3, 2, "thin");
-    var solids = [];
-    for (var x = 0; x < 100; x += 50) {
-        for (var y = 0; y < 100; y += 50) {
+    let legoPlate = shape_factory.makeLegoBrick(occ, 3, 2, "thin");
+    let solids = [];
+    for (let x = 0; x < 100; x += 50) {
+        for (let y = 0; y < 100; y += 50) {
             solids.push(legoPlate.translate([x, y, 0]));
         }
     }
@@ -138,8 +136,8 @@ function build_large_part() {
     /*
      occ.writeSTL(lego_filename + ".stl", solids);
 
-     var obj = {solids: []};
-     var counter = 0;
+     let obj = {solids: []};
+     let counter = 0;
      solids.forEach(function (solid) {
      solid.name = "S" + counter;
      counter++;
@@ -157,7 +155,7 @@ describe("it should write and read a large brep file", function () {
 
     this.timeout(15000);
 
-    var filename = build_large_part();
+    let filename = build_large_part();
 
     it("should read a large BREP file quickly", function (done) {
 

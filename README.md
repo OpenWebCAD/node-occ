@@ -8,9 +8,8 @@ It provides a simple yet powerful javascript api to construct 3D geometry models
 This project comes with a set of V8 wrappers around OpenCascade API and a sample web application.
 
 [![Build Status](https://travis-ci.org/erossignon/node-occ.png?branch=master)](https://travis-ci.org/erossignon/node-occ)
+[![Build status](https://ci.appveyor.com/api/projects/status/s5eaux89v2c0wmu4?svg=true)](https://ci.appveyor.com/project/erossignon/node-occ)
 
-<!-- [![Build status](https://ci.appveyor.com/api/projects/status/s5eaux89v2c0wmu4?svg=true)](https://ci.appveyor.com/project/erossignon/node-occ)
--->
 
 ### quick example
 
@@ -50,12 +49,18 @@ alt="node occ" width="240" height="180" border="10" /></a>
 
 ### sample web application
 
-''/sample'' : sample nodejs/express REST API server to build solid , based on threejs
-
+[node-occ-sample](https://github.com/erossignon/node-occ-sample): sample nodejs/express REST API server to build solid , based on threejs
 
 
 ## installing node-occ from npm
- 
+
+```
+$npm install node-occ
+```
+
+
+## building node-occ from source :  prerequisites
+
 ### on Windows
   - you need Microsoft Visual Studio 2012
   - please install OpenCascade oce-0.17  from https://github.com/tpaviot/oce/downloads to you c:\OCE-0.17 folder
@@ -71,16 +76,13 @@ alt="node occ" width="240" height="180" border="10" /></a>
 
 
 
-
-## building node-occ from source :  prerequisites
-
 ### on ubuntu
 
 ```bash
 
 # installing nodejs and gyp utility to build extensions
 sudo apt-get install nodejs npm
-sudo npm install node-gyp -g
+sudo npm install node-pre-gyp -g
 sudo npm install mocha -g
 
 #installing cmake
@@ -91,13 +93,9 @@ git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
 sh prepare_build_occt.sh
 npm install
-node-gyp configure
-node-gyp build
+node-pre-gyp configure
+node-pre-gyp build
 mocha
-
-cd sample
-npm install
-node app.js
 ```
 
 
@@ -107,7 +105,6 @@ node app.js
 ## dependencies:
 
  - threejs    : https://github.com/mrdoob/three.js
- - codemirror : https://github.com/marijnh/CodeMirror
 
 ## acknowledgement:
     
