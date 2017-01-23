@@ -3,6 +3,8 @@ language: cpp
 os:
   - linux
   - osx
+dist: trusty
+sudo: required
 
 # sudo: required
 
