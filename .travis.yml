@@ -32,6 +32,7 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
+    - libxi-dev
 
 before_install:
 # reinstall latest nvm
