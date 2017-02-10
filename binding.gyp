@@ -13,6 +13,7 @@
       ],
       "cflags": [
         "-frtti",
+        "-I/usr/include/opencascade",
         "-Wno-ignored-qualifiers",
         "-Wno-unused-variable",
         "-Wno-reorder",
@@ -20,6 +21,7 @@
       ],
       "cflags_cc": [
         "-frtti",
+        "-I/usr/include/opencascade",
         "-Wno-ignored-qualifiers",
         "-Wno-unused-variable",
         "-Wno-reorder",
