@@ -1,3 +1,4 @@
+"use strict";
 const assert = require("assert");
 const should = require("should");
 
@@ -284,7 +285,7 @@ describe("testing solid construction",function() {
                   actual.push(j.toString());
                }
                let missing = [];
-               for (j in expected) {
+               for (let j in expected) {
                    if (actual.indexOf(expected[j]) == -1) {
                     missing.push(expected[j]);
                    }

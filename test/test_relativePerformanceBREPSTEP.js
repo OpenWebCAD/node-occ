@@ -1,3 +1,4 @@
+"use strict";
 const occ = require('../lib/occ');
 const should = require("should");
 const async = require("async");
@@ -69,7 +70,7 @@ function myReadStep(filename, done) {
     function read_original_step_file(callback) {
 
 
-        t1 = new Date();
+        let t1 = new Date();
         occ.readSTEP(filename, function (err, _solids) {
             solids = _solids;
             if (err) {

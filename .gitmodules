@@ -1,6 +1,3 @@
 [submodule "sample/3rdparties/dropzone"]
 	path = sample/3rdparties/dropzone
 	url = http://github.com/enyo/dropzone.git
-[submodule "oce"]
-	path = oce
-	url = http://github.com/tpaviot/oce.git

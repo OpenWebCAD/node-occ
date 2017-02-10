@@ -12,12 +12,16 @@
         "-fno-exceptions"
       ],
       "cflags": [
+        "-frtti",
+        "-I/usr/include/opencascade",
         "-Wno-ignored-qualifiers",
         "-Wno-unused-variable",
         "-Wno-reorder",
         "-Wno-extra"
       ],
       "cflags_cc": [
+        "-frtti",
+        "-I/usr/include/opencascade",
         "-Wno-ignored-qualifiers",
         "-Wno-unused-variable",
         "-Wno-reorder",
@@ -99,7 +103,6 @@
         "-lTKMesh<(dbg)",
         "-lTKOffset<(dbg)",
         "-lTKPrim<(dbg)",
-        "-lTKPShape<(dbg)",
         "-lTKShHealing<(dbg)",
         "-lTKTopAlgo<(dbg)",
         "-lTKIGES<(dbg)",
@@ -135,61 +138,6 @@
         "<(module_name)"
       ],
       "conditions": [[
-        "OS=='linux'",
-        {
-          "variables": {
-             "bin_folder": "./build_oce/Unix/x86_64-Release-64"
-          },
-          "copies": [
-            {
-              "files": [
-                "<(bin_folder)/libTKBO.so.11.0.0",
-                "<(bin_folder)/libTKBool.so.11.0.0",
-                "<(bin_folder)/libTKBRep.so.11.0.0",
-                "<(bin_folder)/libTKernel.so.11.0.0",
-                "<(bin_folder)/libTKFillet.so.11.0.0",
-                "<(bin_folder)/libTKG2d.so.11.0.0",
-                "<(bin_folder)/libTKG3d.so.11.0.0",
-                "<(bin_folder)/libTKGeomAlgo.so.11.0.0",
-                "<(bin_folder)/libTKGeomBase.so.11.0.0",
-                "<(bin_folder)/libTKMath.so.11.0.0",
-                "<(bin_folder)/libTKMesh.so.11.0.0",
-                "<(bin_folder)/libTKOffset.so.11.0.0",
-                "<(bin_folder)/libTKPrim.so.11.0.0",
-                "<(bin_folder)/libTKShHealing.so.11.0.0",
-                "<(bin_folder)/libTKSTEP.so.11.0.0",
-                "<(bin_folder)/libTKSTEP209.so.11.0.0",
-                "<(bin_folder)/libTKSTEPAttr.so.11.0.0",
-                "<(bin_folder)/libTKSTEPBase.so.11.0.0",
-                "<(bin_folder)/libTKSTL.so.11.0.0",
-                "<(bin_folder)/libTKTopAlgo.so.11.0.0",
-                "<(bin_folder)/libTKXSBase.so.11.0.0",
-
-                "<(bin_folder)/libTKBO.so.11",
-                "<(bin_folder)/libTKBool.so.11",
-                "<(bin_folder)/libTKBRep.so.11",
-                "<(bin_folder)/libTKernel.so.11",
-                "<(bin_folder)/libTKFillet.so.11",
-                "<(bin_folder)/libTKG2d.so.11",
-                "<(bin_folder)/libTKG3d.so.11",
-                "<(bin_folder)/libTKGeomAlgo.so.11",
-                "<(bin_folder)/libTKGeomBase.so.11",
-                "<(bin_folder)/libTKMath.so.11",
-                "<(bin_folder)/libTKMesh.so.11",
-                "<(bin_folder)/libTKOffset.so.11",
-                "<(bin_folder)/libTKPrim.so.11",
-                "<(bin_folder)/libTKShHealing.so.11",
-                "<(bin_folder)/libTKSTEP.so.11",
-                "<(bin_folder)/libTKSTEP209.so.11",
-                "<(bin_folder)/libTKSTEPAttr.so.11",
-                "<(bin_folder)/libTKSTEPBase.so.11",
-                "<(bin_folder)/libTKSTL.so.11",
-                "<(bin_folder)/libTKTopAlgo.so.11",
-                "<(bin_folder)/libTKXSBase.so.11",
-              ],
-              "destination": "<(module_path)"
-          }]
-        }],[
         "OS=='win'",
         {
           "variables": {

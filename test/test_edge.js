@@ -1,3 +1,4 @@
+"use strict";
 const assert = require("assert");
 const should = require("should");
 const occ = require("../lib/occ");

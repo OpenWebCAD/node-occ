@@ -106,7 +106,7 @@
 #include <STEPControl_Writer.hxx>
 #include <STEPControl_Reader.hxx>
 
-#include <ShapeSchema.hxx>
+//#include <ShapeSchema.hxx>
 
 // #include <StdPrs_ToolShadedShape.hxx>
 
@@ -147,6 +147,8 @@
 #include <TDataStd_Name.hxx>
 #include <TNaming_Builder.hxx>
 #include <Interface_Graph.hxx>
+#include <BRepClass3d.hxx>
+#define OUTER_SHELL(x)  BRepClass3d::OuterShell(x)
 
 #include <Poly_Polygon3D.hxx>
 #include <BRep_TEdge.hxx>
@@ -154,6 +156,7 @@
 #include <BRep_PolygonOnTriangulation.hxx>
 
 // Compatibility 6.5 and above
+/*
 #if (OCC_VERSION_MAJOR * 10 + OCC_VERSION_MINOR )  < 66 
 
 // this makes some adjustemnts to make sure node-occ can be
@@ -172,5 +175,5 @@
 #include <BRepClass3d.hxx>
 #define OUTER_SHELL(x)  BRepClass3d::OuterShell(x)
 #endif
-
+*/
 #undef Handle

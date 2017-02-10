@@ -2,6 +2,7 @@ const should = require('should');
 const sr = require('../lib/scriptrunner');
 describe("Script Runner",function()
 {
+    "use strict";
     let runner;
 	let myEnv = { foo: "bar" };
 	
@@ -11,7 +12,7 @@ describe("Script Runner",function()
 	
 	it("should not be possible load external module with require",function(done){
 		
-		runner.run(                    "let fs= require('fs');",
+		runner.run(                    "\"use strict\"; let fs= require('fs');",
 
 			function(){
 				should.fail("done callback");
