@@ -6,6 +6,7 @@ NPROC=$(grep "^core id" /proc/cpuinfo | wc -l)
 echo "Numbrer of processors =" ${NPROC}
 if [ "$TRAVIS" = "true" ]
 then
+sudo apt-get -y install tcl8.5-dev tk8.5-dev libcoin80-dev
 sudo dpkg -i packages/OCCT-7.0_trusty-amd64.deb
 else
 cd occt ;
