@@ -4,7 +4,10 @@ lscpu ;
 NPROC=$(grep "^core id" /proc/cpuinfo | wc -l)
 
 echo "Numbrer of processors =" ${NPROC}
-
+if [ "$TRAVIS" = "true" ]
+then
+dpkg -i packages/OCCT-7.0_trusty-amd64.deb
+else
 cd occt ;
 wget "http://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;h=b00770133187b83761e651df50051b2fa3433858;sf=tgz";
 mv "index.html?p=occt.git;a=snapshot;h=b00770133187b83761e651df50051b2fa3433858;sf=tgz" occt.tgz;
@@ -26,3 +29,4 @@ echo "CPU COUNT " ${NPROC}
 make -j ${NPROC} install 
 cd ..
 echo "done"
+fi
