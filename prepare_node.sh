@@ -5,15 +5,17 @@
 ##########################################################################################
 export OCCT_PACKAGE=occt-7.1.0
 export OCCT_TARFILE=${OCCT_PACKAGE}-linux.tgz
-ls
 echo "--------------------------  OCCT TAR FILE ${OCCT_TARFILE}"
-if [ ! -f "${OCC_TARFILE}" ]; then
+ls ${OCCT_TARFILE} 
+if [ ! -f "${OCCT_TARFILE}" ]; then
   wget https://github.com/OpenWebCAD/occt_builder/releases/download/v7.1.0/${OCCT_TARFILE}
 fi
 if [ ! -d "${OCCT_PACKAGE}" ]; then 
+  echo "extracting package ${OCCT_TARFILE}"
   tar -xf ${OCCT_TARFILE}
 fi
  
+export LD_LIBRARY_PATH=`pwd`/occt-7.1.0/lib:$LD_LIBRARY_PATH
 
 grep -i "#define OCC_VERSION_COMPLETE" ${OCCT_PACKAGE}/include/opencascade/Standard_Version.hxx ;
 lscpu ;
@@ -69,4 +71,4 @@ if [[ ! -z $TRAVIS_ELECTRON_VERSION ]]; then
 fi
 
 #  git submodule update --depth 50 --init --recursive
-npm install --build-from-source
+npm install --build-from-source 

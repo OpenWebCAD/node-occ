@@ -75,6 +75,7 @@ install:
 script:
 - >
   if [[ -z $TRAVIS_ELECTRON_VERSION ]]; then
+    export LD_LIBRARY_PATH=`pwd`/occt-7.1.0./lib
     node ./
     npm test
   else
