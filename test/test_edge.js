@@ -127,8 +127,8 @@ describe("testing Edges ",function(){
             edge.getBoundingBox().should.be.instanceOf(occ.BoundingBox);
             edge.getBoundingBox().isVoid.should.eql(false);
             //xx console.log(JSON.stringify(edge.getBoundingBox()));//.toString());
-            edge.getBoundingBox().nearPt.equals([-11.647844, -11.647844, 10]).should.eql(true);
-            edge.getBoundingBox().farPt.equals([31.647844, 31.647844, 10]).should.eql(true);
+            edge.getBoundingBox().nearPt.equals([-11.647844, -11.647844, 10]);
+            edge.getBoundingBox().farPt.equals([31.647844, 31.647844, 10]);
         });
 
         it("should polygonize a edge", function () {
