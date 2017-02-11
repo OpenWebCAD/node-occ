@@ -54,3 +54,5 @@ extrudedFace.step
 lib/binding
 *.tgz
 npm-debug*
+occt-*
+

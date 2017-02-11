@@ -137,9 +137,12 @@ NAN_METHOD(writeSTL)
       TopoDS_Shape shape = (*it)->shape();
       B.Add(C, shape);
     }
+
+#if 0
     StlAPI_Writer writer;
     writer.ASCIIMode() = Standard_False;
     writer.Write(C, filename.c_str());
+#endif
 
   } CATCH_AND_RETHROW("Failed to write STL file ");
   info.GetReturnValue().Set(Nan::New<v8::Boolean>(true));
@@ -467,7 +470,8 @@ void StepAsyncReadWorker::Execute() {
           occHandle(StepRepr_NextAssemblyUsageOccurrence) NAUO = occHandle(StepRepr_NextAssemblyUsageOccurrence)::DownCast(enti);
           if (NAUO.IsNull()) continue;
 
-          Interface_EntityIterator subs = aReader.WS()->Graph().Sharings(NAUO);
+          // Interface_EntityIterator subs = aReader.WS()->Graph().Sharings(NAUO);
+          auto  subs = aReader.WS()->Graph().Sharings(NAUO);
           for (subs.Start(); subs.More(); subs.Next()) {
             occHandle(StepRepr_ProductDefinitionShape) PDS = occHandle(StepRepr_ProductDefinitionShape)::DownCast(subs.Value());
             if (PDS.IsNull()) continue;

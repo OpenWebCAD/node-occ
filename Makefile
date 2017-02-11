@@ -1,12 +1,12 @@
 all:
-	node-gyp configure
-	node-gyp build
+	node-pre-gyp configure
+	node-pre-gyp build
 	mocha 
 packet:
 	npm install mocha
 	npm install assert
 	npm install should
-	npm install should		
+	npm install node-pre-gyp		
 	
 
 copy: 

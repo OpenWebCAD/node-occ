@@ -66,7 +66,8 @@ int Edge::createLine(Vertex *start, Vertex *end)
     gp_Pnt aP1 = start->point();
     gp_Pnt aP2 = end->point();
 
-    GC_MakeLine line(aP1, aP2);
+    gce_MakeLin mLine(aP1, aP2);
+    const gp_Lin& line= mLine.Value();
 
     TopoDS_Shape shape = BRepBuilderAPI_MakeEdge(line, start->vertex(), end->vertex());
     this->setShape(shape);
@@ -97,7 +98,6 @@ int Edge::createArc(Vertex *start, Vertex *end, const gp_Pnt& center)
 
   }
   CATCH_AND_RETHROW("Failed to create arc");
-
   return 1;
 }
 
@@ -108,7 +108,7 @@ int Edge::createArc3P(Vertex *start, Vertex *end, const gp_Pnt& aPoint)
     gp_Pnt aP2 = aPoint;
     gp_Pnt aP3 = end->point();
     GC_MakeArcOfCircle arc(aP1, aP2, aP3);
-    this->setShape(BRepBuilderAPI_MakeEdge(arc, start->vertex(), end->vertex()));
+    this->setShape(BRepBuilderAPI_MakeEdge(arc.Value(), start->vertex(), end->vertex()));
   }
   CATCH_AND_RETHROW("Failed to create arc");
   return 1;

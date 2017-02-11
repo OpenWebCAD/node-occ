@@ -4,6 +4,8 @@ os:
   - linux
   - osx
 
+#  we use travis container based infrastructure
+#  https://docs.travis-ci.com/user/installing-dependencies/#Installing-Packages-on-Container-Based-Infrastructure 
 # sudo: required
 
 env:
@@ -61,8 +63,6 @@ before_install:
 - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
 - $CXX --version
 
-# compile OCE
-- bash ./prepare_build.sh
 # compile Node-OCC
 - bash ./prepare_node.sh
 
