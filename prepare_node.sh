@@ -3,14 +3,14 @@
 #
 #
 ##########################################################################################
-OCCT_PACKAGE=occt-7.1.0
-OCCT_TARFILE=${OCCT_PACKAGE}-linux.tgz
-if [ ! -f ${OCC_TARFILE} ] 
-then
+export OCCT_PACKAGE=occt-7.1.0
+export OCCT_TARFILE=${OCCT_PACKAGE}-linux.tgz
+ls
+echo "--------------------------"
+if [ ! -f ${OCC_TARFILE} ]; then
   wget https://github.com/OpenWebCAD/occt_builder/releases/download/v7.1.0/${OCCT_TARFILE}
 fi
-if [ ! -d ${OCCT_PACKAGE} ]
-then 
+if [ ! -d ${OCCT_PACKAGE} ]; then 
   tar -xf ${OCCT_TARFILE}
 fi
  
