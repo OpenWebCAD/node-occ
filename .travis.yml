@@ -63,6 +63,7 @@ before_install:
 - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
 - $CXX --version
 
+
 # compile Node-OCC
 - bash ./prepare_node.sh
 
@@ -85,6 +86,12 @@ script:
   true;
 
 # if publishing, do it
+# Figure out if we should publish
+- PUBLISH_BINARY=false
+# If we are building a tag then we need to publish a new binary package
+- if [[ $TRAVIS_BRANCH == `git describe --tags --always HEAD` ]]; then PUBLISH_BINARY=true; fi;
+# or if we put the string [publish binary] in the commit message
+- if test "${COMMIT_MESSAGE#*'[publish binary]'}" != "$COMMIT_MESSAGE"; then PUBLISH_BINARY=true; fi;
 - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package; fi;
 - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp-github publish --release; fi;
 
