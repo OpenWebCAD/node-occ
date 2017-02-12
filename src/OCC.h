@@ -117,7 +117,7 @@
 #include <Storage_HSeqOfRoot.hxx>
 #include <Storage_Root.hxx>
 
-//xx #include <StlAPI_Writer.hxx>
+#include <StlAPI_Writer.hxx>
 //xx #include <StlAPI_Reader.hxx>
 
 #include <TColgp_Array1OfDir.hxx>
@@ -156,7 +156,7 @@
 #include <BRep_PolygonOnTriangulation.hxx>
 
 // Compatibility 6.5 and above
-#if (OCC_VERSION_MAJOR * 10 + OCC_VERSION_MINOR )  < 66 
+#if (OCC_VERSION_MAJOR * 10 + OCC_VERSION_MINOR )  < 66
 
 // this makes some adjustemnts to make sure node-occ can be
 // build with older version of OCC.
@@ -169,7 +169,7 @@
 #define BOPAlgo_CUT21   BOP_CUT21
 #define BOPAlgo_UNKNOWN BOP_UNKNOWN
 #define OUTER_SHELL(x)  BRepTools::OuterShell(x)
-#else 
+#else
 
 #include <BRepClass3d.hxx>
 #define OUTER_SHELL(x)  BRepClass3d::OuterShell(x)
