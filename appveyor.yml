@@ -27,6 +27,13 @@ environment:
       nodejs_version: 6
       platform: x64
 
+    - electron_version: "1.6.2"
+      nodejs_version: 6
+      platform: x86
+
+    - electron_version: "1.6.2"
+      nodejs_version: 6
+      platform: x64
 
     - nodejs_version: 6
       platform: x86
