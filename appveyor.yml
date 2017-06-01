@@ -90,8 +90,8 @@ install:
     true;
 
 
-- cmd: npm install mocha node-pre-gyp-github -g
-# - cmd: build_oce.bat %PLATFORM%
+# - cmd: npm install mocha node-pre-gyp-github -g
+- cmd: setup.bat %PLATFORM%
 - cmd: build.bat %PLATFORM%
 
 
