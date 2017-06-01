@@ -8,11 +8,11 @@
     "colors": "*",
     "gettemporaryfilepath": "1.0.0",
     "nan": "^2.6.2",
+    "node-pre-gyp": "^0.6.36",
     "pace": "~0.0.4",
     "progress": "~2.0.0",
-    "temporary": "~0.0.8",
-    "node-pre-gyp": "0.6.x",
-    "should": "~11.2.1"
+    "should": "~11.2.1",
+    "temporary": "~0.0.8"
   },
   "devDependencies": {
     "aws-sdk": "2.x",
