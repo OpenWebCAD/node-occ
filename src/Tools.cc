@@ -434,7 +434,13 @@ void StepAsyncReadWorker::Execute() {
 
     int nbs = aReader.NbShapes();
     for (int i = 1; i <= nbs; i++) {
-      const TopoDS_Shape& aShape = aReader.Shape(i);
+      const TopoDS_Shape& aShape = aReader.Shape(i);             
+
+
+      if (aShape.ShapeType() == TopAbs_SOLID) {
+        ShapeFix_Solid fix((const TopoDS_Solid&)aShape);
+        fix.Perform();
+      }
       B.Add(compound, aShape);
       this->shapes.push_back(aShape);
     }

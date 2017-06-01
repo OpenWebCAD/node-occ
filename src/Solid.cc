@@ -452,6 +452,7 @@ v8::Handle<v8::Object> Solid::createMesh(double factor, double angle, bool quali
         for (exFace.Init(solid, TopAbs_FACE); exFace.More(); exFace.Next()) {
           const TopoDS_Face& face = TopoDS::Face(exFace.Current());
           if (face.IsNull()) continue;
+          std::cerr << " extracting mesh  for compound face" <<std::endl;
           mesh->extractFaceMesh(face, qualityNormals);
         }
       }
