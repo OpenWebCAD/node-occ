@@ -6,29 +6,57 @@
   "targets": [
     {
       "target_name": "occ",
-      "cflags!": [
-        "-fno-exceptions"
-      ],
-      "cflags_cc!": [
-        "-fno-exceptions"
-      ],
-      "cflags": [
-        "-O3",
-        "-frtti",
-        "-Wno-ignored-qualifiers",
-        "-Wno-unused-variable",
-        "-Wno-reorder",
-        "-Wno-extra"
-      ],
-      "cflags_cc": [
-        "-Wl,-rpath,\${ORIGIN}",
-        "-O3",
-        "-frtti",
-        "-Wno-ignored-qualifiers",
-        "-Wno-unused-variable",
-        "-Wno-reorder",
-        "-Wno-extra"
-      ],
+
+         "conditions": [
+              [
+                  "OS=='linux'",    {
+                      "cflags!": [
+                        "-fno-exceptions"
+                      ],
+                      "cflags_cc!": [
+                        "-fno-exceptions"
+                      ],
+                      "cflags": [
+                        "-O3",
+                        "-frtti",
+                        "-Wno-ignored-qualifiers",
+                        "-Wno-unused-variable",
+                        "-Wno-reorder",
+                        "-Wno-extra"
+                      ],
+                      "cflags_cc": [
+                        "-Wl,-rpath,\${ORIGIN}",
+                        "-O3",
+                        "-frtti",
+                        "-Wno-ignored-qualifiers",
+                        "-Wno-unused-variable",
+                        "-Wno-reorder",
+                        "-Wno-extra"
+                      ],
+
+                      "library_dirs": [
+                        "<!(pwd)/occt-7.1.0/lib",
+                      ],
+                      "include_dirs": [
+                        "<!(pwd)/occt-7.1.0/include/opencascade",
+                        "<!(node -e \"require('nan')\")"
+                      ],
+
+                  }
+              ],
+              [
+                  "OS=='win'",    {
+                      "library_dirs": [
+                        "./occt-7.1.0/win64/vc14/lib",
+                      ],
+                      "include_dirs": [
+                        "./occt-7.1.0/inc",
+                        "<!(node -e \"require('nan')\")"
+                      ],
+                  }
+              ]
+         ],
+
       "xcode_settings": {
         "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
       },
@@ -83,13 +111,6 @@
         "OCE_HAVE_IOSTREAM",
         "OCE_HAVE_CLIMITS"
       ],
-      "library_dirs": [
-        "<!(pwd)/occt-7.1.0/lib",
-      ],
-      "include_dirs": [
-        "<!(pwd)/occt-7.1.0/include/opencascade",
-        "<!(node -e \"require('nan')\")"
-      ],
       "libraries+": [
         "-Wl,-rpath=<(OOO)",
         "-lTKBO<(dbg)",
@@ -115,10 +136,10 @@
         "-lTKSTEPAttr<(dbg)",
         "-lTKSTEPBase<(dbg)",
         "-lTKFillet<(dbg)",
-        "-lTKXSBase<(dbg)"
+        "-lTKXSBase<(dbg)",
+        "-lTKSTL<(dbg)",
       ],
       "other_libraries": [
-        "-lTKSTL<(dbg)",
         "-lTKTObj<(dbg)",
         "-lTKLCAF<(dbg)"
       ],
@@ -205,7 +226,7 @@
         "OS=='win'",
         {
           "variables": {
-             "bin_folder": '<!(ECHO %PREFIX%)\<!(ECHO %ARCH%)/bin'
+             "bin_folder": 'occt-7.1.0/win64/vc14/bin'
           },
           "copies": [
             {
