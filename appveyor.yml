@@ -43,6 +43,10 @@ environment:
       nodejs_version: 7.4
       platform: x64
 
+    - electron_version: "1.6.10"
+      nodejs_version: 8
+      platform: x64
+
     # - nodejs_version: 6
     #   platform: x86
 
