@@ -19,6 +19,21 @@ environment:
   VisualStudioVersion: "12"
   matrix:
 
+    # - nodejs_version: 6
+    #   platform: x86
+
+    - nodejs_version: 6
+      platform: x64
+
+    # - nodejs_version: 7
+    #   platform: x86
+
+    - nodejs_version: 7
+      platform: x64
+
+    - nodejs_version: 8
+      platform: x64
+
     # - electron_version: "1.4.14"
     #   nodejs_version: 6
     #   platform: x86
@@ -47,17 +62,6 @@ environment:
       nodejs_version: 8
       platform: x64
 
-    # - nodejs_version: 6
-    #   platform: x86
-
-    - nodejs_version: 6
-      platform: x64
-
-    # - nodejs_version: 7
-    #   platform: x86
-
-    - nodejs_version: 7
-      platform: x64
 
 
 # clone directory
@@ -104,7 +108,7 @@ build_script:
 # - npm install --build-from-source --target_arch=%npm_config_arch%
 
 cache:
-  - c:\projects\node-occ\occt-7.1.0
+  # - c:\projects\node-occ\occt-7.1.0
 
 
 configuration:
