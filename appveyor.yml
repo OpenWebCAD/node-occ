@@ -91,7 +91,7 @@ install:
 
 
 # - cmd: npm install mocha node-pre-gyp-github -g
-- cmd: setup.bat %PLATFORM%
+- cmd: setenv.bat %PLATFORM%
 - cmd: build.bat %PLATFORM%
 
 
