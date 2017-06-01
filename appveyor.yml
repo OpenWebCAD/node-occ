@@ -90,7 +90,7 @@ install:
     true;
 
 
-# - cmd: npm install mocha node-pre-gyp-github -g
+- cmd: npm install mocha node-pre-gyp-github -g
 - cmd: setenv.bat 64
 - cmd: build.bat %PLATFORM%
 
