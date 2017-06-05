@@ -31,6 +31,7 @@ public:
 
     static NAN_METHOD(getEdgeIndices);
     static NAN_METHOD(getFaceTriangles);
+    static NAN_METHOD(getFaceTriangleNormals);
 
     static void Init(v8::Handle<v8::Object> target);
 

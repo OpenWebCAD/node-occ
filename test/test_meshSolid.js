@@ -3,7 +3,11 @@ const should = require("should");
 
 const nodeocc = require("..");
 const occ = nodeocc.occ;
-
+const doDebug = false;
+function debugLog() {
+    arguments;
+    /* implement me*/
+}
 describe("T1- testing mesh on a simple box shape", function () {
 
     let shape, mesh;
@@ -136,7 +140,7 @@ describe("T1- testing mesh on a simple box shape", function () {
 
     it("Mesh#getEdgeIndices    - mesh should provide a mechanism to extract the Polygon of a given edge", function () {
         //xx console.log(mesh);
-        let arr = mesh.getEdgeIndices(shape.getEdges()[0]);
+        const arr = mesh.getEdgeIndices(shape.getEdges()[0]);
         arr.should.eql(new Uint8Array([0, 1]));
 
     });
@@ -217,14 +221,15 @@ describe("testing performance of meshing algorithms with various parameters", fu
 
     this.timeout(30000);
 
-
+    function makeUnitBox() {
+        return occ.makeBox([0, 0, 0], [100, 100, 100]);
+    }
     function makeSphere() {
         return occ.makeSphere([0, 0, 0], 100);
     }
 
     function makeLegoBrick() {
-        const shape2 = nodeocc.shapeFactory.makeLegoBrick(occ, 4, 2, "thin");
-        return shape2;
+        return nodeocc.shapeFactory.makeLegoBrick(occ, 4, 2, "thin");
     }
 
     function installFor(makeShape) {
@@ -235,13 +240,11 @@ describe("testing performance of meshing algorithms with various parameters", fu
         });
         function test_with(tol, angle) {
             it(makeShape.name + " testing with parameter : deflection : " + tol + "  angle :" + angle, function () {
-                let mesh1 = shape2.createMesh(tol, angle);
-                console.log("  vertices    = ", mesh1.vertices.length);
-                console.log("  triangles   = ", mesh1.triangles.length);
-                //xx console.log("  edgeindices = ", mesh1.edgeindices);
-                //xx        console.log("  json      = " , vertices * 3 * 10 + triangle*  3 *10);
+                const mesh1 = shape2.createMesh(tol, angle);
+                debugLog("  vertices    = ", mesh1.vertices.length);
+                debugLog("  triangles   = ", mesh1.triangles.length);
             });
-        };
+        }
         test_with(0.01, 0.5);
         test_with(0.01, 5);
         test_with(0.01, 10);
@@ -268,18 +271,21 @@ describe("testing performance of meshing algorithms with various parameters", fu
 
             let shape2;
             beforeEach(function () {
-                shape2 = makeShape();
+                shape2 = makeUnitBox();
             });
             it("should create default JSON file with acceptable size", function () {
                 shape2.name = "shape2";
-                let obj1 = occ.buildSolidMesh(shape2);
-                console.log("json json1", JSON.stringify(obj1).length);
+                const obj1 = occ.buildSolidMesh(shape2);
+                debugLog("json json1", JSON.stringify(obj1, null, "\t"));
+                debugLog("json json1", JSON.stringify(obj1).length);
+
             });
             it("should create default JSON file with acceptable size", function () {
                 shape2.name = "shape2";
-                let obj2 = occ.buildSolidMeshNew(shape2);
-                console.log("json json2", JSON.stringify(obj2).length);
-                // console.log(JSON.stringify(obj,null," "));
+                const obj2 = occ.buildSolidMeshNew(shape2);
+                debugLog("json json1", JSON.stringify(obj2, null, "\t"));
+                debugLog("json json2", JSON.stringify(obj2).length);
+
             });
         });
 

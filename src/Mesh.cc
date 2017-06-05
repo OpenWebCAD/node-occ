@@ -59,6 +59,7 @@ void Mesh::Init(v8::Handle<v8::Object> target)
 
   EXPOSE_METHOD(Mesh, getEdgeIndices);
   EXPOSE_METHOD(Mesh, getFaceTriangles);
+  EXPOSE_METHOD(Mesh, getFaceTriangleNormals);
 
   // other Mesh prototype members are defined in the mesh.js script
   target->Set(Nan::New("Mesh").ToLocalChecked(), tpl->GetFunction());
@@ -84,6 +85,7 @@ uint32_t Mesh::push_point(const Coord3f& point) {
   }
   return it->second;
 }
+
 uint32_t Mesh::push_normal(const Coord3f& normal) {
   long hash = hashpoint(normal.x, normal.y, normal.z);
   auto it = this->_mapNormals.find(hash);
@@ -124,6 +126,9 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
   gp_Trsf tr = loc;
   std::vector<uint32_t> translationTable;
   translationTable.reserve(nb_points);
+
+  std::vector<uint32_t> normalTranslationTable;
+  normalTranslationTable.reserve(nb_points);
 
   // ------------------------------------------------------------------------------
   // import face points into index 
@@ -227,6 +232,7 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
   for (int i = 0; i < nb_points; i++) {
     const gp_Vec n = local_normals[i];
     uint32_t index = this->push_normal(n);
+    normalTranslationTable[i] = index;
   };
 
   //---------------------------------------------------------------------------------
@@ -290,9 +296,10 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
       local_normals[n2 - 1] = local_normals[n2 - 1] - normal;
       local_normals[n3 - 1] = local_normals[n3 - 1] - normal;
 
-      tri.i = translationTable[(uint32_t)(n1 - 1)];
-      tri.j = translationTable[(uint32_t)(n2 - 1)];
-      tri.k = translationTable[(uint32_t)(n3 - 1)];
+      tri.i = this->push_normal(local_normals[n1 - 1]);
+      tri.j = this->push_normal(local_normals[n2 - 1]);
+      tri.k = this->push_normal(local_normals[n3 - 1]);
+
       this->_triangles_normals.push_back(tri);
 
     }
@@ -300,6 +307,7 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
       tri.i = this->push_normal(local_normals[n1 - 1]);
       tri.j = this->push_normal(local_normals[n2 - 1]);
       tri.k = this->push_normal(local_normals[n3 - 1]);
+
       this->_triangles_normals.push_back(tri);
 
     }
@@ -401,6 +409,27 @@ void Mesh::updateJavaScriptArray()
 }
 
 
+template <class uintX_t>
+void makeTT(const std::vector<Triangle3i>& arr,uint32_t start,uint32_t length,std::vector<uintX_t>& indexes)
+{
+    indexes.clear();
+    indexes.reserve(length * 3);
+    for (uint32_t i = 0; i < length; i++) {
+      indexes.push_back((uintX_t)arr[start + i].i);
+      indexes.push_back((uintX_t)arr[start + i].j);
+      indexes.push_back((uintX_t)arr[start + i].k);
+    }
+}
+template <class uintX_t>
+void makeTT(const std::vector<uint32_t>& arr,uint32_t start,uint32_t length,std::vector<uintX_t>& indexes)
+{
+    indexes.clear();
+    indexes.reserve(length);
+    for (uint32_t i = 0; i < length; i++) {
+      indexes.push_back(arr[start + i]);
+    }
+}
+
 #include "Face.h"
 NAN_METHOD(Mesh::getFaceTriangles)
 {
@@ -424,38 +453,58 @@ NAN_METHOD(Mesh::getFaceTriangles)
   const auto arr = pThis->_triangles;
 
   if (pThis->numVertices() <= 255) {
-
     std::vector<uint8_t> indexes;
-    indexes.clear();
-    indexes.reserve(length * 3);
-    for (uint32_t i = 0; i < length; i++) {
-      indexes.push_back((uint8_t)arr[start + i].i);
-      indexes.push_back((uint8_t)arr[start + i].j);
-      indexes.push_back((uint8_t)arr[start + i].k);
-    }
+    makeTT<uint8_t>(arr,start,length,indexes);
     info.GetReturnValue().Set(makeUint8Array(indexes.data(), length * 3));
     return;
   }
   if (pThis->numVertices() <= 65535) {
     std::vector<uint16_t> indexes;
-    indexes.clear();
-    indexes.reserve(length * 3);
-    for (uint32_t i = 0; i < length; i++) {
-      indexes.push_back((uint16_t)arr[start + i].i);
-      indexes.push_back((uint16_t)arr[start + i].j);
-      indexes.push_back((uint16_t)arr[start + i].k);
-    }
+    makeTT<uint16_t>(arr,start,length,indexes);
     info.GetReturnValue().Set(makeUint16Array(indexes.data(), length * 3));
     return;
   }
   std::vector<uint32_t> indexes;
-  indexes.clear();
-  indexes.reserve(length * 3);
-  for (uint32_t i = 0; i < length; i++) {
-    indexes.push_back(arr[start + i].i);
-    indexes.push_back(arr[start + i].j);
-    indexes.push_back(arr[start + i].k);
+  makeTT<uint32_t>(arr,start,length,indexes);
+  info.GetReturnValue().Set(makeUint32Array(indexes.data(), length * 3));
+}
+
+NAN_METHOD(Mesh::getFaceTriangleNormals)
+{
+  Mesh* pThis = UNWRAP(Mesh);
+  Face* pFace = 0;
+  if (info.Length() == 1 && info[0]->IsObject()) {
+    pFace = Nan::ObjectWrap::Unwrap<Face>(info[0]->ToObject());
   }
+  if (!pFace) {
+    return Nan::ThrowError("expecting one argument : face");
+  }
+  auto& hashMap = pThis->_faceHashMap;
+  int hash = pFace->m_face.HashCode(std::numeric_limits<int>::max());
+  // find hash in edgehash.push_back(hash);
+  if (hashMap.end() == hashMap.find(hash)) {
+    return Nan::ThrowError("Cannot find indices for this face");
+  }
+  uint32_t index = hashMap[hash];
+  uint32_t start = pThis->_faceRanges[index];
+  uint32_t length = pThis->_faceRanges[index + 1];
+
+  const auto arr = pThis->_triangles_normals;
+
+  if (pThis->numNormals() <= 255) {
+    std::vector<uint8_t> indexes;
+    makeTT<uint8_t>(arr,start,length,indexes);
+    info.GetReturnValue().Set(makeUint8Array(indexes.data(), length * 3));
+    return;
+  }
+  if (pThis->numNormals() <= 65535) {
+    std::vector<uint16_t> indexes;
+    makeTT<uint16_t>(arr,start,length,indexes);
+    info.GetReturnValue().Set(makeUint16Array(indexes.data(), length * 3));
+    return;
+  }
+  std::vector<uint32_t> indexes;
+  makeTT<uint32_t>(arr,start,length,indexes);
   info.GetReturnValue().Set(makeUint32Array(indexes.data(), length * 3));
 }
 #include "Edge.h"
@@ -490,33 +539,20 @@ NAN_METHOD(Mesh::getEdgeIndices)
 
 
   if (pThis->numVertices() <= 255) {
-
     std::vector<uint8_t> indexes;
-    indexes.clear();
-    indexes.reserve(length);
-    for (uint32_t i = 0; i < length; i++) {
-      indexes.push_back(arr[start + i]);
-    }
+    makeTT<uint8_t>(arr,start,length,indexes);
     info.GetReturnValue().Set(makeUint8Array(indexes.data(), length));
     return;
   }
   if (pThis->numVertices() <= 65535) {
     std::vector<uint16_t> indexes;
-    indexes.clear();
-    indexes.reserve(length);
-    for (uint32_t i = 0; i < length; i++) {
-      indexes.push_back(arr[start + i]);
-    }
+    makeTT<uint16_t>(arr,start,length,indexes);
     info.GetReturnValue().Set(makeUint16Array(indexes.data(), length));
     return;
   }
 
   std::vector<uint32_t> indexes;
-  indexes.clear();
-  indexes.reserve(length);
-  for (uint32_t i = 0; i < length; i++) {
-    indexes.push_back(arr[start + i]);
-  }
+  makeTT<uint32_t>(arr,start,length,indexes);
   info.GetReturnValue().Set(makeUint32Array(indexes.data(), length));
 
 }

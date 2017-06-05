@@ -2,27 +2,32 @@
 const occ = require("../lib/occ");
 const should = require("should");
 
-
+const doDebug = false;
+function debugLog() {
+    if (doDebug) {
+        console.log.apply(console, arguments);
+    }
+}
 describe("issue#17 testing that mesh get invalidated ", function () {
 
 
     function constructFaceWithWire() {
-        let aPnt1 = [0, 0.0, 0];
-        let aPnt2 = [10, 1.0, 0];
-        let aPnt3 = [10, 9.0, 0];
-        let aPnt4 = [0, 10.0, 0];
-        let segment1 = new occ.makeLine(aPnt1, aPnt2);
-        let segment2 = new occ.makeLine(aPnt2, aPnt3);
-        let segment3 = new occ.makeLine(aPnt3, aPnt4);
-        let segment4 = new occ.makeLine(aPnt4, aPnt1);
+        const aPnt1 = [0, 0.0, 0];
+        const aPnt2 = [10, 1.0, 0];
+        const aPnt3 = [10, 9.0, 0];
+        const aPnt4 = [0, 10.0, 0];
+        const segment1 = new occ.makeLine(aPnt1, aPnt2);
+        const segment2 = new occ.makeLine(aPnt2, aPnt3);
+        const segment3 = new occ.makeLine(aPnt3, aPnt4);
+        const segment4 = new occ.makeLine(aPnt4, aPnt1);
 
-        let wire = new occ.Wire(segment1, segment2, segment3, segment4);
+        const wire = new occ.Wire(segment1, segment2, segment3, segment4);
         wire.isClosed.should.equal(true);
         wire.numEdges.should.equal(4);
         wire.numVertices.should.equal(4);
 
         // the vector to extrude the face along.
-        let face = new occ.Face(wire);
+        const face = new occ.Face(wire);
 
         face.getWires().length.should.eql(1);
 
@@ -33,10 +38,10 @@ describe("issue#17 testing that mesh get invalidated ", function () {
     it("should translate a face", function (done) {
         let face = constructFaceWithWire();
 
-        let vertices_before = face.getWires()[0].getVertices();
+        const vertices_before = face.getWires()[0].getVertices();
 
         face = face.translate([20, 30, 40]);
-        let vertices_after = face.getWires()[0].getVertices();
+        const vertices_after = face.getWires()[0].getVertices();
 
         vertices_after[0].x.should.eql(vertices_before[0].x + 20);
         vertices_after[0].y.should.eql(vertices_before[0].y + 30);
@@ -66,13 +71,15 @@ describe("issue#17 testing that mesh get invalidated ", function () {
         face.createMesh(0.1);
         face.hasMesh.should.equal(true);
 
-        console.log("face mesh vertices =", face.mesh.vertices.toString());
+        debugLog("face mesh vertices =", face.mesh.vertices.toString());
 
-        let vertices_before = face.mesh.vertices;
+
+        const vertices_before = face.mesh.vertices;
         face = face.translate([20, 30, 40]);
 
-        console.log("face mesh vertices =", face.mesh.vertices.toString());
-        let vertices_after = face.mesh.vertices;
+        debugLog("face mesh vertices =", face.mesh.vertices.toString());
+
+        const vertices_after = face.mesh.vertices;
 
         vertices_before.toString().should.eql("0,0,0,10,1,0,10,9,0,0,10,0");
         vertices_after.toString().should.eql("20,30,40,30,31,40,30,39,40,20,40,40");

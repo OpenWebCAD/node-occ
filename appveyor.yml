@@ -72,7 +72,7 @@ clone_folder: c:\projects\node-occ
 clone_depth: 5
 
 matrix:
-  fast_finish: true
+  fast_finish: false
   allow_failures:
     - nodejs_version: 7
 

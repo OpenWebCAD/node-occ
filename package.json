@@ -10,26 +10,24 @@
     "nan": "^2.6.2",
     "node-pre-gyp": "^0.6.36",
     "pace": "~0.0.4",
-    "progress": "~2.0.0",
-    "should": "~11.2.1",
-    "temporary": "~0.0.8"
+    "progress": "~2.0.0"
   },
   "devDependencies": {
     "aws-sdk": "2.x",
     "electron-rebuild": "^1.5.11",
-    "grunt": "~1.0.1",
-    "grunt-contrib-concat": "1.0.1",
-    "grunt-contrib-jshint": "~1.1.0",
+    "eslint": "^3.19.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-require-path-exists": "^1.1.7",
+    "eslint-plugin-standard": "^3.0.1",
+    "grunt": "^1.0.1",
+    "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-nodeunit": "~1.0.0",
     "grunt-contrib-uglify": "3.0.1",
     "grunt-docco": "~0.5.0",
     "grunt-mocha-cli": "~3.0.0",
     "mocha": "~3.4.2",
-    "eslint": "^3.19.0",
-    "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-require-path-exists": "^1.1.7",
-    "eslint-plugin-standard": "^3.0.1"
+    "should": "~11.2.1"
   },
   "main": "index",
   "author": {
@@ -54,7 +52,8 @@
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "mocha -R spec",
-    "lint": "eslint lib test bin"
+    "lint": "eslint lib test bin",
+    "doc": "grunt doc"
   },
   "binary": {
     "module_name": "occ",
