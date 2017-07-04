@@ -6,10 +6,34 @@
   "targets": [
     {
       "target_name": "occ",
-
          "conditions": [
               [
-                  "OS=='linux'",    {
+                "OS=='mac'",
+                {
+                   "xcode_settings": {
+                        "OTHER_CFLAGS" : [
+                            "-O3",
+                            "-frtti",
+                            "-Wno-ignored-qualifiers",
+                            "-Wno-unused-variable",
+                            "-Wno-reorder",
+                            "-Wno-extra"
+                        ],
+                        "OTHER_LDFLAGS" : [
+
+                        ]
+                   },
+                    "library_dirs": [
+                      "<!(pwd)/occt-7.1.0/lib",
+                    ],
+                    "include_dirs": [
+                      "<!(pwd)/occt-7.1.0/include/opencascade",
+                      "<!(node -e \"require('nan')\")"
+                    ],},
+              ],
+              [
+                "OS=='linux'",
+                {
                       "cflags!": [
                         "-fno-exceptions"
                       ],
@@ -40,20 +64,18 @@
                       "include_dirs": [
                         "<!(pwd)/occt-7.1.0/include/opencascade",
                         "<!(node -e \"require('nan')\")"
-                      ],
-
-                  }
+                      ],}
               ],
               [
-                  "OS=='win'",    {
+                "OS=='win'",
+                {
                       "library_dirs": [
                         "./occt-7.1.0/win64/vc14/lib",
                       ],
                       "include_dirs": [
                         "./occt-7.1.0/inc",
                         "<!(node -e \"require('nan')\")"
-                      ],
-                  }
+                      ],}
               ]
          ],
 
@@ -112,7 +134,7 @@
         "OCE_HAVE_CLIMITS"
       ],
       "libraries+": [
-        "-Wl,-rpath=<(OOO)",
+        "-Wl",
         "-lTKBO<(dbg)",
         "-lTKBool<(dbg)",
         "-lTKBRep<(dbg)",
@@ -165,8 +187,71 @@
       "dependencies": [
         "<(module_name)"
       ],
-      "conditions": [[
-        "OS=='linux'",
+      "conditions": [
+        ["OS=='mac'",
+        {
+                "variables": {
+                   "bin_folder": "./occt-7.1.0/lib"
+                },
+                "copies": [
+                  {
+                    "files": [
+                      "<(bin_folder)/libTKBO.7.dylib",
+                      "<(bin_folder)/libTKBool.7.dylib",
+                      "<(bin_folder)/libTKBRep.7.dylib",
+                      "<(bin_folder)/libTKernel.7.dylib",
+                      "<(bin_folder)/libTKFeat.7.dylib",
+                      "<(bin_folder)/libTKFillet.7.dylib",
+                      "<(bin_folder)/libTKG2d.7.dylib",
+                      "<(bin_folder)/libTKG3d.7.dylib",
+                      "<(bin_folder)/libTKGeomAlgo.7.dylib",
+                      "<(bin_folder)/libTKGeomBase.7.dylib",
+                      "<(bin_folder)/libTKIGES.7.dylib",
+
+                      "<(bin_folder)/libTKMath.7.dylib",
+                      "<(bin_folder)/libTKMesh.7.dylib",
+                      "<(bin_folder)/libTKOffset.7.dylib",
+                      "<(bin_folder)/libTKPrim.7.dylib",
+                      "<(bin_folder)/libTKShHealing.7.dylib",
+                      "<(bin_folder)/libTKSTEP.7.dylib",
+                      "<(bin_folder)/libTKSTEP209.7.dylib",
+                      "<(bin_folder)/libTKSTEPAttr.7.dylib",
+                      "<(bin_folder)/libTKSTEPBase.7.dylib",
+                      "<(bin_folder)/libTKSTL.7.dylib",
+                      "<(bin_folder)/libTKTopAlgo.7.dylib",
+                      "<(bin_folder)/libTKXSBase.7.dylib",
+
+                      "<(bin_folder)/libTKBO.7.1.0.dylib",
+                      "<(bin_folder)/libTKBool.7.1.0.dylib",
+                      "<(bin_folder)/libTKBRep.7.1.0.dylib",
+                      "<(bin_folder)/libTKernel.7.1.0.dylib",
+                      "<(bin_folder)/libTKFeat.7.1.0.dylib",
+                      "<(bin_folder)/libTKFillet.7.1.0.dylib",
+                      "<(bin_folder)/libTKG2d.7.1.0.dylib",
+                      "<(bin_folder)/libTKG3d.7.1.0.dylib",
+                      "<(bin_folder)/libTKGeomAlgo.7.1.0.dylib",
+                      "<(bin_folder)/libTKGeomBase.7.1.0.dylib",
+                      "<(bin_folder)/libTKIGES.7.1.0.dylib",
+
+                      "<(bin_folder)/libTKMath.7.1.0.dylib",
+                      "<(bin_folder)/libTKMesh.7.1.0.dylib",
+                      "<(bin_folder)/libTKOffset.7.1.0.dylib",
+                      "<(bin_folder)/libTKPrim.7.1.0.dylib",
+                      "<(bin_folder)/libTKShHealing.7.1.0.dylib",
+                      "<(bin_folder)/libTKSTEP.7.1.0.dylib",
+                      "<(bin_folder)/libTKSTEP209.7.1.0.dylib",
+                      "<(bin_folder)/libTKSTEPAttr.7.1.0.dylib",
+                      "<(bin_folder)/libTKSTEPBase.7.1.0.dylib",
+                      "<(bin_folder)/libTKSTL.7.1.0.dylib",
+                      "<(bin_folder)/libTKTopAlgo.7.1.0.dylib",
+                      "<(bin_folder)/libTKXSBase.7.1.0.dylib",
+
+
+                    ] ,
+                    "destination": "<(module_path)"
+                }]
+        }],
+        ["OS=='linux'",
         {
           "variables": {
              "bin_folder": "./occt-7.1.0/lib"
@@ -222,8 +307,8 @@
               ] ,
               "destination": "<(module_path)"
           }]
-        }],[
-        "OS=='win'",
+        }],
+        ["OS=='win'",
         {
           "variables": {
              "bin_folder": 'occt-7.1.0/win64/vc14/bin'
@@ -309,8 +394,8 @@
               "destination": "<(module_path)"
             }
           ]
-        }
-      ]]
+        }]
+      ]
     }
   ]
 }

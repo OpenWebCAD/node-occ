@@ -4,7 +4,12 @@
 #
 ##########################################################################################
 export OCCT_PACKAGE=occt-7.1.0
+if [ `uname` == "Darwin" ];then
+export OCCT_TARFILE=${OCCT_PACKAGE}-osx.tgz
+else
 export OCCT_TARFILE=${OCCT_PACKAGE}-linux.tgz
+fi
+
 echo "--------------------------  OCCT TAR FILE ${OCCT_TARFILE}"
 ls ${OCCT_TARFILE} 
 if [ ! -f "${OCCT_TARFILE}" ]; then

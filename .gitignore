@@ -56,3 +56,4 @@ lib/binding
 npm-debug*
 occt-*
 
+bower_components
