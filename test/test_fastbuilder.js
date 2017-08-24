@@ -1,13 +1,12 @@
-const assert = require("assert");
 const fastBuilder_ = require("../lib/fastbuilder");
 const fast_occ = fastBuilder_.occ;
 const fastBuilder  = fastBuilder_.fastBuilder;
 
 function makeShape() {
-    var e= 20;
-    var s1 = fast_occ.makeBox([10,e,30],[110,120,130]);
-    var s2 = fast_occ.makeBox(100,200,300);
-    var s3 = fast_occ.fuse(s1,s2);
+    let e = 20;
+    let s1 = fast_occ.makeBox([10, e, 30], [110, 120, 130]);
+    let s2 = fast_occ.makeBox(100, 200, 300);
+    let s3 = fast_occ.fuse(s1, s2);
     s3 =  s3.translate([0,20,30]);
     s3=  s3.translate([0,20,30]);
     return s3;
@@ -17,7 +16,7 @@ function startChronometer() {
     return process.hrtime();
 }
 function stopChronometer(time1) {
-    var diff1 = process.hrtime(time1);
+    let diff1 = process.hrtime(time1);
     diff1 = (diff1[0]*1E9+diff1[1]); // in nanoseconds
     diff1 /= 1000.0;                 // in microseconds
     diff1 /= 1000.0;                 // in miliseconds
@@ -37,16 +36,16 @@ describe("testing geometry builder",function(){
         fastBuilder.mapQueryCount.should.equal(0);
         fastBuilder.mapHit.should.equal(0);
 
-        var c1 = startChronometer();
+        let c1 = startChronometer();
         makeShape();
-        var diff1 = stopChronometer(c1);
+        let diff1 = stopChronometer(c1);
 
         fastBuilder.mapQueryCount.should.equal(5);
         fastBuilder.mapHit.should.equal(0);
 
-        var c2 = startChronometer();
+        let c2 = startChronometer();
         makeShape();
-        var diff2 = stopChronometer(c2);
+        let diff2 = stopChronometer(c2);
 
 
         fastBuilder.mapQueryCount.should.equal(10);
@@ -64,8 +63,8 @@ describe("testing geometry builder",function(){
 
 describe("testing calculateOperationHash",function(){
 
-    var fastbuilder = require("../lib/fastbuilder");
-    var calculateOperationHash = function() {
+    let fastbuilder = require("../lib/fastbuilder");
+    let calculateOperationHash = function () {
         return fastbuilder.calculateOperationHash("myFunc",arguments);
     };
 
@@ -73,7 +72,7 @@ describe("testing calculateOperationHash",function(){
 
     });
     it("should calculate the hash of [10,20,30]",function(){
-         calculateOperationHash([10,20,30])[1].should.equal("myFunc([10,20,30])");
+        calculateOperationHash([10, 20, 30])[1].should.equal("myFunc([10,20,30])");
     });
 });
 
@@ -87,7 +86,7 @@ describe("testing fast builder with array of shape",function(){
 
         fastBuilder.mapQueryCount.should.equal(0);
         fastBuilder.mapHit.should.equal(0);
-        var a =[];
+        let a = [];
         a.push(makeShape());
         a.push(makeShape().translate(10,20,30));
         a.push(makeShape().translate(30,20,30));
@@ -136,24 +135,25 @@ describe("testing fast builder with some shapes", function () {
 
 
 describe("testing fast builder get Common Edge" , function() {
-  let solid1;
-  let solid2;
-  function buildFilletOnTopLeftEdge() {
-     let s1 = fast_occ.makeBox([10,20,30],[110,120,130]);
-     let edges = s1.getCommonEdges(s1.faces.front,s1.faces.left);
-     s1 = fast_occ.makeFillet(s1,edges,10);
-     //xx console.log(Object.keys(s1.faces));
-     s1 = fast_occ.makeDraftAngle(s1,s1.faces["mleft:0"],0.1,s1.faces["mbottom:0"]);
-     return s1;
-  }
-  before(function(){
-    solid1 = buildFilletOnTopLeftEdge();
-    solid2 = buildFilletOnTopLeftEdge();
-  });
-  it("should have 7 faces",function(){
-    solid1.numFaces.should.be.equal(7);
-    solid2.numFaces.should.be.equal(7);
-  });
+    let solid1;
+    let solid2;
+
+    function buildFilletOnTopLeftEdge() {
+        let s1 = fast_occ.makeBox([10, 20, 30], [110, 120, 130]);
+        let edges = s1.getCommonEdges(s1.faces.front, s1.faces.left);
+        s1 = fast_occ.makeFillet(s1, edges, 10);
+        s1 = fast_occ.makeDraftAngle(s1, s1.faces["mleft:0"], 0.1, s1.faces["mbottom:0"]);
+        return s1;
+    }
+
+    before(function () {
+        solid1 = buildFilletOnTopLeftEdge();
+        solid2 = buildFilletOnTopLeftEdge();
+    });
+    it("should have 7 faces", function () {
+        solid1.numFaces.should.be.equal(7);
+        solid2.numFaces.should.be.equal(7);
+    });
 });
 
 
@@ -181,7 +181,7 @@ describe("testing fast-builder with LEGO brick" , function () {
 
             let nx = 3;
             let ny = 6;
-            let brick24 = factory.makeLegoBrick(fast_occ, nx, ny, 'thick');
+            let brick24 = factory.makeLegoBrick(fast_occ, nx, ny, "thick");
 
             brick24.numFaces.should.be.greaterThan(40);
 

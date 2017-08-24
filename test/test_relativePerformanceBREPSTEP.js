@@ -1,9 +1,9 @@
-const occ = require('../lib/occ');
+const occ = require("../lib/occ");
 const should = require("should");
 const async = require("async");
 const path = require("path");
 
-const ProgressBar = require('progress');
+const ProgressBar = require("progress");
 const remove_file = require("./helpers").remove_file;
 
 function myReadStep(filename, done) {
@@ -12,8 +12,8 @@ function myReadStep(filename, done) {
     let brep_filename = require("./helpers").getTemporaryFilePath({suffix: ".brep"});
 
     let bar = new ProgressBar("reading file [:bar] :percent elapsed :elapseds ETA :etas", {
-        complete: '=',
-        incomplete: '-',
+        complete: "=",
+        incomplete: "-",
         width: 100,
         total: 1000
     });
@@ -26,8 +26,8 @@ function myReadStep(filename, done) {
 
     function performMesh(solids) {
         let bar = new ProgressBar("meshing solids [:bar] :percent elapsed :elapseds  ETA :etas", {
-            complete: '=',
-            incomplete: '-',
+            complete: "=",
+            incomplete: "-",
             width: 100,
             total: solids.length
         });
@@ -100,7 +100,6 @@ function myReadStep(filename, done) {
             if (!err) {
                 solids = _solids;
                 console.log(" nb solids = ", solids.length);
-            } else {
             }
             return callback(err);
         }, progressFunc);
@@ -125,7 +124,7 @@ function myReadStep(filename, done) {
 describe("testing relative performance of BREP and STEP I/O", function () {
     this.timeout(40000);
     it("should read kuka robot", function (done) {
-        let filename = path.join(__dirname, 'kuka.stp');
+        let filename = path.join(__dirname, "kuka.stp");
         myReadStep(filename, done);
     });
 });

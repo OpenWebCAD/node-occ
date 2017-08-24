@@ -1,6 +1,5 @@
-const assert = require("assert");
 const occ = require("../lib/occ");
-const shapeFactory = require('../lib/shapeFactory');
+require("../lib/shapeFactory");
 
 
 
@@ -8,7 +7,7 @@ describe("testing bounding box",function(){
     describe("an empty BoundingBox", function() {
         let bbox;
         before(function() {
-             bbox = new occ.BoundingBox();
+            bbox = new occ.BoundingBox();
         });
         it("should  be void", function() {
             bbox.isVoid.should.equal(true);

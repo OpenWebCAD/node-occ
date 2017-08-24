@@ -1,7 +1,7 @@
-const getTemporaryFilePath = require('gettemporaryfilepath');
+const getTemporaryFilePath = require("gettemporaryfilepath");
 
 const _getTemporaryFilePath = function () {
-    var tmp = getTemporaryFilePath.apply(null, arguments);
+    let tmp = getTemporaryFilePath.apply(null, arguments);
     return tmp.replace(/\\/g, "/");
 };
 exports.getTemporaryFilePath = _getTemporaryFilePath;
