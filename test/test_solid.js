@@ -517,6 +517,38 @@ describe("testing solid construction",function() {
        });
        
     });
+    describe("makeTorus with invalid arguments", function () {
+
+        it("should not crash if torus is created with invalid arguments", function () {
+            should(function () {
+                const solid = occ.makeTorus([0, 0, 0], [0, 0, 0], 10, 100);
+            }).throwError();
+        });
+    });
+    describe("makeCylinder with invalid arguments", function () {
+
+        it("should not crash if Cylinder is created with invalid arguments", function () {
+            should(function () {
+                const solid = occ.makeCylinder([0, 0, 0], [0, 0, 0], 10);
+            }).throwError();
+        });
+    });
+
+    describe("makeCone with invalid arguments", function () {
+
+        it("should not crash if Cone is created with invalid arguments", function () {
+            should(function () {
+                const solid = occ.makeCone([0, 0, 0], 0 [0, 0, 0], 10);
+            }).throwError();
+
+            should(function () {
+                const solid = occ.makeCone([0, 0, 0], 0 [0, 0, 0], 0);
+            }).throwError();
+        });
+    });
+
+
+
     describe("rotate apply on a solid", function() {
         let solid;
         before(function() {

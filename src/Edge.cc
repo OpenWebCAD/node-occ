@@ -73,7 +73,7 @@ int Edge::createLine(Vertex *start, Vertex *end)
     this->setShape(shape);
 
   }
-  CATCH_AND_RETHROW("Failed to create line");
+  CATCH_AND_RETHROW_NO_RETURN("Failed to create line");
 
   return 1;
 }
@@ -97,7 +97,7 @@ int Edge::createArc(Vertex *start, Vertex *end, const gp_Pnt& center)
     this->setShape(BRepBuilderAPI_MakeEdge(arc, start->vertex(), end->vertex()));
 
   }
-  CATCH_AND_RETHROW("Failed to create arc");
+  CATCH_AND_RETHROW_NO_RETURN("Failed to create arc");
   return 1;
 }
 
@@ -110,7 +110,7 @@ int Edge::createArc3P(Vertex *start, Vertex *end, const gp_Pnt& aPoint)
     GC_MakeArcOfCircle arc(aP1, aP2, aP3);
     this->setShape(BRepBuilderAPI_MakeEdge(arc.Value(), start->vertex(), end->vertex()));
   }
-  CATCH_AND_RETHROW("Failed to create arc");
+  CATCH_AND_RETHROW_NO_RETURN("Failed to create arc");
   return 1;
 }
 
@@ -128,7 +128,7 @@ int Edge::createCircle(const gp_Pnt& center, const gp_Dir& normal, double radius
     this->setShape(BRepBuilderAPI_MakeEdge(circle));
 
   }
-  CATCH_AND_RETHROW("Failed to create circle");
+  CATCH_AND_RETHROW_NO_RETURN("Failed to create circle");
   return 1;
 }
 

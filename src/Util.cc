@@ -97,11 +97,9 @@ void ReadDir(v8::Local<v8::Value> value, gp_Dir* pt)
 {
   double x = 0, y = 0, z = 1.0;
   ReadPoint(value, &x, &y, &z);
-  try {
-    pt->SetCoord(x, y, z);
-  }
-  CATCH_AND_RETHROW("Invalid Direction");
+  pt->SetCoord(x, y, z);
 }
+
 void ReadVector(v8::Local<v8::Value> value, gp_Vec* pt)
 {
   double x = 0, y = 0, z = 0;

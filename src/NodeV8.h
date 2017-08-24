@@ -161,10 +161,20 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
   catch(Standard_Failure& ) {                                   \
     Handle_Standard_Failure e = Standard_Failure::Caught();     \
     Standard_CString msg = e->GetMessageString();               \
-    std::cerr << "C++ exception in OCC "<< msg << std::endl;                              \
+    std::cerr << "C++ exception in OCC "<< msg << " " << message << std::endl;                              \
     if (msg == NULL || strlen(msg) < 1) {                       \
       msg = message;                                            \
     }                                                           \
-     Nan::ThrowError(msg);                                \
+     Nan::ThrowError(msg);                                      \
   }                                                             \
 
+#define CATCH_AND_RETHROW2(message)                              \
+  catch(Standard_Failure& ) {                                   \
+     info.GetReturnValue().Set(v8::Local<v8::Object>());               \
+     return Nan::ThrowError("");                                   \
+  }
+
+#define CATCH_AND_RETHROW_NO_RETURN(message)                    \
+  catch(Standard_Failure& ) {                                   \
+     Nan::ThrowError("");                                       \
+  }

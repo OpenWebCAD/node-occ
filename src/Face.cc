@@ -123,7 +123,7 @@ bool Face::buildFace(std::vector<Wire*>& wires)
     }
 
   }
-  CATCH_AND_RETHROW("Failed to create a face");
+  CATCH_AND_RETHROW_NO_RETURN("Failed to create a face");
   return true;
 }
 
@@ -200,7 +200,7 @@ v8::Handle<v8::Object> Face::createMesh(double factor, double angle, bool qualit
     mesh->extractFaceMesh(this->face(), qualityNormals);
     mesh->optimize();
 
-  } CATCH_AND_RETHROW("Failed to mesh solid ");
+  } CATCH_AND_RETHROW_NO_RETURN("Failed to mesh solid ");
   return scope.Escape(theMesh);
 }
 
