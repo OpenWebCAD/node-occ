@@ -13,7 +13,7 @@ fi
 echo "--------------------------  OCCT TAR FILE ${OCCT_TARFILE}"
 ls ${OCCT_TARFILE} 
 if [ ! -f "${OCCT_TARFILE}" ]; then
-  wget https://github.com/OpenWebCAD/occt_builder/releases/download/v7.1.0/${OCCT_TARFILE}
+  wget -q https://github.com/OpenWebCAD/occt_builder/releases/download/v7.1.0/${OCCT_TARFILE}
 fi
 if [ ! -d "${OCCT_PACKAGE}" ]; then 
   echo "extracting package ${OCCT_TARFILE}"
