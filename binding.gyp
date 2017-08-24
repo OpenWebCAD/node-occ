@@ -13,6 +13,7 @@
                    "xcode_settings": {
                         "OTHER_CFLAGS" : [
                             "-O3",
+                            "-rpath,\${ORIGIN}",
                             "-frtti",
                             "-Wno-ignored-qualifiers",
                             "-Wno-unused-variable",
@@ -49,7 +50,6 @@
                         "-Wno-extra"
                       ],
                       "cflags_cc": [
-                        "-rpath,\${ORIGIN}",
                         "-O3",
                         "-frtti",
                         "-Wno-ignored-qualifiers",
