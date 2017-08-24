@@ -49,7 +49,7 @@
                         "-Wno-extra"
                       ],
                       "cflags_cc": [
-                        "-Wl,-rpath,\${ORIGIN}",
+                        "-rpath,\${ORIGIN}",
                         "-O3",
                         "-frtti",
                         "-Wno-ignored-qualifiers",
@@ -153,7 +153,6 @@
         "-lTKPrim<(dbg)",
         "-lTKShHealing<(dbg)",
         "-lTKTopAlgo<(dbg)",
-        "-lTKIGES<(dbg)",
         "-lTKSTEP<(dbg)",
         "-lTKSTEPAttr<(dbg)",
         "-lTKSTEPBase<(dbg)",

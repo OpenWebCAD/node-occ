@@ -47,7 +47,7 @@ before_install:
 # download node if testing x86 architecture
 - >
   if [[ "$ARCH" == "x86" ]]; then
-    wget $BASE_URL/$X86_FILE.tar.gz
+    wget -q $BASE_URL/$X86_FILE.tar.gz
     tar -xf $X86_FILE.tar.gz
     export PATH=$X86_FILE/bin:$PATH
     ls $X86_FILE/bin
