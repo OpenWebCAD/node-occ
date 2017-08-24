@@ -134,7 +134,6 @@
         "OCE_HAVE_CLIMITS"
       ],
       "libraries+": [
-        "-Wl",
         "-lTKBO<(dbg)",
         "-lTKBool<(dbg)",
         "-lTKBRep<(dbg)",
