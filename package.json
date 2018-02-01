@@ -22,12 +22,6 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-require-path-exists": "^1.1.7",
     "eslint-plugin-standard": "^3.0.1",
-    "grunt": "^1.0.1",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-nodeunit": "~1.0.0",
-    "grunt-contrib-uglify": "3.3.0",
-    "grunt-docco": "~0.5.0",
-    "grunt-mocha-cli": "~4.0.0",
     "mocha": "~5.0.0",
     "should": "~13.2.1"
   },
