@@ -12,22 +12,23 @@ if '%ARCH%' == 'unset' (
 
 
 SET CWD=%~dp0
-SET OCCT_FOLDER="%CWD%occt-7.1.0\"
+SET OCCT_VER=7.2.0
+SET OCCT_FOLDER="%CWD%occt-%OCCT_VER%\"
 ECHO %OCCT_FOLDER%
 IF EXIST "%OCCT_FOLDER%" (
-   echo OCCT-7.1.0 prebuild stuff already installed
+   echo OCCT-%OCCT_VER% prebuild stuff already installed
 ) else (
-  IF NOT EXIST occt-7.0.1 (
-     curl -OL https://github.com/OpenWebCAD/occt_builder/releases/download/v7.1.0l/occt-7.1.0-win64.zip
+  IF NOT EXIST occt-%OCCT_VER% (
+      curl -OL https://github.com/OpenWebCAD/occt_builder/releases/download/%OCCT_VER%/occt-%OCCT_VER%-win64.zip
   )
-  7z x occt-7.1.0-win64.zip -y > a.txt
+  7z x occt-%OCCT_VER%-win64.zip -y > a.txt
   echo DONE
 )
 
 ::
 :: Note CL and LINK require unix style like path
 ::
-SET OCE=occt-7.1.0
+SET OCE=occt-%OCCT_VER%
 SET PREFIX=%OCCT_FOLDER%
 SET CL=/I%PREFIX%/inc
 SET LINK=/LIBPATH:%PREFIX%/%ARCH%/vc14/lib
@@ -53,3 +54,4 @@ ECHO ARCH %ARCH%
 
 
 EXIT /B 0
+
