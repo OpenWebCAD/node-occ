@@ -3,7 +3,7 @@
 #
 #
 ##########################################################################################
-export OCCT_PACKAGE=occt-7.1.0
+export OCCT_PACKAGE=occt-7.2.0
 if [ `uname` == "Darwin" ];then
 export OCCT_TARFILE=${OCCT_PACKAGE}-osx.tgz
 else
@@ -13,14 +13,14 @@ fi
 echo "--------------------------  OCCT TAR FILE ${OCCT_TARFILE}"
 ls ${OCCT_TARFILE} 
 if [ ! -f "${OCCT_TARFILE}" ]; then
-  wget -q https://github.com/OpenWebCAD/occt_builder/releases/download/v7.1.0/${OCCT_TARFILE}
+  wget -q https://github.com/OpenWebCAD/occt_builder/releases/download/7.2.0/${OCCT_TARFILE}
 fi
 if [ ! -d "${OCCT_PACKAGE}" ]; then 
   echo "extracting package ${OCCT_TARFILE}"
   tar -xf ${OCCT_TARFILE}
 fi
  
-export LD_LIBRARY_PATH=`pwd`/occt-7.1.0/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=`pwd`/occt-7.2.0/lib:$LD_LIBRARY_PATH
 
 grep -i "#define OCC_VERSION_COMPLETE" ${OCCT_PACKAGE}/include/opencascade/Standard_Version.hxx ;
 lscpu ;
