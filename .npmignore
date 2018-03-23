@@ -1,9 +1,10 @@
+package/
 build*/
 sample/
 dist/
 sample_angular2
 oce/
-occt-7.1.0/
+occt-*/
 test_electron
 .eslintrc
 a.txt
