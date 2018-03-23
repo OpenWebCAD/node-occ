@@ -39,8 +39,12 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
+    - libtbb2
 
 before_install:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi   
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install tbb; fi
+
 # reinstall latest nvm
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
 - nvm install $TRAVIS_NODE_VERSION
