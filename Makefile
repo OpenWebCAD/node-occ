@@ -1,8 +1,12 @@
 all:
 	node-pre-gyp configure
 	node-pre-gyp build
-	export LD_LIBRARY_PATH=$(CURDIR)/occt-7.2.0/lib:$LD_LIBRARY_PATH; \
-	mocha 
+	export LD_LIBRARY_PATH=$(CURDIR)/lib/binding:$LD_LIBRARY_PATH; mocha 
+	#mocha
+
+clean:
+	node-pre-gyp clean
+
 packet:
 	npm install mocha
 	npm install assert
