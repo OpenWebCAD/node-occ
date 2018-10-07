@@ -16,10 +16,12 @@ echo "  OCCT_TARFILE     = " ${OCCT_TARFILE}
 echo "  OCCT_TARFILE_URL = " ${OCCT_TARFILE_URL}
 
 echo "--------------------------  OCCT TAR FILE ${OCCT_TARFILE}"
-ls ${OCCT_TARFILE} 
 if [ ! -f "${OCCT_TARFILE}" ]; then
-  wget -q ${OCCT_TARFILE_URL}
+  echo "Getting ${OCCT_TARFILE}"
+  wget --continue -O "${OCCT_TARFILE}.downloading" ${OCCT_TARFILE_URL} --progress=bar:force 2>&1 | tail -f -n +6
+  mv "${OCCT_TARFILE}.downloading" ${OCCT_TARFILE}
 fi
+
 if [ ! -d "${OCCT_PACKAGE}" ]; then 
   echo "extracting package ${OCCT_TARFILE}"
   tar -xf ${OCCT_TARFILE}
