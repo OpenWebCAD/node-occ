@@ -1,8 +1,7 @@
 all:
 	node-pre-gyp configure
 	node-pre-gyp build
-	export LD_LIBRARY_PATH=$(CURDIR)/lib/binding:$LD_LIBRARY_PATH; mocha 
-	#mocha
+	mocha
 
 clean:
 	node-pre-gyp clean
