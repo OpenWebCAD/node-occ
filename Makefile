@@ -1,6 +1,7 @@
 all:
 	node-pre-gyp configure
 	node-pre-gyp build
+	export LD_LIBRARY_PATH=$(CURDIR)/occt-7.2.0/lib:$LD_LIBRARY_PATH; \
 	mocha 
 packet:
 	npm install mocha

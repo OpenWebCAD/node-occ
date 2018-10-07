@@ -93,10 +93,7 @@ git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
 bash prepare_build.sh
 npm install
-node-pre-gyp configure
-node-pre-gyp build
-export LD_LIBRARY_PATH=./occt-7.2.0/lib:$LD_LIBRARY_PATH
-mocha
+make
 ```
 
 
