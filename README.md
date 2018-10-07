@@ -15,7 +15,7 @@ This project comes with a set of V8 wrappers around OpenCascade API and a sample
 
 
 ```javascript
-var occ = require('occ')
+var occ = require('occ').occ
 
 // construct a box
 var box = occ.makeBox([0,0,0],[100,100,50])
