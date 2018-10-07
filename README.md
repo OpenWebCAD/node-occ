@@ -91,10 +91,11 @@ sudo apt-get install cmake cmake-curses-gui g++ build-essential
 # ------------------------------------
 git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
-sh prepare_build.sh
+bash prepare_build.sh
 npm install
 node-pre-gyp configure
 node-pre-gyp build
+export LD_LIBRARY_PATH=./occt-7.2.0/lib:$LD_LIBRARY_PATH
 mocha
 ```
 
