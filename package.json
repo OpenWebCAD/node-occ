@@ -46,7 +46,8 @@
     "url": "https://github.com/openwebcad/node-occ.git"
   },
   "scripts": {
-    "install": "bash ./build.sh --only-prepare; node-pre-gyp install --fallback-to-build",
+    "preinstall": "./build.sh --only-prepare",
+    "install": "node-pre-gyp install --fallback-to-build",
     "test": "mocha -R spec",
     "lint": "eslint lib test bin",
     "doc": "grunt doc"
