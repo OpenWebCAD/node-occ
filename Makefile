@@ -3,6 +3,10 @@ all:
 	node-pre-gyp build
 	mocha
 
+.PHONY: test
+test:
+	mocha
+
 clean:
 	node-pre-gyp clean
 

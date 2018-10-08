@@ -91,9 +91,8 @@ sudo apt-get install cmake cmake-curses-gui g++ build-essential
 # ------------------------------------
 git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
-bash prepare_build.sh
 npm install
-make
+make test
 ```
 
 

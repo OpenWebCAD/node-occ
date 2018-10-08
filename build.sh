@@ -84,4 +84,4 @@ if [[ ! -z $TRAVIS_ELECTRON_VERSION ]]; then
 fi
 
 #  git submodule update --depth 50 --init --recursive
-npm install --build-from-source 
+[[ ${1:-} = "--only-prepare" ]] || npm install --build-from-source 
