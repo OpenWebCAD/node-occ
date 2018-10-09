@@ -86,7 +86,7 @@ sudo npm install node-pre-gyp -g
 sudo npm install mocha -g
 
 #installing cmake
-sudo apt-get install cmake cmake-curses-gui g++ build-essential
+sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
 
 # ------------------------------------
 git clone --recursive https://github.com/erossignon/node-occ.git
