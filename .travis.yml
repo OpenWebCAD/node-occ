@@ -33,7 +33,8 @@ matrix:
     env: TRAVIS_NODE_VERSION="9"
   #- os: osx
   # env: TRAVIS_NODE_VERSION="7" ARCH="x86"
-
+  allow_failures:
+    - os: osx
 addons:
   apt:
     sources:
