@@ -15,7 +15,7 @@ This project comes with a set of V8 wrappers around OpenCascade API and a sample
 
 
 ```javascript
-var occ = require('occ')
+var occ = require('occ').occ
 
 // construct a box
 var box = occ.makeBox([0,0,0],[100,100,50])
@@ -86,16 +86,13 @@ sudo npm install node-pre-gyp -g
 sudo npm install mocha -g
 
 #installing cmake
-sudo apt-get install cmake cmake-curses-gui g++ build-essential
+sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
 
 # ------------------------------------
 git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
-sh prepare_build.sh
 npm install
-node-pre-gyp configure
-node-pre-gyp build
-mocha
+make test
 ```
 
 

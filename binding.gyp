@@ -57,6 +57,9 @@
                         "-Wno-reorder",
                         "-Wno-extra"
                       ],
+                      "ldflags": [
+                        "-Wl,-rpath,<(module_root_dir)/lib/binding"
+                        ],
 
                       "library_dirs": [
                         "<!(pwd)/occt-7.2.0/lib",
@@ -155,7 +158,9 @@
         "-lTKSTEP<(dbg)",
         "-lTKSTEPAttr<(dbg)",
         "-lTKSTEPBase<(dbg)",
+        "-lTKSTEP209<(dbg)",
         "-lTKFillet<(dbg)",
+        "-lTKFeat<(dbg)",
         "-lTKXSBase<(dbg)",
         "-lTKSTL<(dbg)",
       ],
@@ -262,6 +267,8 @@
                 "<(bin_folder)/libTKBRep.so.7",
                 "<(bin_folder)/libTKernel.so.7",
                 "<(bin_folder)/libTKFillet.so.7",
+                "<(bin_folder)/libTKFeat.so.7",
+                "<(bin_folder)/libTKIGES.so.7",
                 "<(bin_folder)/libTKG2d.so.7",
                 "<(bin_folder)/libTKG3d.so.7",
                 "<(bin_folder)/libTKGeomAlgo.so.7",
@@ -284,6 +291,8 @@
                 "<(bin_folder)/libTKBRep.so.7.2.1",
                 "<(bin_folder)/libTKernel.so.7.2.1",
                 "<(bin_folder)/libTKFillet.so.7.2.1",
+                "<(bin_folder)/libTKFeat.so.7.2.1",
+                "<(bin_folder)/libTKIGES.so.7.2.1",
                 "<(bin_folder)/libTKG2d.so.7.2.1",
                 "<(bin_folder)/libTKG3d.so.7.2.1",
                 "<(bin_folder)/libTKGeomAlgo.so.7.2.1",

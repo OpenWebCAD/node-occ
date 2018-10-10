@@ -1,7 +1,15 @@
 all:
 	node-pre-gyp configure
 	node-pre-gyp build
-	mocha 
+	mocha
+
+.PHONY: test
+test:
+	mocha
+
+clean:
+	node-pre-gyp clean
+
 packet:
 	npm install mocha
 	npm install assert
