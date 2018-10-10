@@ -11,6 +11,8 @@ const fs = require("fs");
 
 function remove_file(filename, optional_callback) {
 
+    optional_callback = optional_callback || function() {};
+
     fs.exists(filename, function (exists) {
 
         if (exists) {
