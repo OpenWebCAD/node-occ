@@ -72,11 +72,11 @@ $npm install node-occ
   >npm install node-occ
   ```
    
-### on Linux
+### On Linux
 
 
 
-### on ubuntu
+### On Ubuntu or Debian
 
 ```bash
 
@@ -91,7 +91,7 @@ sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
 # ------------------------------------
 git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
-npm install
+./build.sh # TODO: Trigger this via `npm install`
 make test
 ```
 
