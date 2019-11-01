@@ -177,5 +177,5 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
 
 #define CATCH_AND_RETHROW_NO_RETURN(message)                    \
   catch(Standard_Failure& ) {                                   \
-     Nan::ThrowError("");                                       \
+     Nan::ThrowError(message);                                       \
   }

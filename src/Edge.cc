@@ -180,7 +180,7 @@ NAN_METHOD(Edge::static_createLine)
     return Nan::ThrowError("expecting 2 arguments : <vertex|point> , <vertex|point> ");
   }
 
-  auto instance = Nan::NewInstance(Constructor<Edge>(), 0, 0).ToLocalChecked();
+  v8::Local<v8::Object> instance = Nan::NewInstance(Constructor<Edge>()).ToLocalChecked();
   Edge* pThis = Nan::ObjectWrap::Unwrap<Edge>(Nan::To<v8::Object>(instance).ToLocalChecked());
   
   pThis->createLine(v1, v2);
