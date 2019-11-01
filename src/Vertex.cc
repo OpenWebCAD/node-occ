@@ -72,7 +72,7 @@ NAN_METHOD(Vertex::New)
 v8::Local<v8::Object>  Vertex::Clone() const
 {
   Vertex* obj = new Vertex();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
+  v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;
@@ -86,7 +86,7 @@ void Vertex::InitNew(_NAN_METHOD_ARGS)
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,z);
 }
 
-void Vertex::Init(v8::Handle<v8::Object> target)
+void Vertex::Init(v8::Local<v8::Object> target)
 {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate>  tpl = Nan::New<v8::FunctionTemplate>(Vertex::New);
@@ -106,6 +106,6 @@ void Vertex::Init(v8::Handle<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, y);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, z);
 
-  target->Set(Nan::New("Vertex").ToLocalChecked(), tpl->GetFunction());
+  Nan::Set(target,Nan::New("Vertex").ToLocalChecked(),Nan::GetFunction(tpl).ToLocalChecked());
 }
 

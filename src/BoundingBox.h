@@ -51,11 +51,11 @@ public:
 
     static Nan::Persistent<v8::FunctionTemplate> _template;
 
-    static v8::Handle<v8::Value> NewInstance(const gp_Pnt& near,const gp_Pnt& far);
-    static v8::Handle<v8::Value> NewInstance(const Bnd_Box& box);
+    static v8::Local<v8::Value> NewInstance(const gp_Pnt& near,const gp_Pnt& far);
+    static v8::Local<v8::Value> NewInstance(const Bnd_Box& box);
 
     static NAN_METHOD(New);
-    static void Init(v8::Handle<v8::Object> target);
+    static void Init(v8::Local<v8::Object> target);
 
 protected:
 	static void Update(BoundingBox* pThis,_NAN_METHOD_ARGS);

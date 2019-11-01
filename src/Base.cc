@@ -157,7 +157,7 @@ NAN_METHOD(Base::applyTransform)
   }
   try {
 
-    Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(info[0]->ToObject());
+    Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
     const gp_Trsf& transformation = pTrans->m_trsf;
     pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
@@ -337,7 +337,7 @@ void Base::InitNew(_NAN_METHOD_ARGS)
   REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,orientation);
 }
 
-void  Base::InitProto(v8::Handle<v8::ObjectTemplate>& proto)
+void  Base::InitProto(v8::Local<v8::ObjectTemplate>& proto)
 {
   EXPOSE_METHOD(Base,clone);
   EXPOSE_METHOD(Base,translate);

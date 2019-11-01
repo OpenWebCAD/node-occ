@@ -20,7 +20,7 @@ public:
   static NAN_METHOD(New);
   static NAN_METHOD(equals);
   static NAN_METHOD(asArray);
-  static void Init(v8::Handle<v8::Object> target);
+  static void Init(v8::Local<v8::Object> target);
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };
 
@@ -58,12 +58,14 @@ public:
     }
     _ThisType* pThis = Nan::ObjectWrap::Unwrap<_ThisType>(info.This());
 
-    info.GetReturnValue().Set(NewInstance(*pThis));
-
+    info.GetReturnValue().Set(Accessor::NewInstance(*pThis));
   }
-  static v8::Handle<v8::Value> NewInstance(_ThisType& parent) {
+  static v8::Local<v8::Value> NewInstance(_ThisType& parent) {
 
-    v8::Local<v8::Object> instance = Nan::New(Wrapper::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),0, 0).ToLocalChecked();
+    auto f = Nan::GetFunction(Nan::New(Wrapper::_template)).ToLocalChecked();
+    v8::Local<v8::Object> instance = Nan::NewInstance(f).ToLocalChecked();
+    
+    // NewInstance(Nan::GetCurrentContext(),0, 0).ToLocalChecked();
     Accessor* pThis = new Accessor(parent);
     pThis->Wrap(instance);
     return instance;
@@ -71,21 +73,19 @@ public:
 };
 
 
-
 #define TEAROFF_POINT(THISTYPE,ACCESSOR,WRAPPER,CLASS)                         \
   typedef Accessor<THISTYPE,WRAPPER,CLASS,&THISTYPE::ACCESSOR> t##ACCESSOR;  \
-
 
 
 
 #define EXPOSE_TEAROFF(THISTYPE,ACCESSOR)                                            \
   Nan::SetAccessor(proto,                                                            \
 			Nan::New<v8::String>(#ACCESSOR).ToLocalChecked(),                        \
-					&t##ACCESSOR::getter,  0,v8::Handle<v8::Value>(),v8::DEFAULT,(v8::PropertyAttribute)(v8::ReadOnly|v8::DontDelete))
+					&t##ACCESSOR::getter,  0,v8::Local<v8::Value>(),v8::DEFAULT,(v8::PropertyAttribute)(v8::ReadOnly|v8::DontDelete))
 
 
 #define REXPOSE_TEAROFF(THISTYPE,ACCESSOR)                                            \
     Nan::SetAccessor(info.This(),                                                 \
     Nan::New(#ACCESSOR).ToLocalChecked(),                                         \
-     &t##ACCESSOR::getter,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly)
+     &t##ACCESSOR::getter,  0,v8::Local<v8::Value>(),v8::DEFAULT,v8::ReadOnly)
 

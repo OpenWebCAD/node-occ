@@ -25,10 +25,9 @@ NAN_METHOD(Mesh::New)
 
   Mesh* obj = new Mesh();
 
-  info.This()->Set(Nan::New("vertices").ToLocalChecked(), Nan::New<v8::Object>());
-  info.This()->Set(Nan::New("normals").ToLocalChecked(), Nan::New<v8::Object>());
-  info.This()->Set(Nan::New("edgeIndices").ToLocalChecked(), Nan::New<v8::Object>());
-  info.This()->Set(Nan::New("triangles").ToLocalChecked(), Nan::New<v8::Object>());
+  Nan::Set(info.This(),Nan::New("normals").ToLocalChecked(), Nan::New<v8::Object>());
+  Nan::Set(info.This(),Nan::New("edgeIndices").ToLocalChecked(), Nan::New<v8::Object>());
+  Nan::Set(info.This(),Nan::New("triangles").ToLocalChecked(), Nan::New<v8::Object>());
 
   obj->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
@@ -38,7 +37,7 @@ Nan::Persistent<v8::FunctionTemplate> Mesh::_template;
 
 
 /*static*/
-void Mesh::Init(v8::Handle<v8::Object> target)
+void Mesh::Init(v8::Local<v8::Object> target)
 {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Mesh::New);
@@ -62,7 +61,7 @@ void Mesh::Init(v8::Handle<v8::Object> target)
   EXPOSE_METHOD(Mesh, getFaceTriangleNormals);
 
   // other Mesh prototype members are defined in the mesh.js script
-  target->Set(Nan::New("Mesh").ToLocalChecked(), tpl->GetFunction());
+  Nan::Set(target,Nan::New("Mesh").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 
 }
 
@@ -388,10 +387,10 @@ int Mesh::extractEdge(const TopoDS_Edge& edge, const occHandle(Poly_Triangulatio
 }
 
 template<class T>
-void UpdateExternalArray(v8::Handle<v8::Object>& pThis, const char* name, const T* data, size_t _length)
+void UpdateExternalArray(v8::Local<v8::Object>& pThis, const char* name, const T* data, size_t _length)
 {
-  v8::Local<v8::Object> arr = _makeTypedArray(data, (int)_length);
-  pThis->Set(Nan::New(name).ToLocalChecked(), arr);
+  v8::MaybeLocal<v8::Object> arr = _makeTypedArray(data, (int)_length);
+  Nan::Set(pThis,Nan::New(name).ToLocalChecked(), arr.ToLocalChecked());
 }
 
 void Mesh::updateJavaScriptArray()
@@ -436,7 +435,7 @@ NAN_METHOD(Mesh::getFaceTriangles)
   Mesh* pThis = UNWRAP(Mesh);
   Face* pFace = 0;
   if (info.Length() == 1 && info[0]->IsObject()) {
-    pFace = Nan::ObjectWrap::Unwrap<Face>(info[0]->ToObject());
+    pFace = Nan::ObjectWrap::Unwrap<Face>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
   }
   if (!pFace) {
     return Nan::ThrowError("expecting one argument : face");
@@ -474,7 +473,7 @@ NAN_METHOD(Mesh::getFaceTriangleNormals)
   Mesh* pThis = UNWRAP(Mesh);
   Face* pFace = 0;
   if (info.Length() == 1 && info[0]->IsObject()) {
-    pFace = Nan::ObjectWrap::Unwrap<Face>(info[0]->ToObject());
+    pFace = Nan::ObjectWrap::Unwrap<Face>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
   }
   if (!pFace) {
     return Nan::ThrowError("expecting one argument : face");
@@ -517,7 +516,7 @@ NAN_METHOD(Mesh::getEdgeIndices)
   Mesh* pThis = UNWRAP(Mesh);
   Edge* pEdge = 0;
   if (info.Length() == 1 && info[0]->IsObject()) {
-    pEdge = Nan::ObjectWrap::Unwrap<Edge>(info[0]->ToObject());
+    pEdge = Nan::ObjectWrap::Unwrap<Edge>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
   }
   if (!pEdge) {
     return Nan::ThrowError("expecting one argument : edge");

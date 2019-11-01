@@ -23,7 +23,7 @@
 //xx using namespace v8;
 
 
-template<class T> bool IsInstanceOf(v8::MaybeLocal<v8::Value> obj) {
+template<class T> bool IsInstanceOf(Nan::MaybeLocal<v8::Value> obj) {
   if (obj.IsEmpty()) {
     return false;
   }
@@ -31,15 +31,17 @@ template<class T> bool IsInstanceOf(v8::MaybeLocal<v8::Value> obj) {
   return _template->HasInstance(obj.ToLocalChecked());
 }
 
-template<class T> bool IsInstanceOf(v8::Local<v8::Value> obj) {
+/*
+template<class T> bool IsInstanceOf(Nan::Local<v8::Value> obj) {
 	v8::Local<v8::FunctionTemplate> _template = Nan::New(T::_template);
 	return _template->HasInstance(obj);
 
 }
-template<class T> bool IsInstanceOf(v8::Handle<v8::Object> obj) {
+template<class T> bool IsInstanceOf(Nan::Handle<v8::Object> obj) {
 	v8::Local<v8::FunctionTemplate> _template = Nan::New(T::_template);
 	return _template->HasInstance(obj);
 }
+*/
 
 
 
@@ -85,7 +87,7 @@ NAN_GETTER(ee)
 // proto->Set(Nan::New(#staticMethod),FunctionTemplate::New(staticMethod)->GetFunction());
 
 #define __EXPOSE_READ_ONLY_PROPERTY(element,staticMethod,name) \
-    Nan::SetAccessor(element,Nan::New(#name).ToLocalChecked(), &staticMethod,  0,v8::Handle<v8::Value>(),v8::DEFAULT,v8::ReadOnly)
+    Nan::SetAccessor(element,Nan::New(#name).ToLocalChecked(), &staticMethod,  0,v8::Local<v8::Value>(),v8::DEFAULT,v8::ReadOnly)
 
 #define EXPOSE_READ_ONLY_PROPERTY(staticMethod,name) \
     __EXPOSE_READ_ONLY_PROPERTY(proto,staticMethod,name)
@@ -149,7 +151,7 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
 #define UNWRAP(CLASS)                                         \
   0;                                                          \
   CHECK_THIS_DEFINED(CLASS)                                   \
-  v8::Handle<v8::Object> pJhis = info.This();                 \
+  v8::Local<v8::Object> pJhis = info.This();                 \
   if ( pJhis.IsEmpty() || !IsInstanceOf<CLASS>(pJhis))  {     \
     return Nan::ThrowError("invalid object");                 \
   }                                                           \
@@ -158,9 +160,8 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
 
 // catch an open cascade exception and turn it into a Nan Execption
 #define CATCH_AND_RETHROW(message)                              \
-  catch(Standard_Failure& ) {                                   \
-    Handle_Standard_Failure e = Standard_Failure::Caught();     \
-    Standard_CString msg = e->GetMessageString();               \
+  catch(Standard_Failure& e) {                                   \
+    Standard_CString msg = e.GetMessageString();               \
     std::cerr << "C++ exception in OCC "<< msg << " " << message << std::endl;                              \
     if (msg == NULL || strlen(msg) < 1) {                       \
       msg = message;                                            \
@@ -168,13 +169,13 @@ inline const char* ToCString(const v8::String::Utf8Value& value)
      Nan::ThrowError(msg);                                      \
   }                                                             \
 
-#define CATCH_AND_RETHROW2(message)                              \
+#define CATCH_AND_RETHROW2(message)                             \
   catch(Standard_Failure& ) {                                   \
-     info.GetReturnValue().Set(v8::Local<v8::Object>());               \
-     return Nan::ThrowError("");                                   \
+     info.GetReturnValue().Set(v8::Local<v8::Object>());        \
+     return Nan::ThrowError("");                                \
   }
 
 #define CATCH_AND_RETHROW_NO_RETURN(message)                    \
   catch(Standard_Failure& ) {                                   \
-     Nan::ThrowError("");                                       \
+     Nan::ThrowError(message);                                       \
   }

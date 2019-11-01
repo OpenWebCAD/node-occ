@@ -86,8 +86,7 @@ NAN_METHOD(Transformation::makeScale)
 
   Transformation* pThis = prepare(info);
 
-  double factor= info[0]->NumberValue();
-
+  double factor= Nan::To<double>(info[0]).FromJust();
   double x=0,y=0,z=0;
   ReadPoint(info[1],&x,&y,&z);
 
@@ -109,7 +108,7 @@ NAN_METHOD(Transformation::makeRotation)
 // Methods exposed to JavaScripts
 Nan::Persistent<v8::FunctionTemplate> Transformation::_template;
 
-void Transformation::Init(v8::Handle<v8::Object> target)
+void Transformation::Init(v8::Local<v8::Object> target)
 {
   v8::Local<v8::FunctionTemplate> tpl =  Nan::New<v8::FunctionTemplate>(Transformation::New);
   // Prepare constructor template
@@ -131,7 +130,7 @@ void Transformation::Init(v8::Handle<v8::Object> target)
   EXPOSE_METHOD(Transformation,makeScale);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Transformation,scaleFactor);
 
-  target->Set(Nan::New("Transformation").ToLocalChecked(), tpl->GetFunction());
+  Nan::Set(target,Nan::New("Transformation").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(Transformation::New)
@@ -150,6 +149,6 @@ NAN_METHOD(Transformation::New)
 
 NAN_METHOD(Transformation::NewInstance)
 {
-  v8::Local<v8::Object> instance = Nan::New<v8::FunctionTemplate>(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(),0,0).ToLocalChecked();
+  v8::Local<v8::Object> instance = makeInstance(_template);
   info.GetReturnValue().Set(instance);
 }

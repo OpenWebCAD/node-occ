@@ -41,6 +41,6 @@ public:
     static NAN_METHOD(makeFillet);
 private:
     static void _boolean(_NAN_METHOD_ARGS,BOPAlgo_Operation op);
-    static v8::Handle<v8::Value> add(const std::vector<Base*>& shapes);
+    static v8::Local<v8::Value> add(const std::vector<Base*>& shapes);
 
 };

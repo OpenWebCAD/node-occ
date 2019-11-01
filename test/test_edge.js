@@ -3,7 +3,7 @@ const occ = require("../lib/occ");
 
 describe("testing Edges ",function(){
 
-    describe("constructing an empty Edge",function(){
+    describe("EDGE0 - constructing an empty Edge",function(){
         let edge;
         before(function(){
             edge = new occ.Edge()
@@ -29,7 +29,7 @@ describe("testing Edges ",function(){
             edge.getBoundingBox().isVoid.should.eql(true);
         });
     });
-    describe("an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ",function(){
+    describe("EDGE1 - an Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ",function(){
         let edge;
         before(function(){
             let v1 = new occ.Vertex(10,20,30);
@@ -62,8 +62,9 @@ describe("testing Edges ",function(){
             edge.getBoundingBox().farPt.asArray().should.eql([10 + extra, 20 + extra, 30 + extra]);
         });
         it("should polygonize a segment with two points", function () {
-
+            console.log("polyligonize");
             let polyline = edge.polygonize();
+            console.log("polyligonize2");
             polyline.length.should.eql(3 * 2);
             [polyline[0], polyline[1], polyline[2]].should.eql([10, 20, 30]);
             let l = polyline.length;
@@ -73,7 +74,7 @@ describe("testing Edges ",function(){
         });
     });
 
-    describe("an Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30)  and translated by [1,2,3]", function () {
+    describe("EDGE2 - an Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30)  and translated by [1,2,3]", function () {
         let edge;
         before(function () {
             let v1 = new occ.Vertex(10, 20, 30);
@@ -98,7 +99,7 @@ describe("testing Edges ",function(){
         });
 
     });
-    describe("an Edge constructed as a Circle on the Z+ plan with a radius of 20", function () {
+    describe("EDGE3 - an Edge constructed as a Circle on the Z+ plan with a radius of 20", function () {
         let edge;
         before(function(){
             edge = occ.makeCircle([10, 10, 10], [0, 0, 1], 20);
@@ -140,7 +141,7 @@ describe("testing Edges ",function(){
 
         });
     });
-    describe("an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () {
+    describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () {
 
     });
 });

@@ -78,13 +78,13 @@ NAN_METHOD(Shell::New)
 v8::Local<v8::Object>  Shell::Clone() const
 {
   Shell* obj = new Shell();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
+  v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;
 }
 
-void Shell::Init(v8::Handle<v8::Object> target)
+void Shell::Init(v8::Local<v8::Object> target)
 {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Shell::New);
@@ -102,5 +102,5 @@ void Shell::Init(v8::Handle<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Shell, numFaces);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Shell, area);
 
-  target->Set(Nan::New("Shell").ToLocalChecked(), tpl->GetFunction());
+  Nan::Set(target, Nan::New("Shell").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }

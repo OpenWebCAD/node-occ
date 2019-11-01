@@ -3,20 +3,24 @@
 #include "NodeV8.h"
 
 
-template <class T> inline double extract_double(const v8::Handle<T>& a) {
+inline v8::Local<v8::Object>  makeInstance(Nan::Persistent<v8::FunctionTemplate>& _template) {
+  return Nan::NewInstance(Nan::GetFunction(Nan::New(_template)).ToLocalChecked()).ToLocalChecked();
+}
+
+template <class T> inline double extract_double(const v8::Local<T>& a) {
   return Nan::To<double>(a).FromJust();
 }
 
-void ReadDouble(const v8::Handle<v8::Value>& _v,double& value);
+void ReadDouble(const v8::Local<v8::Value>& _v,double& value);
 
-void ReadInt(v8::Handle<v8::Object> obj,const char* name,int* retValue,int defaultValue);
-void ReadDouble(v8::Handle<v8::Object> obj,const char* name,double* retValue,double defaultValue=0.0);
+void ReadInt(v8::Local<v8::Object> obj,const char* name,int* retValue,int defaultValue);
+void ReadDouble(v8::Local<v8::Object> obj,const char* name,double* retValue,double defaultValue=0.0);
 
-void ReadPropertyPointFromArray(v8::Handle<v8::Array> value,double* x,double* y, double*z );
+void ReadPropertyPointFromArray(v8::Local<v8::Array> value,double* x,double* y, double*z );
 // void ReadPropertyPoint( Handle<Object> value,const char* name,double* x,double* y, double*z );
 
-void ReadXYZ(v8::Handle<v8::Object> value,double* x,double* y,double* z);
-void ReadUVW(v8::Handle<v8::Object> value,double* x,double* y,double* z);
+void ReadXYZ(v8::Local<v8::Object> value,double* x,double* y,double* z);
+void ReadUVW(v8::Local<v8::Object> value,double* x,double* y,double* z);
 
 void ReadPoint(v8::Local<v8::Value> value,double* x,double* y, double*z);
 void ReadPoint(v8::Local<v8::Value> value,gp_Pnt* pt);
@@ -64,10 +68,7 @@ inline int ArrayTypeSize(ArrayType type) {
 
 inline v8::Local<v8::Value> makeArrayBuffer(int length) {
 
-  v8::Local<v8::Object> global = Nan::GetCurrentContext()->Global();
-  v8::Local<v8::Value> val;
-  // make ArrayBuffer
-  val = global->Get(Nan::New("ArrayBuffer").ToLocalChecked());
+  v8::Local<v8::Value> val = Nan::New("ArrayBuffer").ToLocalChecked();
 
   if (val.IsEmpty() || !val->IsFunction()) {
     Nan::ThrowError("Error getting ArrayBuffer constructor");
@@ -113,26 +114,24 @@ inline v8::Local<v8::Value> makeArrayBuffer(int length) {
 #define GET_UINT8ARRAY_ARRAY_DATA(value)   GET_UINT8ARRAY_DATA(value)
 #define GET_UINT8ARRAY_ARRAY_LENGTH(value) (value.As<v8::Uint8Array>()->Length())
 
-inline v8::Local<v8::Object> makeTypedArray(ArrayType type, uint32_t length) {
 
-  v8::Local<v8::Value> val;
-  v8::Local<v8::Function> constructor;
-  v8::Local<v8::Object> global = Nan::GetCurrentContext()->Global();
+inline v8::Local<v8::Object> makeTypedArray(ArrayType type, uint32_t length) {
 
   const char *name = ArrayTypeToString(type);
   if (!name) {
     Nan::ThrowError("Unsupported array type");
-    return v8::Local<v8::Object>();
+    return Nan::New<v8::Object>();
   }
-  v8::Local<v8::Value> typedArrayConstructor = global->Get(Nan::New(name).ToLocalChecked());
 
+  auto typedArrayConstructor = Nan::Get(Nan::GetCurrentContext()->Global(),Nan::New(name).ToLocalChecked()).ToLocalChecked();
+  
   if (typedArrayConstructor.IsEmpty() || !typedArrayConstructor->IsFunction()) {
     Nan::ThrowError("Error getting typed array constructor");
-    return v8::Local<v8::Object>();
+    return Nan::New<v8::Object>();
   }
 
-  constructor = typedArrayConstructor.As<v8::Function>();
-
+  v8::Local<v8::Function> constructor = Nan::To<v8::Function>(typedArrayConstructor).ToLocalChecked();
+  
   const int argc = 1;
   v8::Local<v8::Value> argv[1] = { Nan::New(length) };
   v8::Local<v8::Object> array = constructor->NewInstance(Nan::GetCurrentContext(),argc, argv).ToLocalChecked();
@@ -181,6 +180,7 @@ inline v8::Local<v8::Object> makeUint8Array(const unsigned char* data, uint32_t 
 inline v8::Local<v8::Object> _makeTypedArray(const float* data, int length) {
   return makeFloat32Array(data, length);
 }
+
 inline v8::Local<v8::Object> _makeTypedArray(const int* data, int length) {
   return makeInt32Array(data, length);
 }
@@ -190,17 +190,19 @@ inline v8::Local<v8::Object> _makeTypedArray(const unsigned int* data, int lengt
 
 
 template <typename OBJECT>
-OBJECT* DynamicCast(const v8::Handle<v8::Value>& value)
+OBJECT* DynamicCast(const v8::Local<v8::Value>& value)
 {
   if (value.IsEmpty()) return 0;
   if (!value->IsObject()) return 0;
-  if (IsInstanceOf<OBJECT>(value->ToObject())) {
-    return Nan::ObjectWrap::Unwrap<OBJECT>(value->ToObject());
+
+  auto o = Nan::To<v8::Object>(value).ToLocalChecked();
+  if (IsInstanceOf<OBJECT>(o)) {
+    return Nan::ObjectWrap::Unwrap<OBJECT>(o);
   }
   return 0;
 }
 template <typename ObjType1, typename ObjType2>
-ObjType2* DynamicCast(const v8::Handle<v8::Value>& value)
+ObjType2* DynamicCast(const v8::Local<v8::Value>& value)
 {
   ObjType1* obj = DynamicCast<ObjType1>(value);
   if (obj) return obj;
@@ -208,15 +210,17 @@ ObjType2* DynamicCast(const v8::Handle<v8::Value>& value)
 }
 
 template<class T> v8::Local<v8::Function> Constructor() {
-     return Nan::New<v8::FunctionTemplate>(T::_template)->GetFunction();
+
+  auto f = Nan::GetFunction(Nan::New(T::_template)).ToLocalChecked();
+  return f;
 }
+
 template<class T> NAN_METHOD(_NewInstance) {
     int argc =info.Length();
     auto  argv = new v8::Local<v8::Value>[argc];// = new v8::Local<v8::Value>[argc];
     for (int i=0;i<argc;i++) {
         argv[i] = info[i];
     }
-    // auto instance = Nan::New<v8::FunctionTemplate>(T::_template)->GetFunction()->NewInstance(Nan::GetCurrentContext(), argc, argv);
     auto instance = Nan::NewInstance(Constructor<T>(),argc,argv);
     delete [] argv;
     info.GetReturnValue().Set(instance.ToLocalChecked());
