@@ -119,7 +119,7 @@ NAN_METHOD(Wire::New)
 v8::Local<v8::Object>  Wire::Clone() const
 {
   Wire* obj = new Wire();
-  v8::Local<v8::Object> instance = Nan::New(_template)->GetFunction()->NewInstance(Nan::GetCurrentContext()).ToLocalChecked();
+  v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
   return instance;
@@ -133,7 +133,7 @@ NAN_METHOD(Wire::InitNew)
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Wire, isClosed);
 }
 
-void Wire::Init(v8::Handle<v8::Object> target)
+void Wire::Init(v8::Local<v8::Object> target)
 {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Wire::New);
@@ -155,7 +155,7 @@ void Wire::Init(v8::Handle<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY_INTEGER(Wire, numEdges);
   EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Wire, isClosed);
 
-  target->Set(Nan::New("Wire").ToLocalChecked(), tpl->GetFunction());
+  Nan::Set(target,Nan::New("Wire").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(Wire::getEdges)

@@ -67,6 +67,6 @@ public:
     static NAN_METHOD(startVertex);
     static NAN_METHOD(endVertex);
 
-    static void Init(v8::Handle<v8::Object> target);
+    static void Init(v8::Local<v8::Object> target);
     static Nan::Persistent<v8::FunctionTemplate> _template;
 };

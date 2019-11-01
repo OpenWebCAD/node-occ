@@ -37,7 +37,7 @@ inline v8::Local<v8::Array> extract_shapes_as_javascript_array(SHAPE* pThis,TopA
   v8::Local<v8::Array> arr = Nan::New<v8::Array>(nb);
   for (int i=0; i<nb; i++)  {
     v8::Local<v8::Object> obj=  buildWrapper(anIndices(i+1)); // 1 based !!!
-    arr->Set(i,obj);
+    Nan::Set(arr,i,obj);
   }
   return arr;
 }

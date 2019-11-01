@@ -12,11 +12,8 @@ using namespace std;
 
 bool operator == (v8::Local<v8::String> str,const char* value)
 {
-    return str->Equals(Nan::New<v8::String>(value).ToLocalChecked());
+    return Nan::Equals(str,Nan::New<v8::String>(value).ToLocalChecked()).ToChecked();
 }
-
-
-
 
 
 const TopoDS_Shape& Shape::shape()  const

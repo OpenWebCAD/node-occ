@@ -54,7 +54,7 @@ describe("testing BREP input output ", function () {
 
     describe(" readBREP ", function () {
 
-        it("ZZ - should throw an error  if used with no argument", function () {
+        it("ZZ1 - should throw an error  if used with no argument", function () {
 
             should(function () {
                 occ.readBREP(null, function (err, shapes) {
@@ -63,15 +63,15 @@ describe("testing BREP input output ", function () {
             }).throwError();
         });
 
-        it("ZZ - should call the callback method with an error if used with an invalid arguments", function (done) {
+        it("ZZ2 - should call the callback method with an error if used with an invalid arguments", function (done) {
 
-            occ.readBREP("||this is a invalid filename||", function (err, shapes) {
+            occ.readBREP("||this is a invalid filename||",  (err, shapes)  => {
                 err.message.should.match(/cannot read/);
                 done();
             });
         });
 
-        it("should call the callback with an error if the file doesn't exist", function (done) {
+        it("ZZ3 - should call the callback with an error if the file doesn't exist", function (done) {
             occ.readBREP("invalid file name", function (err, shapes) {
                 console.log(" intercepting error ", err);
                 assert(err !== undefined);
@@ -79,9 +79,9 @@ describe("testing BREP input output ", function () {
             });
         });
 
-        it("should read the shape back", function (done) {
+        it("ZZ4 - should read the shape back", function (done) {
 
-            occ.readBREP(b1_brep, function (err, shapes) {
+            occ.readBREP(b1_brep,  (err, shapes) => {
 
                 should(err).eql(null);
 
@@ -96,7 +96,7 @@ describe("testing BREP input output ", function () {
             });
         });
 
-        it("should read the shape back", function (done) {
+        it("ZZ5 - should read the shape back", function (done) {
 
             occ.readBREP(b2_brep, function (err, shapes) {
                 if (!err) {
@@ -107,7 +107,7 @@ describe("testing BREP input output ", function () {
             });
 
         });
-        it("should read the shape back", function (done) {
+        it("ZZ6 - should read the shape back", function (done) {
             occ.readBREP(b3_brep, function (err, shapes) {
                 if (!err) {
                     shapes.length.should.equal(2);

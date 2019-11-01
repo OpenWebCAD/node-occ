@@ -25,7 +25,7 @@ public:
     virtual Base* Unwrap(v8::Local<v8::Object> obj) const {   return Nan::ObjectWrap::Unwrap<Shell>(obj);  }
     virtual v8::Local<v8::Object> Clone() const ;
 
-    static void Init(v8::Handle<v8::Object> target);
+    static void Init(v8::Local<v8::Object> target);
     static NAN_METHOD(New);
     static Nan::Persistent<v8::FunctionTemplate> _template;
 };

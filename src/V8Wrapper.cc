@@ -22,7 +22,7 @@ NAN_METHOD(ForceGC)
     Nan::IdleNotification(100);
 }
 
-void Initialize(v8::Handle<v8::Object> target)
+void Initialize(v8::Local<v8::Object> target)
 {
 
     BoundingBox::Init(target);
@@ -79,9 +79,9 @@ void Initialize(v8::Handle<v8::Object> target)
     Nan::SetMethod(target,"readBREP",      readBREP);
 
     //xx Nan::SetMethod(target,"oceVersion",NanNew("0.13"));
-    target->Set(Nan::New("oceVersion").ToLocalChecked(),  Nan::New("0.13").ToLocalChecked());
+    Nan::Set(target,Nan::New("oceVersion").ToLocalChecked(),  Nan::New("0.13").ToLocalChecked());
 
-    Nan::SetMethod(target,"gc",ForceGC);
+    Nan::SetMethod(target,"gc",ForceGC); 
 
 
 }

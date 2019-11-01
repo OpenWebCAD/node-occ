@@ -26,7 +26,7 @@ public:
     virtual void InitNew(_NAN_METHOD_ARGS);
 
 
-    static void Init(v8::Handle<v8::Object> target);
+    static void Init(v8::Local<v8::Object> target);
     static NAN_METHOD(NewInstance);
     static NAN_METHOD(New);
     static Nan::Persistent<v8::FunctionTemplate> _template;

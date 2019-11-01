@@ -33,7 +33,7 @@ public:
     static NAN_METHOD(getFaceTriangles);
     static NAN_METHOD(getFaceTriangleNormals);
 
-    static void Init(v8::Handle<v8::Object> target);
+    static void Init(v8::Local<v8::Object> target);
 
 private:
 

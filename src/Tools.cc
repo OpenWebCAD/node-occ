@@ -16,14 +16,15 @@ void extractShapes(v8::Local<v8::Value> value, std::list<Shape*>& shapes)
 {
   if (value->IsArray()) {
 
-    v8::Array* arr = v8::Array::Cast(*value);
+    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
     for (uint32_t i = 0; i < arr->Length(); i++) {
-      extractShapes(arr->Get(i), shapes);
+      auto elementI = Nan::Get(arr,i).ToLocalChecked();
+      extractShapes(elementI, shapes);
     }
   }
   else if (value->IsObject()) {
     // it must be of type
-    v8::Handle<v8::Object> obj = value->ToObject();
+    v8::Local<v8::Object> obj = Nan::To<v8::Object>(value).ToLocalChecked();
     if (IsInstanceOf<Solid>(obj)) {
       shapes.push_back(Nan::ObjectWrap::Unwrap<Shape>(obj));
     }
@@ -31,23 +32,23 @@ void extractShapes(v8::Local<v8::Value> value, std::list<Shape*>& shapes)
   }
 }
 
-static bool extractFileName(const v8::Handle<v8::Value>& value, std::string& filename)
+static bool extractFileName(const v8::Local<v8::Value>& value, std::string& filename)
 {
   // first argument is filename
   if (!value->IsString()) {
     return false;
   }
-  v8::String::Utf8Value str(value);
-  filename = ToCString(str);
+  Nan::Utf8String str(value);
+  filename = *str;
   return true;
 }
-static bool extractCallback(const v8::Handle<v8::Value>& value, v8::Handle<v8::Function>& callback)
+
+static bool extractCallback(const v8::Local<v8::Value>& value, v8::Local<v8::Function>& callback)
 {
   if (!value->IsFunction()) {
     return false;
   }
-  callback = v8::Handle<v8::Function>::Cast(value->ToObject());
-  assert(!callback.IsEmpty());
+  callback = Nan::To<v8::Function>(value).ToLocalChecked();
   return true;
 }
 
@@ -158,7 +159,7 @@ static int extractSubShape(const TopoDS_Shape& shape, std::list<v8::Local<v8::Ob
   case TopAbs_COMPSOLID:
   case TopAbs_SOLID:
   {
-    shapes.push_back(Solid::NewInstance(shape)->ToObject());
+    shapes.push_back(Nan::To<v8::Object>(Solid::NewInstance(shape)).ToLocalChecked());
     break;
   }
   case TopAbs_FACE:
@@ -232,7 +233,7 @@ static v8::Local<v8::Array> convert(std::list<v8::Local<v8::Object> > & shapes) 
   v8::Local<v8::Array> arr = Nan::New<v8::Array>((int)shapes.size());
   int i = 0;
   for (std::list<v8::Local<v8::Object> >::iterator it = shapes.begin(); it != shapes.end(); it++) {
-    arr->Set(i, *it);
+    Nan::Set(arr,i, *it);
     i++;
   }
   return arr;
@@ -290,7 +291,7 @@ Standard_Boolean MyProgressIndicator::Show(const Standard_Boolean force)
     this->m_data->m_percent = value;
     this->m_data->m_progress = int(delta * 1000);// this->GetPosition();
     this->m_data->m_lastValue = value;
-    _worker->send_notify_progress();
+    this->_worker->send_notify_progress();
 
   }
   return Standard_False;
@@ -303,27 +304,21 @@ Standard_Boolean MyProgressIndicator::Show(const Standard_Boolean force)
 //http://free-cad.sourceforge.net/SrcDocu/df/d7b/ImportStep_8cpp_source.html
 
 
-class StepAsyncReadWorker : public AsyncWorkerWithProgress {
-public:
-  StepAsyncReadWorker(Nan::Callback *callback, Nan::Callback* progressCallback, std::string* pfilename)
+class StepBrepAsyncReadWorker : public AsyncWorkerWithProgress {
+protected:
+  StepBrepAsyncReadWorker(Nan::Callback *callback, Nan::Callback* progressCallback, std::string* pfilename)
     : AsyncWorkerWithProgress(callback, progressCallback, pfilename)
   {
-  }
-  ~StepAsyncReadWorker() {
-
-  }
-
-  virtual void Execute();
-  virtual void HandleOKCallback();
+  }  
+  virtual void WorkComplete();
 protected:
   int _retValue;
   std::list<TopoDS_Shape > shapes;
 };
 
+void StepBrepAsyncReadWorker::WorkComplete() {
 
-void StepAsyncReadWorker::HandleOKCallback() {
-
-
+  Nan::HandleScope scope;
   if (this->_retValue == 0) {
 
     try {
@@ -339,18 +334,33 @@ void StepAsyncReadWorker::HandleOKCallback() {
 
       v8::Local<v8::Value> err = Nan::Null(); 
       v8::Local<v8::Value> argv[2] = { err, arr };
-      callback->Call(2, argv);
+
+      callback->Call(2, argv, async_resource);
 
     }
     catch (...) {
       this->SetErrorMessage(" exception in trying to build shapes");
-      return this->HandleErrorCallback();
+      return this->AsyncWorkerWithProgress::WorkComplete();
     }
   }
   else {  
-    return this->HandleErrorCallback();
+    return this->AsyncWorkerWithProgress::WorkComplete();
   }
 }
+
+class StepAsyncReadWorker : public StepBrepAsyncReadWorker {
+public:
+  StepAsyncReadWorker(Nan::Callback *callback, Nan::Callback* progressCallback, std::string* pfilename)
+    : StepBrepAsyncReadWorker(callback, progressCallback, pfilename)
+  {
+  }
+  ~StepAsyncReadWorker() {
+  }
+
+  virtual void Execute();
+};
+
+
 
 void StepAsyncReadWorker::Execute() {
 
@@ -462,7 +472,6 @@ void StepAsyncReadWorker::Execute() {
 
       Standard_Integer nb = Model->NbEntities();
 
-//xx      cout << " nb entities =" << nb << std::endl;
 
       for (Standard_Integer ie = 1; ie <= nb; ie++) {
 
@@ -522,16 +531,12 @@ void StepAsyncReadWorker::Execute() {
         */
         TCollection_ExtendedString aNameExt(aName->ToCString());
 
-        //xx    cout << " name of part =" << aName->ToCString() << std::endl;
         // find target shape
         occHandle(Transfer_Binder) binder = TP->Find(enti);
         if (binder.IsNull()) continue;
 
         TopoDS_Shape S = TransferBRep::ShapeResult(binder);
         if (S.IsNull()) continue;
-
-        //xx cout << " name of part = ---------" << std::endl;
-
         // as PRODUCT can be included in the main shape
         // several times, we look here for all inclusions.
         Standard_Integer isub, nbSubs = anIndices.Extent();
@@ -571,7 +576,7 @@ void StepAsyncReadWorker::Execute() {
 void readStepAsync(const std::string& filename, v8::Local<v8::Function> _callback, v8::Local<v8::Function> _progressCallback)
 {
   Nan::Callback* callback = new Nan::Callback(_callback);
-  Nan::Callback* progressCallback = _progressCallback.IsEmpty() ? NULL : new Nan::Callback(_progressCallback);
+  Nan::Callback* progressCallback = _progressCallback.IsEmpty() ? nullptr : new Nan::Callback(_progressCallback);
   std::string* pfilename = new std::string(filename);
   Nan::AsyncQueueWorker(new StepAsyncReadWorker(callback, progressCallback, pfilename));
 }
@@ -603,10 +608,10 @@ NAN_METHOD(readSTEP)
 
 
 
-class BRepAsyncReadWorker : public StepAsyncReadWorker {
+class BRepAsyncReadWorker : public StepBrepAsyncReadWorker {
 public:
   BRepAsyncReadWorker(Nan::Callback *callback, Nan::Callback* progressCallback, std::string* pfilename)
-    : StepAsyncReadWorker(callback, progressCallback, pfilename)
+    : StepBrepAsyncReadWorker(callback, progressCallback, pfilename)
   {
   }
   ~BRepAsyncReadWorker() {
@@ -658,9 +663,11 @@ void BRepAsyncReadWorker::Execute()
 void readBREPAsync(const std::string& filename, v8::Local<v8::Function> _callback, v8::Local<v8::Function> _progressCallback)
 {
   Nan::Callback* callback = new Nan::Callback(_callback);
-  Nan::Callback* progressCallback = _progressCallback.IsEmpty() ? NULL : new Nan::Callback(_progressCallback);
+  Nan::Callback* progressCallback = _progressCallback.IsEmpty() ? nullptr : new Nan::Callback(_progressCallback);
   std::string* pfilename = new std::string(filename);
+
   Nan::AsyncQueueWorker(new BRepAsyncReadWorker(callback, progressCallback, pfilename));
+
 }
 
 
@@ -675,15 +682,15 @@ NAN_METHOD(readBREP)
   if (!extractCallback(info[1], callback)) {
     return Nan::ThrowError("expecting a callback function");
   }
-
   v8::Local<v8::Function> progressCallback;
   if (!extractCallback(info[2], progressCallback)) {
     // OPTIONAL !!!
     // return Nan::ThrowError("expecting a callback function");
   }
   readBREPAsync(filename, callback, progressCallback);
+
+  info.GetReturnValue().SetUndefined();
 }
-#undef Handle
 
 
 

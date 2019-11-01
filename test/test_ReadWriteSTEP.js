@@ -38,16 +38,17 @@ describe("testing STEP input output ", function () {
         remove_file(b3_step);
     });
 
-    it("should write a simple shape", function (done) {
+    it("AZ0 - should write a simple shape", function (done) {
         let box = occ.makeBox([0, 0, 0], [100, 200, 300]);
         let b1 = occ.writeSTEP(b1_step, box);
         done();
     });
 
-    it(" readSTEP with callback ", function (done) {
+    it("AZ1 - readSTEP with callback ", function (done) {
 
         let callback_called = 0;
-        occ.readSTEP(b3_step, function (err, shapes) {
+        occ.readSTEP(b3_step,  (err, shapes) => {
+            console.log(err,shapes);
             shapes.length.should.equal(2);
             shapes[0].numFaces.should.equal(6);
             shapes[1].numFaces.should.equal(3);
@@ -59,7 +60,7 @@ describe("testing STEP input output ", function () {
     });
 
 
-    it("should raise an exception with invalid arguments", function () {
+    it("AZ2 - should raise an exception with invalid arguments", function () {
         (function () {
             occ.readSTEP();
         }).should.throwError();
@@ -70,14 +71,14 @@ describe("testing STEP input output ", function () {
 
     });
 
-    it("should call the callback with an error if the file doesn't exist", function (done) {
+    it("AZ3 - should call the callback with an error if the file doesn't exist", function (done) {
 
         occ.readSTEP("invalid file name", function (err, shapes) {
             err.message.should.match(/invalid file name/);
             done();
         });
     });
-    it("should read file one", function (done) {
+    it("AZ4 - should read file one", function (done) {
 
         occ.readSTEP(b1_step, function (err, shapes) {
             if (err) {
@@ -90,7 +91,7 @@ describe("testing STEP input output ", function () {
         });
     });
 
-    it("should read file two", function (done) {
+    it("AZ5 - should read file two", function (done) {
 
         occ.readSTEP(b2_step, function (err, shapes) {
             if (err) {
@@ -103,7 +104,7 @@ describe("testing STEP input output ", function () {
         });
 
     });
-    it("should read file three", function (done) {
+    it("AZ6 - should read file three", function (done) {
         occ.readSTEP(b3_step, function (err, shapes) {
             if (err) {
                 console.log(" err = ", err, shapes);
