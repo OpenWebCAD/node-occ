@@ -13,6 +13,7 @@
                    "xcode_settings": {
                         "OTHER_CFLAGS" : [
                             "-O3",
+                            "-frtti",
                             "-Wno-ignored-qualifiers",
                             "-Wno-unused-variable",
                             "-Wno-reorder",
