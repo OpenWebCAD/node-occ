@@ -13,8 +13,7 @@
                    "xcode_settings": {
                         "OTHER_CFLAGS" : [
                             "-O3",
-                            "-rpath,\${ORIGIN}",
-                            "-frtti",
+                            "-rpath,\$$ORIGIN",
                             "-Wno-ignored-qualifiers",
                             "-Wno-unused-variable",
                             "-Wno-reorder",
