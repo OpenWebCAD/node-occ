@@ -16,6 +16,7 @@
     "aws-sdk": "^2.562.0",
     "electron-rebuild": "^1.8.6",
     "eslint": "^6.6.0",
+    "eslint-utils": "^1.4.3",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^10.0.0",
