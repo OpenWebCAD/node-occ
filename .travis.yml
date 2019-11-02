@@ -45,6 +45,7 @@ addons:
     packages:
     - g++
     - libtbb2
+    - libtbb
 
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi   

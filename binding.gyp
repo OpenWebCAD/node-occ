@@ -58,7 +58,7 @@
                         "-Wno-extra"
                       ],
                       "ldflags": [
-                        "-Wl,-rpath,<(module_root_dir)/lib/binding"
+                        "-Wl,-rpath,\$$ORIGIN",
                         ],
 
                       "library_dirs": [
