@@ -50,7 +50,8 @@
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "mocha -R spec",
     "lint": "eslint lib test bin",
-    "doc": "grunt doc"
+    "doc": "grunt doc",
+    "postinstall": "node post-install.js"
   },
   "binary": {
     "module_name": "occ",
