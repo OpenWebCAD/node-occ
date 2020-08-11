@@ -53,31 +53,21 @@ $npm install node-occ
 
 ## building node-occ from source : prerequisites
 
-### on Linux
+### On Linux
 
-#### on ubuntu
-
-(use nodejs 12.0)
+#### On Ubuntu/Debian
 
 ```bash
-# installing nodejs and gyp utility to build extensions
-sudo apt-get install nodejs npm
-sudo npm install node-pre-gyp -g
-sudo npm install mocha -g
-
-#installing cmake
-sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
-
-# ------------------------------------
-git clone --recursive https://github.com/erossignon/node-occ.git
-cd node-occ
-export OCCT_PACKAGE=occt-7.2.0
-export LD_LIBRARY_PATH=`pwd`/${OCCT_PACKAGE}/lib:$LD_LIBRARY_PATH
-npm install --build-from-source
-make test
+$ git clone --recursive https://github.com/erossignon/node-occ.git
+$ cd node-occ
+$ make install-deps
+$ make create-venv
+$ ./venv                 # Activate the virtual environment.
+(node-occ) $ ./build.sh
+(node-occ) $ make test
 ```
 
-### on windows
+### On Windows
 
 -   follow the tutorial in the [wiki](https://github.com/erossignon/node-occ/wiki)
 

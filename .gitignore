@@ -57,3 +57,5 @@ npm-debug*
 occt-*
 
 bower_components
+
+nodeenv

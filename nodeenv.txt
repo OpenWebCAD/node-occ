@@ -1,0 +1,3 @@
+#node@12.18.2
+node-pre-gyp@0.15.0
+mocha@8.1.1

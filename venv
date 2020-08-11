@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Description
+# -----------
+# Switch to appropriate (or given) Virtual Environment.
+#
+safe_source () { [[ ! -z ${1:-} ]] && source $1; _dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; _sdir=$(dirname "$(readlink -f "$0")"); }; safe_source
+
+ENV_VERSION="NODE_OCC_1_ENV"
+LOCAL_VENV="$_sdir/nodeenv"
+
+VENV_PATH=
+[[ -d "$LOCAL_VENV" ]] && VENV_PATH=$LOCAL_VENV
+
+_sourced=
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    #echo "script ${BASH_SOURCE[0]} is being sourced ..."
+    _sourced="yes"
+else
+    [[ -n ${1:-} ]] && VENV_PATH=$1
+fi
+
+
+SCADAJS_VENV=${VENV_PATH:-$(eval echo "\$$ENV_VERSION")}
+
+if [[ ! -d "$SCADAJS_VENV" ]]; then
+    if [[ -n $SCADAJS_VENV ]]; then
+        echo "$ENV_VERSION variable is set but it's not a valid directory."
+        echo "Please check $SCADAJS_VENV is a valid virtual environment"
+    else
+        cat <<EOL
+
+        Please set $ENV_VERSION variable (in your .bashrc file)
+
+        or
+
+        Pass the virtual environment path as the first argument
+
+EOL
+    fi
+    exit 1
+fi
+
+echo "Using nodeenv at ${SCADAJS_VENV}"
+if [[ -z $_sourced ]]; then
+    bash --rcfile <(echo ". ~/.bashrc; . ${SCADAJS_VENV}/bin/activate")
+else
+    . ${SCADAJS_VENV}/bin/activate
+fi
+
