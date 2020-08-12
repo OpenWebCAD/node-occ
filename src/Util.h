@@ -82,34 +82,42 @@ inline v8::Local<v8::Value> makeArrayBuffer(int length) {
   return array_buffer.ToLocalChecked();
 }
 
+template <typename T,class V> T* getArrayData(V&& value) {
+  #if (V8_MAJOR_VERSION >= 8)
+   return (T*)(static_cast<char*>(value->Buffer()->GetBackingStore()->Data()) + value->ByteOffset());
+  #else 
+   return (T*)(static_cast<char*>(value->Buffer()->GetContents().Data()) + value->ByteOffset());
+  #endif
+}
+
 #define IS_FLOAT32ARRAY(value)               (value->IsFloat32Array() && (value.As<v8::Float32Array>()->Length() == 2))
-#define GET_FLOAT32ARRAY_DATA(value)         (float*)(static_cast<char*>(value.As<v8::Float32Array>()->Buffer()->GetContents().Data()) + value.As<v8::Float32Array>()->ByteOffset())
+#define GET_FLOAT32ARRAY_DATA(value)         getArrayData<float>(value.As<v8::Float32Array>())
 #define IS_FLOAT32ARRAY_ARRAY(value)         (value->IsFloat32Array() && ((value.As<v8::Float32Array>()->Length() % 2) == 0))
 #define GET_FLOAT32ARRAY_ARRAY_DATA(value)   GET_FLOAT32ARRAY_DATA(value)
 #define GET_FLOAT32ARRAY_ARRAY_LENGTH(value) (value.As<v8::Float32Array>()->Length())
 
 
 #define IS_INT32ARRAY(value)                (value->IsInt32Array() && (value.As<v8::Int32Array>()->Length() == 2))
-#define GET_INT32ARRAY_DATA(value)          (int*)(static_cast<char*>(value.As<v8::Int32Array>()->Buffer()->GetContents().Data()) + value.As<v8::Int32Array>()->ByteOffset())
+#define GET_INT32ARRAY_DATA(value)          getArrayData<int32_t>(value.As<v8::Int32Array>()) 
 #define IS_INT32ARRAY_ARRAY(value)          (value->IsInt32Array() && ((value.As<v8::Int32Array>()->Length() % 2) == 0))
 #define GET_INT32ARRAY_ARRAY_DATA(value)    GET_INT32ARRAY_DATA(value)
 #define GET_INT32ARRAY_ARRAY_LENGTH(value)  (value.As<v8::Int32Array>()->Length())
 
 #define IS_UINT32ARRAY(value)               (value->IsUint32Array() && (value.As<v8::Uint32Array>()->Length() == 2))
-#define GET_UINT32ARRAY_DATA(value)         (unsigned int*)(static_cast<char*>(value.As<v8::Uint32Array>()->Buffer()->GetContents().Data()) + value.As<v8::Uint32Array>()->ByteOffset())
+#define GET_UINT32ARRAY_DATA(value)         getArrayData<uint32_t>(value.As<v8::Uint32Array>()) 
 #define IS_UINT32ARRAY_ARRAY(value)         (value->IsUint32Array() && ((value.As<v8::Uint32Array>()->Length() % 2) == 0))
 #define GET_UINT32ARRAY_ARRAY_DATA(value)   GET_UINT32ARRAY_DATA(value)
 #define GET_UINT32ARRAY_ARRAY_LENGTH(value) (value.As<v8::Uint32Array>()->Length())
 
 
 #define IS_UINT16ARRAY(value)               (value->IsUint16Array() && (value.As<v8::Uint16Array>()->Length() == 2))
-#define GET_UINT16ARRAY_DATA(value)         (unsigned short*)(static_cast<char*>(value.As<v8::Uint16Array>()->Buffer()->GetContents().Data()) + value.As<v8::Uint16Array>()->ByteOffset())
+#define GET_UINT16ARRAY_DATA(value)         getArrayData<uint16_t>(value.As<v8::Uint16Array>()) 
 #define IS_UINT16ARRAY_ARRAY(value)         (value->IsUint32Array() && ((value.As<v8::Uint16Array>()->Length() % 2) == 0))
 #define GET_UINT16ARRAY_ARRAY_DATA(value)   GET_UINT16ARRAY_DATA(value)
 #define GET_UINT16ARRAY_ARRAY_LENGTH(value) (value.As<v8::Uint16Array>()->Length())
 
 #define IS_UINT8ARRAY(value)               (value->IsUint8Array() && (value.As<v8::Uint8Array>()->Length() == 2))
-#define GET_UINT8ARRAY_DATA(value)         (unsigned char*)(static_cast<char*>(value.As<v8::Uint8Array>()->Buffer()->GetContents().Data()) + value.As<v8::Uint8Array>()->ByteOffset())
+#define GET_UINT8ARRAY_DATA(value)         getArrayData<uint8_t>(value.As<v8::Uint8Array>()) 
 #define IS_UINT8ARRAY_ARRAY(value)         (value->IsUint8Array() && ((value.As<v8::Uint8Array>()->Length() % 2) == 0))
 #define GET_UINT8ARRAY_ARRAY_DATA(value)   GET_UINT8ARRAY_DATA(value)
 #define GET_UINT8ARRAY_ARRAY_LENGTH(value) (value.As<v8::Uint8Array>()->Length())
