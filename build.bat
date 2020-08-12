@@ -72,21 +72,23 @@ df
 
 
 IF NOT DEFINED electron_version (
-   SET electron_version=1.4.14
+   SET electron_version=9.2.0
 )
 
 SET npm_config_target=%electron_version%
-SET npm_config_disturl=https://atom.io/download/atom-shell
+SET npm_config_arch=%PLATFORM%
+SET npm_config_target_arch=%PLATFORM%
+SET npm_config_disturl=https://electronjs.org/headers
 SET npm_config_runtime=electron
-
+SET npm_config_build_from_source=true
 ECHO Install electron and electron-mocha
 ECHO "  PLATFORM            =" %PLATFORM%
 ECHO "  npm_config_arch     =" %npm_config_arch%
 ECHO "  npm_config_target   =" %npm_config_target%
 ECHO "  npm_config_runtime  =" %npm_config_runtime%
-
+SET HOME=%APPDATA%/.electron-gyp
 CALL npm install electron@%electron_version% -g
-CALL npm install electron-mocha
+CALL npm install electron-mocha@%electron_version%
 CALL npm install --build-from-source --msvc_version=%VSVER% --target_arch=%npm_config_arch%
 if  NOT '%ERRORLEVEL%'=='0'   goto handle_npm_install_error
 

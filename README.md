@@ -62,7 +62,7 @@ $npm install node-occ
 # installing nodejs and gyp utility to build extensions
 sudo apt-get install nodejs npm
 sudo npm install node-pre-gyp -g
-sudo npm install mocha -g
+sudo npm install mocha@7 -g
 
 #installing cmake
 sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
