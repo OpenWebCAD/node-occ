@@ -315,7 +315,8 @@
         ["OS=='win'",
         {
           "variables": {
-             "bin_folder": 'occt-7.2.0/win64/vc14/bin'
+             "bin_folder": 'occt-7.2.0/win64/vc14/bin',
+             "dest_": 'lib/binding'
           },
           "copies": [
             {
@@ -395,7 +396,7 @@
                 "<(bin_folder)/TKXmlLd.dll",
                 "<(bin_folder)/TKXSBased.dll"
               ],
-              "destination": "<(module_path)"
+              "destination": "<(dest_)"
             }
           ]
         }]

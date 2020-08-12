@@ -60,7 +60,8 @@ $npm install node-occ
 ```bash
 $ git clone --recursive https://github.com/erossignon/node-occ.git
 $ cd node-occ
-$ make install-deps
+$ make install-linux-deps
+$ make install-venv-deps
 $ make create-venv
 $ ./venv                 # Activate the virtual environment.
 (node-occ) $ ./build.sh
@@ -69,7 +70,24 @@ $ ./venv                 # Activate the virtual environment.
 
 ### On Windows
 
--   follow the tutorial in the [wiki](https://github.com/erossignon/node-occ/wiki)
+In MSYS2 console:
+
+```bash
+$ git clone --recursive https://github.com/erossignon/node-occ.git
+$ cd node-occ
+$ # https://github.com/orlp/dev-on-windows/wiki/Installing-GCC--&-MSYS2
+$ make install-windows-deps
+$ # Better add the following in your ~/.bashrc file:
+$ export PATH=/c/msys64/mingw64/bin/:/c/msys64/mingw32/bin/:$PATH
+
+$ make install-venv-deps
+$ # make sure that the patch is included: https://github.com/ekalinin/nodeenv/pull/263/files
+$ # in file: /usr/lib/python3.8/site-packages/nodeenv.py
+$ make create-venv
+$ ./venv 
+(node-occ) $ # Follow: https://github.com/nodejs/node-gyp/issues/629#issuecomment-153196245
+(node-occ) $ ./build.sh
+```
 
 ## dependencies:
 

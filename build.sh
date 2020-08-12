@@ -1,14 +1,19 @@
 #!/bin/bash
+#set -e
 ##########################################################################################
 #
 #
 ##########################################################################################
 export OCCT_VERSION=7.2.0
 export OCCT_PACKAGE=occt-${OCCT_VERSION}
+INCLUDE_DIR="include/opencascade"
 if [ `uname` == "Darwin" ];then
-export OCCT_TARFILE=${OCCT_PACKAGE}-osx.tgz
-else
-export OCCT_TARFILE=${OCCT_PACKAGE}-linux.tgz
+  export OCCT_TARFILE=${OCCT_PACKAGE}-osx.tgz
+elif [ `uname` == "Linux" ];then
+  export OCCT_TARFILE=${OCCT_PACKAGE}-linux.tgz
+elif [ "$MSYSTEM" == "MSYS" ]; then
+  INCLUDE_DIR="inc"
+  export OCCT_TARFILE=${OCCT_PACKAGE}-win64.zip
 fi
 export OCCT_TARFILE_URL="https://github.com/OpenWebCAD/occt_builder/releases/download/${OCCT_VERSION}/${OCCT_TARFILE}"
 
@@ -24,14 +29,19 @@ fi
 
 if [ ! -d "${OCCT_PACKAGE}" ]; then 
   echo "extracting package ${OCCT_TARFILE}"
-  tar -xf ${OCCT_TARFILE}
+  extension="${OCCT_TARFILE##*.}"
+  if [ "$extension" == "zip" ]; then
+    unzip ${OCCT_TARFILE}
+  else
+    tar -xf ${OCCT_TARFILE}
+  fi
 fi
  
 export LD_LIBRARY_PATH=`pwd`/${OCCT_PACKAGE}/lib:$LD_LIBRARY_PATH
 
-export VERSION_FILE=`pwd`/${OCCT_PACKAGE}/include/opencascade/Standard_Version.hxx
+export VERSION_FILE=`pwd`/${OCCT_PACKAGE}/${INCLUDE_DIR}/Standard_Version.hxx
 grep -i "#define OCC_VERSION_COMPLETE"  ${VERSION_FILE} ;
-lscpu ;
+lscpu 2> /dev/null;
 cmake --version ;
 
 #set NPROC=`nproc`

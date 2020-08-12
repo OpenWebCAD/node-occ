@@ -55,7 +55,7 @@
   },
   "binary": {
     "module_name": "occ",
-    "module_path": "./lib/binding/",
+    "module_path": "lib/binding/",
     "host-aws": "https://nodeocc.s3-us-west-1.amazonaws.com",
     "host": "https://github.com/openwebcad/node-occ/releases/download/",
     "remote_path": "{version}"
