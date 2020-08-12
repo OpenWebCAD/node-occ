@@ -53,11 +53,10 @@ $npm install node-occ
 
 ## building node-occ from source : prerequisites
 
-### on Linux
 
-#### on ubuntu
+#### on (linux Ubuntu
 
-(use nodejs 12.0)
+(use nodejs 12 or 14)
 
 ```bash
 # installing nodejs and gyp utility to build extensions
@@ -71,9 +70,16 @@ sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
 # ------------------------------------
 git clone --recursive https://github.com/erossignon/node-occ.git
 cd node-occ
+
+# download prebuild OpenCascade Library and header files
+bash ./prepare_node.sh
+
+#
 export OCCT_PACKAGE=occt-7.2.0
 export LD_LIBRARY_PATH=`pwd`/${OCCT_PACKAGE}/lib:$LD_LIBRARY_PATH
 npm install --build-from-source
+
+# verify that everything is working OK
 make test
 ```
 

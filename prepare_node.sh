@@ -16,15 +16,16 @@ echo "  OCCT_TARFILE     = " ${OCCT_TARFILE}
 echo "  OCCT_TARFILE_URL = " ${OCCT_TARFILE_URL}
 
 echo "--------------------------  OCCT TAR FILE ${OCCT_TARFILE}"
-ls ${OCCT_TARFILE} 
 if [ ! -f "${OCCT_TARFILE}" ]; then
-  wget -q ${OCCT_TARFILE_URL}
+  echo "downloading ${OCCT_TARFILE}"
+  wget --show-progress -q ${OCCT_TARFILE_URL}
 fi
 if [ ! -d "${OCCT_PACKAGE}" ]; then 
   echo "extracting package ${OCCT_TARFILE}"
   tar -xf ${OCCT_TARFILE}
 fi
  
+ls ${OCCT_TARFILE} 
 export LD_LIBRARY_PATH=`pwd`/${OCCT_PACKAGE}/lib:$LD_LIBRARY_PATH
 
 export VERSION_FILE=`pwd`/${OCCT_PACKAGE}/include/opencascade/Standard_Version.hxx
