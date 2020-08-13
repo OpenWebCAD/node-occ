@@ -82,7 +82,7 @@ before_install:
 # use g++ on linux
 - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++; fi
 - $CXX --version
-- npm install -g node-pre-gyp-github node-pre-gyp
+- npm install -g https://github.com/OpenWebCAD/node-pre-gyp-github.git node-pre-gyp
 
 # compile Node-OCC
 - bash ./prepare_node.sh
