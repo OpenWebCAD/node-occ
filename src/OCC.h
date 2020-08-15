@@ -8,7 +8,7 @@
 #include <BRep_Tool.hxx>
 #include <BRepCheck_Analyzer.hxx>
 
-#include <BRepMesh.hxx>
+//#include <BRepMesh.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepMesh_FastDiscret.hxx>
 

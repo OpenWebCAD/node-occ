@@ -1,8 +1,12 @@
 language: cpp
-dist: bionic // 18.04
+# 18.04
+dist: bionic
+#  - focal
+
 os:
   - linux
   - osx
+osx_image: xcode12
 
 #  we use travis container based infrastructure
 #  https://docs.travis-ci.com/user/installing-dependencies/#Installing-Packages-on-Container-Based-Infrastructure 
@@ -39,21 +43,35 @@ matrix:
   # env: TRAVIS_NODE_VERSION="7" ARCH="x86"
   allow_failures:
     - os: osx
+
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:ubuntu-toolchain-r/test'
+      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+        key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
-    - g++
-    - libtbb2
-    - libtbb-dev
+      - g++
+      - libtbb2
+      - libtbb-dev
+    update: true
+  homebrew:
+    packages:
+      - tbb
+      - freetype
+      - opencascade
+    update: true
 
 before_install:
-# 
-- if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get install -y libtbb2 libtbb-dev; fi
-#
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update     ; fi   
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install tbb; fi
+- >
+  if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    cat /etc/apt/sources.list
+    sudo add-apt-repository universe
+    sudo add-apt-repository multiverse
+    sudo apt-add-repository -y ppa:freecad-maintainers/freecad-daily 
+    sudo apt-get update -qq
+    sudo apt-get install -y --no-install-recommends libocct-data-exchange-dev       
+  fi
 
 # reinstall latest nvm
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
@@ -96,8 +114,8 @@ install:
 script:
 - >
   if [[ -z $TRAVIS_ELECTRON_VERSION ]]; then
-    export LD_LIBRARY_PATH=`pwd`/occt-7.2.0/lib
-    export DYLD_LIBRARY_PATH=`pwd`/occt-7.2.0/lib
+  #  export LD_LIBRARY_PATH=`pwd`/occt-7.2.0/lib
+  #  export DYLD_LIBRARY_PATH=`pwd`/occt-7.2.0/lib
     node ./
     npm test
   else

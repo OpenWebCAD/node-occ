@@ -1245,12 +1245,20 @@ static int chamfer(Solid* pNewSolid, Solid* pSolid, const std::vector<Edge*>& ed
 
       if (distances_size == 1) {
         // single distance
+#if (OCC_VERSION_MAJOR ==7 && OCC_VERSION_MINOR <=3) 
         CF.Add(distances[0], edge, face);
+#else 
+        CF.Add(edge);
+#endif
 
       }
       else if (distances_size == edges_size) {
         // distance given for each edge
+#if (OCC_VERSION_MAJOR ==7 && OCC_VERSION_MINOR <=3) 
         CF.Add(distances[i], edge, face);
+#else 
+        CF.Add(edge);
+#endif
 
       }
       else {

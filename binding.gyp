@@ -24,10 +24,9 @@
                         ]
                    },
                     "library_dirs": [
-                      "<!(pwd)/occt-7.2.0/lib",
                     ],
                     "include_dirs": [
-                      "<!(pwd)/occt-7.2.0/include/opencascade",
+                      "/usr/local/include/opencascade",
                       "<!(node -e \"require('nan')\")"
                     ],},
               ],
@@ -61,10 +60,9 @@
                         ],
 
                       "library_dirs": [
-                        "<!(pwd)/occt-7.2.0/lib",
                       ],
                       "include_dirs": [
-                        "<!(pwd)/occt-7.2.0/include/opencascade",
+                      "/usr/include/opencascade",
                         "<!(node -e \"require('nan')\")"
                       ],}
               ],
@@ -190,128 +188,7 @@
         "<(module_name)"
       ],
       "conditions": [
-        ["OS=='mac'",
-        {
-                "variables": {
-                   "bin_folder": "./occt-7.2.0/lib"
-                },
-                "copies": [
-                  {
-                    "files": [
-                      "<(bin_folder)/libTKBO.7.dylib",
-                      "<(bin_folder)/libTKBool.7.dylib",
-                      "<(bin_folder)/libTKBRep.7.dylib",
-                      "<(bin_folder)/libTKernel.7.dylib",
-                      "<(bin_folder)/libTKFeat.7.dylib",
-                      "<(bin_folder)/libTKFillet.7.dylib",
-                      "<(bin_folder)/libTKG2d.7.dylib",
-                      "<(bin_folder)/libTKG3d.7.dylib",
-                      "<(bin_folder)/libTKGeomAlgo.7.dylib",
-                      "<(bin_folder)/libTKGeomBase.7.dylib",
-                      "<(bin_folder)/libTKIGES.7.dylib",
 
-                      "<(bin_folder)/libTKMath.7.dylib",
-                      "<(bin_folder)/libTKMesh.7.dylib",
-                      "<(bin_folder)/libTKOffset.7.dylib",
-                      "<(bin_folder)/libTKPrim.7.dylib",
-                      "<(bin_folder)/libTKShHealing.7.dylib",
-                      "<(bin_folder)/libTKSTEP.7.dylib",
-                      "<(bin_folder)/libTKSTEP209.7.dylib",
-                      "<(bin_folder)/libTKSTEPAttr.7.dylib",
-                      "<(bin_folder)/libTKSTEPBase.7.dylib",
-                      "<(bin_folder)/libTKSTL.7.dylib",
-                      "<(bin_folder)/libTKTopAlgo.7.dylib",
-                      "<(bin_folder)/libTKXSBase.7.dylib",
-
-                      "<(bin_folder)/libTKBO.7.2.1.dylib",
-                      "<(bin_folder)/libTKBool.7.2.1.dylib",
-                      "<(bin_folder)/libTKBRep.7.2.1.dylib",
-                      "<(bin_folder)/libTKernel.7.2.1.dylib",
-                      "<(bin_folder)/libTKFeat.7.2.1.dylib",
-                      "<(bin_folder)/libTKFillet.7.2.1.dylib",
-                      "<(bin_folder)/libTKG2d.7.2.1.dylib",
-                      "<(bin_folder)/libTKG3d.7.2.1.dylib",
-                      "<(bin_folder)/libTKGeomAlgo.7.2.1.dylib",
-                      "<(bin_folder)/libTKGeomBase.7.2.1.dylib",
-                      "<(bin_folder)/libTKIGES.7.2.1.dylib",
-
-                      "<(bin_folder)/libTKMath.7.2.1.dylib",
-                      "<(bin_folder)/libTKMesh.7.2.1.dylib",
-                      "<(bin_folder)/libTKOffset.7.2.1.dylib",
-                      "<(bin_folder)/libTKPrim.7.2.1.dylib",
-                      "<(bin_folder)/libTKShHealing.7.2.1.dylib",
-                      "<(bin_folder)/libTKSTEP.7.2.1.dylib",
-                      "<(bin_folder)/libTKSTEP209.7.2.1.dylib",
-                      "<(bin_folder)/libTKSTEPAttr.7.2.1.dylib",
-                      "<(bin_folder)/libTKSTEPBase.7.2.1.dylib",
-                      "<(bin_folder)/libTKSTL.7.2.1.dylib",
-                      "<(bin_folder)/libTKTopAlgo.7.2.1.dylib",
-                      "<(bin_folder)/libTKXSBase.7.2.1.dylib",
-
-
-                    ] ,
-                    "destination": "<(module_path)"
-                }]
-        }],
-        ["OS=='linux'",
-        {
-          "variables": {
-             "bin_folder": "./occt-7.2.0/lib"
-          },
-          "copies": [
-            {
-              "files": [
-                "<(bin_folder)/libTKBO.so.7",
-                "<(bin_folder)/libTKBool.so.7",
-                "<(bin_folder)/libTKBRep.so.7",
-                "<(bin_folder)/libTKernel.so.7",
-                "<(bin_folder)/libTKFillet.so.7",
-                "<(bin_folder)/libTKFeat.so.7",
-                "<(bin_folder)/libTKIGES.so.7",
-                "<(bin_folder)/libTKG2d.so.7",
-                "<(bin_folder)/libTKG3d.so.7",
-                "<(bin_folder)/libTKGeomAlgo.so.7",
-                "<(bin_folder)/libTKGeomBase.so.7",
-                "<(bin_folder)/libTKMath.so.7",
-                "<(bin_folder)/libTKMesh.so.7",
-                "<(bin_folder)/libTKOffset.so.7",
-                "<(bin_folder)/libTKPrim.so.7",
-                "<(bin_folder)/libTKShHealing.so.7",
-                "<(bin_folder)/libTKSTEP.so.7",
-                "<(bin_folder)/libTKSTEP209.so.7",
-                "<(bin_folder)/libTKSTEPAttr.so.7",
-                "<(bin_folder)/libTKSTEPBase.so.7",
-                "<(bin_folder)/libTKSTL.so.7",
-                "<(bin_folder)/libTKTopAlgo.so.7",
-                "<(bin_folder)/libTKXSBase.so.7",
- 
-                "<(bin_folder)/libTKBO.so.7.2.1",
-                "<(bin_folder)/libTKBool.so.7.2.1",
-                "<(bin_folder)/libTKBRep.so.7.2.1",
-                "<(bin_folder)/libTKernel.so.7.2.1",
-                "<(bin_folder)/libTKFillet.so.7.2.1",
-                "<(bin_folder)/libTKFeat.so.7.2.1",
-                "<(bin_folder)/libTKIGES.so.7.2.1",
-                "<(bin_folder)/libTKG2d.so.7.2.1",
-                "<(bin_folder)/libTKG3d.so.7.2.1",
-                "<(bin_folder)/libTKGeomAlgo.so.7.2.1",
-                "<(bin_folder)/libTKGeomBase.so.7.2.1",
-                "<(bin_folder)/libTKMath.so.7.2.1",
-                "<(bin_folder)/libTKMesh.so.7.2.1",
-                "<(bin_folder)/libTKOffset.so.7.2.1",
-                "<(bin_folder)/libTKPrim.so.7.2.1",
-                "<(bin_folder)/libTKShHealing.so.7.2.1",
-                "<(bin_folder)/libTKSTEP.so.7.2.1",
-                "<(bin_folder)/libTKSTEP209.so.7.2.1",
-                "<(bin_folder)/libTKSTEPAttr.so.7.2.1",
-                "<(bin_folder)/libTKSTEPBase.so.7.2.1",
-                "<(bin_folder)/libTKSTL.so.7.2.1",
-                "<(bin_folder)/libTKTopAlgo.so.7.2.1",
-                "<(bin_folder)/libTKXSBase.so.7.2.1",
-              ] ,
-              "destination": "<(module_path)"
-          }]
-        }],
         ["OS=='win'",
         {
           "variables": {

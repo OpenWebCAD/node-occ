@@ -3,32 +3,8 @@
 #
 #
 ##########################################################################################
-export OCCT_VERSION=7.2.0
-export OCCT_PACKAGE=occt-${OCCT_VERSION}
-if [ `uname` == "Darwin" ];then
-export OCCT_TARFILE=${OCCT_PACKAGE}-osx.tgz
-else
-export OCCT_TARFILE=${OCCT_PACKAGE}-linux.tgz
-fi
-export OCCT_TARFILE_URL="https://github.com/OpenWebCAD/occt_builder/releases/download/${OCCT_VERSION}/${OCCT_TARFILE}"
 
-echo "  OCCT_TARFILE     = " ${OCCT_TARFILE}
-echo "  OCCT_TARFILE_URL = " ${OCCT_TARFILE_URL}
-
-echo "--------------------------  OCCT TAR FILE ${OCCT_TARFILE}"
-if [ ! -f "${OCCT_TARFILE}" ]; then
-  echo "downloading ${OCCT_TARFILE}"
-  wget --show-progress -q ${OCCT_TARFILE_URL}
-fi
-if [ ! -d "${OCCT_PACKAGE}" ]; then 
-  echo "extracting package ${OCCT_TARFILE}"
-  tar -xf ${OCCT_TARFILE}
-fi
- 
-ls ${OCCT_TARFILE} 
-export LD_LIBRARY_PATH=`pwd`/${OCCT_PACKAGE}/lib:$LD_LIBRARY_PATH
-
-export VERSION_FILE=`pwd`/${OCCT_PACKAGE}/include/opencascade/Standard_Version.hxx
+export VERSION_FILE=/usr/include/opencascade/Standard_Version.hxx
 grep -i "#define OCC_VERSION_COMPLETE"  ${VERSION_FILE} ;
 lscpu ;
 cmake --version ;
@@ -84,3 +60,4 @@ fi
 
 #  git submodule update --depth 50 --init --recursive
 npm install --build-from-source 
+
