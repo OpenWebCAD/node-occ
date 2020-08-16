@@ -22,7 +22,6 @@ Makefile
 appveyor.yml
 *.tgz
 *.zip
-src
 node-occ-package2
 .gitattributes
 .idea
