@@ -450,35 +450,46 @@ v8::Local<v8::Object> Solid::createMesh(double factor, double angle, bool qualit
 
   try {
 
-    if (angle == 0.0) {
-       BRepMesh_IncrementalMesh m1(shape,factor,Standard_True);
-    } else {
-       BRepMesh_IncrementalMesh m2(shape,factor,Standard_True,angle, Standard_True);
-    }
-
-    if (shape.ShapeType() == TopAbs_COMPSOLID || shape.ShapeType() == TopAbs_COMPOUND) {
-      TopExp_Explorer exSolid, exFace;
-      for (exSolid.Init(shape, TopAbs_SOLID); exSolid.More(); exSolid.Next()) {
-        const TopoDS_Solid& solid = TopoDS::Solid(exSolid.Current());
-        for (exFace.Init(solid, TopAbs_FACE); exFace.More(); exFace.Next()) {
-          const TopoDS_Face& face = TopoDS::Face(exFace.Current());
-          if (face.IsNull()) continue;
-          mesh->extractFaceMesh(face, qualityNormals);
+        if (angle == 0.0) {
+           BRepMesh_IncrementalMesh m1(shape,factor,Standard_True);
+        } else {
+           BRepMesh_IncrementalMesh m2(shape,factor,Standard_True,angle, Standard_True);
         }
-      }
-    }  else {
-      TopExp_Explorer exFace;
-      for (exFace.Init(shape, TopAbs_FACE); exFace.More(); exFace.Next()) {
-        const TopoDS_Face& face = TopoDS::Face(exFace.Current());
-        if (face.IsNull()) continue;
-        mesh->extractFaceMesh(face, qualityNormals);
-      }
-    }
 
-    mesh->optimize();
 
-  } CATCH_AND_RETHROW_NO_RETURN("Failed to mesh solid ");
+        if (shape.ShapeType() == TopAbs_COMPSOLID || shape.ShapeType() == TopAbs_COMPOUND) {
+          TopExp_Explorer exSolid, exFace;
+          for (exSolid.Init(shape, TopAbs_SOLID); exSolid.More(); exSolid.Next()) {
+            const TopoDS_Solid& solid = TopoDS::Solid(exSolid.Current());
+            for (exFace.Init(solid, TopAbs_FACE); exFace.More(); exFace.Next()) {
+              const TopoDS_Face& face = TopoDS::Face(exFace.Current());
+              if (face.IsNull()) continue;
+              mesh->extractFaceMesh(face, qualityNormals);
+            }
+          }
+        }  else {
+          TopExp_Explorer exFace;
+          for (exFace.Init(shape, TopAbs_FACE); exFace.More(); exFace.Next()) {
 
+                const TopoDS_Face& face = TopoDS::Face(exFace.Current());
+                if (face.IsNull()) continue;
+                try {
+                    mesh->extractFaceMesh(face, qualityNormals);
+                }    catch(Standard_Failure const& anException) {
+
+                     }
+          }
+        }
+
+         mesh->optimize();
+
+
+    }  catch(Standard_Failure const& anException) {
+                            Standard_SStream aMsg;
+                            aMsg << "EXCEPTION in Solid::createMesh" << endl;
+                            aMsg << anException << endl;
+                            Nan::ThrowError(aMsg.str().c_str());
+                          }
 
   return scope.Escape(theMesh);
 }
