@@ -4,10 +4,38 @@ const should = require("should");
 const nodeocc = require("..");
 const occ = nodeocc.occ;
 const doDebug = false;
+
 function debugLog() {
     arguments;
     /* implement me*/
 }
+
+describe("TBugLinux- testing mesh on a simple cone shape with radius2 = 0 returns 2 Faces (latteral+bottom)", function () {
+    // cf. https://github.com/antonymarion/node-occ-csg-editor-display/runs/1517044830?check_suite_focus=true
+    let shape, mesh;
+    before(function () {
+        shape = occ.makeCone([0, 0, 0], 2, [0, 0, 2], 0);
+        mesh = shape.createMesh(0.1);
+    });
+    it("solid should have 2 faces", function () {
+        const myFaces = shape.getFaces();
+        console.log("shape", shape);
+        console.log("cone Faces", myFaces);
+        myFaces.length.should.eql(2);
+
+        // meshing should work on Linux ! (was not working w/ Linux pre compiled occ.node)
+        shape
+            .hasMesh.should.be.eql(true);
+        shape.faces["lateral"]
+            .hasMesh
+            .should.be.eql(true);
+        shape.faces["bottom"]
+            .hasMesh
+            .should.be.eql(true);
+
+    });
+});
+
 describe("T1- testing mesh on a simple box shape", function () {
 
     let shape, mesh;
@@ -30,8 +58,7 @@ describe("T1- testing mesh on a simple box shape", function () {
         mesh.vertices[4].should.eql(0.0);
         mesh.vertices[5].should.eql(100.0);
 
-       if (false) {
-	       mesh.vertices[6].should.eql(0.0);
+        mesh.vertices[6].should.eql(0.0);
         mesh.vertices[7].should.eql(40.0);
         mesh.vertices[8].should.eql(100.0);
 
@@ -42,7 +69,6 @@ describe("T1- testing mesh on a simple box shape", function () {
         mesh.vertices[12].should.eql(10.0);
         mesh.vertices[13].should.eql(0.0);
         mesh.vertices[14].should.eql(0.0);
-      }   
 
     });
     it("Mesh#triangle          - mesh should provide triangles indexes", function () {
@@ -81,12 +107,10 @@ describe("T1- testing mesh on a simple box shape", function () {
     it("Mesh#getFaceTriangles  - mesh should provide a mechanism to extract triangles indexes of a given shape face", function () {
         // --------------------------------------- face accessor
         let arr = mesh.getFaceTriangles(shape.getFaces()[0]);
-        arr.length.should.eql(6);
-	//arr.should.eql(new Uint8Array([3, 1, 2, 0, 1, 3]));
+        arr.should.eql(new Uint8Array([3, 1, 2, 0, 1, 3]));
 
         arr = mesh.getFaceTriangles(shape.getFaces()[1]);
-        arr.length.should.eql(6);
-        //arr.should.eql(new Uint8Array([5, 7, 6, 5, 4, 7]));
+        arr.should.eql(new Uint8Array([5, 7, 6, 5, 4, 7]));
         // etc...
     });
     it("Mesh#edgeRanges        - mesh should provide a mechanism to easily identify edges", function () {
@@ -228,6 +252,7 @@ describe("testing performance of meshing algorithms with various parameters", fu
     function makeUnitBox() {
         return occ.makeBox([0, 0, 0], [100, 100, 100]);
     }
+
     function makeSphere() {
         return occ.makeSphere([0, 0, 0], 100);
     }
@@ -242,6 +267,7 @@ describe("testing performance of meshing algorithms with various parameters", fu
         beforeEach(function () {
             shape2 = makeShape();
         });
+
         function test_with(tol, angle) {
             it(makeShape.name + " testing with parameter : deflection : " + tol + "  angle :" + angle, function () {
                 const mesh1 = shape2.createMesh(tol, angle);
@@ -249,6 +275,7 @@ describe("testing performance of meshing algorithms with various parameters", fu
                 debugLog("  triangles   = ", mesh1.triangles.length);
             });
         }
+
         test_with(0.01, 0.5);
         test_with(0.01, 5);
         test_with(0.01, 10);
