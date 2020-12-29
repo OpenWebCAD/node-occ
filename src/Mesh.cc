@@ -187,7 +187,9 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
           double fV = uv.Y();
 
           GeomLProp_SLProps faceprop(surface, fU, fV, 2, gp::Resolution());
-          normal = faceprop.Normal();
+          if (faceprop.IsNormalDefined()){
+            normal = faceprop.Normal();
+          }
 
           if (normal.SquareMagnitude() > 1.0e-10) {
             normal.Normalize();
@@ -212,7 +214,9 @@ int Mesh::extractFaceMesh(const TopoDS_Face& face, bool qualityNormals)
           SrfProp.Parameters(1, fU, fV);
 
           GeomLProp_SLProps faceprop(surface, fU, fV, 2, gp::Resolution());
-          normal = faceprop.Normal();
+          if (faceprop.IsNormalDefined()){
+            normal = faceprop.Normal();
+          }
 
           if (normal.SquareMagnitude() > 1.0e-10) {
             normal.Normalize();
