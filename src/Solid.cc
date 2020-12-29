@@ -476,7 +476,10 @@ v8::Local<v8::Object> Solid::createMesh(double factor, double angle, bool qualit
                 try {
                     mesh->extractFaceMesh(face, qualityNormals);
                 }    catch(Standard_Failure const& anException) {
-
+                        Standard_SStream aMsg;	
+                       aMsg << "EXCEPTION in mesh->extractFaceMesh" << endl;	
+                       aMsg << anException << endl;	
+                       Nan::ThrowError(aMsg.str().c_str());
                      }
           }
         }
