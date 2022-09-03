@@ -1,13 +1,12 @@
 # node-occ
 
-OpenCascade nodejs extension for solid modeling.
+OpenCascade NodeJS package for solid modeling.
 
-This nodejs extension provides _solid construction_ to nodejs.
+This package provides _solid construction_ to NodeJS.
 It provides a simple yet powerful javascript api to construct 3D geometry models.
 
 This project comes with a set of V8 wrappers around OpenCascade API and a sample web application.
 
-[![Build Status](https://travis-ci.org/OpenWebCAD/node-occ.png?branch=master)](https://travis-ci.org/OpenWebCAD/node-occ)
 [![Build status](https://ci.appveyor.com/api/projects/status/s5eaux89v2c0wmu4?svg=true)](https://ci.appveyor.com/project/erossignon/node-occ-6ktv4)
 
 ### quick example
@@ -35,11 +34,11 @@ alt="node occ" width="240" height="180" border="10" /></a>
 
 ### list of features
 
--   creation of basic shapes ( box, cylinder , cone , torus )
--   boolean operation ( fuse , common , cut )
--   features ( draftAngle)
--   solid properties ( faces, edges, vertices, area , volume )
--   import export ( STEP BREP )
+- creation of basic shapes ( box, cylinder , cone , torus )
+- boolean operation ( fuse , common , cut )
+- features ( draftAngle)
+- solid properties ( faces, edges, vertices, area , volume )
+- import export ( STEP BREP )
 
 ### sample web application
 
@@ -52,7 +51,6 @@ $npm install node-occ
 ```
 
 ## building node-occ from source : prerequisites
-
 
 #### on (linux Ubuntu
 
@@ -85,24 +83,25 @@ make test
 
 ### on windows
 
--   follow the tutorial in the [wiki](https://github.com/erossignon/node-occ/wiki)
+- follow the tutorial in the [wiki](https://github.com/erossignon/node-occ/wiki)
 
 ## dependencies:
 
--   threejs : https://github.com/mrdoob/three.js
+- threejs : https://github.com/mrdoob/three.js
 
-## acknowledgement:
+## acknowledgment:
 
--   OpenCascade : http://www.opencascade.org
--   occmodel : https://github.com/tenko/occmodel
--   ShapeSmith : https://github.com/bjnortier/shapesmith
+- OpenCascade : http://www.opencascade.org
+- occmodel : https://github.com/tenko/occmodel
+- ShapeSmith : https://github.com/bjnortier/shapesmith
 
 ## MIT License
 
-Copyright © 2012-2019 E. Rossignon
+Copyright © 2012-2022 E. Rossignon
+Copyright © 2022 Sterfive SAS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
