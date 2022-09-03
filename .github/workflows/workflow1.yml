@@ -26,6 +26,4 @@ jobs:
     - run: sudo apt-get install libocct-data-exchange-dev libocct-modeling-data-dev 
     - run: npm install -g pnpm@6
     - run: pnpm recursive install
-    - run: pnpm run build
-    - run: pnpm run pretest
     - run: pnpm test
