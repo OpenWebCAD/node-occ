@@ -269,9 +269,10 @@ public:
   MyProgressIndicator(AsyncWorkerWithProgress* worker);
 
   void notify_progress();
-  virtual Standard_Boolean Show(const Standard_Boolean force);
+  virtual void Show(
+    const Message_ProgressScope& theScope, 
+    const Standard_Boolean isForce);
 };
-
 
 
 MyProgressIndicator::MyProgressIndicator(AsyncWorkerWithProgress* worker)
@@ -281,7 +282,7 @@ MyProgressIndicator::MyProgressIndicator(AsyncWorkerWithProgress* worker)
 }
 
 
-Standard_Boolean MyProgressIndicator::Show(const Standard_Boolean force)
+void MyProgressIndicator::Show(const Message_ProgressScope& scope, const Standard_Boolean force)
 {
 
   double value = this->GetPosition();
@@ -294,7 +295,6 @@ Standard_Boolean MyProgressIndicator::Show(const Standard_Boolean force)
     this->_worker->send_notify_progress();
 
   }
-  return Standard_False;
 }
 
 
@@ -362,17 +362,14 @@ public:
 
 
 
+// https://unlimited3d.wordpress.com/2020/10/17/progress-indication-changes-in-occt-7-5-0/
+
 void StepAsyncReadWorker::Execute() {
 
   MutexLocker _locker(stepOperation_mutex);
 
   void* data = request.data;
   this->_retValue = 0;
-
-  occHandle(Message_ProgressIndicator) progress = new MyProgressIndicator(this);
-
-  progress->SetScale(1, 100, 1);
-  progress->Show();
 
   try {
 
@@ -383,8 +380,7 @@ void StepAsyncReadWorker::Execute() {
     Interface_Static::SetIVal("read.step.nonmanifold",  1);
     Interface_Static::SetIVal("read.step.product.mode", 1);
 
-    progress->NewScope(5, "reading");
-
+   
     if (aReader.ReadFile(_filename.c_str()) != IFSelect_RetDone) {
 
       std::stringstream str;
@@ -394,20 +390,14 @@ void StepAsyncReadWorker::Execute() {
       // Local<Value> argv[] = { Local<Value>(String::New())  };
       //  Local<Value>  res =  callback->Call(global, 1, argv);
       // NanReturnUndefined();
-      progress->EndScope();
-      progress->SetValue(105.0);
-      progress->Show();
+      // progress->EndScope();
       this->_retValue = 1;
       return;
 
     }
-    progress->EndScope();
-    progress->Show();
 
 
-    progress->NewScope(95, "transfert");
-    progress->Show();
-    aReader.WS()->MapReader()->SetProgress(progress);
+   // aReader.WS()->MapReader()->SetProgress(progress);
 
 
     // Root transfers
@@ -416,7 +406,6 @@ void StepAsyncReadWorker::Execute() {
     Standard_Boolean failsonly = Standard_False;
     aReader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
 
-    progress->SetRange(0, nbr);
     int mod = nbr / 10 + 1;
     for (int n = 1; n <= nbr; n++) {
 
@@ -426,21 +415,16 @@ void StepAsyncReadWorker::Execute() {
       if (!ok || nbs == 0) {
         continue; // skip empty root
       }
-      if ((n + 1) % mod == 0) { progress->Increment(); }
+    //  if ((n + 1) % mod == 0) { progress->Increment(); }
     }
 
-    aReader.WS()->MapReader()->SetProgress(0);
+  //   aReader.WS()->MapReader()->SetProgress(0);
   
-    progress->SetValue(100);
-    progress->EndScope();
-    progress->Show(true);
 
     TopoDS_Shape aResShape;
     BRep_Builder B;
     TopoDS_Compound compound;
     B.MakeCompound(compound);
-
-
 
     int nbs = aReader.NbShapes();
     for (int i = 1; i <= nbs; i++) {
@@ -631,27 +615,21 @@ void BRepAsyncReadWorker::Execute()
   std::string filename = this->_filename;
 
   try {
-    occHandle(Message_ProgressIndicator) progress = new MyProgressIndicator(this);
-    progress->SetScale(1, 100, 1);
-    progress->Show();
+    Message_ProgressRange progressRange;
 
     // read brep-file
     TopoDS_Shape shape;
     BRep_Builder aBuilder;
-    if (!BRepTools::Read(shape, filename.c_str(), aBuilder, progress)) {
+    if (!BRepTools::Read(shape, filename.c_str(), aBuilder, progressRange)) {
 
       std::stringstream str;
       str << "1- cannot read BREP file : '" << filename << "'" << std::ends;
       this->SetErrorMessage(str.str().c_str());
       this->_retValue = 1;
 
-      progress->SetValue(100.0);
-      progress->Show();
       return;
     }
     this->shapes.push_back(shape);
-    progress->SetValue(100.0);
-    progress->Show();
   }
   catch (...) {
     this->SetErrorMessage("2 ( caught C++ exception in _readBREPAsync");

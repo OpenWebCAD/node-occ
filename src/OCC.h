@@ -3,6 +3,7 @@
 
 #include <Standard_Version.hxx>
 
+#include "BSplCLib.hxx"  
 #include <Bnd_Box.hxx>
 
 #include <BRep_Tool.hxx>
@@ -14,7 +15,6 @@
 
 #include <BRepTools.hxx>
 #include <BRepLib.hxx>
-
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepGProp.hxx>

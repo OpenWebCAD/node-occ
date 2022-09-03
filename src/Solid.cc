@@ -501,6 +501,7 @@ v8::Local<v8::Object> Solid::createMesh(double factor, double angle, bool qualit
 NAN_METHOD(Solid::getShapeName)
 {
   Solid* pThis = UNWRAP(Solid); 
+  pThis;
 
   v8::Local<v8::Object> pShape = Nan::To<v8::Object>(info[0]).ToLocalChecked();
 

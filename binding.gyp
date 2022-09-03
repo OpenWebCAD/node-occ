@@ -26,7 +26,7 @@
                     "library_dirs": [
                     ],
                     "include_dirs": [
-                      "/usr/local/include/opencascade",
+                      "/usr/include/opencascade",
                       "<!(node -e \"require('nan')\")"
                     ],},
               ],
@@ -58,22 +58,27 @@
                       "ldflags": [
                         "-Wl,-rpath,\$$ORIGIN",
                         ],
-
                       "library_dirs": [
+                        "/usr/lib/x86_64-linux-gnu",
                       ],
                       "include_dirs": [
                       "/usr/include/opencascade",
                         "<!(node -e \"require('nan')\")"
-                      ],}
+                      ],
+                      "_libraries": [
+                        "/usr/lib/x86_64-linux-gnu/libTKMath.so",
+                        "/usr/lib/x86_64-linux-gnu/libTKG2d.so"
+                      ]
+                      }
               ],
               [
                 "OS=='win'",
                 {
                       "library_dirs": [
-                        "./occt-7.2.0/win64/vc14/lib",
+                        "./occt-7.5.0/win64/vc14/lib",
                       ],
                       "include_dirs": [
-                        "./occt-7.2.0/inc",
+                        "./occt-7.5.0/inc",
                         "<!(node -e \"require('nan')\")"
                       ],}
               ]
@@ -135,6 +140,7 @@
       ],
       "libraries+": [
         "-lTKBO<(dbg)",
+        "-lTKMath<(dbg)",
         "-lTKBool<(dbg)",
         "-lTKBRep<(dbg)",
         "-lTKernel<(dbg)",
@@ -146,7 +152,6 @@
         "-lTKGeomBase<(dbg)",
         "-lTKIGES<(dbg)",
         "-lTKernel<(dbg)",
-        "-lTKMath<(dbg)",
         "-lTKMesh<(dbg)",
         "-lTKOffset<(dbg)",
         "-lTKPrim<(dbg)",
@@ -163,6 +168,7 @@
       ],
       "other_libraries": [
         "-lTKTObj<(dbg)",
+        "-lTKMath<(dbg)",
         "-lTKLCAF<(dbg)"
       ],
     },
