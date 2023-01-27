@@ -11,7 +11,7 @@ clean:
 	node-pre-gyp clean
 
 packet:
-	npm install mocha@7
+	npm install mocha@9
 	npm install assert
 	npm install should
 	npm install node-pre-gyp		
