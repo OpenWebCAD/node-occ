@@ -1,4 +1,4 @@
-const occ = require("../lib/occ");
+import { occ } from "..";
 
 const pace = require("pace")(1000);
 

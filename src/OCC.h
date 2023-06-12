@@ -3,13 +3,13 @@
 
 #include <Standard_Version.hxx>
 
-#include "BSplCLib.hxx"  
+#include "BSplCLib.hxx"
 #include <Bnd_Box.hxx>
 
 #include <BRep_Tool.hxx>
 #include <BRepCheck_Analyzer.hxx>
 
-//#include <BRepMesh.hxx>
+// #include <BRepMesh.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepMesh_FastDiscret.hxx>
 
@@ -47,13 +47,12 @@
 #include <BRepOffsetAPI_DraftAngle.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
 
-
 #include <BRepClass3d_SolidExplorer.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
 
 #include <ElCLib.hxx>
 
-//xx #include <FSD_BinaryFile.hxx>
+// xx #include <FSD_BinaryFile.hxx>
 
 #include <Geom_BezierCurve.hxx>
 #include <Geom_Circle.hxx>
@@ -78,9 +77,6 @@
 #include <GC_MakePlane.hxx>
 #include <GC_MakeTrimmedCone.hxx>
 
-
-
-
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 
@@ -89,13 +85,12 @@
 
 #include <GProp_GProps.hxx>
 
-
 #include <Interface_Static.hxx>
 #include <Interface_InterfaceModel.hxx>
 
 #include "Message_ProgressIndicator.hxx"
 
-//xx #include <MgtBRep.hxx>
+// xx #include <MgtBRep.hxx>
 
 #include <Poly_Triangulation.hxx>
 #include <Poly_Connect.hxx>
@@ -108,7 +103,7 @@
 #include <STEPControl_Writer.hxx>
 #include <STEPControl_Reader.hxx>
 
-//xx #include <ShapeSchema.hxx>
+// xx #include <ShapeSchema.hxx>
 
 // #include <StdPrs_ToolShadedShape.hxx>
 
@@ -118,7 +113,7 @@
 #include <Storage_Root.hxx>
 
 #include <StlAPI_Writer.hxx>
-//xx #include <StlAPI_Reader.hxx>
+// xx #include <StlAPI_Reader.hxx>
 
 #include <TColgp_Array1OfDir.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
@@ -144,10 +139,10 @@
 #include <StepRepr_ProductDefinitionShape.hxx>
 #include <Interface_EntityIterator.hxx>
 #include <TransferBRep.hxx>
-//xx #include <TDF_Label.hxx>
-//xx #include <TDF_ChildIDIterator.hxx>
-//xx #include <TDataStd_Name.hxx>
-//xx #include <TNaming_Builder.hxx>
+// xx #include <TDF_Label.hxx>
+// xx #include <TDF_ChildIDIterator.hxx>
+// xx #include <TDataStd_Name.hxx>
+// xx #include <TNaming_Builder.hxx>
 #include <Interface_Graph.hxx>
 
 #include <Poly_Polygon3D.hxx>
@@ -155,24 +150,25 @@
 #include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_PolygonOnTriangulation.hxx>
 
+#include <Message_ProgressScope.hxx>
 // Compatibility 6.5 and above
-#if (OCC_VERSION_MAJOR * 10 + OCC_VERSION_MINOR )  < 66
+#if (OCC_VERSION_MAJOR * 10 + OCC_VERSION_MINOR) < 66
 
 // this makes some adjustemnts to make sure node-occ can be
 // build with older version of OCC.
 #include <TNaming_NamedShape.hxx>
 #define BOPAlgo_Operation BOP_Operation
 #define BOPAlgo_SECTION BOP_SECTION
-#define BOPAlgo_COMMON  BOP_COMMON
-#define BOPAlgo_FUSE    BOP_FUSE
-#define BOPAlgo_CUT     BOP_CUT
-#define BOPAlgo_CUT21   BOP_CUT21
+#define BOPAlgo_COMMON BOP_COMMON
+#define BOPAlgo_FUSE BOP_FUSE
+#define BOPAlgo_CUT BOP_CUT
+#define BOPAlgo_CUT21 BOP_CUT21
 #define BOPAlgo_UNKNOWN BOP_UNKNOWN
-#define OUTER_SHELL(x)  BRepTools::OuterShell(x)
+#define OUTER_SHELL(x) BRepTools::OuterShell(x)
 #else
 
 #include <BRepClass3d.hxx>
-#define OUTER_SHELL(x)  BRepClass3d::OuterShell(x)
+#define OUTER_SHELL(x) BRepClass3d::OuterShell(x)
 #endif
 
 #undef Handle
