@@ -272,12 +272,12 @@ export interface OCC {
     makeTorus(center: PointLike, vector: VectorLike, mainRadius: Real, smallRadius: Real): ISolid;
 
     // boolean operation
-    // Wrires
-
+    // Edges
     makeLine(point1: PointLike, point2: PointLike): IWire;
     makeArc3P(point1: PointLike, point2: PointLike, point3: PointLike): IWire;
     makeCircle(center: PointLike, normal: VectorLike, radius: Real): IWire;
-    makeWire(...args: IWire[]): IWire;
+    // Wires
+    makeWire(...args: (IEdge | IWire)[]): IWire;
 
 
     // --- TO IMPLEMENT SOMEHOW !!!
