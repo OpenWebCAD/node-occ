@@ -1,31 +1,29 @@
 import should from "should";
 import { ITransform, occ, Transformation, ZDir } from "..";
 
-
 describe("testing transformation object", function () {
+  let trsf: ITransform;
+  before(function () {
+    trsf = new Transformation();
+    should.exist(trsf);
+  });
+  describe("a empty transformation", function () {
+    it("should have a scale factor of 1.0", function () {
+      trsf.scaleFactor.should.equal(1.0);
+    });
+    it("should have a rotation axis of 0,0,1", function () {
+      trsf.scaleFactor.should.equal(1.0);
+    });
+  });
 
-    let trsf: ITransform;
+  describe("testing translation [10,20,30]", function () {
     before(function () {
-        trsf = new Transformation();
-        should.exist(trsf);
+      trsf.makeTranslation([10, 20, 30]);
     });
-    describe("a empty transformation", function () {
-        it("should have a scale factor of 1.0", function () {
-            trsf.scaleFactor.should.equal(1.0);
-        });
-        it("should have a rotation axis of 0,0,1", function () {
-            trsf.scaleFactor.should.equal(1.0);
-        });
+    it("should have a scale factor of 1.0", function () {
+      trsf.scaleFactor.should.equal(1.0);
     });
-
-    describe("testing translation [10,20,30]", function () {
-        before(function () {
-            trsf.makeTranslation([10, 20, 30]);
-        });
-        it("should have a scale factor of 1.0", function () {
-            trsf.scaleFactor.should.equal(1.0);
-        });
-        /*
+    /*
         it("should have a rotation axis of 0,0,1", function() {
             trsf.rotationAxis.i.should.equal(0.0);
             trsf.rotationAxis.j.should.equal(0.0);
@@ -37,25 +35,22 @@ describe("testing transformation object", function () {
             trsf.translationPart.z.should.equal(30.0);
         });
         */
+  });
+  describe("testing planeMirror o=[10,20,30] dir=[0,0,1", function () {
+    before(function () {
+      ZDir.should.eql([0, 0, 1]);
+
+      trsf.makePlaneMirror([10, 20, 30], ZDir);
     });
-    describe("testing planeMirror o=[10,20,30] dir=[0,0,1", function () {
 
-        before(function () {
-
-            ZDir.should.eql([0, 0, 1]);
-
-            trsf.makePlaneMirror([10, 20, 30], ZDir);
-
-        });
-
-        it("should have a scale factor of -1.0", function () {
-            trsf.scaleFactor.should.eql(-1);
-        });
-
-        it("should flip coord on the Z axis", function () {
-            let v = occ.makeVertex(10, 10, 40);
-            let v2 = v.transformed(trsf);
-            v2.x.should.eql(v.x);
-        })
+    it("should have a scale factor of -1.0", function () {
+      trsf.scaleFactor.should.eql(-1);
     });
+
+    it("should flip coord on the Z axis", function () {
+      let v = occ.makeVertex(10, 10, 40);
+      let v2 = v.transformed(trsf);
+      v2.x.should.eql(v.x);
+    });
+  });
 });
