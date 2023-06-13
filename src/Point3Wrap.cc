@@ -3,22 +3,16 @@
 
 Nan::Persistent<v8::FunctionTemplate> Point3Wrap::_template;
 
-class Point3Wrap1 : public Point3Wrap
-{
+class Point3Wrap1 : public Point3Wrap {
   gp_XYZ _p;
 
 public:
   Point3Wrap1(double x, double y, double z) : _p(x, y, z){};
-  virtual const gp_XYZ get() const
-  {
-    return _p;
-  }
+  virtual const gp_XYZ get() const { return _p; }
 };
 // Methods exposed to JavaScripts
-NAN_METHOD(Point3Wrap::New)
-{
-  if (!info.IsConstructCall())
-  {
+NAN_METHOD(Point3Wrap::New) {
+  if (!info.IsConstructCall()) {
     return Nan::ThrowError(" use new occ.Point() to construct a Point");
   }
 
@@ -37,8 +31,7 @@ NAN_METHOD(Point3Wrap::New)
   info.GetReturnValue().Set(info.This());
 }
 
-NAN_METHOD(Point3Wrap::asArray)
-{
+NAN_METHOD(Point3Wrap::asArray) {
   Point3Wrap *pThis = Nan::ObjectWrap::Unwrap<Point3Wrap>(info.This());
   v8::Local<v8::Array> arr = Nan::New<v8::Array>(3);
   Nan::Set(arr, 0, Nan::New(pThis->x()));
@@ -46,19 +39,15 @@ NAN_METHOD(Point3Wrap::asArray)
   Nan::Set(arr, 2, Nan::New(pThis->z()));
   info.GetReturnValue().Set(arr);
 }
-NAN_METHOD(Point3Wrap::equals)
-{
+NAN_METHOD(Point3Wrap::equals) {
   CHECK_THIS_DEFINED(Point3Wrap);
   Point3Wrap *pThis = Nan::ObjectWrap::Unwrap<Point3Wrap>(info.This());
-  if (info.Length() == 1)
-  {
+  if (info.Length() == 1) {
     gp_Pnt p1;
     ReadPoint(info[0], &p1);
     bool isEqual = gp_Pnt(pThis->get()).IsEqual(p1, 0.0000001);
     return info.GetReturnValue().Set(isEqual);
-  }
-  else if (info.Length() == 2)
-  {
+  } else if (info.Length() == 2) {
     gp_Pnt p1;
     ReadPoint(info[0], &p1);
 
@@ -73,10 +62,10 @@ NAN_METHOD(Point3Wrap::equals)
 }
 
 // Methods exposed to JavaScripts
-void Point3Wrap::Init(v8::Local<v8::Object> target)
-{
+void Point3Wrap::Init(v8::Local<v8::Object> target) {
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Point3Wrap::New);
+  v8::Local<v8::FunctionTemplate> tpl =
+      Nan::New<v8::FunctionTemplate>(Point3Wrap::New);
   tpl->SetClassName(Nan::New("Point3D").ToLocalChecked());
 
   // object has one internal filed ( the C++ object)
@@ -93,5 +82,6 @@ void Point3Wrap::Init(v8::Local<v8::Object> target)
   EXPOSE_METHOD(Point3Wrap, equals);
   EXPOSE_METHOD(Point3Wrap, asArray);
 
-  Nan::Set(target, Nan::New("Point3D").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+  Nan::Set(target, Nan::New("Point3D").ToLocalChecked(),
+           Nan::GetFunction(tpl).ToLocalChecked());
 }

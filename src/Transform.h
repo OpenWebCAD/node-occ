@@ -3,13 +3,13 @@
 //
 //#include "OCC.h"
 //
-//using namespace std;
+// using namespace std;
 //
 //
-//template <class T>
-//class Transformer {
+// template <class T>
+// class Transformer {
 //
-//public:
+// public:
 //    Transformer(TopoDS_Shape shape,
 //                Handle<Object> origin,
 //                Handle<Object> parameters)
@@ -23,7 +23,7 @@
 //    }
 //
 //
-//private:
+// private:
 //    TopoDS_Shape transformed_shape_;
 //
 //    template<typename U>
@@ -54,9 +54,11 @@
 //            TopoDS_Shape shape_to_copy = copies[group_index];
 //
 //            auto_ptr<T> transform(new T(shape_to_copy));
-//            TopoDS_Shape transformedShape = transform->apply(multiplier, origin, parameters);
+//            TopoDS_Shape transformedShape = transform->apply(multiplier,
+//            origin, parameters);
 //
-//            copies[index] = BRepAlgoAPI_Fuse(transformedShape, copies[index - 1]).Shape();
+//            copies[index] = BRepAlgoAPI_Fuse(transformedShape, copies[index -
+//            1]).Shape();
 //
 //            multiplier = multiplier + grouping;
 //            remaining = remaining - grouping;
@@ -75,10 +77,10 @@
 //
 //};
 //
-//class Transform {
-//protected:
+// class Transform {
+// protected:
 //    TopoDS_Shape shape_;
-//public:
+// public:
 //    Transform(TopoDS_Shape shape);
 //    virtual ~Transform() {};
 //
@@ -87,9 +89,9 @@
 //                                 Handle<Object>  parameters) = 0;
 //};
 //
-//class RotateTransform : public Transform {
+// class RotateTransform : public Transform {
 //
-//public:
+// public:
 //    RotateTransform(TopoDS_Shape shape) : Transform(shape) {}
 //    virtual ~RotateTransform() {};
 //
@@ -99,9 +101,9 @@
 //};
 //
 //
-//class Scale : public Transform {
+// class Scale : public Transform {
 //
-//public:
+// public:
 //    Scale(TopoDS_Shape shape) : Transform(shape) {}
 //    virtual ~Scale() {};
 //
@@ -110,9 +112,9 @@
 //                               Handle<Object>  parameters);
 //};
 //
-//class AxisMirror : public Transform {
+// class AxisMirror : public Transform {
 //
-//public:
+// public:
 //    AxisMirror(TopoDS_Shape shape) : Transform(shape) {}
 //    virtual ~AxisMirror() {};
 //
@@ -121,9 +123,9 @@
 //                                Handle<Object> parameters);
 //};
 //
-//class PlaneMirror : public Transform {
+// class PlaneMirror : public Transform {
 //
-//public:
+// public:
 //    PlaneMirror(TopoDS_Shape shape) : Transform(shape) {}
 //    virtual ~PlaneMirror() {};
 //
@@ -132,9 +134,9 @@
 //                              Handle<Object>  parameters);
 //};
 //
-//class TranslateTransform : public Transform {
+// class TranslateTransform : public Transform {
 //
-//public:
+// public:
 //    TranslateTransform(TopoDS_Shape shape) : Transform(shape) {}
 //    virtual ~TranslateTransform() {};
 //

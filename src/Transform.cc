@@ -3,17 +3,17 @@
 //#include "Transform.h"
 //#include "Util.h"
 //
-//using namespace std;
+// using namespace std;
 //
 //
 ////
-//Transform::Transform(TopoDS_Shape shape)
+// Transform::Transform(TopoDS_Shape shape)
 //{
 //    shape_ = shape;
 //}
 //
 //
-//TopoDS_Shape RotateTransform::apply(
+// TopoDS_Shape RotateTransform::apply(
 //    double multiplier,
 //    Handle<Object> origin,
 //    Handle<Object> parameters)
@@ -41,7 +41,7 @@
 //    return BRepBuilderAPI_Transform(shape_, transformation).Shape();
 //}
 
-//TopoDS_Shape Scale::apply(double multiplier,
+// TopoDS_Shape Scale::apply(double multiplier,
 //                          Handle<Object> origin,
 //                          Handle<Object> parameters) {
 //
@@ -57,7 +57,7 @@
 //
 //}
 
-//TopoDS_Shape AxisMirror::apply(double multiplier,
+// TopoDS_Shape AxisMirror::apply(double multiplier,
 //                               Handle<Object> origin,
 //                               Handle<Object> parameters) {
 //
@@ -73,7 +73,7 @@
 //    return BRepBuilderAPI_Transform(shape_, transformation).Shape();
 //
 //}
-//TopoDS_Shape PlaneMirror::apply(double multiplier,
+// TopoDS_Shape PlaneMirror::apply(double multiplier,
 //                                Handle<Object> origin,
 //                                Handle<Object> parameters) {
 //
@@ -90,7 +90,7 @@
 //
 //}
 
-//TopoDS_Shape TranslateTransform::apply(double multiplier,
+// TopoDS_Shape TranslateTransform::apply(double multiplier,
 //                              Handle<Object> origin,
 //                              Handle<Object> parameters) {
 //

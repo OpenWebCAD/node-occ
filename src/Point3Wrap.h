@@ -6,15 +6,10 @@
 class Point3Wrap : public Nan::ObjectWrap {
   virtual const gp_XYZ get() const = 0;
 
-  double x() {
-    return get().X();
-  }
-  double y() {
-    return get().Y();
-  }
-  double z() {
-    return get().Z();
-  }
+  double x() { return get().X(); }
+  double y() { return get().Y(); }
+  double z() { return get().Z(); }
+
 public:
   // Methods exposed to JavaScript
   static NAN_METHOD(New);
@@ -24,28 +19,21 @@ public:
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };
 
+#define TEAROFF_INIT(ACCESSOR) m_##ACCESSOR(*this)
 
-
-#define TEAROFF_INIT(ACCESSOR)   m_##ACCESSOR(*this)
-
-template <class _ThisType, class Wrapper, class CLASS, const CLASS(_ThisType::*ACCESSOR)() const>
+template <class _ThisType, class Wrapper, class CLASS,
+          const CLASS (_ThisType::*ACCESSOR)() const>
 class Accessor : public Wrapper {
 
   //    typedef Accessor<_ThisType, Wrapper,CLASS,ACCESSOR> THIS;
-  _ThisType& m_parent;
+  _ThisType &m_parent;
 
 public:
+  Accessor(_ThisType &parent) : m_parent(parent) {}
 
-  Accessor(_ThisType& parent)
-    :m_parent(parent) {
-  }
+  ~Accessor() {}
 
-  ~Accessor() {
-  }
-
-  virtual const CLASS get() const {
-    return (m_parent.*ACCESSOR)();
-  }
+  virtual const CLASS get() const { return (m_parent.*ACCESSOR)(); }
 
   static NAN_PROPERTY_GETTER(getter) {
     if (info.This().IsEmpty()) {
@@ -56,36 +44,32 @@ public:
       info.GetReturnValue().SetUndefined();
       return;
     }
-    _ThisType* pThis = Nan::ObjectWrap::Unwrap<_ThisType>(info.This());
+    _ThisType *pThis = Nan::ObjectWrap::Unwrap<_ThisType>(info.This());
 
     info.GetReturnValue().Set(Accessor::NewInstance(*pThis));
   }
-  static v8::Local<v8::Value> NewInstance(_ThisType& parent) {
+  static v8::Local<v8::Value> NewInstance(_ThisType &parent) {
 
     auto f = Nan::GetFunction(Nan::New(Wrapper::_template)).ToLocalChecked();
     v8::Local<v8::Object> instance = Nan::NewInstance(f).ToLocalChecked();
-    
+
     // NewInstance(Nan::GetCurrentContext(),0, 0).ToLocalChecked();
-    Accessor* pThis = new Accessor(parent);
+    Accessor *pThis = new Accessor(parent);
     pThis->Wrap(instance);
     return instance;
   }
 };
 
+#define TEAROFF_POINT(THISTYPE, ACCESSOR, WRAPPER, CLASS)                      \
+  typedef Accessor<THISTYPE, WRAPPER, CLASS, &THISTYPE::ACCESSOR> t##ACCESSOR;
 
-#define TEAROFF_POINT(THISTYPE,ACCESSOR,WRAPPER,CLASS)                         \
-  typedef Accessor<THISTYPE,WRAPPER,CLASS,&THISTYPE::ACCESSOR> t##ACCESSOR;  \
+#define EXPOSE_TEAROFF(THISTYPE, ACCESSOR)                                     \
+  Nan::SetAccessor(proto, Nan::New<v8::String>(#ACCESSOR).ToLocalChecked(),    \
+                   &t##ACCESSOR::getter, 0, v8::Local<v8::Value>(),            \
+                   v8::DEFAULT,                                                \
+                   (v8::PropertyAttribute)(v8::ReadOnly | v8::DontDelete))
 
-
-
-#define EXPOSE_TEAROFF(THISTYPE,ACCESSOR)                                            \
-  Nan::SetAccessor(proto,                                                            \
-			Nan::New<v8::String>(#ACCESSOR).ToLocalChecked(),                        \
-					&t##ACCESSOR::getter,  0,v8::Local<v8::Value>(),v8::DEFAULT,(v8::PropertyAttribute)(v8::ReadOnly|v8::DontDelete))
-
-
-#define REXPOSE_TEAROFF(THISTYPE,ACCESSOR)                                            \
-    Nan::SetAccessor(info.This(),                                                 \
-    Nan::New(#ACCESSOR).ToLocalChecked(),                                         \
-     &t##ACCESSOR::getter,  0,v8::Local<v8::Value>(),v8::DEFAULT,v8::ReadOnly)
-
+#define REXPOSE_TEAROFF(THISTYPE, ACCESSOR)                                    \
+  Nan::SetAccessor(info.This(), Nan::New(#ACCESSOR).ToLocalChecked(),          \
+                   &t##ACCESSOR::getter, 0, v8::Local<v8::Value>(),            \
+                   v8::DEFAULT, v8::ReadOnly)
