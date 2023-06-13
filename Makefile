@@ -1,22 +1,15 @@
 all:
-	node-pre-gyp configure
-	node-pre-gyp build
-	mocha
+	./node_modules/.bin/node-pre-gyp configure
+	./node_modules/.bin/node-pre-gyp build
+	mocha test/*.ts
 
 .PHONY: test
 test:
-	mocha
+	mocha test/*.ts
 
 clean:
-	node-pre-gyp clean
-
-packet:
-	npm install mocha@7
-	npm install assert
-	npm install should
-	npm install node-pre-gyp		
-	
-
+	./node_modules/.bin/node-pre-gyp clean		  
+	²
 copy: 
 	COPY D:\projet\oce-build\bin\Debug\*.dll build\Release
 

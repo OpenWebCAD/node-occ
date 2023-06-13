@@ -118,12 +118,12 @@ test_script:
   - IF NOT DEFINED electron_version (npm test)
 
 after_test:
-  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp package 2>&1)
-  - # IF %PUBLISH_BINARY% == 1        (node-pre-gyp publish 2>&1)
-  - # IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish --release 2>&1)
-  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish)
-  -  # IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish  2>&1)
-  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp clean)
+  - IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp package 2>&1)
+  - # IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp publish 2>&1)
+  - # IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp-github publish --release 2>&1)
+  - IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp-github publish)
+  -  # IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp-github publish  2>&1)
+  - IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp clean)
   - IF %PUBLISH_BINARY% == 1        (npm install --fallback-to-build=false)
 
 deploy: off

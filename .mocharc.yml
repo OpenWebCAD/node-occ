@@ -1,7 +1,7 @@
 require:
   - ./node_modules/ts-node/register
 extensions:
-  - .js
-  - .ts
+  - js
+  - ts
 recursive: true
 enable-source-map: true

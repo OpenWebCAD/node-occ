@@ -8,13 +8,8 @@ export interface MakeBottleOptions {
     height: number; // @default 70
     filletRadius: number;
 }
-/**
- *
- * @param parameters
- * @param parameters.height = 70.0
- * @param parameters.filletRadius = 2.6
- * @returns {*}
- */
+
+
 export function makeBottle(occ: OCC, parameters: MakeBottleOptions) {
     assert(occ.hasOwnProperty("makeLine"));
 
@@ -98,9 +93,9 @@ export function makeBottle(occ: OCC, parameters: MakeBottleOptions) {
     myBody = occ.makeThickSolid(myBody, faceToRemove, smallThickness);
     return myBody;
 
-};
+}
 
-exports.makePan = function (csg: OCC, _height: number, _radius: number) {
+export function makePan(csg: OCC, _height: number, _radius: number) {
 
     const height = _height || 20;
     const radius = _radius || 25.0;
@@ -131,15 +126,16 @@ exports.makePan = function (csg: OCC, _height: number, _radius: number) {
     let body = csg.cut(s6, r5);
 
     const lidHeight = 10;
-    const lid = exports.makePanLid(csg, radius, lidHeight, height);
+    const lid = makePanLid(csg, radius, lidHeight, height);
     lid.translate([0, 0, 1]);
 
     body = csg.fuse(body, lid);
 
     return body;
 
-};
-exports.makePanLid = function (csg: OCC, _r: number, _height: number, _H: number) {
+}
+
+export function makePanLid(csg: OCC, _r: number, _height: number, _H: number) {
     "use strict";
 
     // r : pan radius
@@ -166,9 +162,9 @@ exports.makePanLid = function (csg: OCC, _r: number, _height: number, _H: number
 
     return solid;
 
-};
+}
 
-exports.makeRoundedPlate = function (csg: OCC, R1: number, R2: number, L: number, thickness: number) {
+export function makeRoundedPlate(csg: OCC, R1: number, R2: number, L: number, thickness: number) {
     "use strict";
 
     R1 = R1 || 7;
@@ -208,9 +204,9 @@ exports.makeRoundedPlate = function (csg: OCC, R1: number, R2: number, L: number
     v = csg.fuse(v, c2);
 
     return v;
-};
+}
 
-exports.makeRivetPlate = function (csg: OCC, params: { B: number, C: number, H1: number, H2: number; J: number, K: number, R: number, V: number }) {
+export function makeRivetPlate(csg: OCC, params: { B: number, C: number, H1: number, H2: number; J: number, K: number, R: number, V: number }) {
     // see http://www.tracepartsonline.net/%28S%281gpggj45ixmu5o5540hxuofo%29%29/PartsDefs/Production/ALCOA/22-02072002-063054/documents/AJAL103.pdf
     //  { A: 18,    B:7,    C:6.0,  F:4.7,  H:3.6,  H1:2.0,  H2:3.0,  J:6.0,  K:2.5,  R:2.5,  V:1.5 }
     //  { A: 24.3,  B:9.5,  C:8.5,  F:4.7,  H:5.3,  H1:2.8,  H2:4.8,  J:8.0,  K:2.5,  R:3.0,  V:1.5 }
@@ -236,11 +232,6 @@ exports.makeRivetPlate = function (csg: OCC, params: { B: number, C: number, H1:
     base = csg.cut(base, csg.makeCylinder([0, C + J, 0], [0, C + J, H2], K / 2));
     base = csg.cut(base, csg.makeCylinder([0, C, 0], [0, C, V], K / 2));
     return base;
-};
-
-export function makePan(params: { H: number, R: number }) {
-    // { R: 10, H: 30 }
-    return exports.makePan(_occ, params.H, params.R);
 };
 
 /**
