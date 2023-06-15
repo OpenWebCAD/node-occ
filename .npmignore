@@ -1,7 +1,8 @@
 package/
 build*/
 sample/
-dist/
+dist-test/
+test/
 sample_angular2
 oce/
 occt-*/

@@ -66,7 +66,7 @@ sudo npm install mocha -g
 sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
 
 # ------------------------------------
-git clone --recursive https://github.com/erossignon/node-occ.git
+git clone --recursive https://github.com/OpenWebCAD/node-occ.git
 cd node-occ
 
 # download prebuild OpenCascade Library and header files

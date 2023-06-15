@@ -4,20 +4,19 @@
   "description": "OpenCascade OCCT Wrapper for Node js",
   "preferGlobal": true,
   "dependencies": {
-    "@types/should": "^13.0.0",
-    "async": "^3.2.4",
-    "colors": "*",
     "gettemporaryfilepath": "1.0.1",
-    "nan": "^2.16.0",
     "@mapbox/node-pre-gyp": "^1.0.10",
+    "nan": "^2.16.0",
     "pace": "~0.0.4",
     "progress": "~2.0.3",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
+    "@types/should": "^13.0.0",
     "@types/async": "^3.2.20",
     "@types/mocha": "^9.1.1",
     "@types/node": "^20.2.3",
+    "aws-sdk": "^2.1396.0",
     "eslint": "^8.23.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
@@ -63,8 +62,8 @@
   "binary": {
     "module_name": "occ",
     "module_path": "./lib/binding/",
-    "host-aws": "https://nodeocc.s3-us-west-1.amazonaws.com",
-    "host": "https://github.com/openwebcad/node-occ/releases/download/",
+    "host": "https://nodeocc.s3-us-west-1.amazonaws.com",
+    "host__": "https://github.com/openwebcad/node-occ/releases/download/",
     "remote_path": "{version}"
   },
   "gypfile": true,
