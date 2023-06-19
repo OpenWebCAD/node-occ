@@ -4,7 +4,8 @@
 #include "Util.h"
 #include "vector"
 
-class Base : public Nan::ObjectWrap {
+class Base : public Nan::ObjectWrap
+{
 public:
   int hashCode();
   bool isNull();
@@ -43,11 +44,14 @@ v8::Local<v8::Object> buildWrapper(const TopoDS_Shape shape);
 
 template <class ClassType>
 size_t extractArgumentList(_NAN_METHOD_ARGS,
-                           std::vector<ClassType *> &elements) {
+                           std::vector<ClassType *> &elements)
+{
   elements.reserve(elements.size() + info.Length());
 
-  for (int i = 0; i < info.Length(); i++) {
-    if (IsInstanceOf<ClassType>(info[i])) {
+  for (int i = 0; i < info.Length(); i++)
+  {
+    if (IsInstanceOf<ClassType>(info[i]))
+    {
 
       auto o = Nan::To<v8::Object>(info[i]).ToLocalChecked();
 
@@ -58,7 +62,8 @@ size_t extractArgumentList(_NAN_METHOD_ARGS,
 }
 
 template <class ClassType>
-bool extractArg(const v8::Local<v8::Value> &value, ClassType *&pObj) {
+bool extractArg(const v8::Local<v8::Value> &value, ClassType *&pObj)
+{
   assert(pObj == 0);
   if (value.IsEmpty())
     return false;
@@ -66,7 +71,8 @@ bool extractArg(const v8::Local<v8::Value> &value, ClassType *&pObj) {
     return false;
 
   auto lo = Nan::To<v8::Object>(value).ToLocalChecked();
-  if (IsInstanceOf<ClassType>(lo)) {
+  if (IsInstanceOf<ClassType>(lo))
+  {
     pObj = Nan::ObjectWrap::Unwrap<ClassType>(lo);
     return true;
   }
@@ -75,27 +81,35 @@ bool extractArg(const v8::Local<v8::Value> &value, ClassType *&pObj) {
 
 template <class ClassType>
 bool _extractArray(const v8::Local<v8::Value> &value,
-                   std::vector<ClassType *> &elements) {
-  if (value->IsArray()) {
+                   std::vector<ClassType *> &elements)
+{
+  if (value->IsArray())
+  {
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
     int length = arr->Length();
     elements.reserve(elements.size() + length);
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
+    {
 
       auto elementI = Nan::Get(arr, i).ToLocalChecked();
-      if (!elementI->IsObject()) {
+      if (!elementI->IsObject())
+      {
         return false; // element is not an object
       }
       v8::Local<v8::Object> obj =
           Nan::To<v8::Object>(elementI).ToLocalChecked();
-      if (IsInstanceOf<ClassType>(obj)) {
+      if (IsInstanceOf<ClassType>(obj))
+      {
         elements.push_back(Nan::ObjectWrap::Unwrap<ClassType>(obj));
       }
     }
-  } else if (value->IsObject()) {
+  }
+  else if (value->IsObject())
+  {
     // a single element
     v8::Local<v8::Object> obj = Nan::To<v8::Object>(value).ToLocalChecked();
-    if (IsInstanceOf<ClassType>(obj)) {
+    if (IsInstanceOf<ClassType>(obj))
+    {
       elements.push_back(Nan::ObjectWrap::Unwrap<ClassType>(obj));
     }
   }

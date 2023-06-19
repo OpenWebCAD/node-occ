@@ -3,7 +3,8 @@
 
 #include "Vertex.h"
 
-class Edge : public Base {
+class Edge : public Base
+{
 
 public:
   TopoDS_Edge m_edge;
@@ -26,6 +27,8 @@ public:
 
   int createCircle(const gp_Pnt &center, const gp_Dir &normal, double radius);
 
+  int interpolateCurve(std::vector<gp_Pnt> &PointArray, bool periodic, double tolerance);
+
   // int createEllipse(OCCStruct3d pnt, OCCStruct3d nor, double rMajor, double
   // rMinor); int createHelix(double pitch, double height, double radius, double
   // angle, bool leftHanded); int createBezier(OCCVertex *start, OCCVertex *end,
@@ -34,16 +37,19 @@ public:
   // createNURBS(OCCVertex *start, OCCVertex *end, std::vector<OCCStruct3d>
   // points,  DVec knots, DVec weights, IVec mult);
 
-  bool canSetShape(const TopoDS_Shape &shape) const {
+  bool canSetShape(const TopoDS_Shape &shape) const
+  {
     return shape.ShapeType() == TopAbs_EDGE;
   }
   virtual const TopoDS_Shape &shape() const { return m_edge; }
   virtual const TopoDS_Edge &edge() const { return m_edge; }
-  virtual void setShape(const TopoDS_Shape &shape) {
+  virtual void setShape(const TopoDS_Shape &shape)
+  {
     m_edge = TopoDS::Edge(shape);
   }
   virtual v8::Local<v8::Object> Clone() const;
-  virtual Base *Unwrap(v8::Local<v8::Object> obj) const {
+  virtual Base *Unwrap(v8::Local<v8::Object> obj) const
+  {
     return Nan::ObjectWrap::Unwrap<Edge>(obj);
   }
 

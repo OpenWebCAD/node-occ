@@ -1,6 +1,6 @@
 import "should";
 
-import { IWire, occ } from "..";
+import { IEdge, IWire, Triplet, occ } from "..";
 
 describe("testing Wire ", function () {
   describe("empty wire", function () {
@@ -45,4 +45,31 @@ describe("testing Wire ", function () {
       wire.isClosed.should.equal(true);
     });
   });
+
+  describe("wire made of many small segments", () => {
+
+    const r = 100;
+
+    const segments: IWire[] = [];
+
+    for (let i = 0; i <= 360; i += 10) {
+      const a1 = i * Math.atan(1) / 45;
+      const a2 = (i + 1) * Math.atan(1) / 45;
+      const c1 = Math.cos(a1);
+      const c2 = Math.cos(a2);
+      const s1 = Math.sin(a1);
+      const s2 = Math.sin(a2);
+
+      const p1: Triplet = [r * c1, r * s1, 0];
+      const p2: Triplet = [r * c2, r * s2, 0];
+
+      console.log(p1, p2);
+      const s = occ.makeLine(p1, p2);
+      segments.push(s);
+    }
+
+    const wire = occ.makeWire(segments);
+  });
+
+
 });
