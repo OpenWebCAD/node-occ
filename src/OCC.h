@@ -170,9 +170,9 @@
 #define OUTER_SHELL(x) BRepClass3d::OuterShell(x)
 #endif
 
-#include <GeomAPI_Interpolate.hxx>
-#include <BRepOffsetAPI_MakePipeShell.hxx>
 #include <BRepOffsetAPI_MakePipe.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
+#include <GeomAPI_Interpolate.hxx>
 
 #undef Handle

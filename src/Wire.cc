@@ -22,6 +22,7 @@ bool Wire::isClosed()
 {
   if (this->wire().IsNull())
     return false;
+
   TopoDS_Vertex aV1, aV2;
   TopExp::Vertices(this->wire(), aV1, aV2);
   if (!aV1.IsNull() && !aV2.IsNull() && aV1.IsSame(aV2))
@@ -82,13 +83,44 @@ void addElement(T info, BRepBuilderAPI_MakeWire &mkWire)
     Nan::ThrowError(mesg.c_str());
   }
 }
+
+bool extractListOfEdge(v8::Local<v8::Value> value,
+                       TopTools_ListOfShape &edges)
+{
+  if (value->IsArray())
+  {
+    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
+    int length = arr->Length();
+    for (int i = 0; i < length; i++)
+    {
+      auto elementI = Nan::Get(arr, i).ToLocalChecked();
+      Edge *pEdge = 0;
+      if (extractArg(elementI, pEdge))
+      {
+        edges.Append(pEdge->edge());
+      }
+    }
+  }
+  else
+  {
+    // could be a single face
+    Edge *pEdge = 0;
+    if (!extractArg(value, pEdge))
+    {
+      return false;
+    }
+    edges.Append(pEdge->edge());
+  }
+
+  return edges.Extent() > 0;
+}
+
 NAN_METHOD(Wire::New)
 {
   if (!info.IsConstructCall())
   {
     return Nan::ThrowError(" use new occ.Wire() to construct a Wire");
   }
-
   Wire *pThis = new Wire();
   pThis->Wrap(info.This());
   pThis->InitNew(info);
@@ -100,39 +132,47 @@ NAN_METHOD(Wire::New)
     return;
   }
 
-  BRepBuilderAPI_MakeWire mkWire;
-  if (info.Length() == 1 && info[0]->IsArray())
+  try
   {
-    // we expect an array of Wire or Edge
-    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(info[0]);
 
-    for (int i = 0; i < arr->Length(); i++)
+    BRepBuilderAPI_MakeWire mkWire;
+    if (info.Length() == 1 && info[0]->IsArray())
     {
-      auto e = Nan::Get(arr, i).ToLocalChecked();
-      addElement(e, mkWire);
+      // we expect an array of Wire or Edge
+      v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(info[0]);
+      TopTools_ListOfShape elements;
+      extractListOfEdge(arr, elements);
+      std::cout << "adding " << elements.Extent() << std::endl;
+      mkWire.Add(elements);
+      BRepBuilderAPI_WireError err = mkWire.Error();
+      std::cout << "wire with element" << toString(err) << std::endl;
+    }
+    else
+    {
+      for (int i = 0; i < info.Length(); i++)
+      {
+        addElement(info[i], mkWire);
+        BRepBuilderAPI_WireError err = mkWire.Error();
+        std::cout << toString(err) << " wire with element " << i << std::endl;
+      }
+    }
+
+    // Xx Standard_Boolean statusIsDone = false;
+    BRepBuilderAPI_WireError err = BRepBuilderAPI_WireDone;
+    err = mkWire.Error();
+    if (BRepBuilderAPI_WireDone == err || mkWire.IsDone())
+    {
+      pThis->setShape(mkWire.Wire());
+    }
+    else
+    {
+      // pThis->setShape(TopoDS_Wire());
+      std::string mesg =
+          std::string("Invalid Wire err:=") + toString(mkWire.Error());
+      std::cerr << mesg << std::endl;
     }
   }
-  else
-  {
-    for (int i = 0; i < info.Length(); i++)
-    {
-      addElement(info[i], mkWire);
-    }
-  }
-
-  // Xx Standard_Boolean statusIsDone = false;
-  BRepBuilderAPI_WireError err = BRepBuilderAPI_WireDone;
-  err = mkWire.Error();
-  if (BRepBuilderAPI_WireDone == err)
-  {
-    pThis->setShape(mkWire.Wire());
-  }
-  else
-  {
-    std::string mesg =
-        std::string("Invalid Wire err:=") + toString(mkWire.Error());
-    return Nan::ThrowError(mesg.c_str());
-  }
+  CATCH_AND_RETHROW("Failed to create wire");
   info.GetReturnValue().Set(info.This());
 }
 

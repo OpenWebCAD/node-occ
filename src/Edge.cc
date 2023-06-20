@@ -80,12 +80,14 @@ int Edge::createLine(Vertex *start, Vertex *end)
   return 1;
 }
 
-int Edge::interpolateCurve(std::vector<gp_Pnt> &pointArray, bool periodic, double tolerance)
+int Edge::interpolateCurve(std::vector<gp_Pnt> &pointArray, bool periodic,
+                           double tolerance)
 {
   try
   {
     const unsigned int n_vertices = pointArray.size();
-    occHandle(TColgp_HArray1OfPnt) vertices = new TColgp_HArray1OfPnt(1, n_vertices);
+    occHandle(TColgp_HArray1OfPnt) vertices =
+        new TColgp_HArray1OfPnt(1, n_vertices);
 
     for (unsigned int vertex = 0; vertex < n_vertices; ++vertex)
     {

@@ -1,6 +1,12 @@
-all:
+.PHONY: build
+
+all: build test
+
+build:
 	./node_modules/.bin/node-pre-gyp configure
 	./node_modules/.bin/node-pre-gyp build
+
+test:	
 	mocha test/*.ts
 
 .PHONY: test

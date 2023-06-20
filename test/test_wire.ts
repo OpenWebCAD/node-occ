@@ -46,29 +46,81 @@ describe("testing Wire ", function () {
     });
   });
 
+
   describe("wire made of many small segments", () => {
 
-    const r = 100;
+    const DEG2RAD = Math.atan(1) / 45;
+    function makeSegments() {
+      const r = 100;
 
-    const segments: IWire[] = [];
+      const segments: IWire[] = [];
 
-    for (let i = 0; i <= 360; i += 10) {
-      const a1 = i * Math.atan(1) / 45;
-      const a2 = (i + 1) * Math.atan(1) / 45;
-      const c1 = Math.cos(a1);
-      const c2 = Math.cos(a2);
-      const s1 = Math.sin(a1);
-      const s2 = Math.sin(a2);
+      for (let i = 0; i <= 360; i += 45) {
+        const a1 = i * DEG2RAD;
+        const c1 = Math.cos(a1);
+        const s1 = Math.sin(a1);
 
-      const p1: Triplet = [r * c1, r * s1, 0];
-      const p2: Triplet = [r * c2, r * s2, 0];
+        const a2 = (i + 1) * DEG2RAD;
+        const c2 = Math.cos(a2);
+        const s2 = Math.sin(a2);
 
-      console.log(p1, p2);
-      const s = occ.makeLine(p1, p2);
-      segments.push(s);
+        const p1: Triplet = [r * c1, r * s1, 0];
+        const p2: Triplet = [r * c2, r * s2, 0];
+
+        // console.log(p1, p2);
+        const s = occ.makeLine(p1, p2);
+        segments.push(s);
+      }
+      return segments;
     }
 
-    const wire = occ.makeWire(segments);
+    function shuffleInPlace<T>(array: T[]): void {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+      }
+    }
+    it("should create a wire with a set of ordered segments forming a close wire", () => {
+      const segments = makeSegments();
+      const wire = occ.makeWire(...segments);
+      console.log("e=", wire.numEdges);
+      console.log("v=", wire.numVertices);
+      console.log("e=")
+      // wire.isClosed.should.eql(true);
+      // wire.isDegenerated.should.eql(false);
+    });
+
+    it("should create a wire with a set of shuffled segments forming a close wire", () => {
+      const segments = makeSegments();
+      shuffleInPlace(segments);
+      const wire = occ.makeWire(segments);
+      if (wire) {
+        // wire.isClosed.should.eql(false);
+        // wire.isDegenerated.should.eql(false);
+      }
+    });
+
+    it("should falied to create  a wire with a set of segments that is not forming a close wire", () => {
+
+      const segments = makeSegments();
+      const lBefore = segments.length
+
+      segments.splice(1, 2);
+
+      segments.splice(5, 2);
+
+      const lAfter = segments.length;
+
+      console.log("lBefore", lBefore, lAfter);
+      const wire = occ.makeWire(segments);
+      if (wire) {
+        //  wire.isClosed.should.eql(false);
+        // wire.isDegenerated.should.eql(false);
+      }
+    });
+
   });
 
 

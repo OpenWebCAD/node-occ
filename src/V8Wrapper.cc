@@ -59,7 +59,8 @@ void Initialize(v8::Local<v8::Object> target)
     Nan::SetMethod(target, "makeDraftAngle", ShapeFactory::makeDraftAngle);
     Nan::SetMethod(target, "makeFillet", ShapeFactory::makeFillet);
     Nan::SetMethod(target, "makePipe", ShapeFactory::makePipe);
-    Nan::SetMethod(target, "makeSolidThruSections", ShapeFactory::makeSolidThruSections);
+    Nan::SetMethod(target, "makeSolidThruSections",
+                   ShapeFactory::makeSolidThruSections);
 
     // target->Set(NanSymbol("makeChamfer")NanNew<FunctionTemplate>(ShapeFactory::makeDraftAngle);
 

@@ -207,7 +207,8 @@ NAN_METHOD(ShapeFactory::makeSolidThruSections)
       }
       else
       {
-        auto mesg = std::string("invalid argument: expecting a Wire or an Edge");
+        auto mesg =
+            std::string("invalid argument: expecting a Wire or an Edge");
         Nan::ThrowError(mesg.c_str());
       }
     }
@@ -216,7 +217,7 @@ NAN_METHOD(ShapeFactory::makeSolidThruSections)
         Nan::To<v8::Object>(pJhis).ToLocalChecked());
     pThis->setShape(thruSection.Shape());
   }
-  CATCH_AND_RETHROW("Failed to create akeSolidThruSections ");
+  CATCH_AND_RETHROW("Failed to create a solid thru sections");
   info.GetReturnValue().Set(pJhis);
 }
 NAN_METHOD(ShapeFactory::makePipe)
@@ -224,7 +225,8 @@ NAN_METHOD(ShapeFactory::makePipe)
 
   if (info.Length() != 2)
   {
-    return Nan::ThrowError("invalid arguments : expecting <Wire> connectionWire,<Wire> wire1, <Wire> wire2");
+    return Nan::ThrowError("invalid arguments : expecting <Wire> "
+                           "connectionWire,<Wire> wire1, <Wire> wire2");
   }
 
   v8::Local<v8::Value> pJhis = Solid::NewInstance();

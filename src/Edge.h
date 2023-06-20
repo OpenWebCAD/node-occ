@@ -27,7 +27,8 @@ public:
 
   int createCircle(const gp_Pnt &center, const gp_Dir &normal, double radius);
 
-  int interpolateCurve(std::vector<gp_Pnt> &PointArray, bool periodic, double tolerance);
+  int interpolateCurve(std::vector<gp_Pnt> &PointArray, bool periodic,
+                       double tolerance);
 
   // int createEllipse(OCCStruct3d pnt, OCCStruct3d nor, double rMajor, double
   // rMinor); int createHelix(double pitch, double height, double radius, double
@@ -69,5 +70,6 @@ public:
   static NAN_METHOD(endVertex);
 
   static void Init(v8::Local<v8::Object> target);
+
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };

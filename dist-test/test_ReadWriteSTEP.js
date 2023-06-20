@@ -15,7 +15,8 @@ describe("testing STEP input output ", function () {
     let b2_step;
     let b3_step;
     before(function () {
-        b1_step = (0, helpers_1.getTemporaryFilePath)({ prefix: "b1_", suffix: ".step" });
+        b1_step = (0, helpers_1.
+            mporaryFilePath)({ prefix: "b1_", suffix: ".step" });
         b2_step = (0, helpers_1.getTemporaryFilePath)({ prefix: "b2_", suffix: ".step" });
         b3_step = (0, helpers_1.getTemporaryFilePath)({ prefix: "b3_", suffix: ".step" });
         let box = __1.occ.makeBox([0, 0, 0], [100, 200, 300]);
