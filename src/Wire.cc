@@ -142,10 +142,8 @@ NAN_METHOD(Wire::New)
       v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(info[0]);
       TopTools_ListOfShape elements;
       extractListOfEdge(arr, elements);
-      std::cout << "adding " << elements.Extent() << std::endl;
       mkWire.Add(elements);
       BRepBuilderAPI_WireError err = mkWire.Error();
-      std::cout << "wire with element" << toString(err) << std::endl;
     }
     else
     {
@@ -153,7 +151,6 @@ NAN_METHOD(Wire::New)
       {
         addElement(info[i], mkWire);
         BRepBuilderAPI_WireError err = mkWire.Error();
-        std::cout << toString(err) << " wire with element " << i << std::endl;
       }
     }
 

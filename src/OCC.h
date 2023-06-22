@@ -103,6 +103,11 @@
 #include <STEPControl_Reader.hxx>
 #include <STEPControl_Writer.hxx>
 
+#include <RWGltf_CafWriter.hxx>
+#include <TDocStd_Document.hxx>
+#include <XCAFApp_Application.hxx>
+#include <XCAFDoc_DocumentTool.hxx>
+#include <XCAFDoc_ShapeTool.hxx>
 // xx #include <ShapeSchema.hxx>
 
 // #include <StdPrs_ToolShadedShape.hxx>

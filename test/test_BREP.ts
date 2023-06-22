@@ -1,9 +1,8 @@
+import assert from "assert";
 import should from "should";
-import { IShape, makeLegoBrick } from "..";
-import { ISolid, occ } from "..";
+import { makeLegoBrick, ISolid, occ } from "..";
 
 import { removeFile, getTemporaryFilePath } from "./helpers";
-import assert from "assert";
 
 describe("testing BREP input output ", function () {
     let b1_brep: string;

@@ -72,6 +72,8 @@ void Initialize(v8::Local<v8::Object> target)
     Nan::SetMethod(target, "writeSTL", writeSTL);
     Nan::SetMethod(target, "writeSTEP", writeSTEP);
     Nan::SetMethod(target, "writeBREP", writeBREP);
+    Nan::SetMethod(target, "writeGLTF", writeGLTF);
+
     Nan::SetMethod(target, "readSTEP", readSTEP);
     Nan::SetMethod(target, "readBREP", readBREP);
 

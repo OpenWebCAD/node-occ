@@ -284,13 +284,13 @@ export interface OCC {
      * @param point1 
      * @param point2 
      */
-    makeSolidThruSections(sections: (IWire | IEdge)[]): ISolid;
+    makeSolidThruSections(sections: IWire[] | IEdge[]): ISolid;
 
     // boolean operation
     // Edges
-    makeLine(point1: PointLike, point2: PointLike): IWire;
-    makeArc3P(point1: PointLike, point2: PointLike, point3: PointLike): IWire;
-    makeCircle(center: PointLike, normal: VectorLike, radius: Real): IWire;
+    makeLine(point1: PointLike, point2: PointLike): IEdge;
+    makeArc3P(point1: PointLike, point2: PointLike, point3: PointLike): IEdge;
+    makeCircle(center: PointLike, normal: VectorLike, radius: Real): IEdge;
     // Wires
     makeWire(edges: (IEdge | IWire)[]): IWire;
     makeWire(...args: (IEdge | IWire)[]): IWire;
@@ -344,4 +344,8 @@ export interface OCC {
         filename: string,
         callback: (err: Error | null, solids: ISolid[]) => void
     ): void;
+
+
+    writeGLTF(filename: string, solid: ISolid): void;
+    writeGLTF(filename: string, ...solid: ISolid[]): void;
 }

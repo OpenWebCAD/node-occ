@@ -19,18 +19,18 @@ describe("testing Wire ", function () {
     });
   });
   describe("wire with three segments", function () {
-    let wire1: IWire, wire2: IWire, wire3: IWire;
+    let edge1: IEdge, edge2: IEdge, edge3: IEdge;
     let wire: IWire;
     before(function () {
       let v1 = occ.makeVertex(0, 0, 0);
       let v2 = occ.makeVertex(10, 10, 0);
       let v3 = occ.makeVertex(20, 0, 0);
 
-      wire1 = occ.makeLine(v1, v2);
-      wire2 = occ.makeLine(v2, v3);
-      wire3 = occ.makeLine(v3, v1);
+      edge1 = occ.makeLine(v1, v2);
+      edge2 = occ.makeLine(v2, v3);
+      edge3 = occ.makeLine(v3, v1);
 
-      wire = occ.makeWire(wire1, wire2, wire3);
+      wire = occ.makeWire(edge1, edge2, edge3);
     });
 
     it("should have three edges", function () {
@@ -53,7 +53,7 @@ describe("testing Wire ", function () {
     function makeSegments() {
       const r = 100;
 
-      const segments: IWire[] = [];
+      const segments: IEdge[] = [];
 
       for (let i = 0; i <= 360; i += 45) {
         const a1 = i * DEG2RAD;
@@ -120,8 +120,5 @@ describe("testing Wire ", function () {
         // wire.isDegenerated.should.eql(false);
       }
     });
-
   });
-
-
 });

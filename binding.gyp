@@ -164,7 +164,10 @@
         "-lTKFillet<(dbg)",
         "-lTKFeat<(dbg)",
         "-lTKXSBase<(dbg)",
+        "-lTKXCAF<(dbg)",
         "-lTKSTL<(dbg)",
+        "-lTKRWMesh<(dbg)",        
+        "-lTKLCAF<(dbg)"
       ],
       "other_libraries": [
         "-lTKTObj<(dbg)",

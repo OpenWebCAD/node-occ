@@ -30,45 +30,45 @@ describe("testing Edges ", function () {
     });
   });
   describe("Wire1 - an Wire constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () {
-    let wire: IWire;
+    let edge: IEdge;
     before(function () {
       let v1 = new Vertex(10, 20, 30);
       let v2 = new Vertex(-30, 20, 30);
-      wire = makeLine(v1, v2);
-      wire.should.be.instanceOf(Edge);
+      edge = makeLine(v1, v2);
+      edge.should.be.instanceOf(Edge);
     });
     it("should have a length of 40.0 ", function () {
-      wire.length.should.equal(40.0);
+      edge.length.should.equal(40.0);
     });
     it("should have two vertices ", function () {
-      wire.numVertices.should.equal(2.0);
+      edge.numVertices.should.equal(2.0);
     });
     it("shouldn't be closed", function () {
-      wire.isClosed.should.equal(false);
+      edge.isClosed.should.equal(false);
     });
     it("shouldn't be degenerated", function () {
-      wire.isDegenerated.should.equal(false);
+      edge.isDegenerated.should.equal(false);
     });
     it("should provide a bounding box", function () {
-      wire.getBoundingBox().should.be.instanceOf(BoundingBox);
-      wire.getBoundingBox().isVoid.should.eql(false);
+      edge.getBoundingBox().should.be.instanceOf(BoundingBox);
+      edge.getBoundingBox().isVoid.should.eql(false);
 
-      wire
+      edge
         .getBoundingBox()
         .nearPt.equals(new Point(-30, 20, 30))
         .should.eql(true);
-      wire.getBoundingBox().nearPt.equals([-30, 20, 30]).should.eql(true);
-      wire.getBoundingBox().farPt.equals([10, 20, 30]).should.eql(true);
+      edge.getBoundingBox().nearPt.equals([-30, 20, 30]).should.eql(true);
+      edge.getBoundingBox().farPt.equals([10, 20, 30]).should.eql(true);
 
       let extra = 0.000000000001;
-      wire
+      edge
         .getBoundingBox()
         .farPt.asArray()
         .should.eql([10 + extra, 20 + extra, 30 + extra]);
     });
     it("should polygonize a segment with two points", function () {
       console.log("polyligonize");
-      let polyline = wire.polygonize();
+      let polyline = edge.polygonize();
       console.log("polyligonize2");
       polyline.length.should.eql(3 * 2);
       [polyline[0], polyline[1], polyline[2]].should.eql([10, 20, 30]);
@@ -82,22 +82,22 @@ describe("testing Edges ", function () {
   });
 
   describe("EDGE2 - an Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30)  and translated by [1,2,3]", function () {
-    let wire: IWire;
+    let edge: IEdge;
     before(function () {
       let v1 = occ.makeVertex(10, 20, 30);
       let v2 = occ.makeVertex(-30, 20, 30);
-      wire = occ.makeLine(v1, v2);
-      wire = wire.translate([1, 2, 3]);
+      edge = occ.makeLine(v1, v2);
+      edge = edge.translate([1, 2, 3]);
     });
     it("should have a length of 40.0 ", function () {
-      wire.length.should.equal(40.0);
+      edge.length.should.equal(40.0);
     });
     it("should provide a bounding box", function () {
-      wire.getBoundingBox().nearPt.equals([-29, 22, 33]).should.eql(true);
-      wire.getBoundingBox().farPt.equals([11, 22, 33]).should.eql(true);
+      edge.getBoundingBox().nearPt.equals([-29, 22, 33]).should.eql(true);
+      edge.getBoundingBox().farPt.equals([11, 22, 33]).should.eql(true);
     });
     it("should polygonize a segment with two points", function () {
-      let polyline = wire.polygonize();
+      let polyline = edge.polygonize();
       polyline.length.should.eql(3 * 2);
       [polyline[0], polyline[1], polyline[2]].should.eql([11, 22, 33]);
       let l = polyline.length;
@@ -108,39 +108,39 @@ describe("testing Edges ", function () {
     });
   });
   describe("Wire - an Wire constructed as a Circle on the Z+ plan with a radius of 20", function () {
-    let wire: IWire;
+    let edge: IEdge;
     before(function () {
-      wire = occ.makeCircle([10, 10, 10], [0, 0, 1], 20);
+      edge = occ.makeCircle([10, 10, 10], [0, 0, 1], 20);
     });
 
     it("should have a length of 2*PI*20.0 ", function () {
       let epsilon = 1e-2;
       let PI = 3.1415;
-      wire.length.should.be.within(
+      edge.length.should.be.within(
         2 * PI * 20.0 - epsilon,
         2 * PI * 20.0 + epsilon
       );
     });
     it("should have a unique vertex ", function () {
-      wire.numVertices.should.equal(1);
+      edge.numVertices.should.equal(1);
     });
     it("should be closed", function () {
-      wire.isClosed.should.equal(true);
+      edge.isClosed.should.equal(true);
     });
     it("shouldn't be degenerated", function () {
-      wire.isDegenerated.should.equal(false);
+      edge.isDegenerated.should.equal(false);
     });
 
     it("should provide a bounding box", function () {
-      wire.getBoundingBox().should.be.instanceOf(BoundingBox);
-      wire.getBoundingBox().isVoid.should.eql(false);
+      edge.getBoundingBox().should.be.instanceOf(BoundingBox);
+      edge.getBoundingBox().isVoid.should.eql(false);
       //xx console.log(JSON.stringify(edge.getBoundingBox()));//.toString());
-      wire.getBoundingBox().nearPt.equals([-11.647844, -11.647844, 10]);
-      wire.getBoundingBox().farPt.equals([31.647844, 31.647844, 10]);
+      edge.getBoundingBox().nearPt.equals([-11.647844, -11.647844, 10]);
+      edge.getBoundingBox().farPt.equals([31.647844, 31.647844, 10]);
     });
 
     it("should polygonize a edge", function () {
-      let a = wire.polygonize();
+      let a = edge.polygonize();
 
       [a[0], a[1], a[2]].should.eql([30, 10, 10]);
       let l = a.length;
@@ -150,5 +150,5 @@ describe("testing Edges ", function () {
       //xx console.log(a);
     });
   });
-  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () {});
+  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () { });
 });
