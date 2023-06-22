@@ -3,8 +3,7 @@
 
 #include "Vertex.h"
 
-class Edge : public Base
-{
+class Edge : public Base {
 
 public:
   TopoDS_Edge m_edge;
@@ -38,19 +37,16 @@ public:
   // createNURBS(OCCVertex *start, OCCVertex *end, std::vector<OCCStruct3d>
   // points,  DVec knots, DVec weights, IVec mult);
 
-  bool canSetShape(const TopoDS_Shape &shape) const
-  {
+  bool canSetShape(const TopoDS_Shape &shape) const {
     return shape.ShapeType() == TopAbs_EDGE;
   }
   virtual const TopoDS_Shape &shape() const { return m_edge; }
   virtual const TopoDS_Edge &edge() const { return m_edge; }
-  virtual void setShape(const TopoDS_Shape &shape)
-  {
+  virtual void setShape(const TopoDS_Shape &shape) {
     m_edge = TopoDS::Edge(shape);
   }
   virtual v8::Local<v8::Object> Clone() const;
-  virtual Base *Unwrap(v8::Local<v8::Object> obj) const
-  {
+  virtual Base *Unwrap(v8::Local<v8::Object> obj) const {
     return Nan::ObjectWrap::Unwrap<Edge>(obj);
   }
 
@@ -58,9 +54,9 @@ public:
   static NAN_PROPERTY_GETTER(getter_lastVertex);
 
   // Static Methods
-  static NAN_METHOD(static_createLine);
-  static NAN_METHOD(static_createCircle);
-  static NAN_METHOD(static_createArc3P);
+  static NAN_METHOD(static_makeLine);
+  static NAN_METHOD(static_makeCircle);
+  static NAN_METHOD(static_makeArc3P);
 
   static NAN_METHOD(polygonize);
   static NAN_METHOD(getVertices);

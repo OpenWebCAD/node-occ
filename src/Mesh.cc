@@ -41,7 +41,7 @@ void Mesh::Init(v8::Local<v8::Object> target) {
       Nan::New<v8::FunctionTemplate>(Mesh::New);
   tpl->SetClassName(Nan::New("Mesh").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   _template.Reset(tpl);

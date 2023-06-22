@@ -22,5 +22,5 @@ copy:
 ## https://leimao.github.io/blog/Clang-Format-Quick-Tutorial/
 format:
 	clang-format -i src/*.h src/*.cc
-	npx -y prettier -w lib/*.ts test/*
+	npx -y prettier -w lib/*.ts test/*.ts
 	

@@ -68,7 +68,7 @@ void Point3Wrap::Init(v8::Local<v8::Object> target) {
       Nan::New<v8::FunctionTemplate>(Point3Wrap::New);
   tpl->SetClassName(Nan::New("Point3D").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   _template.Reset(tpl);
 

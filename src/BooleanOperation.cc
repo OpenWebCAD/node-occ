@@ -78,7 +78,7 @@ void BooleanOperation::Init(v8::Local<v8::Object> target) {
       Nan::New<v8::FunctionTemplate>(BooleanOperation::New);
   tpl->SetClassName(Nan::New("BooleanOperation").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   _template.Reset(tpl);

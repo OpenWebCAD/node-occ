@@ -77,7 +77,7 @@ void Shell::Init(v8::Local<v8::Object> target) {
       Nan::New<v8::FunctionTemplate>(Shell::New);
   tpl->SetClassName(Nan::New("Shell").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   _template.Reset(tpl);
 

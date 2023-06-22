@@ -1,7 +1,6 @@
 #include "Wire.h"
 
-int Wire::numVertices()
-{
+int Wire::numVertices() {
   if (this->wire().IsNull())
     return 0;
   TopTools_IndexedMapOfShape anIndices;
@@ -9,8 +8,7 @@ int Wire::numVertices()
   return anIndices.Extent();
 }
 
-int Wire::numEdges()
-{
+int Wire::numEdges() {
   if (this->wire().IsNull())
     return 0;
   TopTools_IndexedMapOfShape anIndices;
@@ -18,8 +16,7 @@ int Wire::numEdges()
   return anIndices.Extent();
 }
 
-bool Wire::isClosed()
-{
+bool Wire::isClosed() {
   if (this->wire().IsNull())
     return false;
 
@@ -35,10 +32,8 @@ void Wire::setShape(const TopoDS_Shape &shape) { m_wire = TopoDS::Wire(shape); }
 
 Nan::Persistent<v8::FunctionTemplate> Wire::_template;
 
-const char *toString(BRepBuilderAPI_WireError err)
-{
-  switch (err)
-  {
+const char *toString(BRepBuilderAPI_WireError err) {
+  switch (err) {
   case BRepBuilderAPI_WireDone:
     return "the wire is done";
     break;
@@ -57,56 +52,42 @@ const char *toString(BRepBuilderAPI_WireError err)
 
 NAN_METHOD(Wire::NewInstance) { _NewInstance<Wire>(info); }
 
-template <class T>
-void addElement(T info, BRepBuilderAPI_MakeWire &mkWire)
-{
+template <class T> void addElement(T info, BRepBuilderAPI_MakeWire &mkWire) {
   Edge *edge = DynamicCast<Edge>(info);
   Wire *wire = DynamicCast<Wire>(info);
 
-  if (edge)
-  {
+  if (edge) {
     // IsInstanceOf<Edge>(info[i]->ToObject())) {
     // xx Edge* edge = Nan::ObjectWrap::Unwrap<Edge>(info[i]->ToObject());
     mkWire.Add(edge->edge());
     // Xx statusIsDone = mkWire.IsDone();
     // err = mkWire.Error();
-  }
-  else if (wire)
-  {
+  } else if (wire) {
     mkWire.Add(wire->wire());
     // Xx statusIsDone = mkWire.IsDone();
     //  err = mkWire.Error();
-  }
-  else
-  {
+  } else {
     auto mesg = std::string("invalid arguement: expecting a Wire or an Edge");
     Nan::ThrowError(mesg.c_str());
   }
 }
 
 bool extractListOfEdge(v8::Local<v8::Value> value,
-                       TopTools_ListOfShape &edges)
-{
-  if (value->IsArray())
-  {
+                       TopTools_ListOfShape &edges) {
+  if (value->IsArray()) {
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
     int length = arr->Length();
-    for (int i = 0; i < length; i++)
-    {
+    for (int i = 0; i < length; i++) {
       auto elementI = Nan::Get(arr, i).ToLocalChecked();
       Edge *pEdge = 0;
-      if (extractArg(elementI, pEdge))
-      {
+      if (extractArg(elementI, pEdge)) {
         edges.Append(pEdge->edge());
       }
     }
-  }
-  else
-  {
+  } else {
     // could be a single face
     Edge *pEdge = 0;
-    if (!extractArg(value, pEdge))
-    {
+    if (!extractArg(value, pEdge)) {
       return false;
     }
     edges.Append(pEdge->edge());
@@ -115,40 +96,32 @@ bool extractListOfEdge(v8::Local<v8::Value> value,
   return edges.Extent() > 0;
 }
 
-NAN_METHOD(Wire::New)
-{
-  if (!info.IsConstructCall())
-  {
+NAN_METHOD(Wire::New) {
+  if (!info.IsConstructCall()) {
     return Nan::ThrowError(" use new occ.Wire() to construct a Wire");
   }
   Wire *pThis = new Wire();
   pThis->Wrap(info.This());
   pThis->InitNew(info);
 
-  if (info.Length() == 0)
-  {
+  if (info.Length() == 0) {
     // this is a empty wire
     info.GetReturnValue().Set(info.This());
     return;
   }
 
-  try
-  {
+  try {
 
     BRepBuilderAPI_MakeWire mkWire;
-    if (info.Length() == 1 && info[0]->IsArray())
-    {
+    if (info.Length() == 1 && info[0]->IsArray()) {
       // we expect an array of Wire or Edge
       v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(info[0]);
       TopTools_ListOfShape elements;
       extractListOfEdge(arr, elements);
       mkWire.Add(elements);
       BRepBuilderAPI_WireError err = mkWire.Error();
-    }
-    else
-    {
-      for (int i = 0; i < info.Length(); i++)
-      {
+    } else {
+      for (int i = 0; i < info.Length(); i++) {
         addElement(info[i], mkWire);
         BRepBuilderAPI_WireError err = mkWire.Error();
       }
@@ -157,12 +130,9 @@ NAN_METHOD(Wire::New)
     // Xx Standard_Boolean statusIsDone = false;
     BRepBuilderAPI_WireError err = BRepBuilderAPI_WireDone;
     err = mkWire.Error();
-    if (BRepBuilderAPI_WireDone == err || mkWire.IsDone())
-    {
+    if (BRepBuilderAPI_WireDone == err || mkWire.IsDone()) {
       pThis->setShape(mkWire.Wire());
-    }
-    else
-    {
+    } else {
       // pThis->setShape(TopoDS_Wire());
       std::string mesg =
           std::string("Invalid Wire err:=") + toString(mkWire.Error());
@@ -173,8 +143,7 @@ NAN_METHOD(Wire::New)
   info.GetReturnValue().Set(info.This());
 }
 
-v8::Local<v8::Object> Wire::Clone() const
-{
+v8::Local<v8::Object> Wire::Clone() const {
   Wire *obj = new Wire();
   v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
@@ -182,22 +151,20 @@ v8::Local<v8::Object> Wire::Clone() const
   return instance;
 }
 
-NAN_METHOD(Wire::InitNew)
-{
+NAN_METHOD(Wire::InitNew) {
   Base::InitNew(info);
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Wire, numVertices);
   REXPOSE_READ_ONLY_PROPERTY_INTEGER(Wire, numEdges);
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Wire, isClosed);
 }
 
-void Wire::Init(v8::Local<v8::Object> target)
-{
+void Wire::Init(v8::Local<v8::Object> target) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Wire::New);
   tpl->SetClassName(Nan::New("Wire").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   _template.Reset(tpl);
@@ -217,14 +184,12 @@ void Wire::Init(v8::Local<v8::Object> target)
            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
-NAN_METHOD(Wire::getEdges)
-{
+NAN_METHOD(Wire::getEdges) {
   Wire *pThis = UNWRAP(Wire);
   auto arr = extract_shapes_as_javascript_array(pThis, TopAbs_EDGE);
   info.GetReturnValue().Set(arr);
 }
-NAN_METHOD(Wire::getVertices)
-{
+NAN_METHOD(Wire::getVertices) {
   Wire *pThis = UNWRAP(Wire);
   auto arr = extract_shapes_as_javascript_array(pThis, TopAbs_VERTEX);
   info.GetReturnValue().Set(arr);

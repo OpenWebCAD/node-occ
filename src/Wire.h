@@ -3,8 +3,7 @@
 
 #include "Edge.h"
 
-class Wire : public Base
-{
+class Wire : public Base {
 
   TopoDS_Wire m_wire;
 
@@ -17,8 +16,7 @@ public:
   const TopoDS_Wire &wire() const { return m_wire; }
   virtual void setShape(const TopoDS_Shape &);
   virtual v8::Local<v8::Object> Clone() const;
-  virtual Base *Unwrap(v8::Local<v8::Object> obj) const
-  {
+  virtual Base *Unwrap(v8::Local<v8::Object> obj) const {
     return Nan::ObjectWrap::Unwrap<Wire>(obj);
   }
 

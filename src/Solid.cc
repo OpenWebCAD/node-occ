@@ -15,7 +15,7 @@ void Solid::Init(v8::Local<v8::Object> target) {
       Nan::New<v8::FunctionTemplate>(Solid::New);
   tpl->SetClassName(Nan::New("Solid").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   _template.Reset(tpl);
@@ -456,7 +456,6 @@ v8::Local<v8::Object> Solid::createMesh(double factor, double angle,
     }
 
     mesh->optimize();
-
   } catch (Standard_Failure const &anException) {
     Standard_SStream aMsg;
     aMsg << "EXCEPTION in Solid::createMesh" << endl;

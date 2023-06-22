@@ -68,7 +68,6 @@ const char *Base::orientation() {
 }
 
 NAN_METHOD(Base::translate) {
-
   CHECK_THIS_DEFINED(Base);
   const Base *pThis = ObjectWrap::Unwrap<Base>(info.This());
 

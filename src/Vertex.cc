@@ -41,8 +41,7 @@ NAN_METHOD(Vertex::New) {
   } else {
     return Nan::ThrowError("Wrong Arguments");
   }
-  gp_Pnt aPnt;
-  aPnt = gp_Pnt(x, y, z);
+  gp_Pnt aPnt(x, y, z);
   BRepBuilderAPI_MakeVertex mkVertex(aPnt);
   pThis->setShape(mkVertex.Vertex());
 
@@ -70,7 +69,7 @@ void Vertex::Init(v8::Local<v8::Object> target) {
       Nan::New<v8::FunctionTemplate>(Vertex::New);
   tpl->SetClassName(Nan::New("Vertex").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   _template.Reset(tpl);

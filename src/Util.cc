@@ -66,13 +66,14 @@ void ReadInt(v8::Local<v8::Object> value, const char *name, int *retValue,
 }
 
 void ReadXYZ(v8::Local<v8::Object> obj, double *x, double *y, double *z) {
+  Nan::HandleScope scope;
   ReadDouble(obj, "x", x, 0.0);
   ReadDouble(obj, "y", y, 0.0);
   ReadDouble(obj, "z", z, 0.0);
 }
 
 void ReadPoint(v8::Local<v8::Value> value, double *x, double *y, double *z) {
-
+  Nan::HandleScope scope;
   if (value->IsArray()) {
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
     ReadPropertyPointFromArray(arr, x, y, z);
@@ -87,30 +88,34 @@ void ReadPoint(v8::Local<v8::Value> value, double *x, double *y, double *z) {
 }
 
 void ReadUVW(v8::Local<v8::Object> obj, double *x, double *y, double *z) {
+  Nan::HandleScope scope;
   ReadDouble(obj, "u", x, 0.0);
   ReadDouble(obj, "v", y, 0.0);
   ReadDouble(obj, "w", z, 0.0);
 }
 
 void ReadPoint(v8::Local<v8::Value> value, gp_Pnt *pt) {
+  Nan::HandleScope scope;
   double x = 0, y = 0, z = 0;
   ReadPoint(value, &x, &y, &z);
   pt->SetCoord(x, y, z);
 }
 void ReadDir(v8::Local<v8::Value> value, gp_Dir *pt) {
+  Nan::HandleScope scope;
   double x = 0, y = 0, z = 1.0;
   ReadPoint(value, &x, &y, &z);
   pt->SetCoord(x, y, z);
 }
 
 void ReadVector(v8::Local<v8::Value> value, gp_Vec *pt) {
+  Nan::HandleScope scope;
   double x = 0, y = 0, z = 0;
   ReadPoint(value, &x, &y, &z);
   pt->SetCoord(x, y, z);
 }
 
 void ReadRotationFromArgs(_NAN_METHOD_ARGS, gp_Trsf &trans) {
-
+  Nan::HandleScope scope;
   double x = 0, y = 0, z = 0;
   ReadPoint(info[0], &x, &y, &z);
 
