@@ -146,37 +146,30 @@ int Edge::createCircle(const gp_Pnt &center, const gp_Dir &normal,
   return 1;
 }
 
-template <class T> T *my_unwrap(v8::MaybeLocal<v8::Value> value) {
-
-  auto a = Nan::To<v8::Object>(value.ToLocalChecked()).ToLocalChecked();
-  return Nan::ObjectWrap::Unwrap<T>(a);
-}
-
-Vertex *getOrCreateVertex(v8::Local<v8::Value> arg) {
-  Nan::HandleScope scope;
-
+v8::Local<v8::Object> getOrCreateVertex(v8::Local<v8::Value> arg) {
+  Nan::EscapableHandleScope scope;
   if (arg->IsArray()) {
-    auto objV =
-        Nan::NewInstance(Constructor<Vertex>(), 1, &arg).ToLocalChecked();
-    if (!IsInstanceOf<Vertex>(objV)) {
-      return 0;
-    }
-    Vertex *vertex = my_unwrap<Vertex>(objV);
-    return vertex;
+    v8::Local<v8::Function> constructor = Constructor<Vertex>();
+    const int argc = 1;
+    v8::Local<v8::Value> argv[argc] = {arg};
+    v8::Local<v8::Object> objV =
+        Nan::NewInstance(constructor, argc, argv).ToLocalChecked();
+    // // make a new vertex from the point array
+    // const int argc = 1;
+    // v8::Local<v8::Object> objV = Nan::NewInstance(cons, argc,
+    // arg).ToLocalChecked();
+    return scope.Escape(objV);
   } else if (arg->IsObject()) {
 
-    v8::Local<v8::Value> obj = Nan::To<v8::Object>(arg).ToLocalChecked();
+    v8::Local<v8::Object> obj = Nan::To<v8::Object>(arg).ToLocalChecked();
     if (!IsInstanceOf<Vertex>(obj)) {
-      return 0;
+      return scope.Escape(Nan::To<v8::Object>(Nan::Null()).ToLocalChecked());
     }
-    Vertex *vertex = Nan::ObjectWrap::Unwrap<Vertex>(
-        Nan::To<v8::Object>(obj).ToLocalChecked());
-    return vertex;
+    return scope.Escape(obj);
   } else {
-    return 0;
+    return scope.Escape(Nan::To<v8::Object>(Nan::Null()).ToLocalChecked());
   }
 }
-
 Nan::Persistent<v8::FunctionTemplate> Edge::_template;
 
 NAN_METHOD(Edge::static_makeLine) {
@@ -188,19 +181,22 @@ NAN_METHOD(Edge::static_makeLine) {
         "expecting 2 arguments : <vertex|point> , <vertex|point> ");
   }
 
-  Vertex *v1 = getOrCreateVertex(info[0]);
-  Vertex *v2 = getOrCreateVertex(info[1]);
-  if (!v1 || !v2) {
+  v8::Local<v8::Object> v1 = getOrCreateVertex(info[0]);
+  v8::Local<v8::Object> v2 = getOrCreateVertex(info[1]);
+
+  if (v1.IsEmpty() || v2.IsEmpty()) {
     return Nan::ThrowError(
         "expecting 2 arguments : <vertex|point> , <vertex|point> ");
   }
 
-  v8::Local<v8::Object> instance =
-      Nan::NewInstance(Constructor<Edge>()).ToLocalChecked();
+  v8::Local<v8::Object> instance = makeInstance(_template);
   Edge *pThis = Nan::ObjectWrap::Unwrap<Edge>(
       Nan::To<v8::Object>(instance).ToLocalChecked());
 
-  pThis->createLine(v1, v2);
+  Vertex *_v1 = Nan::ObjectWrap::Unwrap<Vertex>(v1);
+  Vertex *_v2 = Nan::ObjectWrap::Unwrap<Vertex>(v2);
+
+  pThis->createLine(_v1, _v2);
   info.GetReturnValue().Set(instance);
 }
 
@@ -217,6 +213,7 @@ NAN_METHOD(Edge::static_makeCircle) {
 
   gp_Pnt center;
   ReadPoint(arg1, &center);
+
   gp_Dir normal;
   ReadDir(arg2, &normal);
 
@@ -250,17 +247,30 @@ NAN_METHOD(Edge::static_makeArc3P) {
         "expecting three arguments : <center>,<normal>,<radius>");
   }
 
-  Vertex *v1 = getOrCreateVertex(arg1);
+  v8::Local<v8::Object> jV1 = getOrCreateVertex(arg1);
+  if (jV1.IsEmpty()) {
+    return Nan::ThrowError("Arg1 must be a point");
+  }
+  Vertex *v1 = Nan::ObjectWrap::Unwrap<Vertex>(jV1);
+
   gp_Pnt p2;
   ReadPoint(arg2, &p2);
-  Vertex *v3 = getOrCreateVertex(arg3);
+
+  v8::Local<v8::Object> jV3 = getOrCreateVertex(arg3);
+  if (jV3.IsEmpty()) {
+    return Nan::ThrowError("Arg3 must be a point");
+  }
+  Vertex *v3 = Nan::ObjectWrap::Unwrap<Vertex>(jV3);
 
   Edge *pThis = new Edge();
   v8::Local<v8::Object> instance = makeInstance(_template);
   pThis->Wrap(instance);
 
-  pThis->createArc3P(v1, v3, p2);
+  try {
 
+    pThis->createArc3P(v1, v3, p2);
+  }
+  CATCH_AND_RETHROW_NO_RETURN("Failed to create arc with 3 points");
   info.GetReturnValue().Set(instance);
 }
 
@@ -283,12 +293,12 @@ NAN_METHOD(Edge::New) {
 }
 
 v8::Local<v8::Object> Edge::Clone() const {
-
+  Nan::EscapableHandleScope scope;
   Edge *obj = new Edge();
   v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
-  return instance;
+  return scope.Escape(instance);
 }
 
 NAN_PROPERTY_GETTER(Edge::getter_firstVertex) {
@@ -330,8 +340,7 @@ NAN_PROPERTY_GETTER(Edge::getter_lastVertex) {
   info.GetReturnValue().Set(obj);
 }
 
-void Edge::Init(v8::Local<v8::Object> target) {
-
+NAN_MODULE_INIT(Edge::Init) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Edge::New);
@@ -403,12 +412,13 @@ void extractEdgePolygon(const TopoDS_Edge &edge,
 
 v8::Local<v8::Object> Edge::polygonize(double factor) {
 
+  Nan::EscapableHandleScope scope;
   const TopoDS_Edge &edge = TopoDS::Edge(this->shape());
 
   if (factor == 0.0) {
     extractEdgePolygon(edge, m_positions);
     int length = (int)m_positions.size();
-    return makeFloat32Array(m_positions.data(), length);
+    return scope.Escape(makeFloat32Array(m_positions.data(), length));
   }
 
   BRepAdaptor_Curve curve_adaptor(edge);
@@ -424,7 +434,8 @@ v8::Local<v8::Object> Edge::polygonize(double factor) {
     m_positions.push_back(static_cast<float>(pt.Z()));
   }
   int length = (int)m_positions.size();
-  return makeFloat32Array(m_positions.data(), length);
+  auto retValue = makeFloat32Array(m_positions.data(), length);
+  return scope.Escape(retValue);
 }
 
 NAN_METHOD(Edge::getVertices) {

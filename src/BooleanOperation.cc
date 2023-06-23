@@ -6,7 +6,6 @@ BooleanOperation::~BooleanOperation() { delete m_bop; }
 Nan::Persistent<v8::FunctionTemplate> BooleanOperation::_template;
 
 v8::Local<v8::Value> BooleanOperation::NewInstance(BOPAlgo_Operation op) {
-
   v8::Local<v8::Object> instance = makeInstance(_template);
   BooleanOperation *pThis = ObjectWrap::Unwrap<BooleanOperation>(instance);
   return instance;
@@ -17,7 +16,6 @@ inline bool _isEqual(v8::Local<v8::String> a, const std::string txt) {
 }
 
 BOPAlgo_Operation ReadOperationType(const v8::Local<v8::Value> &arg) {
-
   v8::Local<v8::String> str = Nan::To<v8::String>(arg).ToLocalChecked();
   if (_isEqual(str, "SECTION"))
     return BOPAlgo_SECTION;
@@ -71,11 +69,9 @@ Handle<Value> BooleanOperation_getSameShape2(const v8::Arguments& args)
 }
 */
 
-void BooleanOperation::Init(v8::Local<v8::Object> target) {
-
+NAN_MODULE_INIT(BooleanOperation::Init) {
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl =
-      Nan::New<v8::FunctionTemplate>(BooleanOperation::New);
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
   tpl->SetClassName(Nan::New("BooleanOperation").ToLocalChecked());
 
   // object has one internal field ( the C++ object)

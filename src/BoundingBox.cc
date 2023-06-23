@@ -6,13 +6,9 @@
 Nan::Persistent<v8::FunctionTemplate> BoundingBox::_template;
 
 v8::Local<v8::Value> BoundingBox::NewInstance(const Bnd_Box &box) {
-
   v8::Local<v8::Object> instance = makeInstance(_template);
-
   BoundingBox *pThis = ObjectWrap::Unwrap<BoundingBox>(instance);
-
   pThis->m_box = box;
-
   return instance;
 }
 
@@ -61,14 +57,13 @@ NAN_METHOD(BoundingBox::New) {
 }
 
 NAN_METHOD(BoundingBox::addPoint) {
-
   BoundingBox *pThis = ObjectWrap::Unwrap<BoundingBox>(info.This());
   BoundingBox::Update(pThis, info);
-
   info.GetReturnValue().Set(info.This());
 }
 
 bool checkCoerceToPoint(const v8::Local<v8::Value> &v) {
+  Nan::HandleScope scope;
   // TODO ...
   return true;
 }
@@ -89,7 +84,7 @@ NAN_METHOD(BoundingBox::isOut) {
   info.GetReturnValue().Set(Nan::New<v8::Boolean>(retVal));
 }
 
-void BoundingBox::Init(v8::Local<v8::Object> target) {
+NAN_MODULE_INIT(BoundingBox::Init) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(BoundingBox::New);

@@ -53,7 +53,7 @@ public:
   static v8::Local<v8::Value> NewInstance(const Bnd_Box &box);
 
   static NAN_METHOD(New);
-  static void Init(v8::Local<v8::Object> target);
+  static NAN_MODULE_INIT(Init);
 
 protected:
   static void Update(BoundingBox *pThis, _NAN_METHOD_ARGS);

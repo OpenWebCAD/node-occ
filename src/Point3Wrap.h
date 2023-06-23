@@ -15,7 +15,7 @@ public:
   static NAN_METHOD(New);
   static NAN_METHOD(equals);
   static NAN_METHOD(asArray);
-  static void Init(v8::Local<v8::Object> target);
+  static NAN_MODULE_INIT(Init);
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };
 
@@ -49,6 +49,7 @@ public:
     info.GetReturnValue().Set(Accessor::NewInstance(*pThis));
   }
   static v8::Local<v8::Value> NewInstance(_ThisType &parent) {
+    Nan::EscapableHandleScope scope;
 
     auto f = Nan::GetFunction(Nan::New(Wrapper::_template)).ToLocalChecked();
     v8::Local<v8::Object> instance = Nan::NewInstance(f).ToLocalChecked();
@@ -56,7 +57,7 @@ public:
     // NewInstance(Nan::GetCurrentContext(),0, 0).ToLocalChecked();
     Accessor *pThis = new Accessor(parent);
     pThis->Wrap(instance);
-    return instance;
+    return scope.Escape(instance);
   }
 };
 

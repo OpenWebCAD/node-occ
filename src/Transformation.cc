@@ -1,13 +1,17 @@
 #include "Transformation.h"
 #include "Util.h"
 
+// Methods exposed to JavaScripts
+Nan::Persistent<v8::FunctionTemplate> Transformation::_template;
+
 template <class T> Transformation *prepare(T &info) {
+  Nan::HandleScope scope;
+
   Transformation *pThis = DynamicCast<Transformation>(info.This());
   if (pThis) {
     info.GetReturnValue().Set(info.This());
   } else {
-    v8::Local<v8::Object> instance =
-        Nan::NewInstance(Constructor<Transformation>()).ToLocalChecked();
+    v8::Local<v8::Object> instance = makeInstance(Transformation::_template);
     pThis = Transformation::Unwrap<Transformation>(instance);
     info.GetReturnValue().Set(instance);
   }
@@ -90,10 +94,8 @@ NAN_METHOD(Transformation::makeRotation) {
   ReadRotationFromArgs(info, pThis->m_trsf);
 }
 
-// Methods exposed to JavaScripts
-Nan::Persistent<v8::FunctionTemplate> Transformation::_template;
+NAN_MODULE_INIT(Transformation::Init) {
 
-void Transformation::Init(v8::Local<v8::Object> target) {
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Transformation::New);
   // Prepare constructor template

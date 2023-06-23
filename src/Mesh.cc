@@ -34,8 +34,7 @@ NAN_METHOD(Mesh::New) {
 
 Nan::Persistent<v8::FunctionTemplate> Mesh::_template;
 
-/*static*/
-void Mesh::Init(v8::Local<v8::Object> target) {
+NAN_MODULE_INIT(Mesh::Init) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Mesh::New);
@@ -95,7 +94,6 @@ uint32_t Mesh::push_normal(const Coord3f &normal) {
 }
 
 int Mesh::extractFaceMesh(const TopoDS_Face &face, bool qualityNormals) {
-
   if (face.IsNull()) {
     StdFail_NotDone::Raise("Face is Null");
   }
@@ -389,6 +387,7 @@ void UpdateExternalArray(v8::Local<v8::Object> &pThis, const char *name,
 }
 
 void Mesh::updateJavaScriptArray() {
+
   assert(sizeof(_triangles[0]) == sizeof(int) * 3);
   v8::Local<v8::Object> pThis = NanObjectWrapHandle(this);
   UpdateExternalArray(pThis, "vertices", &_vertices.data()[0].x,
@@ -411,6 +410,7 @@ void Mesh::updateJavaScriptArray() {
 template <class uintX_t>
 void makeTT(const std::vector<Triangle3i> &arr, uint32_t start, uint32_t length,
             std::vector<uintX_t> &indexes) {
+
   indexes.clear();
   indexes.reserve(length * 3);
   for (uint32_t i = 0; i < length; i++) {

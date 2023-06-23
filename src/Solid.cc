@@ -7,9 +7,7 @@
 
 Nan::Persistent<v8::FunctionTemplate> Solid::_template;
 
-/*static*/
-void Solid::Init(v8::Local<v8::Object> target) {
-
+NAN_MODULE_INIT(Solid::Init) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Solid::New);
@@ -86,10 +84,11 @@ NAN_METHOD(Solid::New) {
 }
 
 v8::Local<v8::Object> Solid::Clone() const {
-  v8::Local<v8::Object> instance =
-      Nan::To<v8::Object>(Solid::NewInstance()).ToLocalChecked();
-  Solid *pClone = Nan::ObjectWrap::Unwrap<Solid>(instance);
 
+  Nan::EscapableHandleScope scope;
+
+  v8::Local<v8::Object> instance = makeInstance(_template);
+  Solid *pClone = Nan::ObjectWrap::Unwrap<Solid>(instance);
   pClone->setShape(this->shape());
 
   if (!this->shape().IsNull()) {
@@ -105,17 +104,17 @@ v8::Local<v8::Object> Solid::Clone() const {
     }
   }
 
-  return instance;
+  return scope.Escape(instance);
 }
 
 v8::Local<v8::Value> Solid::NewInstance() {
-  v8::Local<v8::Object> instance = makeInstance(Solid::_template);
+  v8::Local<v8::Object> instance = makeInstance(_template);
   Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(instance);
   return instance;
 }
 
 v8::Local<v8::Value> Solid::NewInstance(TopoDS_Shape shape) {
-  v8::Local<v8::Object> instance = makeInstance(Solid::_template);
+  v8::Local<v8::Object> instance = makeInstance(_template);
   Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(instance);
   pThis->setShape(shape);
   return instance;
@@ -131,7 +130,6 @@ NAN_METHOD(Solid::getEdges) {
   Solid *pThis = UNWRAP(Solid);
 
   TopTools_IndexedMapOfShape map;
-  // TopExp::MapShapes(pThis->shape(), TopAbs_EDGE, map);
   BRepTools::Map3DEdges(pThis->shape(), map);
 
   int nbShape = map.Extent();
@@ -468,7 +466,7 @@ v8::Local<v8::Object> Solid::createMesh(double factor, double angle,
 
 NAN_METHOD(Solid::getShapeName) {
   Solid *pThis = UNWRAP(Solid);
-  pThis;
+  // pThis;
 
   v8::Local<v8::Object> pShape = Nan::To<v8::Object>(info[0]).ToLocalChecked();
 
@@ -489,6 +487,7 @@ NAN_METHOD(Solid::getShapeName) {
 }
 
 std::string Solid::_getShapeName(const TopoDS_Shape &shape) {
+
   v8::Local<v8::Object> pJhis = this->handle(); // NanObjectWrapHandle(this);
 
   auto _rm = Nan::Get(pJhis, Nan::New("_reversedMap").ToLocalChecked())
@@ -505,6 +504,8 @@ std::string Solid::_getShapeName(const TopoDS_Shape &shape) {
 }
 
 void Solid::_registerNamedShape(const char *name, const TopoDS_Shape &shape) {
+  Nan::HandleScope scope;
+
   if (shape.ShapeType() == TopAbs_FACE) {
 
     v8::Local<v8::Object> obj =

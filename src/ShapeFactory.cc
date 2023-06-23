@@ -310,7 +310,7 @@ NAN_METHOD(ShapeFactory::makeSphere) {
   info.GetReturnValue().Set(pJhis);
 }
 
-void ReadAx2(const v8::Local<v8::Value> &value, gp_Ax2 *ax2) {
+void ReadAx2(v8::Local<v8::Value> value, gp_Ax2 *ax2) {
   assert(ax2);
   if (value->IsArray()) {
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
@@ -910,6 +910,7 @@ static void registerShapes(BRepBuilderAPI_MakeShape *pTool, Solid *newSolid,
 static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS, Solid *pSolid1,
                                        Solid *pSolid2, BOPAlgo_Operation op) {
 
+  Nan::HandleScope scope;
   const TopoDS_Shape &firstObject = pSolid1->shape();
   const TopoDS_Shape &secondObject = pSolid2->shape();
 
@@ -939,10 +940,10 @@ static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS, Solid *pSolid1,
     }
     shape = pTool->Shape();
 
-    v8::Local<v8::Value> result(Solid::NewInstance(shape));
+    v8::Local<v8::Value> pJhis = Solid::NewInstance(shape);
 
     Solid *pResult = Nan::ObjectWrap::Unwrap<Solid>(
-        Nan::To<v8::Object>(result).ToLocalChecked());
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
     registerShapes(pTool.get(), pResult, pSolid1, pSolid2);
 
@@ -973,16 +974,19 @@ static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS, Solid *pSolid1,
         pResult->setShape(shapeMap(1));
       }
     }
-    return info.GetReturnValue().Set(result);
+    return info.GetReturnValue().Set(pJhis);
   }
   CATCH_AND_RETHROW("Failed in boolean operation");
 }
 
 v8::Local<v8::Value> ShapeFactory::add(const std::vector<Base *> &shapes) {
+
+  Nan::EscapableHandleScope scope;
+
   TopoDS_Compound compound;
   BRep_Builder builder;
 
-  v8::Local<v8::Value> pJhis(Solid::NewInstance());
+  v8::Local<v8::Value> pJhis = Solid::NewInstance();
   Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
       Nan::To<v8::Object>(pJhis).ToLocalChecked());
   try {
@@ -998,7 +1002,7 @@ v8::Local<v8::Value> ShapeFactory::add(const std::vector<Base *> &shapes) {
     pThis->setShape(compound);
   }
   CATCH_AND_RETHROW_NO_RETURN("Failed in compound operation");
-  return pJhis;
+  return scope.Escape(pJhis);
 }
 
 NAN_METHOD(ShapeFactory::compound) {
@@ -1064,6 +1068,8 @@ NAN_METHOD(ShapeFactory::common) { return _boolean(info, BOPAlgo_COMMON); }
 
 bool extractListOfFaces(v8::Local<v8::Value> value,
                         TopTools_ListOfShape &faces) {
+  Nan::HandleScope scope;
+
   if (value->IsArray()) {
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
     int length = arr->Length();
@@ -1121,19 +1127,19 @@ NAN_METHOD(ShapeFactory::makeThickSolid) {
 
     TopoDS_Shape shape = tool.Shape();
 
-    v8::Local<v8::Value> result(Solid::NewInstance(shape));
+    v8::Local<v8::Value> pJhis = Solid::NewInstance(shape);
 
     Solid *pResult = Nan::ObjectWrap::Unwrap<Solid>(
-        Nan::To<v8::Object>(result).ToLocalChecked());
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
     registerShapes(&tool, pResult, pSolid);
 
-    info.GetReturnValue().Set(result);
+    info.GetReturnValue().Set(pJhis);
   }
   CATCH_AND_RETHROW("Failed in makeThickSolid operation");
 }
 
-bool ReadPlane(const v8::Local<v8::Value> &value, gp_Pln &plane) {
+bool ReadPlane(v8::Local<v8::Value> value, gp_Pln &plane) {
   if (value.IsEmpty()) {
     return false;
   }
@@ -1196,14 +1202,14 @@ NAN_METHOD(ShapeFactory::makeDraftAngle) {
 
     TopoDS_Shape shape = tool.Shape();
 
-    v8::Local<v8::Value> result(Solid::NewInstance(shape));
+    v8::Local<v8::Value> pJhis = Solid::NewInstance(shape);
 
     Solid *pResult = Nan::ObjectWrap::Unwrap<Solid>(
-        Nan::To<v8::Object>(result).ToLocalChecked());
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
     registerShapes(&tool, pResult, pSolid);
 
-    info.GetReturnValue().Set(result);
+    info.GetReturnValue().Set(pJhis);
   }
   CATCH_AND_RETHROW("Failed in compound operation");
 }

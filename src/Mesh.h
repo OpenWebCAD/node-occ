@@ -39,7 +39,7 @@ public:
   static NAN_METHOD(getFaceTriangles);
   static NAN_METHOD(getFaceTriangleNormals);
 
-  static void Init(v8::Local<v8::Object> target);
+  static NAN_MODULE_INIT(Init);
 
 private:
   // a set of points to support edges and triangles

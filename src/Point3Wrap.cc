@@ -61,9 +61,7 @@ NAN_METHOD(Point3Wrap::equals) {
   Nan::ThrowError("Invalid");
 }
 
-// Methods exposed to JavaScripts
-void Point3Wrap::Init(v8::Local<v8::Object> target) {
-  // Prepare constructor template
+NAN_MODULE_INIT(Point3Wrap::Init) {
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Point3Wrap::New);
   tpl->SetClassName(Nan::New("Point3D").ToLocalChecked());

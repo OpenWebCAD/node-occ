@@ -51,7 +51,6 @@ inline v8::Local<v8::String> c(Nan::MaybeLocal<v8::String> e) {
 }
 
 template <class T, typename T1, typename T2, T2 (T::*func)()> NAN_GETTER(ee) {
-  // xx NanScope();
   if (info.This().IsEmpty()) {
     info.GetReturnValue().SetUndefined();
     return;
@@ -65,10 +64,8 @@ template <class T, typename T1, typename T2, T2 (T::*func)()> NAN_GETTER(ee) {
   T *obj = Nan::ObjectWrap::Unwrap<T>(info.This());
 
   try {
-
     auto val = (obj->*func)();
     info.GetReturnValue().Set(c(Nan::New<T1>(val)));
-
   } catch (...) {
     return Nan::ThrowError("exception caught in C++ code");
   }
@@ -183,7 +180,7 @@ inline const char *ToCString(const v8::String::Utf8Value &value) {
 #define CATCH_AND_RETHROW2(message)                                            \
   catch (Standard_Failure &) {                                                 \
     info.GetReturnValue().Set(v8::Local<v8::Object>());                        \
-    return Nan::ThrowError("");                                                \
+    return Nan::ThrowError(message));                                          \
   }
 
 #define CATCH_AND_RETHROW_NO_RETURN(message)                                   \

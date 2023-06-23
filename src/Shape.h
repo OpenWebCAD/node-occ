@@ -26,6 +26,8 @@ template <class SHAPE>
 inline v8::Local<v8::Array>
 extract_shapes_as_javascript_array(SHAPE *pThis, TopAbs_ShapeEnum type) {
 
+  Nan::EscapableHandleScope scope;
+
   TopTools_IndexedMapOfShape anIndices;
   TopExp::MapShapes(pThis->shape(), type, anIndices);
 
@@ -35,5 +37,5 @@ extract_shapes_as_javascript_array(SHAPE *pThis, TopAbs_ShapeEnum type) {
     v8::Local<v8::Object> obj = buildWrapper(anIndices(i + 1)); // 1 based !!!
     Nan::Set(arr, i, obj);
   }
-  return arr;
+  return scope.Escape(arr);
 }

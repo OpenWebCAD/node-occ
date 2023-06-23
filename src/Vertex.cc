@@ -49,11 +49,12 @@ NAN_METHOD(Vertex::New) {
 }
 
 v8::Local<v8::Object> Vertex::Clone() const {
+  Nan::EscapableHandleScope scope;
   Vertex *obj = new Vertex();
   v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
-  return instance;
+  return scope.Escape(instance);
 }
 
 void Vertex::InitNew(_NAN_METHOD_ARGS) {
@@ -63,7 +64,8 @@ void Vertex::InitNew(_NAN_METHOD_ARGS) {
   REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, z);
 }
 
-void Vertex::Init(v8::Local<v8::Object> target) {
+NAN_MODULE_INIT(Vertex::Init) {
+
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Vertex::New);

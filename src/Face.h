@@ -44,7 +44,6 @@ public:
   v8::Local<v8::Object> createMesh(double factor, double angle,
                                    bool qualityNormals);
 
-  static void Init(v8::Local<v8::Object> target);
   static v8::Local<v8::Object> NewInstance(const TopoDS_Face &face);
 
   static NAN_METHOD(New);
@@ -53,6 +52,7 @@ public:
   static NAN_METHOD(getWires);
 
   static NAN_METHOD(NewInstance);
+  static NAN_MODULE_INIT(Init);
 
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };

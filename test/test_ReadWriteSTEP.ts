@@ -33,10 +33,9 @@ describe("testing STEP input output ", function () {
     removeFile(b3_step);
   });
 
-  it("AZ0 - should write a simple shape", function (done) {
+  it("AZ0 - should write a simple shape", () => {
     let box = occ.makeBox([0, 0, 0], [100, 200, 300]);
     let b1 = occ.writeSTEP(b1_step, box);
-    done();
   });
 
   it("AZ1 - readSTEP with callback ", function (done) {

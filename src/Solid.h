@@ -63,9 +63,7 @@ public:
   static NAN_METHOD(getCommonEdges);
   static NAN_METHOD(getCommonVertices);
 
-  // Methods exposed to JavaScripts
-  static void Init(v8::Local<v8::Object> target);
-
+  static NAN_MODULE_INIT(Init);
   static NAN_METHOD(New);
   static NAN_METHOD(NewInstance);
 

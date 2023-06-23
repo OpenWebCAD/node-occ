@@ -46,9 +46,7 @@ describe("testing Wire ", function () {
     });
   });
 
-
   describe("wire made of many small segments", () => {
-
     const DEG2RAD = Math.atan(1) / 45;
     function makeSegments() {
       const r = 100;
@@ -85,27 +83,22 @@ describe("testing Wire ", function () {
     it("should create a wire with a set of ordered segments forming a close wire", () => {
       const segments = makeSegments();
       const wire = occ.makeWire(...segments);
-      console.log("e=", wire.numEdges);
-      console.log("v=", wire.numVertices);
-      console.log("e=")
-      // wire.isClosed.should.eql(true);
-      // wire.isDegenerated.should.eql(false);
+      wire.isClosed.should.eql(true);
     });
 
     it("should create a wire with a set of shuffled segments forming a close wire", () => {
       const segments = makeSegments();
       shuffleInPlace(segments);
       const wire = occ.makeWire(segments);
+      wire.isClosed.should.eql(false);
       if (wire) {
-        // wire.isClosed.should.eql(false);
         // wire.isDegenerated.should.eql(false);
       }
     });
 
     it("should falied to create  a wire with a set of segments that is not forming a close wire", () => {
-
       const segments = makeSegments();
-      const lBefore = segments.length
+      const lBefore = segments.length;
 
       segments.splice(1, 2);
 

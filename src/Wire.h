@@ -20,7 +20,7 @@ public:
     return Nan::ObjectWrap::Unwrap<Wire>(obj);
   }
 
-  static void Init(v8::Local<v8::Object> target);
+  static NAN_MODULE_INIT(Init);
   static NAN_METHOD(New);
   static NAN_METHOD(getEdges);
   static NAN_METHOD(getVertices);

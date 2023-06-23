@@ -17,5 +17,5 @@ public:
   static v8::Local<v8::Value> NewInstance(BOPAlgo_Operation op);
 
   static NAN_METHOD(New);
-  static void Init(v8::Local<v8::Object> target);
+  static NAN_MODULE_INIT(Init);
 };

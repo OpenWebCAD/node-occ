@@ -64,14 +64,16 @@ NAN_METHOD(Shell::New) {
 }
 
 v8::Local<v8::Object> Shell::Clone() const {
-  Shell *obj = new Shell();
+  Nan::EscapableHandleScope scope;
+
   v8::Local<v8::Object> instance = makeInstance(_template);
+  Shell *obj = new Shell();
   obj->Wrap(instance);
   obj->setShape(this->shape());
-  return instance;
+  return scope.Escape(instance);
 }
 
-void Shell::Init(v8::Local<v8::Object> target) {
+NAN_MODULE_INIT(Shell::Init) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Shell::New);

@@ -24,7 +24,7 @@ public:
   gp_Trsf m_trsf;
 
   // Methods exposed to JavaScripts
-  static void Init(v8::Local<v8::Object> target);
+  static NAN_MODULE_INIT(Init);
   static NAN_METHOD(NewInstance);
   static NAN_METHOD(New);
 

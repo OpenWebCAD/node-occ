@@ -150,5 +150,5 @@ describe("testing Edges ", function () {
       //xx console.log(a);
     });
   });
-  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () { });
+  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () {});
 });

@@ -4,16 +4,18 @@
 
 inline v8::Local<v8::Object>
 makeInstance(Nan::Persistent<v8::FunctionTemplate> &_template) {
-  return Nan::NewInstance(
-             Nan::GetFunction(Nan::New(_template)).ToLocalChecked())
-      .ToLocalChecked();
+
+  v8::Local<v8::Object> o =
+      Nan::NewInstance(Nan::GetFunction(Nan::New(_template)).ToLocalChecked())
+          .ToLocalChecked();
+  return o;
 }
 
-template <class T> inline double extract_double(const v8::Local<T> &a) {
+template <class T> inline double extract_double(v8::Local<T> a) {
   return Nan::To<double>(a).FromJust();
 }
 
-void ReadDouble(const v8::Local<v8::Value> &_v, double &value);
+void ReadDouble(v8::Local<v8::Value> _v, double &value);
 
 void ReadInt(v8::Local<v8::Object> obj, const char *name, int *retValue,
              int defaultValue);
@@ -111,12 +113,13 @@ inline int ArrayTypeSize(ArrayType type) {
 }
 
 inline v8::Local<v8::Value> makeArrayBuffer(int length) {
+  Nan::EscapableHandleScope scope;
 
   v8::Local<v8::Value> val = Nan::New("ArrayBuffer").ToLocalChecked();
 
   if (val.IsEmpty() || !val->IsFunction()) {
     Nan::ThrowError("Error getting ArrayBuffer constructor");
-    return val;
+    return scope.Escape(val);
   }
 
   v8::Local<v8::Function> constructor = val.As<v8::Function>();
@@ -124,7 +127,7 @@ inline v8::Local<v8::Value> makeArrayBuffer(int length) {
 
   Nan::MaybeLocal<v8::Value> array_buffer =
       Nan::CallAsConstructor(constructor, 1, &size);
-  return array_buffer.ToLocalChecked();
+  return scope.Escape(array_buffer.ToLocalChecked());
 }
 
 template <typename T, class V> T *getArrayData(V &&value) {
@@ -190,10 +193,12 @@ template <typename T, class V> T *getArrayData(V &&value) {
 
 inline v8::Local<v8::Object> makeTypedArray(ArrayType type, uint32_t length) {
 
+  Nan::EscapableHandleScope scope;
+
   const char *name = ArrayTypeToString(type);
   if (!name) {
     Nan::ThrowError("Unsupported array type");
-    return Nan::New<v8::Object>();
+    return scope.Escape(Nan::New<v8::Object>());
   }
 
   auto typedArrayConstructor = Nan::Get(Nan::GetCurrentContext()->Global(),
@@ -202,7 +207,7 @@ inline v8::Local<v8::Object> makeTypedArray(ArrayType type, uint32_t length) {
 
   if (typedArrayConstructor.IsEmpty() || !typedArrayConstructor->IsFunction()) {
     Nan::ThrowError("Error getting typed array constructor");
-    return Nan::New<v8::Object>();
+    return scope.Escape(Nan::New<v8::Object>());
   }
 
   v8::Local<v8::Function> constructor =
@@ -216,44 +221,49 @@ inline v8::Local<v8::Object> makeTypedArray(ArrayType type, uint32_t length) {
 
   if (array.IsEmpty() || !array->IsObject()) {
     Nan::ThrowError("Error creating TypedArray");
-    return v8::Local<v8::Object>();
+    return scope.Escape(v8::Local<v8::Object>());
   }
-  return array;
+  return scope.Escape(array);
 }
 
 inline v8::Local<v8::Object> makeFloat32Array(const float *data,
                                               uint32_t length) {
+  Nan::EscapableHandleScope scope;
   v8::Local<v8::Object> array = makeTypedArray(A_Float32, length);
   float *dest = GET_FLOAT32ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
-  return array;
+  return scope.Escape(array);
 }
 inline v8::Local<v8::Object> makeInt32Array(const int *data, uint32_t length) {
+  Nan::EscapableHandleScope scope;
   v8::Local<v8::Object> array = makeTypedArray(A_Int32, length);
   int *dest = GET_INT32ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
-  return array;
+  return scope.Escape(array);
 }
 inline v8::Local<v8::Object> makeUint32Array(const unsigned int *data,
                                              uint32_t length) {
+  Nan::EscapableHandleScope scope;
   v8::Local<v8::Object> array = makeTypedArray(A_UInt32, length);
   unsigned int *dest = GET_UINT32ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
-  return array;
+  return scope.Escape(array);
 }
 inline v8::Local<v8::Object> makeUint16Array(const unsigned short *data,
                                              uint32_t length) {
+  Nan::EscapableHandleScope scope;
   v8::Local<v8::Object> array = makeTypedArray(A_UInt16, length);
   unsigned short *dest = GET_UINT16ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
-  return array;
+  return scope.Escape(array);
 }
 inline v8::Local<v8::Object> makeUint8Array(const unsigned char *data,
                                             uint32_t length) {
+  Nan::EscapableHandleScope scope;
   v8::Local<v8::Object> array = makeTypedArray(A_UInt8, length);
   unsigned char *dest = GET_UINT8ARRAY_ARRAY_DATA(array);
   memcpy(dest, data, length * sizeof(data[0]));
-  return array;
+  return scope.Escape(array);
 }
 
 inline v8::Local<v8::Object> _makeTypedArray(const float *data, int length) {
@@ -268,8 +278,7 @@ inline v8::Local<v8::Object> _makeTypedArray(const unsigned int *data,
   return makeUint32Array(data, length);
 }
 
-template <typename OBJECT>
-OBJECT *DynamicCast(const v8::Local<v8::Value> &value) {
+template <typename OBJECT> OBJECT *DynamicCast(v8::Local<v8::Value> value) {
   if (value.IsEmpty())
     return 0;
   if (!value->IsObject())
@@ -282,7 +291,7 @@ OBJECT *DynamicCast(const v8::Local<v8::Value> &value) {
   return 0;
 }
 template <typename ObjType1, typename ObjType2>
-ObjType2 *DynamicCast(const v8::Local<v8::Value> &value) {
+ObjType2 *DynamicCast(v8::Local<v8::Value> value) {
   ObjType1 *obj = DynamicCast<ObjType1>(value);
   if (obj)
     return obj;
@@ -290,7 +299,6 @@ ObjType2 *DynamicCast(const v8::Local<v8::Value> &value) {
 }
 
 template <class T> v8::Local<v8::Function> Constructor() {
-
   auto f = Nan::GetFunction(Nan::New(T::_template)).ToLocalChecked();
   return f;
 }

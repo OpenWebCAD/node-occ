@@ -128,19 +128,21 @@ NAN_METHOD(Face::New) {
 }
 
 v8::Local<v8::Object> Face::Clone() const {
+  Nan::EscapableHandleScope scope;
   Face *obj = new Face();
   v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
-  return instance;
+  return scope.Escape(instance);
 }
 
 v8::Local<v8::Object> Face::NewInstance(const TopoDS_Face &face) {
+  Nan::EscapableHandleScope scope;
   Face *obj = new Face();
   v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(face);
-  return instance;
+  return scope.Escape(instance);
 }
 
 NAN_PROPERTY_GETTER(Face::_mesh) {
@@ -192,7 +194,8 @@ void Face::InitNew(_NAN_METHOD_ARGS) {
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Face, hasMesh);
 }
 
-void Face::Init(v8::Local<v8::Object> target) {
+NAN_MODULE_INIT(Face::Init) {
+
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Face::New);

@@ -24,7 +24,7 @@ public:
   }
   virtual v8::Local<v8::Object> Clone() const;
 
-  static void Init(v8::Local<v8::Object> target);
   static NAN_METHOD(New);
+  static NAN_MODULE_INIT(Init);
   static Nan::Persistent<v8::FunctionTemplate> _template;
 };

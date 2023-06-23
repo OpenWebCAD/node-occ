@@ -29,24 +29,26 @@ v8::Local<v8::Object> buildEmptyWrapper(TopAbs_ShapeEnum type) {
   return v8::Local<v8::Object>();
 }
 v8::Local<v8::Object> buildWrapper(const TopoDS_Shape shape) {
+  Nan::EscapableHandleScope scope;
   v8::Local<v8::Object> obj =
       v8::Local<v8::Object>(buildEmptyWrapper(shape.ShapeType()));
   Base *pShape = Nan::ObjectWrap::Unwrap<Base>(obj);
   pShape->setShape(shape);
-  return obj;
+  return scope.Escape(obj);
 }
 
 bool ShapeIterator::more() { return ex.More() ? true : false; }
 
 v8::Local<v8::Value> ShapeIterator::next() {
+  Nan::EscapableHandleScope scope;
   if (ex.More()) {
 
     v8::Local<v8::Object> obj = buildWrapper(ex.Current());
     Nan::Set(this->handle(), Nan::New("current").ToLocalChecked(), obj);
     ex.Next();
-    return obj;
+    return scope.Escape(obj);
   } else {
-    return Nan::Undefined();
+    return scope.Escape(Nan::Undefined());
   }
 }
 
@@ -65,7 +67,7 @@ NAN_METHOD(ShapeIterator::reset) {
 
 Nan::Persistent<v8::FunctionTemplate> ShapeIterator::_template;
 
-void ShapeIterator::Init(v8::Local<v8::Object> target) {
+NAN_MODULE_INIT(ShapeIterator::Init) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(ShapeIterator::New);
@@ -91,6 +93,7 @@ void ShapeIterator::Init(v8::Local<v8::Object> target) {
 }
 
 TopAbs_ShapeEnum getShapeEnum(const v8::Local<v8::Value> arg) {
+
   if (arg->IsString()) {
 
     v8::Local<v8::String> str = Nan::To<v8::String>(arg).ToLocalChecked();

@@ -53,6 +53,7 @@ const char *toString(BRepBuilderAPI_WireError err) {
 NAN_METHOD(Wire::NewInstance) { _NewInstance<Wire>(info); }
 
 template <class T> void addElement(T info, BRepBuilderAPI_MakeWire &mkWire) {
+
   Edge *edge = DynamicCast<Edge>(info);
   Wire *wire = DynamicCast<Wire>(info);
 
@@ -144,11 +145,13 @@ NAN_METHOD(Wire::New) {
 }
 
 v8::Local<v8::Object> Wire::Clone() const {
+  Nan::EscapableHandleScope scope;
+
   Wire *obj = new Wire();
   v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
-  return instance;
+  return scope.Escape(instance);
 }
 
 NAN_METHOD(Wire::InitNew) {
@@ -158,7 +161,7 @@ NAN_METHOD(Wire::InitNew) {
   REXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Wire, isClosed);
 }
 
-void Wire::Init(v8::Local<v8::Object> target) {
+NAN_MODULE_INIT(Wire::Init) {
   // Prepare constructor template
   v8::Local<v8::FunctionTemplate> tpl =
       Nan::New<v8::FunctionTemplate>(Wire::New);

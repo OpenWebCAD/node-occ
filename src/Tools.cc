@@ -13,6 +13,7 @@
 // ref : http://nikhilm.github.io/uvbook/threads.html
 //
 void extractShapes(v8::Local<v8::Value> value, std::list<Shape *> &shapes) {
+
   if (value->IsArray()) {
 
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
@@ -29,8 +30,7 @@ void extractShapes(v8::Local<v8::Value> value, std::list<Shape *> &shapes) {
   }
 }
 
-static bool extractFileName(const v8::Local<v8::Value> &value,
-                            std::string &filename) {
+static bool extractFileName(v8::Local<v8::Value> value, std::string &filename) {
   // first argument is filename
   if (!value->IsString()) {
     return false;
@@ -40,9 +40,9 @@ static bool extractFileName(const v8::Local<v8::Value> &value,
   return true;
 }
 
-static bool extractCallback(const v8::Local<v8::Value> &value,
+static bool extractCallback(v8::Local<v8::Value> value,
                             v8::Local<v8::Function> &callback) {
-  if (!value->IsFunction()) {
+  if (value.IsEmpty() || !value->IsFunction()) {
     return false;
   }
   callback = Nan::To<v8::Function>(value).ToLocalChecked();
@@ -230,6 +230,7 @@ static int extractSubShape(const TopoDS_Shape &shape,
 
 static int extractShape(const TopoDS_Shape &shape,
                         std::list<v8::Local<v8::Object>> &shapes) {
+
   TopAbs_ShapeEnum type = shape.ShapeType();
 
   if (type != TopAbs_COMPOUND) {
@@ -272,6 +273,8 @@ static int extractShape(const TopoDS_Shape &shape,
 }
 
 static v8::Local<v8::Array> convert(std::list<v8::Local<v8::Object>> &shapes) {
+  Nan::EscapableHandleScope scope;
+
   v8::Local<v8::Array> arr = Nan::New<v8::Array>((int)shapes.size());
   int i = 0;
   for (std::list<v8::Local<v8::Object>>::iterator it = shapes.begin();
@@ -279,7 +282,7 @@ static v8::Local<v8::Array> convert(std::list<v8::Local<v8::Object>> &shapes) {
     Nan::Set(arr, i, *it);
     i++;
   }
-  return arr;
+  return scope.Escape(arr);
 }
 
 bool mutex_initialised = false;
@@ -605,7 +608,10 @@ NAN_METHOD(readSTEP) {
   }
 
   v8::Local<v8::Function> progressCallback;
-  if (!extractCallback(info[2], progressCallback)) {
+
+  if (!extractCallback(info[2], progressCallback))
+
+  {
     // OPTIONAL !!!
     // Nan::ThrowError("expecting a callback function");
   }
@@ -624,7 +630,6 @@ public:
 };
 
 void BRepAsyncReadWorker::Execute() {
-
   this->_retValue = 0;
 
   std::string filename = this->_filename;
@@ -667,15 +672,21 @@ void readBREPAsync(const std::string &filename,
 
 NAN_METHOD(readBREP) {
 
+  if (info.Length() == 0 || info[0].IsEmpty()) {
+    return Nan::ThrowError("expecting one argument");
+  }
   std::string filename;
   if (!extractFileName(info[0], filename)) {
     return Nan::ThrowError("expecting a file name");
   }
+
   v8::Local<v8::Function> callback;
+
   if (!extractCallback(info[1], callback)) {
     return Nan::ThrowError("expecting a callback function");
   }
   v8::Local<v8::Function> progressCallback;
+
   if (!extractCallback(info[2], progressCallback)) {
     // OPTIONAL !!!
     // return Nan::ThrowError("expecting a callback function");

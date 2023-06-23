@@ -17,8 +17,7 @@
 
 NAN_METHOD(ForceGC) { Nan::IdleNotification(100); }
 
-void Initialize(v8::Local<v8::Object> target) {
-
+NAN_MODULE_INIT(Init) {
   BoundingBox::Init(target);
   Edge::Init(target);
   Face::Init(target);
@@ -82,4 +81,4 @@ void Initialize(v8::Local<v8::Object> target) {
 
   Nan::SetMethod(target, "gc", ForceGC);
 }
-NODE_MODULE(occ, Initialize)
+NODE_MODULE(occ, Init)
