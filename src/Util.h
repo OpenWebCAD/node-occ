@@ -14,8 +14,14 @@ makeInstance(Nan::Persistent<v8::FunctionTemplate> &_template) {
 template <class T> inline double extract_double(v8::Local<T> a) {
   return Nan::To<double>(a).FromJust();
 }
+template <class T> inline bool extract_bool(v8::Local<T> a) {
+  return Nan::To<bool>(a).FromJust();
+}
 
-void ReadDouble(v8::Local<v8::Value> _v, double &value);
+void ReadDouble(v8::Local<v8::Value> _v, double &value,
+                double defaultValue = 0.0);
+void ReadBoolean(v8::Local<v8::Value> _v, bool &value,
+                 bool defaultValue = false);
 
 void ReadInt(v8::Local<v8::Object> obj, const char *name, int *retValue,
              int defaultValue);

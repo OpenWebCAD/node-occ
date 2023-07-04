@@ -1,5 +1,5 @@
 import should from "should";
-import { occ, Edge, BoundingBox, IEdge, Vertex, IWire, Point } from "..";
+import { occ, Edge, BoundingBox, IEdge, Vertex, IWire, Point, PointLike } from "..";
 const { makeLine } = occ;
 
 describe("testing Edges ", function () {
@@ -150,5 +150,29 @@ describe("testing Edges ", function () {
       //xx console.log(a);
     });
   });
-  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () {});
+  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () { });
+
+
+  describe("EDGE5 - makeInterpolatedCurve", () => {
+
+
+    const points: PointLike[] = [
+      [10, 0, 0],
+      [20, 20, 0],
+      [30, 0, 0]
+    ];
+
+    it("should interpolate a curve through 3 points", () => {
+
+      const edge = occ.makeInterpolatedCurve(points, false, 0.01);
+
+      console.log(edge.firstVertex.toString());
+
+      console.log(edge.lastVertex.toString());
+
+      console.log(edge.polygonize().toString());
+      console.log("l =", edge.length);
+    })
+  });
+
 });

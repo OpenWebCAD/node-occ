@@ -73,8 +73,8 @@ int Edge::createLine(Vertex *start, Vertex *end) {
   return 1;
 }
 
-int Edge::interpolateCurve(std::vector<gp_Pnt> &pointArray, bool periodic,
-                           double tolerance) {
+int Edge::createInterpolatedCurve(std::vector<gp_Pnt> &pointArray,
+                                  bool periodic, double tolerance) {
   try {
     const unsigned int n_vertices = pointArray.size();
     occHandle(TColgp_HArray1OfPnt) vertices =
@@ -170,6 +170,29 @@ v8::Local<v8::Object> getOrCreateVertex(v8::Local<v8::Value> arg) {
     return scope.Escape(Nan::To<v8::Object>(Nan::Null()).ToLocalChecked());
   }
 }
+
+void getPointArray(v8::Local<v8::Value> arg, std::vector<gp_Pnt> &pointArray) {
+  Nan::HandleScope scope;
+  if (arg->IsArray()) {
+    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(arg);
+    int length = arr->Length();
+    pointArray.reserve(pointArray.size() + length);
+    for (int i = 0; i < length; i++) {
+
+      auto elementI = Nan::Get(arr, i).ToLocalChecked();
+      v8::Local<v8::Object> jV1 = getOrCreateVertex(elementI);
+      if (jV1.IsEmpty()) {
+        return Nan::ThrowError("Arg1 must be a point");
+      }
+      Vertex *v1 = Nan::ObjectWrap::Unwrap<Vertex>(jV1);
+
+      gp_Pnt p2;
+      ReadPoint(elementI, &p2);
+      pointArray.push_back(p2);
+    }
+  }
+}
+
 Nan::Persistent<v8::FunctionTemplate> Edge::_template;
 
 NAN_METHOD(Edge::static_makeLine) {
@@ -197,6 +220,34 @@ NAN_METHOD(Edge::static_makeLine) {
   Vertex *_v2 = Nan::ObjectWrap::Unwrap<Vertex>(v2);
 
   pThis->createLine(_v1, _v2);
+  info.GetReturnValue().Set(instance);
+}
+
+/**
+ * info[0] => PntArray or Vertex Array
+ */
+NAN_METHOD(Edge::static_makeInterpolatedCurve) {
+  v8::Local<v8::Object> instance = makeInstance(_template);
+  Edge *pThis = Nan::ObjectWrap::Unwrap<Edge>(
+      Nan::To<v8::Object>(instance).ToLocalChecked());
+
+  try {
+    v8::Local<v8::Value> arg1 = info[0];
+    v8::Local<v8::Value> arg2 = info[1];
+    v8::Local<v8::Value> arg3 = info[2];
+    std::vector<gp_Pnt> pointArray;
+    getPointArray(arg1, pointArray);
+
+    bool periodic = false;
+    ReadBoolean(arg2, periodic, false);
+
+    double tolerance = 0.01;
+    ReadDouble(arg3, tolerance, tolerance);
+
+    pThis->createInterpolatedCurve(pointArray, periodic, tolerance);
+  }
+  CATCH_AND_RETHROW_NO_RETURN("Failed to create an interpolated curve");
+
   info.GetReturnValue().Set(instance);
 }
 
@@ -377,10 +428,14 @@ NAN_MODULE_INIT(Edge::Init) {
   Nan::SetMethod(tpl, "makeLine", Edge::static_makeLine);
   Nan::SetMethod(tpl, "makeArc3P", Edge::static_makeArc3P);
   Nan::SetMethod(tpl, "makeCircle", Edge::static_makeCircle);
+  Nan::SetMethod(tpl, "makeInterpolatedCurve",
+                 Edge::static_makeInterpolatedCurve);
 
   Nan::SetMethod(target, "makeLine", Edge::static_makeLine);
   Nan::SetMethod(target, "makeArc3P", Edge::static_makeArc3P);
   Nan::SetMethod(target, "makeCircle", Edge::static_makeCircle);
+  Nan::SetMethod(target, "makeInterpolatedCurve",
+                 Edge::static_makeInterpolatedCurve);
 }
 
 void extractEdgePolygon(const TopoDS_Edge &edge,

@@ -92,7 +92,7 @@ NAN_MODULE_INIT(ShapeIterator::Init) {
            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
-TopAbs_ShapeEnum getShapeEnum(const v8::Local<v8::Value> arg) {
+TopAbs_ShapeEnum getShapeEnum(v8::Local<v8::Value> arg) {
 
   if (arg->IsString()) {
 

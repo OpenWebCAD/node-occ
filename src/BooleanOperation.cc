@@ -15,7 +15,7 @@ inline bool _isEqual(v8::Local<v8::String> a, const std::string txt) {
   return txt == *Nan::Utf8String(a);
 }
 
-BOPAlgo_Operation ReadOperationType(const v8::Local<v8::Value> &arg) {
+BOPAlgo_Operation ReadOperationType(v8::Local<v8::Value> arg) {
   v8::Local<v8::String> str = Nan::To<v8::String>(arg).ToLocalChecked();
   if (_isEqual(str, "SECTION"))
     return BOPAlgo_SECTION;

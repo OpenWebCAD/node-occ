@@ -26,8 +26,8 @@ public:
 
   int createCircle(const gp_Pnt &center, const gp_Dir &normal, double radius);
 
-  int interpolateCurve(std::vector<gp_Pnt> &PointArray, bool periodic,
-                       double tolerance);
+  int createInterpolatedCurve(std::vector<gp_Pnt> &PointArray, bool periodic,
+                              double tolerance);
 
   // int createEllipse(OCCStruct3d pnt, OCCStruct3d nor, double rMajor, double
   // rMinor); int createHelix(double pitch, double height, double radius, double
@@ -57,6 +57,7 @@ public:
   static NAN_METHOD(static_makeLine);
   static NAN_METHOD(static_makeCircle);
   static NAN_METHOD(static_makeArc3P);
+  static NAN_METHOD(static_makeInterpolatedCurve);
 
   static NAN_METHOD(polygonize);
   static NAN_METHOD(getVertices);

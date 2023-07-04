@@ -37,11 +37,19 @@ void ReadPropertyPointFromArray(v8::Local<v8::Array> arr, double *x, double *y,
 //  //xx }
 //}
 
-void ReadDouble(v8::Local<v8::Value> _v, double &value) {
+void ReadDouble(v8::Local<v8::Value> _v, double &value, double defaultValue) {
 
-  value = 0.0;
+  value = defaultValue;
   if (_v->IsNumber()) {
     value = extract_double(_v);
+  }
+}
+
+void ReadBoolean(v8::Local<v8::Value> _v, bool &value, bool defaultValue) {
+
+  value = defaultValue;
+  if (_v->IsBoolean()) {
+    value = extract_bool(_v);
   }
 }
 void ReadDouble(v8::Local<v8::Object> value, const char *name, double *retValue,

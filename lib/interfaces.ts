@@ -92,8 +92,8 @@ export interface IShape<T> {
 }
 
 export interface IVertex extends IShape<IVertex>, IPoint {
-  new (x: Real, y: Real, z: Real): IVertex;
-  new (point: PointLike): IVertex;
+  new(x: Real, y: Real, z: Real): IVertex;
+  new(point: PointLike): IVertex;
   isValid: boolean;
 }
 
@@ -291,6 +291,8 @@ export interface OCC {
   makeLine(point1: PointLike, point2: PointLike): IEdge;
   makeArc3P(point1: PointLike, point2: PointLike, point3: PointLike): IEdge;
   makeCircle(center: PointLike, normal: VectorLike, radius: Real): IEdge;
+  makeInterpolatedCurve(points: PointLike[], isPeriodic: boolean, tolerance: number): IEdge;
+
   // Wires
   makeWire(edges: (IEdge | IWire)[]): IWire;
   makeWire(...args: (IEdge | IWire)[]): IWire;

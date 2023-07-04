@@ -62,7 +62,7 @@ NAN_METHOD(BoundingBox::addPoint) {
   info.GetReturnValue().Set(info.This());
 }
 
-bool checkCoerceToPoint(const v8::Local<v8::Value> &v) {
+bool checkCoerceToPoint(v8::Local<v8::Value> v) {
   Nan::HandleScope scope;
   // TODO ...
   return true;

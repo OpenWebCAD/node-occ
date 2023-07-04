@@ -58,7 +58,7 @@ size_t extractArgumentList(_NAN_METHOD_ARGS,
 }
 
 template <class ClassType>
-bool extractArg(const v8::Local<v8::Value> &value, ClassType *&pObj) {
+bool extractArg(v8::Local<v8::Value> value, ClassType *&pObj) {
 
   assert(pObj == 0);
   if (value.IsEmpty())
@@ -75,7 +75,7 @@ bool extractArg(const v8::Local<v8::Value> &value, ClassType *&pObj) {
 }
 
 template <class ClassType>
-bool _extractArray(const v8::Local<v8::Value> &value,
+bool _extractArray(v8::Local<v8::Value> value,
                    std::vector<ClassType *> &elements) {
 
   if (value->IsArray()) {
