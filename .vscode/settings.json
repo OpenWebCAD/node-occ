@@ -53,6 +53,9 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "unordered_set": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp",
+        "ratio": "cpp"
     }
 }
