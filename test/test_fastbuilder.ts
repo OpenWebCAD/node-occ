@@ -93,7 +93,7 @@ describe("testing fast builder with some built-in shapes", function () {
   it("should  create the  bottle..", function () {
     let s1 = shapeFactory.makeBottle(fastBuilder, {
       filletRadius: 1,
-      height: 100,
+      height: 100
     });
     s1.numFaces.should.be.greaterThan(16);
   });

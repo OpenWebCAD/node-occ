@@ -34,6 +34,9 @@ char m(Primitives_Direction p) {
   }
   return 0;
 }
+
+static void ReadAx1(v8::Local<v8::Value> value, gp_Ax1 *ax1);
+
 static void registerMakeBoxFaces(Solid *pThis, BRepPrimAPI_MakeBox &tool) {
   pThis->_registerNamedShape("top", tool.TopFace());
   pThis->_registerNamedShape("bottom", tool.BottomFace());
@@ -188,32 +191,140 @@ NAN_METHOD(ShapeFactory::makeSolidThruSections) {
   CATCH_AND_RETHROW("Failed to create a solid thru sections");
   info.GetReturnValue().Set(pJhis);
 }
+
+Base *GetBaseShape(v8::Local<v8::Value> arg) {
+  auto vertex = DynamicCast<Vertex>(arg);
+  if (vertex)
+    return vertex;
+  auto edge = DynamicCast<Edge>(arg);
+  if (edge)
+    return edge;
+  auto wire = DynamicCast<Wire>(arg);
+  if (wire)
+    return wire;
+  auto face = DynamicCast<Face>(arg);
+  if (face)
+    return face;
+  return 0;
+}
+NAN_METHOD(ShapeFactory::makeRevol) {
+  v8::Local<v8::Value> pJhis = Solid::NewInstance();
+  try {
+    if (info.Length() != 2 && info.Length() != 3) {
+      return Nan::ThrowError(
+          "invalid arguments : expecting <shape>,<axis>,[angleInDregree]");
+    }
+
+    Base *shape = GetBaseShape(info[0]);
+    if (!shape) {
+      return Nan::ThrowError("Expecting a <vertex>|<edge>|<wire>|<face>");
+    }
+    gp_Ax1 axis;
+    ReadAx1(info[1], &axis);
+
+    double angleInDegree = 360;
+    ReadDouble(info[2], angleInDegree);
+
+    Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
+    if (angleInDegree == 360) {
+      BRepPrimAPI_MakeRevol tool(shape->shape(), axis);
+      tool.Build();
+      pThis->setShape(tool.Shape());
+    } else {
+      BRepPrimAPI_MakeRevol tool(shape->shape(), axis, angleInDegree);
+      tool.Build();
+      pThis->setShape(tool.Shape());
+      // registerXXXXFaces(pThis, prismMaker);
+    }
+    /**
+     * Vertex -> Edge.
+     * Edge -> Face.
+     * Wire -> Shell.
+     * Face -> Solid.
+     * Shell -> CompSolid.
+     */
+  }
+  CATCH_AND_RETHROW("Failed to create pipe ");
+  info.GetReturnValue().Set(pJhis);
+}
 NAN_METHOD(ShapeFactory::makePipe) {
   if (info.Length() != 2) {
     return Nan::ThrowError("invalid arguments : expecting <Wire> "
                            "connectionWire,<Wire> wire1, <Wire> wire2");
   }
-
   v8::Local<v8::Value> pJhis = Solid::NewInstance();
   try {
     Wire *connectionWire = DynamicCast<Wire>(info[0]);
     Wire *profile = DynamicCast<Wire>(info[1]);
 
-    BRepOffsetAPI_MakePipe piper(connectionWire->wire(), profile->wire());
+    BRepOffsetAPI_MakePipe tool(connectionWire->wire(), profile->wire());
 
-    piper.Build();
+    tool.Build();
 
     Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
         Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
     // auto listOfShapes = piper.Generated();
-    pThis->setShape(piper.Shape());
+    pThis->setShape(tool.Shape());
     // registerXXXXFaces(pThis, prismMaker);
   }
   CATCH_AND_RETHROW("Failed to create pipe ");
   info.GetReturnValue().Set(pJhis);
 }
 
+NAN_METHOD(ShapeFactory::makePipeShell) {
+
+  /**
+   * {
+   *    wire: Wire | Wire[],
+   *    spineSupport: Wire
+   *    auxilarySpine:
+   * // advanced
+   *    mode: enum {
+   *       Frenet //  Boolean => SetMode(isFrenet);
+   *   }:
+   *   maxDegree?: number;
+   *   maxSegment?: number;
+   *   forceApproxC1?: boolean;
+   * }
+   */
+  v8::Local<v8::Value> arg1 = info[0];
+  if (arg1.IsEmpty() || !arg1->IsObject()) {
+    return Nan::ThrowError("expecting  parameters object ");
+  }
+
+  Nan::HandleScope scope;
+  v8::Local<v8::Object> arg1AsObject =
+      Nan::To<v8::Object>(arg1).ToLocalChecked();
+  auto propWire = Nan::Get(arg1AsObject, Nan::New("wire").ToLocalChecked())
+                      .ToLocalChecked();
+  Wire *wire = DynamicCast<Wire>(propWire);
+  if (!wire) {
+    auto mesg =
+        std::string("invalid argument: expecting param.wire to be a Wire");
+    Nan::ThrowError(mesg.c_str());
+  }
+
+  //  = Nan::To<double>(_v).FromMaybe(defaultValue);
+
+  auto tool = new BRepOffsetAPI_MakePipeShell(wire->wire());
+
+  //
+}
+
+// NAN_METHOD(Solid::makePipe)
+// {
+//   /**
+//    * closed face at top and bottong
+//    *
+//    * {
+//    *    wire: Wire | Wire[],
+//    *    spineSupport: Wire
+//    *    auxilarySpine:
+//    * }
+//    */
+// }
 NAN_METHOD(ShapeFactory::makePrism) {
   // <FACE> [x,y,z]
   // <FACE> [x,y,z] [x,y,z]
@@ -340,6 +451,28 @@ void ReadAx2(v8::Local<v8::Value> value, gp_Ax2 *ax2) {
   }
 }
 
+void ReadAx1(v8::Local<v8::Value> value, gp_Ax1 *ax1) {
+  assert(ax1);
+  if (value->IsArray()) {
+    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
+    gp_Pnt origin;
+
+    auto element0 = Nan::Get(arr, 0).ToLocalChecked();
+
+    ReadPoint(element0, &origin);
+    if (arr->Length() == 2) {
+      // variation 2 :  gp_Ax2(const gp_Pnt& P,const gp_Dir& V);
+      gp_Dir V;
+      auto element1 = Nan::Get(arr, 1).ToLocalChecked();
+      ReadDir(element1, &V);
+      *ax1 = gp_Ax1(origin, V);
+    } else {
+      Nan::ThrowError("Cannot extract Axis from argument value");
+    }
+  } else {
+    Nan::ThrowError("Cannot extract Axis from argument value");
+  }
+}
 NAN_METHOD(ShapeFactory::makeCylinder) {
 
   //  gp_Ax2& Axes

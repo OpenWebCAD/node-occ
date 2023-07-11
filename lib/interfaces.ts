@@ -25,6 +25,7 @@ export interface XYZ {
 export type Triplet = [Real, Real, Real];
 export type PointLike = IPoint | Triplet | XYZ;
 export type VectorLike = IVector | Triplet;
+export type IAxisLike = [PointLike, VectorLike];
 
 export interface IBoundingBox {
   nearPt: IPoint;
@@ -92,8 +93,8 @@ export interface IShape<T> {
 }
 
 export interface IVertex extends IShape<IVertex>, IPoint {
-  new(x: Real, y: Real, z: Real): IVertex;
-  new(point: PointLike): IVertex;
+  new (x: Real, y: Real, z: Real): IVertex;
+  new (point: PointLike): IVertex;
   isValid: boolean;
 }
 
@@ -216,6 +217,8 @@ export interface ISolid extends IShape<ISolid> {
   getShapeName(topologyElement: IFace | IEdge | IVertex): string;
 }
 
+export interface IAxis {}
+
 export interface IWire extends IShape<IWire> {
   isClosed: boolean;
   numEdges: number;
@@ -230,6 +233,8 @@ export interface IWire extends IShape<IWire> {
 }
 
 export interface OCC {
+  makeAxis(): IAxis;
+
   makeBox(point1: PointLike, point2: PointLike): ISolid;
   makeBox(width: Real, length: Real, height: Real): ISolid;
 
@@ -238,11 +243,7 @@ export interface OCC {
     highCenterPoint: PointLike,
     radius: Real
   ): ISolid;
-  makeCylinder(
-    [origin, axis]: [PointLike, VectorLike],
-    radius: Real,
-    height: Real
-  ): ISolid;
+  makeCylinder([origin, axis]: IAxisLike, radius: Real, height: Real): ISolid;
   makeCylinder(radius: Real, height: Real): ISolid;
   makeCylinder(
     originDirection: [PointLike, VectorLike],
@@ -279,6 +280,13 @@ export interface OCC {
    */
   makePipe(spine: IWire, profile: IWire): ISolid;
 
+  makeRevol(vertex: IVertex, axis: IAxisLike, angleDegree?: number): IEdge;
+  makeRevol(edge: IEdge, axis: IAxisLike, angleDegree?: number): IFace;
+  makeRevol(wire: IWire, axis: IAxisLike, angleDegree?: number): IShell;
+  makeRevol(face: IFace, axis: IAxisLike, angleDegree?: number): ISolid;
+
+  // makeRevol(solid: ISolid): ICompound;
+
   /**
    *
    * @param point1
@@ -291,7 +299,11 @@ export interface OCC {
   makeLine(point1: PointLike, point2: PointLike): IEdge;
   makeArc3P(point1: PointLike, point2: PointLike, point3: PointLike): IEdge;
   makeCircle(center: PointLike, normal: VectorLike, radius: Real): IEdge;
-  makeInterpolatedCurve(points: PointLike[], isPeriodic: boolean, tolerance: number): IEdge;
+  makeInterpolatedCurve(
+    points: PointLike[],
+    isPeriodic: boolean,
+    tolerance: number
+  ): IEdge;
 
   // Wires
   makeWire(edges: (IEdge | IWire)[]): IWire;

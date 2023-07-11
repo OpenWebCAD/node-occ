@@ -45,7 +45,7 @@ class Cache {
     }
     Object.defineProperty(obj, methodName, {
       value: performOperation,
-      enumerable: false,
+      enumerable: false
     });
   }
 

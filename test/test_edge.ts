@@ -1,5 +1,14 @@
 import should from "should";
-import { occ, Edge, BoundingBox, IEdge, Vertex, IWire, Point, PointLike } from "..";
+import {
+  occ,
+  Edge,
+  BoundingBox,
+  IEdge,
+  Vertex,
+  IWire,
+  Point,
+  PointLike
+} from "..";
 const { makeLine } = occ;
 
 describe("testing Edges ", function () {
@@ -76,7 +85,7 @@ describe("testing Edges ", function () {
 
       (l % 3).should.eql(0);
       [polyline[l - 3], polyline[l - 2], polyline[l - 1]].should.eql([
-        -30, 20, 30,
+        -30, 20, 30
       ]);
     });
   });
@@ -103,7 +112,7 @@ describe("testing Edges ", function () {
       let l = polyline.length;
       (l % 3).should.eql(0);
       [polyline[l - 3], polyline[l - 2], polyline[l - 1]].should.eql([
-        -29, 22, 33,
+        -29, 22, 33
       ]);
     });
   });
@@ -150,12 +159,9 @@ describe("testing Edges ", function () {
       //xx console.log(a);
     });
   });
-  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () { });
-
+  describe("EDGE4 - an  Edge constructed as  as a linear Segment between (10,20,30) and (-30,20,30) ", function () {});
 
   describe("EDGE5 - makeInterpolatedCurve", () => {
-
-
     const points: PointLike[] = [
       [10, 0, 0],
       [20, 20, 0],
@@ -163,7 +169,6 @@ describe("testing Edges ", function () {
     ];
 
     it("should interpolate a curve through 3 points", () => {
-
       const edge = occ.makeInterpolatedCurve(points, false, 0.01);
 
       console.log(edge.firstVertex.toString());
@@ -172,7 +177,6 @@ describe("testing Edges ", function () {
 
       console.log(edge.polygonize().toString());
       console.log("l =", edge.length);
-    })
+    });
   });
-
 });

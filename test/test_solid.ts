@@ -10,7 +10,7 @@ import {
   ISolid,
   Solid,
   Triplet,
-  occ,
+  occ
 } from "..";
 
 const DEG2RAD = Math.PI / 180;
@@ -384,7 +384,7 @@ describe("testing solid construction", () => {
     before(() => {
       let position: [Triplet, Triplet] = [
         [0, 0, 1],
-        [0, 1, 0],
+        [0, 1, 0]
       ];
       let radius = 50;
       let height = 100;

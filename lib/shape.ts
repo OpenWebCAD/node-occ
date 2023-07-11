@@ -89,7 +89,7 @@ export function init(occ: OCC) {
 
           const entry = {
             name: solid.getShapeName(edge),
-            mesh: toBase64(polyline),
+            mesh: toBase64(polyline)
           };
           jsonSolidMesh.edges.push(entry);
           return;
@@ -100,7 +100,7 @@ export function init(occ: OCC) {
 
         const entry = {
           name: solid.getShapeName(edge),
-          indexes: toBase64(indexes),
+          indexes: toBase64(indexes)
         };
         jsonSolidMesh.edges.push(entry);
       });
@@ -132,7 +132,7 @@ export function init(occ: OCC) {
         const entry = {
           name: solid.getShapeName(face),
           indexes: toBase64(indexes),
-          normalIndexes: toBase64(normalindexes),
+          normalIndexes: toBase64(normalindexes)
         };
         //xx entry.mesh.materials[0].colorDiffuse = [ Math.random(),Math.random(),Math.random()];
         jsonSolidMesh.faces.push(entry);
@@ -161,7 +161,7 @@ export function init(occ: OCC) {
       vertices: [],
       faces: [],
       edges: [],
-      normals: [],
+      normals: []
     };
 
     jsonSolidMesh.vertices = toBase64(mesh.vertices);
@@ -195,7 +195,7 @@ export function init(occ: OCC) {
       vertices: [],
       faces: [],
       edges: [],
-      normals: [],
+      normals: []
     };
     let i;
 
@@ -208,12 +208,12 @@ export function init(occ: OCC) {
       const entry: IFaceMesh = {
         name: solid.getShapeName(face),
         // color:(r*255+g)*255+b,
-        mesh: face.mesh.toJSON() as any,
+        mesh: face.mesh.toJSON() as any
       };
       entry.mesh.materials[0].colorDiffuse = [
         Math.random(),
         Math.random(),
-        Math.random(),
+        Math.random()
       ];
       jsonSolidMesh.faces.push(entry);
     }
@@ -236,7 +236,7 @@ export function init(occ: OCC) {
       }
       const entry: IFaceMesh = {
         name: solid.getShapeName(edge),
-        mesh: pts,
+        mesh: pts
       };
       //entry.mesh.materials[0].colorDiffuse could be [ Math.random(),Math.random(),Math.random()];
       jsonSolidMesh.edges.push(entry);

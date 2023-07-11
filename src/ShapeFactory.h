@@ -32,7 +32,9 @@ public:
   static NAN_METHOD(makeCone);
   static NAN_METHOD(makeSphere);
   static NAN_METHOD(makeTorus);
+  static NAN_METHOD(makeRevol);
   static NAN_METHOD(makePipe);
+  static NAN_METHOD(makePipeShell);
   static NAN_METHOD(makeSolidThruSections);
   //
   static NAN_METHOD(makeThickSolid);

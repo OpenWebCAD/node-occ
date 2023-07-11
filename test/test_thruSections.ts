@@ -15,7 +15,7 @@ describe("through_sections", function () {
       circle_1,
       circle_2,
       circle_3,
-      circle_4,
+      circle_4
     ]);
 
     const filename = getTemporaryFilePath({ prefix: "b1_", suffix: ".step" });

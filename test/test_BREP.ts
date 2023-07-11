@@ -115,7 +115,7 @@ describe("testing BREP input output ", function () {
 function build_large_part() {
   let lego_filename = getTemporaryFilePath({
     prefix: "legoPlate3x2_2x2",
-    suffix: "",
+    suffix: ""
   });
 
   let legoPlate = makeLegoBrick(occ, 3, 2, "thin");

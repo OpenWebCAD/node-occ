@@ -5,7 +5,7 @@ import path from "node:path";
 
 export function getTemporaryFilePath({
   prefix,
-  suffix,
+  suffix
 }: {
   prefix?: string;
   suffix: string;

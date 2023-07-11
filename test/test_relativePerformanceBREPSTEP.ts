@@ -18,7 +18,7 @@ async function myReadStep(filename: string): Promise<void> {
       complete: "=",
       incomplete: "-",
       width: 100,
-      total: 1000,
+      total: 1000
     }
   );
 
@@ -35,7 +35,7 @@ async function myReadStep(filename: string): Promise<void> {
         complete: "=",
         incomplete: "-",
         width: 100,
-        total: solids.length,
+        total: solids.length
       }
     );
     for (let i in solids) {

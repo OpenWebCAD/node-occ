@@ -1,32 +1,7 @@
 import * as should from "should";
 import { IBoundingBox, ISolid, occ } from "..";
+import { dumpSolid } from "./debug_tools";
 
-const doDebug = false;
-function dumpSolid(b: ISolid) {
-  if (doDebug) {
-    console.log(
-      " faces    = ",
-      b
-        .getFaces()
-        .map((e) => b.getShapeName(e))
-        .join(", ")
-    );
-    console.log(
-      " edges    = ",
-      b
-        .getEdges()
-        .map((e) => b.getShapeName(e))
-        .join(", ")
-    );
-    console.log(
-      " vertices = ",
-      b
-        .getVertices()
-        .map((e) => b.getShapeName(e))
-        .join(", ")
-    );
-  }
-}
 // see https://npmjs.org/package/should
 
 describe("testing face naming on simple box", () => {

@@ -56,6 +56,7 @@ NAN_MODULE_INIT(Init) {
   Nan::SetMethod(target, "makeThickSolid", ShapeFactory::makeThickSolid);
   Nan::SetMethod(target, "makeDraftAngle", ShapeFactory::makeDraftAngle);
   Nan::SetMethod(target, "makeFillet", ShapeFactory::makeFillet);
+  Nan::SetMethod(target, "makeRevol", ShapeFactory::makeRevol);
   Nan::SetMethod(target, "makePipe", ShapeFactory::makePipe);
   Nan::SetMethod(target, "makeSolidThruSections",
                  ShapeFactory::makeSolidThruSections);

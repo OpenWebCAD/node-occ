@@ -26,7 +26,7 @@ describe("testing createProxyObject", function () {
     const a = {
       add(a1: number, a2: number): number {
         return a1 + a2;
-      },
+      }
     };
 
     const b = createProxyObject(a);

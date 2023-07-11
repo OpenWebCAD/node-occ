@@ -17,7 +17,7 @@ import {
   IVector,
   IWire,
   OCC,
-  IShapeIterator,
+  IShapeIterator
 } from "./interfaces";
 
 export const _occ = require("../lib/bindings");

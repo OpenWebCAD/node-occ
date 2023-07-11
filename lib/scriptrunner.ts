@@ -5,7 +5,7 @@ const doDebug = false;
 
 function getTemporaryFilePath({
   prefix,
-  suffix,
+  suffix
 }: {
   prefix: string;
   suffix: string;
@@ -34,7 +34,7 @@ export class ScriptRunner {
         log: () => {
           /// console.log.apply(console,arguments);
           this.env.logs.push(arguments);
-        },
+        }
       },
 
       eval: () => {
@@ -49,7 +49,7 @@ export class ScriptRunner {
       setInterval: () => {
         throw new Error("setInterval is forbidden");
       },
-      error: null,
+      error: null
     };
 
     // extend default env object with env parameters
@@ -67,7 +67,7 @@ export class ScriptRunner {
   ) {
     const settings = {
       prefix: "script",
-      suffix: ".bar",
+      suffix: ".bar"
     };
 
     const log = this.env.console.log;

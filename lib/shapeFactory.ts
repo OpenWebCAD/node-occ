@@ -8,7 +8,7 @@ import {
   PointLike,
   Triplet,
   UInteger,
-  VectorLike,
+  VectorLike
 } from "./interfaces";
 import { _occ } from "./occ";
 
@@ -127,7 +127,7 @@ export function makePan(csg: OCC, _height: number, _radius: number) {
   const pt2: Triplet = [
     handleLength + radius - 2 * thickness,
     0,
-    height - handleRadius * 1.1,
+    height - handleRadius * 1.1
   ];
   const handle = csg.makeCylinder(pt1, pt2, handleRadius);
 

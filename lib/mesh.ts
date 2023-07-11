@@ -23,12 +23,12 @@ export function init() {
           DbgColor: 15658734, // => 0xeeeeee
           DbgIndex: 0,
           DbgName: "dummy",
-          colorDiffuse: [1, 0, 0],
-        },
+          colorDiffuse: [1, 0, 0]
+        }
       ],
       vertices: [],
       normals: [],
-      faces: [],
+      faces: []
     };
 
     json.vertices = toArray(this.vertices);
