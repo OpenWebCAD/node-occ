@@ -165,11 +165,22 @@ export interface IFace extends IShape<IFace> {
 
 export interface IShell extends IShape<IShell> {
   shapeType: "SHELL";
-
   hashCode: string;
-
   numFaces: UInteger;
   orientation: "FORWARD";
+  area: Real;
+  getEdges(): IEdge[];
+  getFaces(): IFace[];
+  getVertices(): IVertex[];
+  getCommonEdges(face1: IFace, face2: IFace): IEdge[];
+  getAdjacentFaces(face: IFace): IFace[];
+  faces: {
+      [key: string]: IFace;
+  };
+  hasMesh: boolean;
+  mesh: IMesh;
+  createMesh(tolerance: Real, angle?: Real): IMesh;
+  getShapeName(topologyElement: IFace | IEdge | IVertex): string;
 }
 
 export interface IShapeIterator<T> {
@@ -279,7 +290,7 @@ export interface OCC {
    * @param profile
    */
   makePipe(spine: IWire, profile: IWire): IShell;
-  makePipe(spine: IFace, profile: IWire): ISolid;
+  // makePipe(spine: IFace, profile: IWire): ISolid;
 
   makeRevol(vertex: IVertex, axis: IAxisLike, angleDegree?: number): IEdge;
   makeRevol(edge: IEdge, axis: IAxisLike, angleDegree?: number): IFace;
