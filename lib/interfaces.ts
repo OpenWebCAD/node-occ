@@ -278,7 +278,8 @@ export interface OCC {
    *
    * @param profile
    */
-  makePipe(spine: IWire, profile: IWire): ISolid;
+  makePipe(spine: IWire, profile: IWire): IShell;
+  makePipe(spine: IFace, profile: IWire): ISolid;
 
   makeRevol(vertex: IVertex, axis: IAxisLike, angleDegree?: number): IEdge;
   makeRevol(edge: IEdge, axis: IAxisLike, angleDegree?: number): IFace;
