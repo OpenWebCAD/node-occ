@@ -56,6 +56,9 @@
         "valarray": "cpp",
         "chrono": "cpp",
         "complex": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "ranges": "cpp"
     }
 }

@@ -175,7 +175,7 @@ export interface IShell extends IShape<IShell> {
   getCommonEdges(face1: IFace, face2: IFace): IEdge[];
   getAdjacentFaces(face: IFace): IFace[];
   faces: {
-      [key: string]: IFace;
+    [key: string]: IFace;
   };
   hasMesh: boolean;
   mesh: IMesh;
@@ -292,6 +292,35 @@ export interface OCC {
   makePipe(spine: IWire, profile: IWire): IShell;
   // makePipe(spine: IFace, profile: IWire): ISolid;
 
+
+  // to do find a better name
+  makePipeShell(params: {
+    wire: IWire,
+    spineSupport: IWire,
+    auxilaryCurve?: IWire,
+    solid?: false;
+  }): IShell;
+
+  makePipeShell(params: {
+    wire: IWire,
+    spineSupport: IWire,
+    auxilaryCurve?: IWire,
+    solid: true;
+  }): ISolid;
+
+  makePipeShell(params: {
+    wires: IWire[],
+    spineSupport: IWire,
+    auxilaryCurve?: IWire,
+    solid?: false;
+  }): IShell;
+
+  makePipeShell(params: {
+    wires: IWire[],
+    spineSupport: IWire,
+    auxilaryCurve?: IWire,
+    solid: true;
+  }): ISolid;
   makeRevol(vertex: IVertex, axis: IAxisLike, angleDegree?: number): IEdge;
   makeRevol(edge: IEdge, axis: IAxisLike, angleDegree?: number): IFace;
   makeRevol(wire: IWire, axis: IAxisLike, angleDegree?: number): IShell;

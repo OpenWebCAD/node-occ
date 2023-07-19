@@ -1,14 +1,5 @@
 import should from "should";
-import {
-  occ,
-  Edge,
-  BoundingBox,
-  IEdge,
-  Vertex,
-  IWire,
-  Point,
-  PointLike
-} from "..";
+import { occ, Edge, BoundingBox, IEdge, Vertex, Point, PointLike } from "..";
 const { makeLine } = occ;
 
 describe("testing Edges ", function () {

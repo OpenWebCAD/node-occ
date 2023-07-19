@@ -3,8 +3,9 @@
 // test_STEP
 import assert from "assert";
 import "should";
-import { occ } from "..";
+import { ISolid, occ } from "..";
 import { getTemporaryFilePath, removeFile } from "./helpers";
+import { IoT1ClickProjects } from "aws-sdk";
 
 describe("testing STEP input output ", function () {
   let b1_step: string;
@@ -42,8 +43,10 @@ describe("testing STEP input output ", function () {
     occ.readSTEP(b3_step, (err, shapes) => {
       console.log(err, shapes);
       shapes.length.should.equal(2);
-      shapes[0].numFaces.should.equal(6);
-      shapes[1].numFaces.should.equal(3);
+      const shape0 = shapes[0] as ISolid;
+      const shape1 = shapes[1] as ISolid;
+      shape0.numFaces.should.equal(6);
+      shape1.numFaces.should.equal(3);
       done();
     });
   });
@@ -75,7 +78,7 @@ describe("testing STEP input output ", function () {
       }
       assert(!err);
       shapes.length.should.equal(1);
-      shapes[0].numFaces.should.equal(6);
+      (shapes[0] as ISolid).numFaces.should.equal(6);
       done();
     });
   });
@@ -87,7 +90,7 @@ describe("testing STEP input output ", function () {
       }
       assert(!err);
       shapes.length.should.equal(1);
-      shapes[0].numFaces.should.equal(3);
+      (shapes[0] as ISolid).numFaces.should.equal(3);
       done();
     });
   });
@@ -98,8 +101,8 @@ describe("testing STEP input output ", function () {
       }
       assert(!err);
       shapes.length.should.equal(2);
-      shapes[0].numFaces.should.equal(6);
-      shapes[1].numFaces.should.equal(3);
+      (shapes[0] as ISolid).numFaces.should.equal(6);
+      (shapes[1] as ISolid).numFaces.should.equal(3);
       done();
     });
   });

@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import "should";
 import { promisify } from "util";
-import { ISolid, occ } from "..";
+import { ISolid, Shape, occ } from "..";
 import { removeFile, getTemporaryFilePath } from "./helpers";
 
 const ProgressBar = require("progress");
@@ -72,7 +72,7 @@ async function myReadStep(filename: string): Promise<void> {
     });
   }
 
-  async function read_original_step_file(): Promise<ISolid[]> {
+  async function read_original_step_file(): Promise<Shape[]> {
     let t1 = new Date();
     return await promisify(occ.readSTEP)(filename);
   }
