@@ -1,36 +1,45 @@
 #include "ShapeFactory.h"
 
-#include "Solid.h"
 #include "Edge.h"
 #include "Face.h"
-#include "Wire.h"
+#include "Solid.h"
 #include "Util.h"
+#include "Wire.h"
 
-
-#include <memory>
 #include <limits>
+#include <memory>
 
-#define  Primitives_Direction BRepPrim_Direction
-#define  Primitives_XMin      BRepPrim_XMin
-#define  Primitives_XMax      BRepPrim_XMax
-#define  Primitives_YMin      BRepPrim_YMin
-#define  Primitives_YMax      BRepPrim_YMax
-#define  Primitives_ZMin      BRepPrim_ZMin
-#define  Primitives_ZMax      BRepPrim_ZMax
+#define Primitives_Direction BRepPrim_Direction
+#define Primitives_XMin BRepPrim_XMin
+#define Primitives_XMax BRepPrim_XMax
+#define Primitives_YMin BRepPrim_YMin
+#define Primitives_YMax BRepPrim_YMax
+#define Primitives_ZMin BRepPrim_ZMin
+#define Primitives_ZMax BRepPrim_ZMax
 
 char m(Primitives_Direction p)
 {
-  switch (p) {
-  case Primitives_XMin: return 'x';
-  case Primitives_YMin: return 'y';
-  case Primitives_ZMin: return 'z';
-  case Primitives_XMax: return 'X';
-  case Primitives_YMax: return 'Y';
-  case Primitives_ZMax: return 'Z';
+  switch (p)
+  {
+  case Primitives_XMin:
+    return 'x';
+  case Primitives_YMin:
+    return 'y';
+  case Primitives_ZMin:
+    return 'z';
+  case Primitives_XMax:
+    return 'X';
+  case Primitives_YMax:
+    return 'Y';
+  case Primitives_ZMax:
+    return 'Z';
   }
   return 0;
 }
-static void registerMakeBoxFaces(Solid* pThis, BRepPrimAPI_MakeBox& tool)
+
+static void ReadAx1(v8::Local<v8::Value> value, gp_Ax1 *ax1);
+
+static void registerMakeBoxFaces(Solid *pThis, BRepPrimAPI_MakeBox &tool)
 {
   pThis->_registerNamedShape("top", tool.TopFace());
   pThis->_registerNamedShape("bottom", tool.BottomFace());
@@ -39,13 +48,16 @@ static void registerMakeBoxFaces(Solid* pThis, BRepPrimAPI_MakeBox& tool)
   pThis->_registerNamedShape("front", tool.FrontFace());
   pThis->_registerNamedShape("back", tool.BackFace());
 
-  BRepPrim_GWedge& wedge = tool.Wedge();
+  BRepPrim_GWedge &wedge = tool.Wedge();
 
-  for (int _p1 = Primitives_XMin; _p1 <= Primitives_YMax; _p1++) {
+  for (int _p1 = Primitives_XMin; _p1 <= Primitives_YMax; _p1++)
+  {
     Primitives_Direction p1 = (Primitives_Direction)_p1;
-    for (int _p2 = ((_p1 >> 1) + 1) * 2; _p2 <= Primitives_ZMax; _p2++) {
+    for (int _p2 = ((_p1 >> 1) + 1) * 2; _p2 <= Primitives_ZMax; _p2++)
+    {
       Primitives_Direction p2 = (Primitives_Direction)_p2;
-      if (wedge.HasEdge(p1, p2)) {
+      if (wedge.HasEdge(p1, p2))
+      {
         char name[4];
         name[0] = 'E';
         name[1] = m(p1);
@@ -53,9 +65,11 @@ static void registerMakeBoxFaces(Solid* pThis, BRepPrimAPI_MakeBox& tool)
         name[3] = 0;
         pThis->_registerNamedShape(name, wedge.Edge(p1, p2));
       }
-      for (int _p3 = ((_p2 >> 1) + 1) * 2; _p3 <= Primitives_ZMax; _p3++) {
+      for (int _p3 = ((_p2 >> 1) + 1) * 2; _p3 <= Primitives_ZMax; _p3++)
+      {
         Primitives_Direction p3 = (Primitives_Direction)_p3;
-        if (wedge.HasVertex(p1, p2, p3)) {
+        if (wedge.HasVertex(p1, p2, p3))
+        {
           char name[5];
           name[0] = 'V';
           name[1] = m(p1);
@@ -69,34 +83,38 @@ static void registerMakeBoxFaces(Solid* pThis, BRepPrimAPI_MakeBox& tool)
   }
 }
 
-
 NAN_METHOD(ShapeFactory::makeBox)
 {
   // could be :
   //    3 numbers dx,dy,dz
   //    2 points  p1,p2
   //    1 point + 3 numbers dx,dy,dz
-  //TODO   1 object with { x: 1,y: 2,z: 3, dw:
+  // TODO   1 object with { x: 1,y: 2,z: 3, dw:
 
   v8::Local<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
+  Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
   double dx = 10;
   double dy = 10;
   double dz = 10;
 
-  try {
+  try
+  {
 
-    if (info.Length() == 3 && info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber()) {
+    if (info.Length() == 3 && info[0]->IsNumber() && info[1]->IsNumber() &&
+        info[2]->IsNumber())
+    {
 
       dx = extract_double(info[0]);
       dy = extract_double(info[1]);
       dz = extract_double(info[2]);
-      BRepPrimAPI_MakeBox  tool(dx, dy, dz);
+      BRepPrimAPI_MakeBox tool(dx, dy, dz);
       pThis->setShape(tool.Shape());
       registerMakeBoxFaces(pThis, tool);
     }
-    else if (info.Length() == 2) {
+    else if (info.Length() == 2)
+    {
 
       gp_Pnt p1;
       ReadPoint(info[0], &p1);
@@ -107,10 +125,9 @@ NAN_METHOD(ShapeFactory::makeBox)
       BRepPrimAPI_MakeBox tool(p1, p2);
       pThis->setShape(tool.Shape());
       registerMakeBoxFaces(pThis, tool);
-
-
     }
-    else if (info.Length() == 3) {
+    else if (info.Length() == 3)
+    {
 
       gp_Pnt p1;
       ReadPoint(info[0], &p1);
@@ -123,19 +140,19 @@ NAN_METHOD(ShapeFactory::makeBox)
       pThis->setShape(tool.Shape());
       registerMakeBoxFaces(pThis, tool);
     }
-    else {
+    else
+    {
       return Nan::ThrowError("invalid arguments in makeBox");
     }
   }
-  catch (Standard_Failure&) {
+  catch (Standard_Failure &)
+  {
     Nan::ThrowError("cannot build box");
   }
   info.GetReturnValue().Set(pJhis);
-
 }
 
-
-static void registerMakeBoxFaces(Solid* pThis, BRepPrimAPI_MakePrism& tool)
+static void registerMakeBoxFaces(Solid *pThis, BRepPrimAPI_MakePrism &tool)
 {
   pThis->_registerNamedShape("bottom", tool.FirstShape());
   pThis->_registerNamedShape("top", tool.LastShape());
@@ -143,17 +160,315 @@ static void registerMakeBoxFaces(Solid* pThis, BRepPrimAPI_MakePrism& tool)
   // const TopTools_ListOfShape& list = tool.Generated(S);
 }
 
-NAN_METHOD(ShapeFactory::makeVertex)
+NAN_METHOD(ShapeFactory::makeVertex) { Vertex::NewInstance(info); }
+NAN_METHOD(ShapeFactory::makeWire) { Wire::NewInstance(info); }
+NAN_METHOD(ShapeFactory::makeFace) { Face::NewInstance(info); }
+
+template <class T>
+void addElement(T info, BRepOffsetAPI_ThruSections &mkThruSections)
 {
-  Vertex::NewInstance(info);
+  Edge *edge = DynamicCast<Edge>(info);
+  Wire *wire = DynamicCast<Wire>(info);
+
+  if (wire)
+  {
+    mkThruSections.AddWire(wire->wire());
+  }
+  else
+  {
+    auto mesg = std::string("invalid argument: expecting a Wire or an Edge");
+    Nan::ThrowError(mesg.c_str());
+  }
 }
-NAN_METHOD(ShapeFactory::makeWire)
+
+NAN_METHOD(ShapeFactory::makeSolidThruSections)
 {
-  Wire::NewInstance(info);
+  v8::Local<v8::Value> pJhis = Solid::NewInstance();
+  try
+  {
+    const Standard_Boolean isSolid = true;
+    const Standard_Boolean ruled = true;
+    const Standard_Real pres3d = 1.0e-06;
+    BRepOffsetAPI_ThruSections thruSection(isSolid, ruled, pres3d);
+
+    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(info[0]);
+
+    for (int i = 0; i < arr->Length(); i++)
+    {
+      auto e = Nan::Get(arr, i).ToLocalChecked();
+      Wire *wire = DynamicCast<Wire>(e);
+      Edge *edge = DynamicCast<Edge>(e);
+
+      if (wire)
+      {
+        thruSection.AddWire(wire->wire());
+      }
+      else if (edge)
+      {
+        auto wire_2 = BRepBuilderAPI_MakeWire(edge->edge()).Wire();
+        thruSection.AddWire(wire_2);
+      }
+      else
+      {
+        auto mesg =
+            std::string("invalid argument: expecting a Wire or an Edge");
+        Nan::ThrowError(mesg.c_str());
+      }
+    }
+    thruSection.Build();
+    Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
+    pThis->setShape(thruSection.Shape());
+  }
+  CATCH_AND_RETHROW("Failed to create a solid thru sections");
+  info.GetReturnValue().Set(pJhis);
 }
-NAN_METHOD(ShapeFactory::makeFace)
+
+Base *GetBaseShape(v8::Local<v8::Value> arg)
 {
-  Face::NewInstance(info);
+  auto vertex = DynamicCast<Vertex>(arg);
+  if (vertex)
+    return vertex;
+  auto edge = DynamicCast<Edge>(arg);
+  if (edge)
+    return edge;
+  auto wire = DynamicCast<Wire>(arg);
+  if (wire)
+    return wire;
+  auto face = DynamicCast<Face>(arg);
+  if (face)
+    return face;
+  return 0;
+}
+NAN_METHOD(ShapeFactory::makeRevol)
+{
+  v8::Local<v8::Value> pJhis = Solid::NewInstance();
+  try
+  {
+    if (info.Length() != 2 && info.Length() != 3)
+    {
+      return Nan::ThrowError(
+          "invalid arguments : expecting <shape>,<axis>,[angleInDregree]");
+    }
+
+    Base *shape = GetBaseShape(info[0]);
+    if (!shape)
+    {
+      return Nan::ThrowError("Expecting a <vertex>|<edge>|<wire>|<face>");
+    }
+    gp_Ax1 axis;
+    ReadAx1(info[1], &axis);
+
+    double angleInDegree = 360;
+    ReadDouble(info[2], angleInDegree);
+
+    Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
+    if (angleInDegree == 360)
+    {
+      BRepPrimAPI_MakeRevol tool(shape->shape(), axis);
+      tool.Build();
+      pThis->setShape(tool.Shape());
+    }
+    else
+    {
+      BRepPrimAPI_MakeRevol tool(shape->shape(), axis, angleInDegree);
+      tool.Build();
+      pThis->setShape(tool.Shape());
+      // registerXXXXFaces(pThis, prismMaker);
+    }
+    /**
+     * Vertex -> Edge.
+     * Edge -> Face.
+     * Wire -> Shell.
+     * Face -> Solid.
+     * Shell -> CompSolid.
+     */
+  }
+  CATCH_AND_RETHROW("Failed to create pipe ");
+  info.GetReturnValue().Set(pJhis);
+}
+NAN_METHOD(ShapeFactory::makePipe)
+{
+  if (info.Length() != 2)
+  {
+    return Nan::ThrowError("invalid arguments : expecting <Wire> "
+                           "connectionWire,<Wire> wire1, <Wire> wire2");
+  }
+  v8::Local<v8::Value> pJhis = Solid::NewInstance();
+  try
+  {
+    Wire *connectionWire = DynamicCast<Wire>(info[0]);
+    Wire *profile = DynamicCast<Wire>(info[1]);
+
+    BRepOffsetAPI_MakePipe tool(connectionWire->wire(), profile->wire());
+
+    tool.Build();
+
+    Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
+
+    // auto listOfShapes = piper.Generated();
+    pThis->setShape(tool.Shape());
+    // registerXXXXFaces(pThis, prismMaker);
+  }
+  CATCH_AND_RETHROW("Failed to create pipe ");
+  info.GetReturnValue().Set(pJhis);
+}
+
+#define PARAM(paramsAsObject,prop)  Nan::Get(paramsAsObject, Nan::New(prop).ToLocalChecked()).ToLocalChecked()
+  
+NAN_METHOD(ShapeFactory::makePipeShell)
+{
+
+  /**
+   * {
+   *    wire: Wire | Wire[],
+   *    spineSupport: Wiret
+   *    transitionMode: "transformed" | "round" | "right"
+   *    auxilaryCurve:
+   *    solid: boolean
+   * // advanced
+   *    mode: enum {
+   *       Frenet //  Boolean => SetMode(isFrenet);
+   *   }:
+   *   maxDegree?: number;
+   *   maxSegment?: number;
+   *   forceApproxC1?: boolean;
+   * }
+   */
+
+  std::vector<Wire *> auxWires;
+
+  v8::Local<v8::Value> params = info[0];
+  if (params.IsEmpty() || !params->IsObject())
+  {
+    return Nan::ThrowError("expecting  parameters object ");
+  }
+
+  Nan::HandleScope scope;
+  v8::Local<v8::Object> paramsAsObject =
+      Nan::To<v8::Object>(params).ToLocalChecked();
+
+  auto propIsFrenet = PARAM(paramsAsObject,"isFrenet");
+  auto propSolid = PARAM(paramsAsObject, "solid");
+  auto propAuxilaryCurve = PARAM(paramsAsObject,"auxilaryCurve");
+  auto propWire = PARAM(paramsAsObject,"wire");
+  auto propWires = PARAM(paramsAsObject, "wires");
+  auto propSpineSupport = PARAM(paramsAsObject, "spineSupport");
+
+
+  Wire *wire = DynamicCast<Wire>(propWire);
+  if (!wire && propWires.IsEmpty())
+  {
+    auto mesg =
+        std::string("invalid argument: expecting param.wire to be a Wire");
+    Nan::ThrowError(mesg.c_str());
+  }
+
+  if (wire)
+  {
+    auxWires.push_back(wire);
+  }
+
+  if (!propWires.IsEmpty() && propWires->IsArray())
+  {
+    std::cout << " A" << std::endl;
+
+    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(propWires);
+    if (!arr.IsEmpty())
+    {
+
+      for (int i = 0; i < arr->Length(); i++)
+      {
+        auto e = Nan::Get(arr, i).ToLocalChecked();
+        Wire *wire2 = DynamicCast<Wire>(e);
+    std::cout << " B" << std::endl;
+        if (wire2)
+        {
+          auxWires.push_back(wire2);
+        }
+      }
+      std::cout << " C" << std::endl;
+    
+    }
+  }
+
+  bool isFrenet = extract_bool(propIsFrenet);
+
+  bool solid = extract_bool(propSolid);
+
+
+  Wire *auxilaryCurve = DynamicCast<Wire>(propAuxilaryCurve);
+
+  //  read optional spineSupport
+
+  Wire *spineSupport = DynamicCast<Wire>(propSpineSupport);
+  if (!spineSupport)
+  {
+    auto mesg = std::string(
+        "invalid argument: expecting param.spineSupport to be a Wire");
+    Nan::ThrowError(mesg.c_str());
+  }
+  //  = Nan::To<double>(_v).FromMaybe(defaultValue);
+  v8::Local<v8::Value> pJhis = Solid::NewInstance();
+  try
+  {
+
+    auto tool = BRepOffsetAPI_MakePipeShell(spineSupport->wire());
+
+    if (auxilaryCurve)
+    {
+      tool.SetMode(auxilaryCurve->wire());// , true, BRepFill_TypeOfContact::BRepFill_Contact);
+    }
+    else
+    {
+      if (isFrenet) {
+       tool.SetMode(isFrenet);
+      }
+    }
+
+#define TRANSFORMED 0
+#define ROUND_CORNER 1
+#define TIGHT_CORNER 2
+
+    int transition = TRANSFORMED;
+    auto transitionMode = ([](int transition)
+                           {
+      switch (transition) {
+      case TRANSFORMED:
+        return BRepBuilderAPI_Transformed;
+      case ROUND_CORNER:
+        return BRepBuilderAPI_RoundCorner;
+      default:
+      case TIGHT_CORNER:
+        return BRepBuilderAPI_RightCorner;
+      } })(transition);
+
+    tool.SetTransitionMode(transitionMode);
+
+    for (auto w : auxWires)
+    {
+      tool.Add(w->wire());
+    }
+    // build a shell
+    tool.Build();
+
+    if (solid)
+    {
+      // turn it to a solid
+      tool.MakeSolid();
+    }
+
+    Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
+
+    // auto listOfShapes = piper.Generated();
+    pThis->setShape(tool.Shape());
+    // registerXXXXFaces(pThis, prismMaker);
+  }
+  CATCH_AND_RETHROW("Failed to create pipe ");
+  info.GetReturnValue().Set(pJhis);
 }
 
 NAN_METHOD(ShapeFactory::makePrism)
@@ -161,54 +476,58 @@ NAN_METHOD(ShapeFactory::makePrism)
   // <FACE> [x,y,z]
   // <FACE> [x,y,z] [x,y,z]
   // OCCBase *shape, OCCStruct3d p1, OCCStruct3d p2)
-  Face* pFace = DynamicCast<Face>(info[0]);
-  if (!pFace) {
+  Face *pFace = DynamicCast<Face>(info[0]);
+  if (!pFace)
+  {
     return Nan::ThrowError("invalid arguments : expecting <FACE>,<VECTOR>");
   }
 
   v8::Local<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
-
+  Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
   gp_Vec direction(0, 0, 10);
   ReadVector(info[1], &direction);
 
-  if (direction.IsEqual(gp_Vec(0, 0, 0), 1E-7, 1E-8)) {
+  if (direction.IsEqual(gp_Vec(0, 0, 0), 1E-7, 1E-8))
+  {
     return Nan::ThrowError("invalid arguments : expecting <FACE>,<VECTOR>");
   }
 
-
-  try {
-    const TopoDS_Shape& face = pFace->face();
+  try
+  {
+    const TopoDS_Shape &face = pFace->face();
 
     BRepPrimAPI_MakePrism prismMaker(face, direction);
-
 
     pThis->setShape(prismMaker.Shape());
     registerMakeBoxFaces(pThis, prismMaker);
 
     // possible fix shape
-    if (!pThis->fixShape()) {
+    if (!pThis->fixShape())
+    {
       StdFail_NotDone::Raise("Shapes not valid");
     }
-
   }
   CATCH_AND_RETHROW("Failed to create prism ");
 
   info.GetReturnValue().Set(pJhis);
 }
 
-static void registerOneAxisFaces(Solid* pThis, BRepPrim_OneAxis& tool)
+static void registerOneAxisFaces(Solid *pThis, BRepPrim_OneAxis &tool)
 {
   pThis->_registerNamedShape("lateral", tool.LateralFace());
-  if (tool.HasSides()) {
+  if (tool.HasSides())
+  {
     pThis->_registerNamedShape("start", tool.StartFace());
     pThis->_registerNamedShape("end", tool.EndFace());
   }
-  if (tool.HasTop()) {
+  if (tool.HasTop())
+  {
     pThis->_registerNamedShape("top", tool.TopFace());
   }
-  if (tool.HasBottom()) {
+  if (tool.HasBottom())
+  {
     pThis->_registerNamedShape("bottom", tool.BottomFace());
   }
   /*
@@ -236,8 +555,8 @@ static void registerOneAxisFaces(Solid* pThis, BRepPrim_OneAxis& tool)
 NAN_METHOD(ShapeFactory::makeSphere)
 {
   v8::Local<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
-
+  Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
   gp_Pnt center(0, 0, 0);
   ReadPoint(info[0], &center);
@@ -245,10 +564,12 @@ NAN_METHOD(ShapeFactory::makeSphere)
   double radius = 0.0;
   ReadDouble(info[1], radius);
 
-  if (radius < 1E-7) {
+  if (radius < 1E-7)
+  {
     return Nan::ThrowError("invalid radius");
   }
-  try {
+  try
+  {
     BRepPrimAPI_MakeSphere tool(center, radius);
     pThis->setShape(tool.Shape());
     registerOneAxisFaces(pThis, tool.Sphere());
@@ -258,51 +579,88 @@ NAN_METHOD(ShapeFactory::makeSphere)
   info.GetReturnValue().Set(pJhis);
 }
 
-void ReadAx2(const v8::Local<v8::Value>& value, gp_Ax2* ax2)
+void ReadAx2(v8::Local<v8::Value> value, gp_Ax2 *ax2)
 {
   assert(ax2);
-  if (value->IsArray()) {
+  if (value->IsArray())
+  {
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
     gp_Pnt origin;
 
-    auto element0 = Nan::Get(arr,0).ToLocalChecked();
+    auto element0 = Nan::Get(arr, 0).ToLocalChecked();
 
     ReadPoint(element0, &origin);
-    if (arr->Length() == 2) {
+    if (arr->Length() == 2)
+    {
       // variation 2 :  gp_Ax2(const gp_Pnt& P,const gp_Dir& V);
       gp_Dir V;
-      auto element1 = Nan::Get(arr,1).ToLocalChecked();
+      auto element1 = Nan::Get(arr, 1).ToLocalChecked();
       ReadDir(element1, &V);
       *ax2 = gp_Ax2(origin, V);
     }
-    if (arr->Length() == 3) {
+    if (arr->Length() == 3)
+    {
       // variation 1 : gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
       gp_Dir N, Vx;
-      auto element1 = Nan::Get(arr,1).ToLocalChecked();
-      auto element2 = Nan::Get(arr,2).ToLocalChecked();
+      auto element1 = Nan::Get(arr, 1).ToLocalChecked();
+      auto element2 = Nan::Get(arr, 2).ToLocalChecked();
       ReadDir(element1, &N);
       ReadDir(element2, &Vx);
       *ax2 = gp_Ax2(origin, N, Vx);
     }
   }
-  else {
+  else
+  {
     Nan::ThrowError("Cannot extract Axis from arrgument value");
   }
 }
 
+void ReadAx1(v8::Local<v8::Value> value, gp_Ax1 *ax1)
+{
+  assert(ax1);
+  if (value->IsArray())
+  {
+    v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
+    gp_Pnt origin;
+
+    auto element0 = Nan::Get(arr, 0).ToLocalChecked();
+
+    ReadPoint(element0, &origin);
+    if (arr->Length() == 2)
+    {
+      // variation 2 :  gp_Ax2(const gp_Pnt& P,const gp_Dir& V);
+      gp_Dir V;
+      auto element1 = Nan::Get(arr, 1).ToLocalChecked();
+      ReadDir(element1, &V);
+      *ax1 = gp_Ax1(origin, V);
+    }
+    else
+    {
+      Nan::ThrowError("Cannot extract Axis from argument value");
+    }
+  }
+  else
+  {
+    Nan::ThrowError("Cannot extract Axis from argument value");
+  }
+}
 NAN_METHOD(ShapeFactory::makeCylinder)
 {
 
   //  gp_Ax2& Axes
   //  gp_Ax2(const gp_Pnt& P,const gp_Dir& N,const gp_Dir& Vx);
-  // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const Standard_Real R,const Standard_Real H);
-  // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const Standard_Real R,const Standard_Real H,const Standard_Real Angle);
-  // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,const Standard_Real H);
-  // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,const Standard_Real H,const Standard_Real Angle);
+  // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const Standard_Real R,const
+  // Standard_Real H); Standard_EXPORT   BRepPrimAPI_MakeCylinder(const
+  // Standard_Real R,const Standard_Real H,const Standard_Real Angle);
+  // Standard_EXPORT   BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const
+  // Standard_Real R,const Standard_Real H); Standard_EXPORT
+  // BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,const
+  // Standard_Real H,const Standard_Real Angle);
   const double epsilon = 1E-3;
 
   gp_Ax2 axis;
-  if (info.Length() == 2) {
+  if (info.Length() == 2)
+  {
 
     // variation 1   <R:number> <H:number>
     // a vertical cylinder of radius R starting a (0,0,0) ending at (0,0,H)
@@ -312,27 +670,32 @@ NAN_METHOD(ShapeFactory::makeCylinder)
     double H = 0;
     ReadDouble(info[1], H);
 
-    if (R < epsilon || H < epsilon) {
-      return  Nan::ThrowError("invalid value for arguments makeCylinder(R,H)");
+    if (R < epsilon || H < epsilon)
+    {
+      return Nan::ThrowError("invalid value for arguments makeCylinder(R,H)");
     }
 
     v8::Local<v8::Value> pJhis = Solid::NewInstance();
-    Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
-    try {
+    Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
+    try
+    {
       pThis->setShape(BRepPrimAPI_MakeCylinder(R, H).Shape());
     }
     CATCH_AND_RETHROW("Failed to create cylinder ");
     info.GetReturnValue().Set(pJhis);
-
   }
-  else if (info.Length() == 3) {
+  else if (info.Length() == 3)
+  {
 
-    if (info[0]->IsArray() && info[1]->IsNumber() && info[2]->IsNumber()) {
+    if (info[0]->IsArray() && info[1]->IsNumber() && info[2]->IsNumber())
+    {
 
-      try {
+      try
+      {
         // variation 2
         //  <[ <Origin[x,yz]>, <VZn[x,yz]>,<VXn[x,yz]>] <R:number> <H:number>
-        gp_Ax2  ax2;
+        gp_Ax2 ax2;
         ReadAx2(info[0], &ax2);
 
         double R = 0;
@@ -341,21 +704,24 @@ NAN_METHOD(ShapeFactory::makeCylinder)
         double H = 0;
         ReadDouble(info[2], H);
 
-        if (R < epsilon || H < epsilon) {
+        if (R < epsilon || H < epsilon)
+        {
           return Nan::ThrowError("invalid value for arguments");
         }
 
         v8::Local<v8::Value> pJhis = Solid::NewInstance();
-        Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
+        Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+            Nan::To<v8::Object>(pJhis).ToLocalChecked());
         BRepPrimAPI_MakeCylinder tool(ax2, R, H);
         pThis->setShape(tool.Shape());
         registerOneAxisFaces(pThis, tool.Cylinder());
         info.GetReturnValue().Set(pJhis);
       }
       CATCH_AND_RETHROW("Failed to create cylinder ");
-
     }
-    else if (info[0]->IsArray() && info[1]->IsArray() && info[2]->IsNumber()) {
+    else if (info[0]->IsArray() && info[1]->IsArray() &&
+             info[2]->IsNumber())
+    {
 
       // variation 3 ( 2 points and a radius  )
       gp_Pnt p1;
@@ -371,43 +737,52 @@ NAN_METHOD(ShapeFactory::makeCylinder)
       const double dy = p2.Y() - p1.Y();
       const double dz = p2.Z() - p1.Z();
 
-      const double H = sqrt(dx*dx + dy*dy + dz*dz);
-      if (H < epsilon) {
-        return Nan::ThrowError("cannot build a cylinder on two coincident points");
+      const double H = sqrt(dx * dx + dy * dy + dz * dz);
+      if (H < epsilon)
+      {
+        return Nan::ThrowError(
+            "cannot build a cylinder on two coincident points");
       }
 
       gp_Vec aV(dx / H, dy / H, dz / H);
       gp_Ax2 ax2(p1, aV);
 
       v8::Local<v8::Value> pJhis = Solid::NewInstance();
-      Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
-      try {
+      Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+          Nan::To<v8::Object>(pJhis).ToLocalChecked());
+      try
+      {
         BRepPrimAPI_MakeCylinder tool(ax2, R, H);
         pThis->setShape(tool.Shape());
         registerOneAxisFaces(pThis, tool.Cylinder());
       }
       CATCH_AND_RETHROW("Failed to create cylinder ");
       info.GetReturnValue().Set(pJhis);
-
     }
   }
-  else {
+  else
+  {
     return Nan::ThrowError("invalid arguments");
   }
-
 }
 
 NAN_METHOD(ShapeFactory::makeCone)
 {
 
   v8::Local<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
+  Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
   const double epsilon = 1E-3;
-  // Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H);
-  // Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
-  // Standard_EXPORT   BRepPrimAPI_MakeCone(const gp_Ax2& Axes,const Standard_Real R1,const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
-  if (info.Length() == 3 && info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber()) {
+  // Standard_EXPORT   BRepPrimAPI_MakeCone(const Standard_Real R1,const
+  // Standard_Real R2,const Standard_Real H); Standard_EXPORT
+  // BRepPrimAPI_MakeCone(const Standard_Real R1,const Standard_Real R2,const
+  // Standard_Real H,const Standard_Real angle); Standard_EXPORT
+  // BRepPrimAPI_MakeCone(const gp_Ax2& Axes,const Standard_Real R1,const
+  // Standard_Real R2,const Standard_Real H,const Standard_Real angle);
+  if (info.Length() == 3 && info[0]->IsNumber() && info[1]->IsNumber() &&
+      info[2]->IsNumber())
+  {
 
     double R1 = 0, R2 = 0, H = 0;
 
@@ -415,19 +790,24 @@ NAN_METHOD(ShapeFactory::makeCone)
     ReadDouble(info[1], R2);
     ReadDouble(info[2], H);
 
-    if (R1 < epsilon || R2 < epsilon || H < epsilon) {
+    if (R1 < epsilon || R2 < epsilon || H < epsilon)
+    {
       return Nan::ThrowError("invalid value for arguments");
     }
-    try {
+    try
+    {
       BRepPrimAPI_MakeCone tool(R1, R2, H);
       pThis->setShape(tool.Shape());
       registerOneAxisFaces(pThis, tool.Cone());
     }
     CATCH_AND_RETHROW("Failed to create Cone ");
   }
-  else if (info.Length() == 3 && info[0]->IsArray() && info[1]->IsNumber() && info[2]->IsNumber()) {
+  else if (info.Length() == 3 && info[0]->IsArray() && info[1]->IsNumber() &&
+           info[2]->IsNumber())
+  {
 
-    try {
+    try
+    {
       gp_Dir axis;
       ReadDir(info[0], &axis);
 
@@ -439,10 +819,12 @@ NAN_METHOD(ShapeFactory::makeCone)
     }
     CATCH_AND_RETHROW("Failed to create Cone, with [u,v,w],angle,height");
 
-    return Nan::ThrowError("Cone with [u,v,w],angle,height not implemented yet");
-
+    return Nan::ThrowError(
+        "Cone with [u,v,w],angle,height not implemented yet");
   }
-  else if (info.Length() == 4 && info[0]->IsArray() && info[1]->IsNumber() && info[2]->IsArray() && info[3]->IsNumber()) {
+  else if (info.Length() == 4 && info[0]->IsArray() && info[1]->IsNumber() &&
+           info[2]->IsArray() && info[3]->IsNumber())
+  {
     // Point, point , R1,R2);
     // variation 3 ( 2 points and a radius  )
     gp_Pnt p1;
@@ -450,7 +832,6 @@ NAN_METHOD(ShapeFactory::makeCone)
 
     double R1 = 10;
     ReadDouble(info[1], R1);
-
 
     gp_Pnt p2;
     ReadPoint(info[2], &p2);
@@ -462,31 +843,35 @@ NAN_METHOD(ShapeFactory::makeCone)
     const double dy = p2.Y() - p1.Y();
     const double dz = p2.Z() - p1.Z();
 
-    const double H = sqrt(dx*dx + dy*dy + dz*dz);
-    if (H < epsilon) {
+    const double H = sqrt(dx * dx + dy * dy + dz * dz);
+    if (H < epsilon)
+    {
       return Nan::ThrowError("cannot build a cone on two coincident points");
     }
     gp_Vec aV(dx / H, dy / H, dz / H);
     gp_Ax2 ax2(p1, aV);
-    try {
+    try
+    {
       BRepPrimAPI_MakeCone tool(ax2, R1, R2, H);
       pThis->setShape(tool.Shape());
       registerOneAxisFaces(pThis, tool.Cone());
     }
     CATCH_AND_RETHROW("Failed to create cone ");
-
   }
-  else if (info.Length() == 4 && info[0]->IsArray() && info[1]->IsArray() && info[2]->IsNumber() && info[3]->IsNumber()) {
-    try {
-      // cone with a sharp apex 
-    // apex, direction ,  half_angle, height
+  else if (info.Length() == 4 && info[0]->IsArray() && info[1]->IsArray() &&
+           info[2]->IsNumber() && info[3]->IsNumber())
+  {
+    try
+    {
+      // cone with a sharp apex
+      // apex, direction ,  half_angle, height
       gp_Pnt apex;
       ReadPoint(info[0], &apex);
 
       gp_Dir innerDir;
       ReadDir(info[1], &innerDir);
 
-      double half_angle_in_radian = atan(1.0); // default : 45° 
+      double half_angle_in_radian = atan(1.0); // default : 45°
       ReadDouble(info[2], half_angle_in_radian);
 
       double height = 100;
@@ -494,14 +879,16 @@ NAN_METHOD(ShapeFactory::makeCone)
       // r/h= tan(a);
 
       gp_Ax2 ax2(apex, innerDir);
-      BRepPrimAPI_MakeCone tool(ax2, 0, height*tan(half_angle_in_radian), height);
+      BRepPrimAPI_MakeCone tool(ax2, 0, height * tan(half_angle_in_radian),
+                                height);
       pThis->setShape(tool.Shape());
       registerOneAxisFaces(pThis, tool.Cone());
     }
-    CATCH_AND_RETHROW("Failed to create cone with apex, direction , half_angle and height");
-
+    CATCH_AND_RETHROW(
+        "Failed to create cone with apex, direction , half_angle and height");
   }
-  else {
+  else
+  {
     return Nan::ThrowError("invalid arguments (cone)");
   }
 
@@ -511,17 +898,20 @@ NAN_METHOD(ShapeFactory::makeCone)
 NAN_METHOD(ShapeFactory::makeTorus)
 {
   v8::Local<v8::Value> pJhis = Solid::NewInstance();
-  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
+  Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
   // variation 1
-  //  
+  //
   //  Center as <x,y,z>
   //  axis   as <u,v,w>
   //  bigRadius
   //  smallRadius
-  if (info.Length() == 4 && info[2]->IsNumber() && info[3]->IsNumber()) {
+  if (info.Length() == 4 && info[2]->IsNumber() && info[3]->IsNumber())
+  {
     //
-    try {
+    try
+    {
       gp_Pnt center;
       ReadPoint(info[0], &center);
       //
@@ -535,7 +925,8 @@ NAN_METHOD(ShapeFactory::makeTorus)
       ReadDouble(info[3], smallR);
       BRepPrimAPI_MakeTorus tool(gp_Ax2(center, axis), bigR, smallR);
 
-      if (tool.Shape().IsNull() || tool.Torus().LateralFace().IsNull()) {
+      if (tool.Shape().IsNull() || tool.Torus().LateralFace().IsNull())
+      {
         // invalid shape
         return Nan::ThrowError("cannot build Torus (makeTorus) A");
       }
@@ -549,86 +940,80 @@ NAN_METHOD(ShapeFactory::makeTorus)
   return Nan::ThrowError("invalid arguments (makeTorus)");
 }
 
-
-
-#include <TopTools_ListOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
-
-
-
-
+#include <TopTools_ListOfShape.hxx>
 
 class IShapeClassifierTool
 {
 public:
-  virtual const TopTools_ListOfShape& getGenerated(const TopoDS_Shape& shape) = 0;
-  virtual const TopTools_ListOfShape& getModified(const TopoDS_Shape& shape) = 0;
-  virtual bool getDeleted(const TopoDS_Shape& shape) = 0;
+  virtual const TopTools_ListOfShape &
+  getGenerated(const TopoDS_Shape &shape) = 0;
+  virtual const TopTools_ListOfShape &
+  getModified(const TopoDS_Shape &shape) = 0;
+  virtual bool getDeleted(const TopoDS_Shape &shape) = 0;
 };
 class IShapeNameAccessor
 {
 public:
-  virtual const TopoDS_Shape& shape() const = 0;
-  virtual std::string getShapeName(const TopoDS_Shape& oldshape) = 0;
+  virtual const TopoDS_Shape &shape() const = 0;
+  virtual std::string getShapeName(const TopoDS_Shape &oldshape) = 0;
   virtual int operand() const = 0;
 };
 class IShapeNameSetter
 {
 public:
-  virtual void setShapeName(const TopoDS_Shape& newshape, const char* name) = 0;
+  virtual void setShapeName(const TopoDS_Shape &newshape, const char *name) = 0;
 };
 
 class ShapeClassifier
 {
 public:
-  ShapeClassifier(
-    IShapeClassifierTool* tool,
-    IShapeNameAccessor* nameAccessor1,
-    IShapeNameAccessor* nameAccessor2, // optional : could be null
-    IShapeNameSetter* nameSetter,
-    const TopoDS_Shape& newShape);
+  ShapeClassifier(IShapeClassifierTool *tool, IShapeNameAccessor *nameAccessor1,
+                  IShapeNameAccessor *nameAccessor2, // optional : could be null
+                  IShapeNameSetter *nameSetter, const TopoDS_Shape &newShape);
   void classify();
 
 private:
-  const TopoDS_Shape& m_newShape;
-  IShapeClassifierTool* m_tool;
-  IShapeNameAccessor*   m_nameAccessor1; //to get the name of a sub-shape of the old shape
-  IShapeNameAccessor*   m_nameAccessor2; //to get the name of a sub-shape of the old shape
-  IShapeNameSetter*     m_nameSetter;   //to set the name of a sub-shape on the new shape
-
+  const TopoDS_Shape &m_newShape;
+  IShapeClassifierTool *m_tool;
+  IShapeNameAccessor
+      *m_nameAccessor1; // to get the name of a sub-shape of the old shape
+  IShapeNameAccessor
+      *m_nameAccessor2; // to get the name of a sub-shape of the old shape
+  IShapeNameSetter
+      *m_nameSetter; // to set the name of a sub-shape on the new shape
 
   // sub-shape of new shape for which we have already computed a name
-  TopTools_MapOfShape   m_processedSubShapes;
+  TopTools_MapOfShape m_processedSubShapes;
 
-  enum  ORIGIN { GENERATED, MODIFIED, IDENTICAL };
+  enum ORIGIN
+  {
+    GENERATED,
+    MODIFIED,
+    IDENTICAL
+  };
 
-  void _classify(IShapeNameAccessor* originalBody, TopAbs_ShapeEnum shapeType);
+  void _classify(IShapeNameAccessor *originalBody, TopAbs_ShapeEnum shapeType);
   void _classifyRemainingSubShape(TopAbs_ShapeEnum shapeType);
 
-  void registerShape(ORIGIN org, IShapeNameAccessor* originalBody, const TopoDS_Shape& originalShape, const TopoDS_Shape& newShape, int counter);
+  void registerShape(ORIGIN org, IShapeNameAccessor *originalBody,
+                     const TopoDS_Shape &originalShape,
+                     const TopoDS_Shape &newShape, int counter);
 
-  ShapeClassifier(const ShapeClassifier&);
-  void operator=(const ShapeClassifier&);
+  ShapeClassifier(const ShapeClassifier &);
+  void operator=(const ShapeClassifier &);
 };
 
-ShapeClassifier::ShapeClassifier(
-  IShapeClassifierTool* tool,
-  IShapeNameAccessor* nameAccessor1,
-  IShapeNameAccessor* nameAccessor2,
-  IShapeNameSetter* nameSetter,
-  const TopoDS_Shape& newShape
-)
-  : m_newShape(newShape)
-  , m_tool(tool)
-  , m_nameAccessor1(nameAccessor1)
-  , m_nameAccessor2(nameAccessor2)
-  , m_nameSetter(nameSetter)
-{
+ShapeClassifier::ShapeClassifier(IShapeClassifierTool *tool,
+                                 IShapeNameAccessor *nameAccessor1,
+                                 IShapeNameAccessor *nameAccessor2,
+                                 IShapeNameSetter *nameSetter,
+                                 const TopoDS_Shape &newShape)
+    : m_newShape(newShape), m_tool(tool), m_nameAccessor1(nameAccessor1),
+      m_nameAccessor2(nameAccessor2), m_nameSetter(nameSetter) {}
 
-}
-
-
-void ShapeClassifier::_classify(IShapeNameAccessor* obj, TopAbs_ShapeEnum shapeType)
+void ShapeClassifier::_classify(IShapeNameAccessor *obj,
+                                TopAbs_ShapeEnum shapeType)
 {
   TopTools_IndexedMapOfShape newShapeMap;
   TopExp::MapShapes(this->m_newShape, shapeType, newShapeMap);
@@ -636,41 +1021,55 @@ void ShapeClassifier::_classify(IShapeNameAccessor* obj, TopAbs_ShapeEnum shapeT
   TopTools_IndexedMapOfShape map;
   TopExp::MapShapes(obj->shape(), shapeType, map);
 
-  for (int i = 0; i < map.Extent(); i++) {
-    const TopoDS_Shape& current = map.FindKey(i + 1);
+  for (int i = 0; i < map.Extent(); i++)
+  {
+    const TopoDS_Shape &current = map.FindKey(i + 1);
 
     int counterG = 0;
     int counterM = 0;
-    const TopTools_ListOfShape& generatedShapes = m_tool->getGenerated(current);
+    const TopTools_ListOfShape &generatedShapes = m_tool->getGenerated(current);
     {
       TopTools_ListIteratorOfListOfShape it(generatedShapes);
-      for (; it.More(); it.Next()) {
-        TopoDS_Shape& newShape = it.Value();
-        if (!newShapeMap.Contains(newShape)) { continue; }
-        if (this->m_processedSubShapes.Contains(newShape)) {
+      for (; it.More(); it.Next())
+      {
+        TopoDS_Shape &newShape = it.Value();
+        if (!newShapeMap.Contains(newShape))
+        {
+          continue;
+        }
+        if (this->m_processedSubShapes.Contains(newShape))
+        {
           continue; // already processed
         }
         registerShape(GENERATED, obj, current, newShape, counterG++);
       }
     }
-    const TopTools_ListOfShape& modifiedShapes = m_tool->getModified(current);
+    const TopTools_ListOfShape &modifiedShapes = m_tool->getModified(current);
     {
       TopTools_ListIteratorOfListOfShape it(modifiedShapes);
-      for (; it.More(); it.Next()) {
-        TopoDS_Shape& newShape = it.Value();
-        if (!newShapeMap.Contains(newShape)) { continue; }
-        if (this->m_processedSubShapes.Contains(newShape)) {
+      for (; it.More(); it.Next())
+      {
+        TopoDS_Shape &newShape = it.Value();
+        if (!newShapeMap.Contains(newShape))
+        {
+          continue;
+        }
+        if (this->m_processedSubShapes.Contains(newShape))
+        {
           continue; // already processed
         }
         registerShape(MODIFIED, obj, current, newShape, counterM++);
       }
     }
-    if ((counterG + counterM == 0) && !m_tool->getDeleted(current)) {
-      if (!newShapeMap.Contains(current)) { continue; }
+    if ((counterG + counterM == 0) && !m_tool->getDeleted(current))
+    {
+      if (!newShapeMap.Contains(current))
+      {
+        continue;
+      }
       registerShape(IDENTICAL, obj, current, current, -1);
     }
   }
-
 }
 
 void ShapeClassifier::_classifyRemainingSubShape(TopAbs_ShapeEnum shapeType)
@@ -678,33 +1077,41 @@ void ShapeClassifier::_classifyRemainingSubShape(TopAbs_ShapeEnum shapeType)
   TopTools_IndexedMapOfShape oldShapeMap1;
   TopExp::MapShapes(m_nameAccessor1->shape(), shapeType, oldShapeMap1);
   TopTools_IndexedMapOfShape oldShapeMap2;
-  if (m_nameAccessor2) {
+  if (m_nameAccessor2)
+  {
     TopExp::MapShapes(m_nameAccessor2->shape(), shapeType, oldShapeMap2);
   }
 
   TopTools_IndexedMapOfShape map;
   TopExp::MapShapes(m_newShape, shapeType, map);
-  for (int i = 0; i < map.Extent(); i++) {
-    const TopoDS_Shape& current = map.FindKey(i + 1);
+  for (int i = 0; i < map.Extent(); i++)
+  {
+    const TopoDS_Shape &current = map.FindKey(i + 1);
 
-    if (this->m_processedSubShapes.Contains(current)) {
+    if (this->m_processedSubShapes.Contains(current))
+    {
       continue; // already processed
     }
-    if (this->m_tool->getDeleted(current)) {
+    if (this->m_tool->getDeleted(current))
+    {
       continue;
     }
-    if (oldShapeMap1.Contains(current)) {
+    if (oldShapeMap1.Contains(current))
+    {
       // reuse name of old shape
       registerShape(IDENTICAL, m_nameAccessor1, current, current, -1);
     }
-    else if (oldShapeMap2.Contains(current)) {
+    else if (oldShapeMap2.Contains(current))
+    {
       // reuse name of old shape
       registerShape(IDENTICAL, m_nameAccessor2, current, current, -1);
     }
-    else {
+    else
+    {
       // provide a default name based on hashCode
       std::stringstream s;
-      s << shapeType << "tmp" << current.HashCode(std::numeric_limits<int>::max());
+      s << shapeType << "tmp"
+        << current.HashCode(std::numeric_limits<int>::max());
       s << std::ends;
       m_nameSetter->setShapeName(current, s.str().c_str());
     }
@@ -715,15 +1122,14 @@ void ShapeClassifier::classify()
   _classify(m_nameAccessor1, TopAbs_FACE);
   _classify(m_nameAccessor1, TopAbs_EDGE);
   _classify(m_nameAccessor1, TopAbs_VERTEX);
-  if (m_nameAccessor2) {
+  if (m_nameAccessor2)
+  {
     _classify(m_nameAccessor2, TopAbs_FACE);
     _classify(m_nameAccessor2, TopAbs_EDGE);
     _classify(m_nameAccessor2, TopAbs_VERTEX);
   }
 
-
-
-  // 
+  //
   // now check shape of the new solid that but that have'nt been processed yet
   //
   //   if the shape can be found in  old solid we can reuse the name of the
@@ -733,10 +1139,12 @@ void ShapeClassifier::classify()
   _classifyRemainingSubShape(TopAbs_FACE);
   _classifyRemainingSubShape(TopAbs_EDGE);
   _classifyRemainingSubShape(TopAbs_VERTEX);
-
 }
 
-void ShapeClassifier::registerShape(ORIGIN org, IShapeNameAccessor* nameAccessor, const TopoDS_Shape& originalShape, const TopoDS_Shape& newShape, int counter)
+void ShapeClassifier::registerShape(ORIGIN org,
+                                    IShapeNameAccessor *nameAccessor,
+                                    const TopoDS_Shape &originalShape,
+                                    const TopoDS_Shape &newShape, int counter)
 {
 
   std::string original_name = nameAccessor->getShapeName(originalShape);
@@ -744,7 +1152,8 @@ void ShapeClassifier::registerShape(ORIGIN org, IShapeNameAccessor* nameAccessor
   std::stringstream s;
 
   std::string op;
-  switch (org) {
+  switch (org)
+  {
   case GENERATED:
     op = "g";
     break;
@@ -757,15 +1166,18 @@ void ShapeClassifier::registerShape(ORIGIN org, IShapeNameAccessor* nameAccessor
 
   s << op;
   bool wantSep = false;
-  if (nameAccessor->operand() >= 0) {
+  if (nameAccessor->operand() >= 0)
+  {
     wantSep = true;
     s << nameAccessor->operand();
   }
-  if (wantSep) {
+  if (wantSep)
+  {
     s << ":";
   }
   s << original_name;
-  if (counter >= 0) {
+  if (counter >= 0)
+  {
     s << ":" << counter;
   }
   s << std::ends;
@@ -774,115 +1186,109 @@ void ShapeClassifier::registerShape(ORIGIN org, IShapeNameAccessor* nameAccessor
 
   m_processedSubShapes.Add(newShape);
   m_nameSetter->setShapeName(newShape, newName.c_str());
-
 }
 
 class BRepAlgoAPI_BooleanOperation_Adaptor : public IShapeClassifierTool
 {
 public:
-  BRepAlgoAPI_BooleanOperation_Adaptor(BRepAlgoAPI_BooleanOperation* pTool)
-    :m_pTool(pTool)
-  {
-  };
-  virtual const TopTools_ListOfShape& getGenerated(const TopoDS_Shape& current)
+  BRepAlgoAPI_BooleanOperation_Adaptor(BRepAlgoAPI_BooleanOperation *pTool)
+      : m_pTool(pTool){};
+  virtual const TopTools_ListOfShape &
+  getGenerated(const TopoDS_Shape &current)
   {
     return m_pTool->Generated(current);
   };
-  virtual const TopTools_ListOfShape& getModified(const TopoDS_Shape& current)
+  virtual const TopTools_ListOfShape &getModified(const TopoDS_Shape &current)
   {
     return m_pTool->Modified(current);
   };
-  virtual bool getDeleted(const TopoDS_Shape& shape)
+  virtual bool getDeleted(const TopoDS_Shape &shape)
   {
     return m_pTool->IsDeleted(shape) ? true : false;
   };
 
   //
-  BRepAlgoAPI_BooleanOperation* m_pTool;
+  BRepAlgoAPI_BooleanOperation *m_pTool;
 };
 class BRepBuilderAPI_MakeShape_Adapator : public IShapeClassifierTool
 {
 public:
-  BRepBuilderAPI_MakeShape_Adapator(BRepBuilderAPI_MakeShape* pTool)
-    :m_pTool(pTool)
-  {
-  };
-  virtual const TopTools_ListOfShape& getGenerated(const TopoDS_Shape& current)
+  BRepBuilderAPI_MakeShape_Adapator(BRepBuilderAPI_MakeShape *pTool)
+      : m_pTool(pTool){};
+  virtual const TopTools_ListOfShape &
+  getGenerated(const TopoDS_Shape &current)
   {
     return m_pTool->Generated(current);
   };
-  virtual const TopTools_ListOfShape& getModified(const TopoDS_Shape& current)
+  virtual const TopTools_ListOfShape &getModified(const TopoDS_Shape &current)
   {
     return m_pTool->Modified(current);
   };
-  virtual bool getDeleted(const TopoDS_Shape& shape)
+  virtual bool getDeleted(const TopoDS_Shape &shape)
   {
     return m_pTool->IsDeleted(shape) ? true : false;
   };
 
   //
-  BRepBuilderAPI_MakeShape* m_pTool;
+  BRepBuilderAPI_MakeShape *m_pTool;
 };
 
-class ShapeNameAccessor : public  IShapeNameAccessor
+class ShapeNameAccessor : public IShapeNameAccessor
 {
 public:
-  ShapeNameAccessor(Solid* obj, int operand = -1) :m_operand(operand), m_obj(obj) {};
-  virtual const TopoDS_Shape& shape() const
-  {
-    return m_obj->shape();
-  }
-  virtual std::string getShapeName(const TopoDS_Shape& shape)
+  ShapeNameAccessor(Solid *obj, int operand = -1)
+      : m_operand(operand), m_obj(obj){};
+  virtual const TopoDS_Shape &shape() const { return m_obj->shape(); }
+  virtual std::string getShapeName(const TopoDS_Shape &shape)
   {
     std::string name = m_obj->_getShapeName(shape);
     return name;
   };
   virtual int operand() const { return m_operand; }
+
 private:
-  Solid* m_obj;
+  Solid *m_obj;
   int m_operand;
 };
-class ShapeNameSetter : public  IShapeNameSetter
+class ShapeNameSetter : public IShapeNameSetter
 {
 public:
-  ShapeNameSetter(Solid* obj) :m_obj(obj) {};
-  virtual void setShapeName(const TopoDS_Shape& newshape, const char* name)
+  ShapeNameSetter(Solid *obj) : m_obj(obj){};
+  virtual void setShapeName(const TopoDS_Shape &newshape, const char *name)
   {
     m_obj->_registerNamedShape(name, newshape);
   };
+
 private:
-  Solid* m_obj;
+  Solid *m_obj;
 };
 
-
-
-
-static void registerShapes(BRepAlgoAPI_BooleanOperation* pTool, Solid* newSolid, Solid* oldSolid1, Solid* oldSolid2)
+static void registerShapes(BRepAlgoAPI_BooleanOperation *pTool, Solid *newSolid,
+                           Solid *oldSolid1, Solid *oldSolid2)
 {
-  const TopoDS_Shape& oldShape1 = oldSolid1->shape();
-  const TopoDS_Shape& oldShape2 = oldSolid2->shape();
-  const TopoDS_Shape& newShape = newSolid->shape();
-
+  const TopoDS_Shape &oldShape1 = oldSolid1->shape();
+  const TopoDS_Shape &oldShape2 = oldSolid2->shape();
+  const TopoDS_Shape &newShape = newSolid->shape();
 
   BRepAlgoAPI_BooleanOperation_Adaptor tool(pTool);
-  ShapeNameAccessor  na1(oldSolid1, 1);
-  ShapeNameAccessor  na2(oldSolid2, 2);
-  ShapeNameSetter    ns(newSolid);
+  ShapeNameAccessor na1(oldSolid1, 1);
+  ShapeNameAccessor na2(oldSolid2, 2);
+  ShapeNameSetter ns(newSolid);
 
   ShapeClassifier classifier(&tool, &na1, &na2, &ns, newShape);
 
   classifier.classify();
-
 }
 
-static void registerShapes(BRepBuilderAPI_MakeShape* pTool, Solid* newSolid, Solid* oldSolid)
+static void registerShapes(BRepBuilderAPI_MakeShape *pTool, Solid *newSolid,
+                           Solid *oldSolid)
 {
-  const TopoDS_Shape& oldShape = oldSolid->shape();
-  const TopoDS_Shape& newShape = newSolid->shape();
+  const TopoDS_Shape &oldShape = oldSolid->shape();
+  const TopoDS_Shape &newShape = newSolid->shape();
 
   BRepBuilderAPI_MakeShape_Adapator tool(pTool);
-  ShapeNameAccessor  na(oldSolid);
-  ShapeNameSetter    ns(newSolid);
+  ShapeNameAccessor na(oldSolid);
+  ShapeNameSetter ns(newSolid);
 
   TopoDS_Shape empty;
   ShapeClassifier classifier(&tool, &na, NULL, &ns, newShape);
@@ -890,126 +1296,144 @@ static void registerShapes(BRepBuilderAPI_MakeShape* pTool, Solid* newSolid, Sol
   classifier.classify();
 }
 
-
-
-static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS, Solid* pSolid1, Solid* pSolid2, BOPAlgo_Operation op)
+static void ShapeFactory_createBoolean(_NAN_METHOD_ARGS, Solid *pSolid1,
+                                       Solid *pSolid2, BOPAlgo_Operation op)
 {
 
-  const TopoDS_Shape& firstObject = pSolid1->shape();
-  const TopoDS_Shape& secondObject = pSolid2->shape();
+  Nan::HandleScope scope;
+  const TopoDS_Shape &firstObject = pSolid1->shape();
+  const TopoDS_Shape &secondObject = pSolid2->shape();
 
   std::unique_ptr<BRepAlgoAPI_BooleanOperation> pTool;
 
-
-
-
   TopoDS_Shape shape;
-  try {
-    switch (op) {
+  try
+  {
+    switch (op)
+    {
     case BOPAlgo_FUSE:
-      pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Fuse(firstObject, secondObject));
+      pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(
+          new BRepAlgoAPI_Fuse(firstObject, secondObject));
       break;
     case BOPAlgo_CUT:
-      pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Cut(firstObject, secondObject));
+      pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(
+          new BRepAlgoAPI_Cut(firstObject, secondObject));
       break;
     case BOPAlgo_COMMON:
-      pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(new BRepAlgoAPI_Common(firstObject, secondObject));
+      pTool = std::unique_ptr<BRepAlgoAPI_BooleanOperation>(
+          new BRepAlgoAPI_Common(firstObject, secondObject));
       break;
     default:
       Standard_ConstructionError::Raise("unknown operation");
       break;
     }
-    if (!pTool->IsDone()) {
+    if (!pTool->IsDone())
+    {
       Standard_ConstructionError::Raise("operation failed");
     }
     shape = pTool->Shape();
 
-    v8::Local<v8::Value> result(Solid::NewInstance(shape));
+    v8::Local<v8::Value> pJhis = Solid::NewInstance(shape);
 
-    Solid* pResult = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(result).ToLocalChecked());
+    Solid *pResult = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
     registerShapes(pTool.get(), pResult, pSolid1, pSolid2);
 
-    if (pTool->HasDeleted()) {
+    if (pTool->HasDeleted())
+    {
       // the boolean operation causes some shape from s1 or s2 to be deleted
     }
-    if (pTool->HasGenerated()) {
+    if (pTool->HasGenerated())
+    {
       // the boolean operation causes some shape from s1 or s2 to be created
-
     }
-    if (pTool->HasModified()) {
+    if (pTool->HasModified())
+    {
       // the boolean operation causes some shape from s1 or s2 to be created
     }
     // check for empty compound shape
     TopoDS_Iterator It(shape, Standard_True, Standard_True);
     int found = 0;
-    for (; It.More(); It.Next()) {
+    for (; It.More(); It.Next())
+    {
       found++;
     }
-    if (found == 0) {
+    if (found == 0)
+    {
       Standard_ConstructionError::Raise("result object is empty compound");
     }
 
     // simplify compound with one solid into a Solid
-    if (shape.ShapeType() == TopAbs_COMPOUND) {
+    if (shape.ShapeType() == TopAbs_COMPOUND)
+    {
       TopTools_IndexedMapOfShape shapeMap;
       TopExp::MapShapes(shape, TopAbs_SOLID, shapeMap);
-      if (shapeMap.Extent() == 1) {
+      if (shapeMap.Extent() == 1)
+      {
         pResult->setShape(shapeMap(1));
       }
     }
-    return info.GetReturnValue().Set(result);
-
+    return info.GetReturnValue().Set(pJhis);
   }
   CATCH_AND_RETHROW("Failed in boolean operation");
 }
 
-
-v8::Local<v8::Value> ShapeFactory::add(const std::vector<Base*>& shapes)
+v8::Local<v8::Value> ShapeFactory::add(const std::vector<Base *> &shapes)
 {
+
+  Nan::EscapableHandleScope scope;
+
   TopoDS_Compound compound;
   BRep_Builder builder;
 
-  v8::Local<v8::Value> pJhis(Solid::NewInstance());
-  Solid* pThis = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(pJhis).ToLocalChecked());
-  try {
+  v8::Local<v8::Value> pJhis = Solid::NewInstance();
+  Solid *pThis = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(pJhis).ToLocalChecked());
+  try
+  {
 
     builder.MakeCompound(compound);
 
-    for (size_t i = 0; i < shapes.size(); i++) {
+    for (size_t i = 0; i < shapes.size(); i++)
+    {
 
-      const TopoDS_Shape&  shape = shapes[i]->shape();
+      const TopoDS_Shape &shape = shapes[i]->shape();
       builder.Add(compound, shape);
     }
 
     pThis->setShape(compound);
-
   }
   CATCH_AND_RETHROW_NO_RETURN("Failed in compound operation");
-  return pJhis;
-
+  return scope.Escape(pJhis);
 }
 
 NAN_METHOD(ShapeFactory::compound)
 {
-  std::vector<Base*> shapes;
-  for (int i = 0; i < info.Length(); i++) {
+  std::vector<Base *> shapes;
+  for (int i = 0; i < info.Length(); i++)
+  {
     v8::Local<v8::Object> obj = Nan::To<v8::Object>(info[i]).ToLocalChecked();
-    if (IsInstanceOf<Solid>(obj)) {
-      Base* pShape = Nan::ObjectWrap::Unwrap<Solid>(obj);
+    if (IsInstanceOf<Solid>(obj))
+    {
+      Base *pShape = Nan::ObjectWrap::Unwrap<Solid>(obj);
       shapes.push_back(pShape);
     }
-    else if (info[i]->IsArray()) {
+    else if (info[i]->IsArray())
+    {
       v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(info[i]);
       int length = arr->Length();
-      for (int j = 0; j < length; j++) {
-        
-        auto elementJ = Nan::Get(arr,j).ToLocalChecked();
-        
-        v8::Local<v8::Object> obj1 = Nan::To<v8::Object>(elementJ).ToLocalChecked();
+      for (int j = 0; j < length; j++)
+      {
 
-        if (IsInstanceOf<Solid>(obj1)) {
-          Base* pShape = Nan::ObjectWrap::Unwrap<Solid>(obj1);
+        auto elementJ = Nan::Get(arr, j).ToLocalChecked();
+
+        v8::Local<v8::Object> obj1 =
+            Nan::To<v8::Object>(elementJ).ToLocalChecked();
+
+        if (IsInstanceOf<Solid>(obj1))
+        {
+          Base *pShape = Nan::ObjectWrap::Unwrap<Solid>(obj1);
           shapes.push_back(pShape);
         }
       }
@@ -1018,21 +1442,26 @@ NAN_METHOD(ShapeFactory::compound)
   info.GetReturnValue().Set(add(shapes));
 }
 
+void ShapeFactory::_boolean(_NAN_METHOD_ARGS, BOPAlgo_Operation op)
+{
 
-void ShapeFactory::_boolean(_NAN_METHOD_ARGS, BOPAlgo_Operation op) {
-
-  if (!IsInstanceOf<Solid>(info[0]) || !IsInstanceOf<Solid>(info[1])) {
-    return Nan::ThrowError("Wrong arguments for boolean operation : expecting two solids");
+  if (!IsInstanceOf<Solid>(info[0]) || !IsInstanceOf<Solid>(info[1]))
+  {
+    return Nan::ThrowError(
+        "Wrong arguments for boolean operation : expecting two solids");
   }
 
-  Solid* pSolid1 = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  Solid *pSolid1 = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
-  Solid* pSolid2 = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  Solid *pSolid2 = Nan::ObjectWrap::Unwrap<Solid>(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
   /*
      std::vector<Solid*> other_solids;
      for (int i=1; i<info.Length(); i++) {
      if(Solid::constructor->HasInstance(info[i])) {
-     Solid* pSolid2 = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(info[i]);
+     Solid* pSolid2 =
+     Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(info[i]);
      other_solids.push_back(pSolid2);
      }
      }
@@ -1041,76 +1470,74 @@ void ShapeFactory::_boolean(_NAN_METHOD_ARGS, BOPAlgo_Operation op) {
      */
 
   return ShapeFactory_createBoolean(info, pSolid1, pSolid2, op);
-
 }
 
-NAN_METHOD(ShapeFactory::fuse)
+NAN_METHOD(ShapeFactory::fuse) { return _boolean(info, BOPAlgo_FUSE); }
+
+NAN_METHOD(ShapeFactory::cut) { return _boolean(info, BOPAlgo_CUT); }
+
+NAN_METHOD(ShapeFactory::common) { return _boolean(info, BOPAlgo_COMMON); }
+
+bool extractListOfFaces(v8::Local<v8::Value> value,
+                        TopTools_ListOfShape &faces)
 {
-  return _boolean(info, BOPAlgo_FUSE);
-}
+  Nan::HandleScope scope;
 
-NAN_METHOD(ShapeFactory::cut)
-{
-  return _boolean(info, BOPAlgo_CUT);
-}
-
-NAN_METHOD(ShapeFactory::common)
-{
-  return _boolean(info, BOPAlgo_COMMON);
-}
-
-
-
-bool extractListOfFaces(v8::Local<v8::Value> value, TopTools_ListOfShape& faces)
-{
-  if (value->IsArray()) {
+  if (value->IsArray())
+  {
     v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(value);
     int length = arr->Length();
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
+    {
 
-      auto elementI = Nan::Get(arr,i).ToLocalChecked();
-      Face* pFace = 0;
-      if (extractArg(elementI, pFace)) {
+      auto elementI = Nan::Get(arr, i).ToLocalChecked();
+      Face *pFace = 0;
+      if (extractArg(elementI, pFace))
+      {
         faces.Append(pFace->face());
       }
     }
   }
-  else {
-    // could be a single face 
-    Face* pFace = 0;
-    if (!extractArg(value, pFace)) {
+  else
+  {
+    // could be a single face
+    Face *pFace = 0;
+    if (!extractArg(value, pFace))
+    {
       return false;
     }
     faces.Append(pFace->face());
   }
 
-
   return faces.Extent() > 0;
 }
-
 
 NAN_METHOD(ShapeFactory::makeThickSolid)
 {
   // variation 1 : <SOLID>,<FACE>,thickness
   // variation 2 : <SOLID>,[ <FACE> ... ],thickness
 
-  Solid* pSolid = 0;
+  Solid *pSolid = 0;
 
-  try {
+  try
+  {
 
-    if (!extractArg(info[0], pSolid)) {
-      return Nan::ThrowError("Wrong arguments for makeThickSolid , first argument must be a solid");
+    if (!extractArg(info[0], pSolid))
+    {
+      return Nan::ThrowError("Wrong arguments for makeThickSolid , first "
+                             "argument must be a solid");
     }
 
-
     TopTools_ListOfShape faces;
-    if (!extractListOfFaces(info[1], faces)) {
-      return Nan::ThrowError("Wrong arguments for makeThickSolid, second argument must be a list of faces or a single face");
+    if (!extractListOfFaces(info[1], faces))
+    {
+      return Nan::ThrowError(
+          "Wrong arguments for makeThickSolid, second argument must be a list "
+          "of faces or a single face");
     }
 
     double offset = 0;
     ReadDouble(info[2], offset);
-
 
     BRepOffset_Mode mode = BRepOffset_Skin;
     Standard_Boolean bIntersection = Standard_False;
@@ -1118,37 +1545,40 @@ NAN_METHOD(ShapeFactory::makeThickSolid)
     GeomAbs_JoinType joinType = GeomAbs_Arc;
     double tol = 0.01;
     BRepOffsetAPI_MakeThickSolid tool;
-    tool.MakeThickSolidByJoin(pSolid->solid(), faces, offset, tol, mode, bIntersection, bSelfInter, joinType);
+    tool.MakeThickSolidByJoin(pSolid->solid(), faces, offset, tol, mode,
+                              bIntersection, bSelfInter, joinType);
 
     TopoDS_Shape shape = tool.Shape();
 
-    v8::Local<v8::Value> result(Solid::NewInstance(shape));
+    v8::Local<v8::Value> pJhis = Solid::NewInstance(shape);
 
-    Solid* pResult = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(result).ToLocalChecked());
-
+    Solid *pResult = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
     registerShapes(&tool, pResult, pSolid);
 
-    info.GetReturnValue().Set(result);
-
-  }CATCH_AND_RETHROW("Failed in makeThickSolid operation");
+    info.GetReturnValue().Set(pJhis);
+  }
+  CATCH_AND_RETHROW("Failed in makeThickSolid operation");
 }
 
-
-bool ReadPlane(const v8::Local<v8::Value>& value, gp_Pln& plane)
+bool ReadPlane(v8::Local<v8::Value> value, gp_Pln &plane)
 {
-  if (value.IsEmpty()) {
+  if (value.IsEmpty())
+  {
     return false;
   }
   // could be a planar face
-  Face* pFace = 0;
-  if (!extractArg<Face>(value, pFace)) {
+  Face *pFace = 0;
+  if (!extractArg<Face>(value, pFace))
+  {
     return false;
   }
 
   Handle_Geom_Surface surf = BRep_Tool::Surface(pFace->face());
   GeomLib_IsPlanarSurface tool(surf);
-  if (!tool.IsPlanar()) {
+  if (!tool.IsPlanar())
+  {
     return false;
   }
   plane = tool.Plan();
@@ -1160,17 +1590,21 @@ NAN_METHOD(ShapeFactory::makeDraftAngle)
 {
 
   // <SOLID>,(<FACE>|[<FACE>...]),<ANGLE>,<NeutralPlane>
-  try {
-    if (info.Length() < 4) {
+  try
+  {
+    if (info.Length() < 4)
+    {
       return Nan::ThrowError("Wrong arguments for makeDraftAngle");
     }
-    Solid* pSolid = 0;
-    if (!extractArg(info[0], pSolid)) {
+    Solid *pSolid = 0;
+    if (!extractArg(info[0], pSolid))
+    {
       return Nan::ThrowError("Wrong arguments for makeDraftAngle");
     }
 
     TopTools_ListOfShape faces;
-    if (!extractListOfFaces(info[1], faces)) {
+    if (!extractListOfFaces(info[1], faces))
+    {
       return Nan::ThrowError("Wrong arguments for makeDraftAngle");
     }
 
@@ -1181,10 +1615,10 @@ NAN_METHOD(ShapeFactory::makeDraftAngle)
     // ReadDir(info[3],&direction);
 
     gp_Pln neutralPlane;
-    if (!ReadPlane(info[3], neutralPlane)) {
+    if (!ReadPlane(info[3], neutralPlane))
+    {
       return Nan::ThrowError("Wrong arguments for makeDraftAngle");
     }
-
 
     BRepOffsetAPI_DraftAngle tool(pSolid->shape());
 
@@ -1192,8 +1626,9 @@ NAN_METHOD(ShapeFactory::makeDraftAngle)
 
     int counter = 0;
     TopTools_ListIteratorOfListOfShape it(faces);
-    for (; it.More(); it.Next()) {
-      TopoDS_Face& face = TopoDS::Face(it.Value());
+    for (; it.More(); it.Next())
+    {
+      TopoDS_Face &face = TopoDS::Face(it.Value());
 
       gp_Dir direction = neutralPlane.Axis().Direction();
       tool.Add(face, direction, angle, neutralPlane, flag);
@@ -1201,68 +1636,72 @@ NAN_METHOD(ShapeFactory::makeDraftAngle)
 
     TopoDS_Shape shape = tool.Shape();
 
-    v8::Local<v8::Value> result(Solid::NewInstance(shape));
+    v8::Local<v8::Value> pJhis = Solid::NewInstance(shape);
 
-    Solid* pResult = Nan::ObjectWrap::Unwrap<Solid>(Nan::To<v8::Object>(result).ToLocalChecked());
-
+    Solid *pResult = Nan::ObjectWrap::Unwrap<Solid>(
+        Nan::To<v8::Object>(pJhis).ToLocalChecked());
 
     registerShapes(&tool, pResult, pSolid);
 
-    info.GetReturnValue().Set(result);
-
-  } CATCH_AND_RETHROW("Failed in compound operation");
-
+    info.GetReturnValue().Set(pJhis);
+  }
+  CATCH_AND_RETHROW("Failed in compound operation");
 }
 
-
-static int chamfer(Solid* pNewSolid, Solid* pSolid, const std::vector<Edge*>& edges, const std::vector<double>& distances)
+static int chamfer(Solid *pNewSolid, Solid *pSolid,
+                   const std::vector<Edge *> &edges,
+                   const std::vector<double> &distances)
 {
 
   size_t edges_size = edges.size();
   size_t distances_size = distances.size();
 
-  try {
+  try
+  {
     BRepFilletAPI_MakeChamfer CF(pSolid->shape());
 
     TopTools_IndexedDataMapOfShapeListOfShape mapEdgeFace;
-    TopExp::MapShapesAndAncestors(pSolid->shape(), TopAbs_EDGE, TopAbs_FACE, mapEdgeFace);
+    TopExp::MapShapesAndAncestors(pSolid->shape(), TopAbs_EDGE, TopAbs_FACE,
+                                  mapEdgeFace);
 
-    for (size_t i = 0; i < edges.size(); i++) {
+    for (size_t i = 0; i < edges.size(); i++)
+    {
 
-
-      const TopoDS_Edge& edge = edges[i]->edge();
+      const TopoDS_Edge &edge = edges[i]->edge();
 
       // skip degenerated edge
       if (BRep_Tool::Degenerated(edge))
         continue;
 
-      const TopoDS_Face& face = TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
+      const TopoDS_Face &face =
+          TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
 
       // skip edge if it is a seam
       if (BRep_Tool::IsClosed(edge, face))
         continue;
 
-
-      if (distances_size == 1) {
+      if (distances_size == 1)
+      {
         // single distance
-#if (OCC_VERSION_MAJOR ==7 && OCC_VERSION_MINOR <=3) 
+#if (OCC_VERSION_MAJOR == 7 && OCC_VERSION_MINOR <= 3)
         CF.Add(distances[0], edge, face);
-#else 
+#else
         CF.Add(edge);
 #endif
-
       }
-      else if (distances_size == edges_size) {
+      else if (distances_size == edges_size)
+      {
         // distance given for each edge
-#if (OCC_VERSION_MAJOR ==7 && OCC_VERSION_MINOR <=3) 
+#if (OCC_VERSION_MAJOR == 7 && OCC_VERSION_MINOR <= 3)
         CF.Add(distances[i], edge, face);
-#else 
+#else
         CF.Add(edge);
 #endif
-
       }
-      else {
-        StdFail_NotDone::Raise("size of distances argument not correct");;
+      else
+      {
+        StdFail_NotDone::Raise("size of distances argument not correct");
+        ;
       }
     }
 
@@ -1271,7 +1710,7 @@ static int chamfer(Solid* pNewSolid, Solid* pSolid, const std::vector<Edge*>& ed
     if (!CF.IsDone())
       StdFail_NotDone::Raise("Failed to chamfer solid");
 
-    const TopoDS_Shape& tmp = CF.Shape();
+    const TopoDS_Shape &tmp = CF.Shape();
 
     if (tmp.IsNull())
       StdFail_NotDone::Raise("Chamfer operaton return Null shape");
@@ -1281,122 +1720,126 @@ static int chamfer(Solid* pNewSolid, Solid* pSolid, const std::vector<Edge*>& ed
     // possible fix shape
     if (!pNewSolid->fixShape())
       StdFail_NotDone::Raise("Shapes not valid");
-
   }
   CATCH_AND_RETHROW_NO_RETURN("Failed to chamfer solid ");
 
   return 0;
 }
 
-static int fillet(Solid* pNewSolid, Solid* pSolid, const std::vector<Edge*>& edges, const  std::vector<double>& radius)
+static int fillet(Solid *pNewSolid, Solid *pSolid,
+                  const std::vector<Edge *> &edges,
+                  const std::vector<double> &radius)
 {
   size_t edges_size = edges.size();
   size_t radius_size = radius.size();
 
-  try {
+  try
+  {
     BRepFilletAPI_MakeFillet tool(pSolid->shape());
 
     TopTools_IndexedDataMapOfShapeListOfShape mapEdgeFace;
-    TopExp::MapShapesAndAncestors(pSolid->shape(), TopAbs_EDGE, TopAbs_FACE, mapEdgeFace);
+    TopExp::MapShapesAndAncestors(pSolid->shape(), TopAbs_EDGE, TopAbs_FACE,
+                                  mapEdgeFace);
 
-    for (size_t i = 0; i < edges.size(); i++) {
+    for (size_t i = 0; i < edges.size(); i++)
+    {
 
-      const TopoDS_Edge& edge = edges[i]->edge();
+      const TopoDS_Edge &edge = edges[i]->edge();
 
       // skip degenerated edge
       if (BRep_Tool::Degenerated(edge))
         continue;
 
-      const TopoDS_Face& face = TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
+      const TopoDS_Face &face =
+          TopoDS::Face(mapEdgeFace.FindFromKey(edge).First());
 
       // skip edge if it is a seam
       if (BRep_Tool::IsClosed(edge, face))
         continue;
 
-      if (radius_size == 1) {
+      if (radius_size == 1)
+      {
         // single radius
         tool.Add(radius[0], edge);
       }
-      else if (radius_size == edges_size) {
+      else if (radius_size == edges_size)
+      {
         // radius given for each edge
         tool.Add(radius[i], edge);
       }
-      else if (radius_size == 2 * edges_size) {
+      else if (radius_size == 2 * edges_size)
+      {
         // variable radius
         tool.Add(radius[2 * i + 0], radius[2 * i + 1], edge);
       }
-      else {
-        StdFail_NotDone::Raise("radius argument size not valid");;
+      else
+      {
+        StdFail_NotDone::Raise("radius argument size not valid");
+        ;
       }
     }
 
     tool.Build();
 
-    if (!tool.IsDone()) {
+    if (!tool.IsDone())
+    {
       StdFail_NotDone::Raise("Fillet operation has failed");
     }
 
-    const TopoDS_Shape& tmp = tool.Shape();
+    const TopoDS_Shape &tmp = tool.Shape();
 
-    if (tmp.IsNull()) {
+    if (tmp.IsNull())
+    {
       StdFail_NotDone::Raise("Fillet operation resulted in Null shape");
     }
 
     pNewSolid->setShape(tmp);
 
     // possible fix shape
-    //xx if (!pNewSolid->fixShape())    {
-    //xx     StdFail_NotDone::Raise("Shapes not valid");
-    //xx }
+    // xx if (!pNewSolid->fixShape())    {
+    // xx     StdFail_NotDone::Raise("Shapes not valid");
+    // xx }
     registerShapes(&tool, pNewSolid, pSolid);
-
   }
   CATCH_AND_RETHROW_NO_RETURN("Failed to fillet solid ");
 
   return 1;
-
 }
-
 
 NAN_METHOD(ShapeFactory::makeFillet)
 {
 
   // <SOLID>, <EDGE> | [edges...],  radius | [ radii ]
 
-  Solid* pSolid = 0;
-  if (!extractArg(info[0], pSolid)) {
+  Solid *pSolid = 0;
+  if (!extractArg(info[0], pSolid))
+  {
     return Nan::ThrowError("Wrong arguments for makeFillet");
   }
-  std::vector<Edge*> edges;
-  if (!_extractArray<Edge>(info[1], edges) || edges.size() == 0) {
-    return Nan::ThrowError("invalid arguments makeFillet: no edges provided:  expecting [<EDGE>...],radius");
+  std::vector<Edge *> edges;
+  if (!_extractArray<Edge>(info[1], edges) || edges.size() == 0)
+  {
+    return Nan::ThrowError("invalid arguments makeFillet: no edges provided:  "
+                           "expecting [<EDGE>...],radius");
   }
 
   std::vector<double> radii;
-  if (info[2]->IsNumber()) {
+  if (info[2]->IsNumber())
+  {
     double radius = 0.0;
     ReadDouble(info[2], radius);
-    if (radius < 1E-7) {
-      //TODO
+    if (radius < 1E-7)
+    {
+      // TODO
     }
     radii.push_back(radius);
   }
 
-  v8::Local<v8::Object>  pNew = pSolid->Clone();
+  v8::Local<v8::Object> pNew = pSolid->Clone();
 
-  Solid* pNewSolid = Nan::ObjectWrap::Unwrap<Solid>(pNew);
+  Solid *pNewSolid = Nan::ObjectWrap::Unwrap<Solid>(pNew);
 
   fillet(pNewSolid, pSolid, edges, radii);
 
   info.GetReturnValue().Set(pNew);
-
 }
-
-NAN_METHOD(ShapeFactory::makePipe)
-{
-  return Nan::ThrowError("makePipe is currently unimplemented");
-}
-
-
-
-

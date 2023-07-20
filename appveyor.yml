@@ -21,47 +21,15 @@ environment:
   VisualStudioVersion: "12"
   matrix:
 
-    - electron_version: "7.3.2"
-      nodejs_version: 12
-      platform: x64
+    #- electron_version: "7.3.2"
+    #  nodejs_version: 12
+    #  platform: x64
     
-    # - electron_version: "8.5.0" // not working yet =< GetBackingStore missing
-    #   nodejs_version: 12
-    #   platform: x64
-
-    # - electron_version: "9.2.0"
-    #   nodejs_version: 12
-    #   platform: x64
-    
-    - nodejs_version: 8
-      platform: x64
-  
-    - nodejs_version: 10
+    - nodejs_version: 16
       platform: x64
 
-    - nodejs_version: 12
+    - nodejs_version: 18
       platform: x64
-    
-    - nodejs_version: 14
-      platform: x64
-
-    # - electron_version: "1.4.14"
-    #   nodejs_version: 6
-    #   platform: x86
-
-    # - electron_version: "1.4.14"
-    #   nodejs_version: 6
-    #   platform: x64
-
-    # - electron_version: "1.6.10"
-    #   nodejs_version: 6
-    #   platform: x86
-
-    # - electron_version: "1.6.10"
-    #   nodejs_version: 6
-    #   platform: x64
-
-
 
 # clone directory
 clone_folder: c:\projects\node-occ
@@ -100,6 +68,7 @@ install:
 - cmd: npm install mocha@7 https://github.com/OpenWebCAD/node-pre-gyp-github.git -g
 - cmd: setenv.bat 64
 - cmd: build.bat %PLATFORM%
+- cmd: npm run build
 
 
 build_script:
@@ -118,12 +87,12 @@ test_script:
   - IF NOT DEFINED electron_version (npm test)
 
 after_test:
-  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp package 2>&1)
-  - # IF %PUBLISH_BINARY% == 1        (node-pre-gyp publish 2>&1)
-  - # IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish --release 2>&1)
-  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish)
-  -  # IF %PUBLISH_BINARY% == 1        (node-pre-gyp-github publish  2>&1)
-  - IF %PUBLISH_BINARY% == 1        (node-pre-gyp clean)
+  - IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp package 2>&1)
+  - # IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp publish 2>&1)
+  - # IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp-github publish --release 2>&1)
+  - IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp-github publish)
+  -  # IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp-github publish  2>&1)
+  - IF %PUBLISH_BINARY% == 1        (./node_modules/.bin/node-pre-gyp clean)
   - IF %PUBLISH_BINARY% == 1        (npm install --fallback-to-build=false)
 
 deploy: off

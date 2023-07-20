@@ -59,14 +59,14 @@ $npm install node-occ
 ```bash
 # installing nodejs and gyp utility to build extensions
 sudo apt-get install nodejs npm
-sudo npm install node-pre-gyp -g
-sudo npm install mocha@7 -g
+sudo npm install @mapbox/node-pre-gyp -g
+sudo npm install mocha -g
 
 #installing cmake
 sudo apt-get install cmake cmake-curses-gui g++ build-essential libtbb2
 
 # ------------------------------------
-git clone --recursive https://github.com/erossignon/node-occ.git
+git clone --recursive https://github.com/OpenWebCAD/node-occ.git
 cd node-occ
 
 # download prebuild OpenCascade Library and header files

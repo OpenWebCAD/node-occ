@@ -1,5 +1,5 @@
-#include "OCC.h"
 #include "NodeV8.h"
+#include "OCC.h"
 
 NAN_METHOD(writeSTEP);
 NAN_METHOD(readSTEP);

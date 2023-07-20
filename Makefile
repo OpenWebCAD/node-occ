@@ -1,24 +1,25 @@
-all:
-	node-pre-gyp configure
-	node-pre-gyp build
-	mocha
+.PHONY: build
+
+all: build test
+
+build:
+	./node_modules/.bin/node-pre-gyp configure
+	./node_modules/.bin/node-pre-gyp build
+
+test:	
+	mocha test/*.ts
 
 .PHONY: test
 test:
-	mocha
+	mocha test/*.ts
 
 clean:
-	node-pre-gyp clean
-
-packet:
-	npm install mocha@7
-	npm install assert
-	npm install should
-	npm install node-pre-gyp		
-	
-
+	./node_modules/.bin/node-pre-gyp clean
 copy: 
 	COPY D:\projet\oce-build\bin\Debug\*.dll build\Release
 
+
+## https://leimao.github.io/blog/Clang-Format-Quick-Tutorial/
 format:
-	astyle --indent=spaces=4 src/*
+	clang-format -i src/*.h src/*.cc
+	npm run prettier

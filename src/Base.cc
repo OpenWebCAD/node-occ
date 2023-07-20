@@ -1,20 +1,13 @@
 #include "Base.h"
-#include "Util.h"
 #include "BoundingBox.h"
 #include "Transformation.h"
+#include "Util.h"
 
+Base::~Base() {}
 
-Base::~Base()
-{
-}
+bool Base::isNull() { return shape().IsNull() ? true : false; }
 
-bool Base::isNull()
-{
-  return shape().IsNull() ? true : false;
-}
-
-bool Base::isValid()
-{
+bool Base::isValid() {
   if (isNull()) {
     return false;
   }
@@ -22,51 +15,42 @@ bool Base::isValid()
   return aChecker.IsValid() ? true : false;
 }
 
-const char* Base::shapeType()
-{
+const char *Base::shapeType() {
   if (isNull()) {
     return "UNDEFINED";
   }
-  switch(shape().ShapeType()) {
-  case    TopAbs_COMPOUND:
+  switch (shape().ShapeType()) {
+  case TopAbs_COMPOUND:
     return "COMPOUND";
     break;
-  case    TopAbs_COMPSOLID:
+  case TopAbs_COMPSOLID:
     return "COMPSOLID";
     break;
-  case    TopAbs_SOLID:
+  case TopAbs_SOLID:
     return "SOLID";
-    break;
-  case    TopAbs_SHELL:
+  case TopAbs_SHELL:
     return "SHELL";
-    break;
-  case    TopAbs_FACE:
+  case TopAbs_FACE:
     return "FACE";
-    break;
-  case    TopAbs_WIRE:
+  case TopAbs_WIRE:
     return "WIRE";
-    break;
-  case    TopAbs_EDGE:
+  case TopAbs_EDGE:
     return "EDGE";
-    break;
-  case    TopAbs_VERTEX:
+  case TopAbs_VERTEX:
     return "VERTEX";
-    break;
-  case    TopAbs_SHAPE:
+  case TopAbs_SHAPE:
     return "SHAPE";
-    break;
   }
-  assert(0=="invalid case");
+  assert(0 == "invalid case");
   return "???";
 }
 
-const char* Base::orientation()
-{
+const char *Base::orientation() {
   if (isNull()) {
     return "UNDEFINED";
   }
   TopAbs_Orientation value = shape().Orientation();
-  switch(value) {
+  switch (value) {
   case TopAbs_FORWARD:
     return "FORWARD";
     break;
@@ -83,185 +67,185 @@ const char* Base::orientation()
   return "???";
 }
 
-NAN_METHOD(Base::translate)
-{
-
+NAN_METHOD(Base::translate) {
   CHECK_THIS_DEFINED(Base);
-  const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
+  const Base *pThis = ObjectWrap::Unwrap<Base>(info.This());
 
   try {
 
     gp_Trsf transformation;
 
-    double x=0,y=0,z=0;
-  if (info.Length() == 3) {
-    ReadDouble(info[0], x);
-    ReadDouble(info[1], y);
-    ReadDouble(info[2], z);
-  }
-  else if (info.Length() == 1) {
-    ReadPoint(info[0], &x, &y, &z);
-  }
-  else {
-    return Nan::ThrowError("Wrong Arguments");
-  }
-    transformation.SetTranslation(gp_Vec(x,y,z));
+    double x = 0, y = 0, z = 0;
+    if (info.Length() == 3) {
+      ReadDouble(info[0], x);
+      ReadDouble(info[1], y);
+      ReadDouble(info[2], z);
+    } else if (info.Length() == 1) {
+      ReadPoint(info[0], &x, &y, &z);
+    } else {
+      return Nan::ThrowError("Wrong Arguments");
+    }
+    transformation.SetTranslation(gp_Vec(x, y, z));
 
-    v8::Local<v8::Object> copy    = pThis->Clone();
+    v8::Local<v8::Object> copy = pThis->Clone();
 
-    pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
+    pThis->Unwrap(copy)->setShape(
+        BRepBuilderAPI_Transform(pThis->shape(), transformation, Standard_True)
+            .Shape());
 
     return info.GetReturnValue().Set(copy);
-
-  } CATCH_AND_RETHROW("Failed to calculate a translated shape ");
-
+  }
+  CATCH_AND_RETHROW("Failed to calculate a translated shape ");
 }
 
-NAN_METHOD(Base::rotate)
-{
+NAN_METHOD(Base::rotate) {
   CHECK_THIS_DEFINED(Base);
-  const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
+  const Base *pThis = ObjectWrap::Unwrap<Base>(info.This());
 
   try {
 
-    gp_Trsf  transformation;
+    gp_Trsf transformation;
 
-    ReadRotationFromArgs(info,transformation);
+    ReadRotationFromArgs(info, transformation);
 
-    v8::Local<v8::Object> copy    = pThis->Clone();
-    pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation,Standard_True).Shape());
+    v8::Local<v8::Object> copy = pThis->Clone();
+    pThis->Unwrap(copy)->setShape(
+        BRepBuilderAPI_Transform(pThis->shape(), transformation, Standard_True)
+            .Shape());
 
     return info.GetReturnValue().Set(copy);
-
-  } CATCH_AND_RETHROW("Failed to calculate a rotated shape ");
-
+  }
+  CATCH_AND_RETHROW("Failed to calculate a rotated shape ");
 }
 
-NAN_METHOD(Base::mirror)
-{
+NAN_METHOD(Base::mirror) {
   CHECK_THIS_DEFINED(Base);
-  const Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
-  // TODO 
-  v8::Local<v8::Object> copy    = pThis->Clone();
+  const Base *pThis = ObjectWrap::Unwrap<Base>(info.This());
+  // TODO
+  v8::Local<v8::Object> copy = pThis->Clone();
   info.GetReturnValue().Set(copy);
 }
 
-NAN_METHOD(Base::applyTransform)
-{
+NAN_METHOD(Base::applyTransform) {
 
   CHECK_THIS_DEFINED(Base);
-  Base* pThis = ObjectWrap::Unwrap<Base>(info.This());
+  Base *pThis = ObjectWrap::Unwrap<Base>(info.This());
 
-  if (info.Length()!=1 && !IsInstanceOf<Transformation>(info[0]) ) {
+  if (info.Length() != 1 && !IsInstanceOf<Transformation>(info[0])) {
     return Nan::ThrowError("invalid  transformation");
   }
   try {
 
-    Transformation* pTrans =  ObjectWrap::Unwrap<Transformation>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+    Transformation *pTrans = ObjectWrap::Unwrap<Transformation>(
+        Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
-    const gp_Trsf& transformation = pTrans->m_trsf;
-    pThis->setShape(BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
+    const gp_Trsf &transformation = pTrans->m_trsf;
+    pThis->setShape(
+        BRepBuilderAPI_Transform(pThis->shape(), transformation).Shape());
 
-	info.GetReturnValue().Set(info.This());
-
-  } CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
-
+    info.GetReturnValue().Set(info.This());
+  }
+  CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
 }
 
-
-NAN_METHOD(Base::transformed)
-{
+NAN_METHOD(Base::transformed) {
   CHECK_THIS_DEFINED(Base);
-  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
+  Base *pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
 
-  if (info.Length()!=1) {
+  if (info.Length() != 1) {
     return Nan::ThrowError("Wrong arguments");
   }
-  Transformation* pTrans = DynamicCast<Transformation>(info[0]);
+  Transformation *pTrans = DynamicCast<Transformation>(info[0]);
   if (!pTrans) {
     return Nan::ThrowError("transform expects a Transformation object");
   }
 
   try {
-    const gp_Trsf& trsf =  pTrans->m_trsf;
-    gp_Trsf transformation =     trsf;
+    const gp_Trsf &trsf = pTrans->m_trsf;
+    gp_Trsf transformation = trsf;
 
-    v8::Local<v8::Object> copy    = pThis->Clone();
+    v8::Local<v8::Object> copy = pThis->Clone();
 
     if (!pThis->shape().IsNull()) {
-      pThis->Unwrap(copy)->setShape(
-        BRepBuilderAPI_Transform(pThis->shape(),
-        transformation,Standard_True).Shape());
+      pThis->Unwrap(copy)->setShape(BRepBuilderAPI_Transform(pThis->shape(),
+                                                             transformation,
+                                                             Standard_True)
+                                        .Shape());
     }
 
-	info.GetReturnValue().Set(copy);
-  } CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
-
+    info.GetReturnValue().Set(copy);
+  }
+  CATCH_AND_RETHROW("Failed to calculate a transformed shape ");
 }
 
-
-//void Shape::ApplyWorkplane(Handle<Object> json) {
+// void Shape::ApplyWorkplane(Handle<Object> json) {
 //
-//   Local<Object> workplane = json->Get(String::New("workplane"))->ToObject();
+//    Local<Object> workplane = json->Get(String::New("workplane"))->ToObject();
 //
-//   if (!workplane->IsNull()) {
+//    if (!workplane->IsNull()) {
 //
 //
-//        Local<Object> workplane_origin = workplane->Get(String::New("origin"))->ToObject();
+//         Local<Object> workplane_origin =
+//         workplane->Get(String::New("origin"))->ToObject();
 //
-//        double x = ReadDouble(workplane_origin,"x");
-//        double y = ReadDouble(workplane_origin,"y");
-//        double z = ReadDouble(workplane_origin,"z");
+//         double x = ReadDouble(workplane_origin,"x");
+//         double y = ReadDouble(workplane_origin,"y");
+//         double z = ReadDouble(workplane_origin,"z");
 //
-//        Local<Object> workplane_axis = workplane->Get(String::New("axis"))->ToObject();
+//         Local<Object> workplane_axis =
+//         workplane->Get(String::New("axis"))->ToObject();
 //
-//        double u = ReadDouble(workplane_axis,"x");
-//        double v = ReadDouble(workplane_axis,"y");
-//        double w = ReadDouble(workplane_axis,"z");
+//         double u = ReadDouble(workplane_axis,"x");
+//         double v = ReadDouble(workplane_axis,"y");
+//         double w = ReadDouble(workplane_axis,"z");
 //
-//        double angle = ReadDouble(workplane,"angle");
+//         double angle = ReadDouble(workplane,"angle");
 //
-//        gp_Trsf transformation1 = gp_Trsf();
-//        transformation1.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0), gp_Dir(u,v,w)), angle/180*M_PI);
-//        shape_ = BRepBuilderAPI_Transform(shape_, transformation1).Shape();
+//         gp_Trsf transformation1 = gp_Trsf();
+//         transformation1.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0),
+//         gp_Dir(u,v,w)), angle/180*M_PI); shape_ =
+//         BRepBuilderAPI_Transform(shape_, transformation1).Shape();
 //
-//        gp_Trsf transformation2 = gp_Trsf();
-//        transformation2.SetTranslation(gp_Vec(x,y,z));
-//        shape_ = BRepBuilderAPI_Transform(shape_, transformation2).Shape();
-//    }
-//}
+//         gp_Trsf transformation2 = gp_Trsf();
+//         transformation2.SetTranslation(gp_Vec(x,y,z));
+//         shape_ = BRepBuilderAPI_Transform(shape_, transformation2).Shape();
+//     }
+// }
 //
-//void Shape::ApplyReverseWorkplane(Handle<Object> json) {
+// void Shape::ApplyReverseWorkplane(Handle<Object> json) {
 //
-//   Local<Object> workplane = json->Get(String::New("workplane"))->ToObject();;
-//   if (!workplane->IsNull()) {
+//    Local<Object> workplane =
+//    json->Get(String::New("workplane"))->ToObject();; if
+//    (!workplane->IsNull()) {
 //
-//        Local<Object> workplane_origin = workplane->Get(String::New("origin"))->ToObject();;
+//         Local<Object> workplane_origin =
+//         workplane->Get(String::New("origin"))->ToObject();;
 //
-//        double x = ReadDouble(workplane_origin,"x");
-//        double y = ReadDouble(workplane_origin,"y");
-//        double z = ReadDouble(workplane_origin,"z");
+//         double x = ReadDouble(workplane_origin,"x");
+//         double y = ReadDouble(workplane_origin,"y");
+//         double z = ReadDouble(workplane_origin,"z");
 //
-//        Local<Object> workplane_axis = workplane->Get(String::New("axis"))->ToObject();;
+//         Local<Object> workplane_axis =
+//         workplane->Get(String::New("axis"))->ToObject();;
 //
-//        double u = ReadDouble(workplane_axis,"x");
-//        double v = ReadDouble(workplane_axis,"y");
-//        double w = ReadDouble(workplane_axis,"z");
+//         double u = ReadDouble(workplane_axis,"x");
+//         double v = ReadDouble(workplane_axis,"y");
+//         double w = ReadDouble(workplane_axis,"z");
 //
-//        double angle = ReadDouble(workplane,"angle");
+//         double angle = ReadDouble(workplane,"angle");
 //
-//        gp_Trsf transformation1 = gp_Trsf();
-//        transformation1.SetTranslation(gp_Vec(x,y,z));
-//        shape_ = BRepBuilderAPI_Transform(shape_, transformation1).Shape();
+//         gp_Trsf transformation1 = gp_Trsf();
+//         transformation1.SetTranslation(gp_Vec(x,y,z));
+//         shape_ = BRepBuilderAPI_Transform(shape_, transformation1).Shape();
 //
-//        gp_Trsf transformation2 = gp_Trsf();
-//        transformation2.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0), gp_Dir(u,v,w)), angle/180*M_PI);
-//        shape_ = BRepBuilderAPI_Transform(shape_, transformation2).Shape();
+//         gp_Trsf transformation2 = gp_Trsf();
+//         transformation2.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0),
+//         gp_Dir(u,v,w)), angle/180*M_PI); shape_ =
+//         BRepBuilderAPI_Transform(shape_, transformation2).Shape();
 //
-//    }
-//}
-bool Base::fixShape()
-{
+//     }
+// }
+bool Base::fixShape() {
 
   if (this->shape().IsNull()) {
     return false;
@@ -269,7 +253,8 @@ bool Base::fixShape()
   BRepCheck_Analyzer aChecker(this->shape());
   if (!aChecker.IsValid()) {
     ShapeFix_ShapeTolerance aSFT;
-    aSFT.LimitTolerance(this->shape(),Precision::Confusion(),Precision::Confusion());
+    aSFT.LimitTolerance(this->shape(), Precision::Confusion(),
+                        Precision::Confusion());
 
     occHandle(ShapeFix_Shape) aSfs = new ShapeFix_Shape(this->shape());
     aSfs->SetPrecision(Precision::Confusion());
@@ -282,14 +267,12 @@ bool Base::fixShape()
     }
   }
   return aChecker.IsValid() ? true : false;
-
 }
 
-NAN_METHOD(Base::fixShape)
-{
+NAN_METHOD(Base::fixShape) {
   CHECK_THIS_DEFINED(Base);
-  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
-  if (info.Length()!=0) {
+  Base *pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
+  if (info.Length() != 0) {
     return Nan::ThrowError("Wrong arguments");
   }
 
@@ -298,65 +281,58 @@ NAN_METHOD(Base::fixShape)
   info.GetReturnValue().Set(info.This());
 }
 
-NAN_METHOD(Base::getBoundingBox)
-{
+NAN_METHOD(Base::getBoundingBox) {
 
   CHECK_THIS_DEFINED(Base);
-  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
-  if (info.Length()!=0) {
+  Base *pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
+  if (info.Length() != 0) {
     return Nan::ThrowError("Wrong arguments");
   }
 
   try {
 
-    const double tolerance= 1E-12;
-    const TopoDS_Shape& shape = pThis->shape();
+    const double tolerance = 1E-12;
+    const TopoDS_Shape &shape = pThis->shape();
     Bnd_Box aBox;
     BRepBndLib::Add(shape, aBox);
     aBox.SetGap(tolerance);
-	info.GetReturnValue().Set(BoundingBox::NewInstance(aBox));
-
-  } CATCH_AND_RETHROW("Failed to compute bounding box ");
-
+    info.GetReturnValue().Set(BoundingBox::NewInstance(aBox));
+  }
+  CATCH_AND_RETHROW("Failed to compute bounding box ");
 }
 
-NAN_METHOD(Base::clone)
-{
+NAN_METHOD(Base::clone) {
   CHECK_THIS_DEFINED(Base);
-  Base* pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
+  Base *pThis = Nan::ObjectWrap::Unwrap<Base>(info.This());
 
-  if (info.Length()!=0) {
+  if (info.Length() != 0) {
     return Nan::ThrowError("Wrong arguments");
   }
   info.GetReturnValue().Set(pThis->Clone());
 }
 
-void Base::InitNew(_NAN_METHOD_ARGS)
-{
-  REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,shapeType);
-  REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,orientation);
+void Base::InitNew(_NAN_METHOD_ARGS) {
+  REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base, shapeType);
+  REXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base, orientation);
 }
 
-void  Base::InitProto(v8::Local<v8::ObjectTemplate>& proto)
-{
-  EXPOSE_METHOD(Base,clone);
-  EXPOSE_METHOD(Base,translate);
-  EXPOSE_METHOD(Base,rotate);
-  EXPOSE_METHOD(Base,mirror);
+void Base::InitProto(v8::Local<v8::ObjectTemplate> &proto) {
+  EXPOSE_METHOD(Base, clone);
+  EXPOSE_METHOD(Base, translate);
+  EXPOSE_METHOD(Base, rotate);
+  EXPOSE_METHOD(Base, mirror);
 
-  EXPOSE_METHOD(Base,transformed);
-  EXPOSE_METHOD(Base,applyTransform);
-  EXPOSE_METHOD(Base,getBoundingBox);
+  EXPOSE_METHOD(Base, transformed);
+  EXPOSE_METHOD(Base, applyTransform);
+  EXPOSE_METHOD(Base, getBoundingBox);
 
-  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isNull);
-  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base,isValid);
-  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Base,hashCode);
-  EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,shapeType);
-  EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base,orientation);
-
+  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base, isNull);
+  EXPOSE_READ_ONLY_PROPERTY_BOOLEAN(Base, isValid);
+  EXPOSE_READ_ONLY_PROPERTY_INTEGER(Base, hashCode);
+  EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base, shapeType);
+  EXPOSE_READ_ONLY_PROPERTY_CONST_STRING(Base, orientation);
 }
 
-int Base::hashCode()
-{
+int Base::hashCode() {
   return shape().HashCode(std::numeric_limits<int>::max());
 }

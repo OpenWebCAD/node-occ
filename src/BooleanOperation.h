@@ -1,22 +1,21 @@
 #pragma once
 
-#include "Shape.h"
 #include "Point3Wrap.h"
+#include "Shape.h"
 
 #include <limits>
 
-
-
 class BooleanOperation : public Nan::ObjectWrap {
-    BRepAlgoAPI_BooleanOperation* m_bop;
-    BooleanOperation();
-    ~BooleanOperation();
+  BRepAlgoAPI_BooleanOperation *m_bop;
+  BooleanOperation();
+  ~BooleanOperation();
+
 public:
-    typedef class BooleanOperation _ThisType;
+  typedef class BooleanOperation _ThisType;
 
-    static Nan::Persistent<v8::FunctionTemplate> _template;
-    static v8::Local<v8::Value> NewInstance(BOPAlgo_Operation op);
+  static Nan::Persistent<v8::FunctionTemplate> _template;
+  static v8::Local<v8::Value> NewInstance(BOPAlgo_Operation op);
 
-    static NAN_METHOD(New);
-    static void Init(v8::Local<v8::Object> target);
+  static NAN_METHOD(New);
+  static NAN_MODULE_INIT(Init);
 };

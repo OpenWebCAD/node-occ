@@ -105,7 +105,7 @@ CALL git submodule update --init --recursive
 
 
 ECHO NODE-PRE-GYP
-@call node-pre-gyp --version
+@call .\node_modules\.bin\node-pre-gyp --version
 @call cl
 @call msbuild
 

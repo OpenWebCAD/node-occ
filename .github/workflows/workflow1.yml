@@ -18,12 +18,7 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install -g pnpm@6
-    - uses: actions/cache@v2
-      with:
-        path: ~/.pnpm-store
-        key: ${{ runner.os }}-pnpm-store
     - run: sudo apt-get install libocct-data-exchange-dev libocct-modeling-data-dev 
-    - run: npm install -g pnpm@6
-    - run: pnpm recursive install
-    - run: pnpm test
+    - run: npm install
+    - run: npm run build
+    - run: npm test

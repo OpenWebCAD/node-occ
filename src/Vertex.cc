@@ -2,46 +2,30 @@
 
 #include "Util.h"
 
-const TopoDS_Shape& Vertex::shape()  const
-{
-  return vertex();
-}
+const TopoDS_Shape &Vertex::shape() const { return vertex(); }
 
-void Vertex::setShape(const TopoDS_Shape& shape)
-{
+void Vertex::setShape(const TopoDS_Shape &shape) {
   m_vertex = TopoDS::Vertex(shape);
 }
 
-gp_Pnt Vertex::point() const
-{
+gp_Pnt Vertex::point() const {
   gp_Pnt pnt = BRep_Tool::Pnt(vertex());
   return pnt;
 }
-double Vertex::x()
-{
-  return  point().X();
-}
-double Vertex::y()
-{
-  return  point().Y();
-}
-double Vertex::z()
-{
-  return  point().Z();
-}
+double Vertex::x() { return point().X(); }
+double Vertex::y() { return point().Y(); }
+double Vertex::z() { return point().Z(); }
 
 Nan::Persistent<v8::FunctionTemplate> Vertex::_template;
 
-
 NAN_METHOD(Vertex::NewInstance) { _NewInstance<Vertex>(info); }
 
-NAN_METHOD(Vertex::New)
-{
+NAN_METHOD(Vertex::New) {
   if (!info.IsConstructCall()) {
-   return Nan::ThrowError(" use new occ.Vertex() to construct a Vertex");
+    return Nan::ThrowError(" use occ.makeVertex() to construct a Vertex");
   }
 
-  Vertex* pThis = new Vertex();
+  Vertex *pThis = new Vertex();
   pThis->Wrap(info.This());
   pThis->InitNew(info);
 
@@ -51,48 +35,43 @@ NAN_METHOD(Vertex::New)
     ReadDouble(info[0], x);
     ReadDouble(info[1], y);
     ReadDouble(info[2], z);
-  }
-  else if (info.Length() == 1) {
+  } else if (info.Length() == 1) {
     ReadPoint(info[0], &x, &y, &z);
-  }
-  else if (info.Length() == 0) {
-  }
-  else {
+  } else if (info.Length() == 0) {
+  } else {
     return Nan::ThrowError("Wrong Arguments");
   }
-  gp_Pnt aPnt;
-  aPnt = gp_Pnt(x, y, z);
+  gp_Pnt aPnt(x, y, z);
   BRepBuilderAPI_MakeVertex mkVertex(aPnt);
   pThis->setShape(mkVertex.Vertex());
 
   info.GetReturnValue().Set(info.This());
 }
 
-
-v8::Local<v8::Object>  Vertex::Clone() const
-{
-  Vertex* obj = new Vertex();
+v8::Local<v8::Object> Vertex::Clone() const {
+  Nan::EscapableHandleScope scope;
+  Vertex *obj = new Vertex();
   v8::Local<v8::Object> instance = makeInstance(_template);
   obj->Wrap(instance);
   obj->setShape(this->shape());
-  return instance;
+  return scope.Escape(instance);
 }
 
-void Vertex::InitNew(_NAN_METHOD_ARGS)
-{
+void Vertex::InitNew(_NAN_METHOD_ARGS) {
   Base::InitNew(info);
-  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,x);
-  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,y);
-  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex,z);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, x);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, y);
+  REXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, z);
 }
 
-void Vertex::Init(v8::Local<v8::Object> target)
-{
+NAN_MODULE_INIT(Vertex::Init) {
+
   // Prepare constructor template
-  v8::Local<v8::FunctionTemplate>  tpl = Nan::New<v8::FunctionTemplate>(Vertex::New);
+  v8::Local<v8::FunctionTemplate> tpl =
+      Nan::New<v8::FunctionTemplate>(Vertex::New);
   tpl->SetClassName(Nan::New("Vertex").ToLocalChecked());
 
-  // object has one internal filed ( the C++ object)
+  // object has one internal field ( the C++ object)
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   _template.Reset(tpl);
@@ -106,6 +85,6 @@ void Vertex::Init(v8::Local<v8::Object> target)
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, y);
   EXPOSE_READ_ONLY_PROPERTY_DOUBLE(Vertex, z);
 
-  Nan::Set(target,Nan::New("Vertex").ToLocalChecked(),Nan::GetFunction(tpl).ToLocalChecked());
+  Nan::Set(target, Nan::New("Vertex").ToLocalChecked(),
+           Nan::GetFunction(tpl).ToLocalChecked());
 }
-

@@ -1,26 +1,24 @@
 #pragma once
-#include "Shape.h"
 #include "Mesh.h"
+#include "Shape.h"
 
 class Edge;
 // a multi body shape
 class Solid : public Shape {
 
 protected:
-  Solid() {};
-  virtual ~Solid() {
-    m_cacheMesh.Reset();
-  };
+  Solid(){};
+  virtual ~Solid() { m_cacheMesh.Reset(); };
 
 public:
-  virtual v8::Local<v8::Object>  Clone() const;
-  virtual Base* Unwrap(v8::Local<v8::Object> obj) const { return Nan::ObjectWrap::Unwrap<Solid>(obj); }
+  virtual v8::Local<v8::Object> Clone() const;
+  virtual Base *Unwrap(v8::Local<v8::Object> obj) const {
+    return Nan::ObjectWrap::Unwrap<Solid>(obj);
+  }
 
   Nan::Persistent<v8::Object> m_cacheMesh;
 
-  const  TopoDS_Solid& solid() const {
-    return TopoDS::Solid(shape());
-  }
+  const TopoDS_Solid &solid() const { return TopoDS::Solid(shape()); }
 
   int numSolids();
   int numFaces();
@@ -32,7 +30,8 @@ public:
 
   virtual void InitNew(_NAN_METHOD_ARGS);
 
-  v8::Local<v8::Object> createMesh(double factor, double angle, bool qualityNormals = true);
+  v8::Local<v8::Object> createMesh(double factor, double angle,
+                                   bool qualityNormals = true);
 
   typedef enum BoolOpType {
     BOOL_FUSE,
@@ -41,10 +40,11 @@ public:
   } BoolOpType;
 
   int boolean(Solid *tool, BoolOpType op);
-  //xx int chamfer(const std::vector<Edge*>& edges, const std::vector<double>& distances);
-  //xx int fillet(const std::vector<Edge*>& edges, const std::vector<double>& distances);
+  // xx int chamfer(const std::vector<Edge*>& edges, const std::vector<double>&
+  // distances); xx int fillet(const std::vector<Edge*>& edges, const
+  // std::vector<double>& distances);
 
-// static Handle<v8::Value> fillet(const v8::Arguments& args);
+  // static Handle<v8::Value> fillet(const v8::Arguments& args);
   // static Handle<v8::Value> chamfer(const v8::Arguments& args);
 
   // default mesh
@@ -63,19 +63,15 @@ public:
   static NAN_METHOD(getCommonEdges);
   static NAN_METHOD(getCommonVertices);
 
-  // Methods exposed to JavaScripts
-  static void Init(v8::Local<v8::Object> target);
-
+  static NAN_MODULE_INIT(Init);
   static NAN_METHOD(New);
   static NAN_METHOD(NewInstance);
 
-  static v8::Local<v8::Value>     NewInstance(TopoDS_Shape shape);
-  static v8::Local<v8::Value>     NewInstance();
+  static v8::Local<v8::Value> NewInstance(TopoDS_Shape shape);
+  static v8::Local<v8::Value> NewInstance();
 
   static Nan::Persistent<v8::FunctionTemplate> _template;
 
-  void _registerNamedShape(const char* name, const TopoDS_Shape& shape);
-  std::string _getShapeName(const TopoDS_Shape& shape);
-
+  void _registerNamedShape(const char *name, const TopoDS_Shape &shape);
+  std::string _getShapeName(const TopoDS_Shape &shape);
 };
-
