@@ -78,8 +78,8 @@ describe("makePipeShell", () => {
     const spine = occ.makeWire(occ.makeLine([0, 0, 0], [0, 0, 10]));
 
 
-    const angleInDegree = 180;
-    const height = 40;
+    const angleInDegree = 90;
+    const height = 10;
     const points = makeHelixPoints({ startPoint: p1, angleInDegree, height, nbPoints: 10 });
 
     // we want a auxilary curve, one point should coincide with one edge of the triangle and 

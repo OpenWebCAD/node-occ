@@ -243,6 +243,8 @@ export interface IWire extends IShape<IWire> {
   polygonize(): Float32Array;
 }
 
+export type Shape = ISolid | IWire | IFace | IShell | IVertex;
+
 export interface OCC {
   makeAxis(): IAxis;
 
@@ -383,13 +385,10 @@ export interface OCC {
 
   gc(): void;
 
-  writeSTEP(filename: string, solid: ISolid): boolean;
-  writeSTEP(filename: string, solids: ISolid[]): boolean;
-  writeSTEP(filename: string, ...solids: ISolid[]): boolean;
-  readSTEP(
-    filename: string,
-    callback: (err: Error | null, solids: ISolid[]) => void
-  ): void;
+  writeSTEP(filename: string, shape: Shape): boolean;
+  writeSTEP(filename: string, shapes: Shape[]): boolean;
+  writeSTEP(filename: string, ...shapes: Shape[]): boolean;
+  readSTEP(filename: string, callback: (err: Error | null, shapes: Shape[]) => void): void;
 
   writeBREP(filename: string, solid: ISolid): boolean;
   writeBREP(filename: string, solids: ISolid[]): boolean;
